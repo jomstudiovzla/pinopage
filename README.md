@@ -1,40 +1,56 @@
-# Pino Espaces Verts – Site Web Officiel
+# Pino Espaces Verts – Maison digitale
 
-Bienvenue dans le code source de la maison digitale de **Pino Espaces Verts** (Andrés Pino). Ce projet a été développé en respectant le **Plan de Développement JOM Studio**.
+Site et future plateforme de **Pino Espaces Verts** (Andrés Pino) — entretien et aménagement de jardins à Bordeaux et en Gironde, partenaire **Unipros** (50 % de crédit d’impôt SAP).
 
-## 📁 Structure du Projet
+## Deux états du projet
 
-```txt
-new/
-├── index.html          # Page d'accueil unique, interactive et optimisée SEO
-├── manifest.json       # Configuration PWA pour l'installation sur mobile
-├── sw.js               # Service Worker pour la mise en cache et le support hors-ligne
-└── assets/             # Fichiers médias du site
-    ├── logo/
-    │   ├── Logo pino.png
-    │   └── Logo completo.png
-    ├── qr/
-    │   ├── QR_WhatsApp.png
-    │   ├── QR_Instagram.png
-    │   ├── QR_Email.png
-    │   └── QR_LandingPage.png
-    └── images/
-        ├── tiro.png     # Image avant travaux (Before)
-        └── retiro.png   # Image après travaux (After)
+| | v1 (en ligne) | v2 (spécifiée) |
+|---|---|---|
+| Code | `index.html` + PWA | Next.js 15 + Supabase `eu-west-3` (Paris) |
+| URL actuelle | [GitHub Pages](https://jomstudiovzla.github.io/pinopage/) | Domaine cible `www.pinoespacesverts.fr` |
+| Données | Firebase `crm-jom` + Web3Forms | Postgres RLS + Storage UE |
+| Spec | — | **[`DOCUMENTO_MAESTRO.md`](./DOCUMENTO_MAESTRO.md)** |
+
+La v1 **reste en production** jusqu’au hito 6 (coupure DNS). Ne pas la démanteler.
+
+## Gouvernance (à lire avant de coder)
+
+- [`DOCUMENTO_MAESTRO.md`](./DOCUMENTO_MAESTRO.md) — exigences, UX, Unipros vs paiement direct, RGPD, rôles, schéma, menaces
+- [`tareas.md`](./tareas.md) — backlog exécutable
+- [`plan_implementacion.md`](./plan_implementacion.md) — ordre des hitos
+- [`AGENTS.md`](./AGENTS.md) — règles pour agents
+- [`docs/sql/001_initial_schema.sql`](./docs/sql/001_initial_schema.sql)
+- [`docs/adr/`](./docs/adr/)
+- [`docs/LEGAL_ET_FISCAL_FRANCE.md`](./docs/LEGAL_ET_FISCAL_FRANCE.md)
+- [`docs/UNIPROS_KNOWLEDGE_BASE.md`](./docs/UNIPROS_KNOWLEDGE_BASE.md)
+
+## v1 — fonctionnalités déjà livrées
+
+1. SEO local JSON-LD (Bordeaux / Gironde)
+2. Galerie avant/après et chantiers réels
+3. Coupon **PELABOLA** −20 % (cumulable avec Unipros)
+4. Chatbot (services, Unipros, devis) — n’affiche jamais le code en clair
+5. Mentions, CGV, RGPD, médiation CNPM
+6. PWA, CTA téléphone / WhatsApp
+
+## Interdits produit
+
+- Thème sombre
+- Encaisser une CB « 50 % » à la place d’Unipros
+- Région Supabase générique « Europe » (Londres / Zurich possibles)
+- Inventer un SIRET ou un capital social (EI)
+
+## Développement local (localhost)
+
+À la racine du dépôt :
+
+```bash
+python3 -m http.server 8080 --bind 127.0.0.1
 ```
 
-## 🚀 Fonctionnalités Clés
+- Site v1 : [http://127.0.0.1:8080/](http://127.0.0.1:8080/)
+- Document maître : [http://127.0.0.1:8080/DOCUMENTO_MAESTRO.md](http://127.0.0.1:8080/DOCUMENTO_MAESTRO.md)
 
-1. **Ciment & SEO :** Données structurées JSON-LD intégrées pour optimiser le classement Google local (Bordeaux et Gironde).
-2. **Galerie Avant/Après :** Slider interactif permettant de comparer visuellement la transformation d'un chantier.
-3. **Le Cerveau (Automatisation) :**
-   - Formulaire de coupon de réduction de 20% avec génération automatique de code promotionnel.
-   - Assistant Chatbot intelligent en bas à droite simulant les réponses hors-horaires (sur Unipros, les devis et les services).
-4. **Prêt pour Mobile (PWA) :** Installable sur smartphone, fonctionne instantanément et gère le cache hors-ligne.
+## Déploiement v1
 
-## 🛠️ Déploiement
-
-Pour publier ce site en production :
-1. Choisissez un hébergeur statique (ex: Hostinger, GitHub Pages, Firebase Hosting ou Vercel).
-2. Uploadez tout le contenu du dossier `new/` à la racine de votre hébergement.
-3. Achetez le nom de domaine officiel (ex: `www.pinoespacesverts.fr`) et configurez les DNS pour pointer vers votre hébergement.
+Hébergeur actuel : GitHub Pages (`main` / racine) — [pinopage](https://jomstudiovzla.github.io/pinopage/). Le texte Mentions Légales devra citer l’hébergeur **réel** dès la v2 (voir ADR-0004).
