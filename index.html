@@ -564,6 +564,520 @@
     </form>
   </div>
 
+  <!-- ========================================================================= -->
+  <!-- MODALS DE GOUVERNANCE & AUTHENTIFICATION (Client & Admin God Mode)       -->
+  <!-- ========================================================================= -->
+
+  <!-- Modal 1: Fenêtre d'Authentification (Client & Admin) -->
+  <dialog id="modal-window-auth" class="section-window bg-white rounded-3xl shadow-2xl border border-brand-accent/30 max-w-md w-full p-0 overflow-hidden text-brand-charcoal">
+    <div class="bg-gradient-to-r from-[#2d4d36] to-[#1e5138] p-6 text-white flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-white text-lg">
+          🌲
+        </div>
+        <div>
+          <h3 class="font-serif text-xl font-bold">Espace Membres</h3>
+          <p class="text-xs text-emerald-200">Pino Espaces Verts • Particuliers, Pros & Admin</p>
+        </div>
+      </div>
+      <button onclick="document.getElementById('modal-window-auth').close()" class="w-8 h-8 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Tabs: Connexion vs Inscription -->
+    <div class="flex border-b border-slate-200 bg-slate-50 text-xs font-bold">
+      <button type="button" id="tab-auth-login" onclick="switchAuthTab('login')" class="flex-1 py-3 px-4 text-center border-b-2 border-emerald-700 text-emerald-800 bg-white transition-all">
+        <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Connexion
+      </button>
+      <button type="button" id="tab-auth-register" onclick="switchAuthTab('register')" class="flex-1 py-3 px-4 text-center text-slate-500 hover:text-slate-800 transition-all">
+        <i class="fa-solid fa-user-plus mr-1.5"></i> Nouveau Client (Créer compte)
+      </button>
+    </div>
+
+    <div class="p-6">
+      <!-- Connexion Form -->
+      <form id="auth-login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="login-email">Adresse e-mail</label>
+          <div class="relative">
+            <i class="fa-solid fa-envelope absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+            <input type="email" id="login-email" required placeholder="nom@exemple.fr ou gérant" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="login-password">Mot de passe</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+            <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
+            <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 text-xs">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Feedback error message -->
+        <div id="login-error-msg" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-medium flex items-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-sm"></i>
+          <span id="login-error-text">Identifiants incorrects. Veuillez vérifier votre adresse e-mail et mot de passe.</span>
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-slate-600">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="remember-me" checked class="rounded text-emerald-700 focus:ring-emerald-600" />
+            <span>Se souvenir de moi</span>
+          </label>
+          <span class="text-[11px] text-slate-400">Accès sécurisé SSL</span>
+        </div>
+
+        <button type="submit" id="btn-login-submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer">
+          <span>Se connecter</span> <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+        <!-- Quick credentials helper info for testing -->
+        <div class="mt-4 p-3 bg-emerald-50/70 border border-emerald-100 rounded-xl text-[11px] text-emerald-900 space-y-1.5">
+          <p class="font-bold flex items-center gap-1.5 text-emerald-800">
+            <i class="fa-solid fa-shield-halved"></i> Accès reconnus :
+          </p>
+          <p class="text-slate-700">• <strong>Administrateur Gérant :</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-emerald-200 font-mono text-[10px]">pino.spacesverts@gmail.com</code> (God Mode)</p>
+          <p class="text-slate-700">• <strong>Client Particulier démo :</strong> <code class="bg-white px-1.5 py-0.5 rounded border border-emerald-200 font-mono text-[10px]">sophie.dupont@bordeaux.fr</code> / <code class="bg-white px-1.5 py-0.5 rounded border border-emerald-200 font-mono text-[10px]">Pino2026!</code></p>
+        </div>
+      </form>
+
+      <!-- Inscription Form -->
+      <form id="auth-register-form" onsubmit="handleRegisterSubmit(event)" class="space-y-3.5 hidden">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-fullname">Nom et Prénom</label>
+          <input type="text" id="reg-fullname" required placeholder="Ex: Jean Martin" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-email">Adresse e-mail</label>
+          <input type="email" id="reg-email" required placeholder="votre@email.fr" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-phone">Téléphone</label>
+            <input type="tel" id="reg-phone" placeholder="06 12 34 56 78" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-commune">Commune / CP</label>
+            <input type="text" id="reg-commune" placeholder="33000 Bordeaux" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-password">Mot de passe</label>
+          <input type="password" id="reg-password" required minlength="6" placeholder="Au moins 6 caractères" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
+        </div>
+
+        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 flex items-start gap-2">
+          <i class="fa-solid fa-gift text-amber-600 text-sm mt-0.5"></i>
+          <span><strong>Bonus Inscription :</strong> Votre code personnel de bienvenue de <strong>-20%</strong> sera généré automatiquement et disponible immédiatement dans votre espace client.</span>
+        </div>
+
+        <label class="flex items-start gap-2 text-xxs text-slate-600 cursor-pointer">
+          <input type="checkbox" required class="mt-0.5 rounded text-emerald-700 focus:ring-emerald-600" />
+          <span>J'accepte les conditions générales et la politique de confidentialité (RGPD).</span>
+        </label>
+
+        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer">
+          <i class="fa-solid fa-user-check"></i> Créer mon Espace Client
+        </button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Modal 2: Espace Client (Conforme DOCUMENTO_MAESTRO.md §3.4) -->
+  <dialog id="modal-window-client" class="section-window bg-white rounded-3xl shadow-2xl border border-brand-accent/30 max-w-4xl w-full p-0 overflow-hidden text-brand-charcoal">
+    <!-- Impersonation Audit Banner (Visible if admin is previewing client) -->
+    <div id="client-impersonation-banner" class="hidden bg-amber-500 text-slate-900 px-6 py-2.5 font-bold text-xs flex justify-between items-center">
+      <span><i class="fa-solid fa-eye mr-2"></i> Mode Aperçu Gérant : Vous visualisez cet espace comme le client.</span>
+      <button onclick="exitImpersonation()" class="bg-slate-900 text-white px-3 py-1 rounded-lg text-xxs font-bold hover:bg-slate-800">
+        Quitter l'aperçu
+      </button>
+    </div>
+
+    <!-- Client Header -->
+    <div class="bg-gradient-to-r from-[#2d4d36] to-[#1e5138] p-6 sm:p-8 text-white flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center font-bold text-2xl">
+          👤
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="font-serif text-2xl font-bold" id="client-display-name">Sophie Dupont</h3>
+            <span class="bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">Particulier SAP</span>
+          </div>
+          <p class="text-xs text-white/75" id="client-display-email">sophie.dupont@bordeaux.fr • <span id="client-display-commune">Bordeaux (33000)</span></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="handleLogout()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+        </button>
+        <button onclick="document.getElementById('modal-window-client').close()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 3 Key Metric Hero Counters (DOCUMENTO_MAESTRO.md §3.4) -->
+    <div class="p-6 sm:p-8 bg-[#faf8f2] border-b border-brand-accent/20">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Card 1: Factures -->
+        <div class="bg-white p-5 rounded-2xl border border-brand-accent/20 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Factures</span>
+            <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs"><i class="fa-solid fa-file-invoice"></i></span>
+          </div>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span class="text-3xl font-extrabold text-brand-green" id="client-factures-count">2</span>
+            <span class="text-xxs text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">50% déduit via Unipros</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">2 factures acquittées avec attestation</p>
+        </div>
+
+        <!-- Card 2: Dossiers -->
+        <div class="bg-white p-5 rounded-2xl border border-brand-accent/20 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Dossiers Chantiers</span>
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs"><i class="fa-solid fa-folder-open"></i></span>
+          </div>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span class="text-3xl font-extrabold text-brand-green" id="client-dossiers-count">2</span>
+            <span class="text-xxs text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-full">1 actif</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Historique des travaux et suivi du jardin</p>
+        </div>
+
+        <!-- Card 3: Avantage 20% -->
+        <div class="bg-white p-5 rounded-2xl border border-brand-accent/20 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Avantage Fidélité</span>
+            <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-xs"><i class="fa-solid fa-tag"></i></span>
+          </div>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span class="text-xl font-mono font-extrabold text-brand-vivid" id="client-promo-code">PINO-2026</span>
+            <span class="text-xxs text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full">-20% disponible</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Utilisable sur votre prochaine réservation</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Client Content Body -->
+    <div class="p-6 sm:p-8 space-y-8 max-h-[50vh] overflow-y-auto">
+      <!-- Section Factures -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h4 class="font-serif text-lg font-bold text-brand-green flex items-center gap-2">
+            <i class="fa-solid fa-receipt text-emerald-700"></i> Mes Factures & Attestations Fiscales
+          </h4>
+          <a href="https://app.unipros.coop" target="_blank" rel="noopener" class="text-xs text-emerald-700 font-bold hover:underline flex items-center gap-1">
+            <span>Espace Attestation Unipros (Case 7DB)</span> <i class="fa-solid fa-arrow-up-right-from-square text-xxs"></i>
+          </a>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-500 border-b border-slate-200 font-bold uppercase text-[10px]">
+              <tr>
+                <th class="p-3">Réf. Facture</th>
+                <th class="p-3">Prestation</th>
+                <th class="p-3">Date</th>
+                <th class="p-3">Montant TTC</th>
+                <th class="p-3">Reste à Charge (50%)</th>
+                <th class="p-3">Statut</th>
+                <th class="p-3 text-right">Document</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr class="hover:bg-slate-50/80">
+                <td class="p-3 font-mono font-bold text-slate-900">#FAC-2026-081</td>
+                <td class="p-3">Entretien de jardin & Tonte complète</td>
+                <td class="p-3 text-slate-500">14/08/2026</td>
+                <td class="p-3 font-bold text-slate-900">240,00 €</td>
+                <td class="p-3 font-bold text-emerald-700">120,00 € (SAP)</td>
+                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold text-xxs px-2 py-0.5 rounded-full">Payée</span></td>
+                <td class="p-3 text-right">
+                  <button onclick="downloadFakeInvoice('FAC-2026-081')" class="text-emerald-700 hover:text-emerald-900 font-bold hover:underline cursor-pointer">
+                    <i class="fa-solid fa-file-pdf mr-1"></i> Reçu PDF
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-slate-50/80">
+                <td class="p-3 font-mono font-bold text-slate-900">#FAC-2026-064</td>
+                <td class="p-3">Taille de haie de cèdres & évacuation</td>
+                <td class="p-3 text-slate-500">28/05/2026</td>
+                <td class="p-3 font-bold text-slate-900">380,00 €</td>
+                <td class="p-3 font-bold text-emerald-700">190,00 € (SAP)</td>
+                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold text-xxs px-2 py-0.5 rounded-full">Payée</span></td>
+                <td class="p-3 text-right">
+                  <button onclick="downloadFakeInvoice('FAC-2026-064')" class="text-emerald-700 hover:text-emerald-900 font-bold hover:underline cursor-pointer">
+                    <i class="fa-solid fa-file-pdf mr-1"></i> Reçu PDF
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section Actions Rapides -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="p-5 bg-brand-light rounded-2xl border border-brand-accent/20 space-y-2">
+          <h5 class="font-bold text-brand-green text-sm flex items-center gap-2">
+            <i class="fa-solid fa-calendar-plus text-emerald-700"></i> Planifier mon prochain passage
+          </h5>
+          <p class="text-xs text-slate-600">Besoin d'une tonte, taille de haie ou nettoyage d'automne ? Vos coordonnées sont déjà enregistrées.</p>
+          <button onclick="bookClientIntervention()" class="mt-2 bg-brand-vivid hover:bg-brand-green text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors cursor-pointer">
+            Demander un devis pré-rempli
+          </button>
+        </div>
+
+        <div class="p-5 bg-amber-50/60 rounded-2xl border border-amber-200/50 space-y-2">
+          <h5 class="font-bold text-amber-900 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-credit-card text-amber-700"></i> Avance Immédiate Unipros
+          </h5>
+          <p class="text-xs text-slate-600">Réglez vos factures en ligne en direct sur le portail sécurisé de la coopérative Unipros sans avance de trésorerie.</p>
+          <a href="https://paiement.unipros.coop" target="_blank" rel="noopener" class="inline-block mt-2 bg-amber-700 hover:bg-amber-800 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors">
+            Accéder à paiement.unipros.coop <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-xxs"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- RGPD & Données personnelles -->
+      <div class="pt-4 border-t border-slate-200 flex flex-wrap justify-between items-center gap-4 text-xs text-slate-500">
+        <button onclick="exportClientDataJson()" class="hover:text-emerald-700 underline flex items-center gap-1.5 font-bold cursor-pointer">
+          <i class="fa-solid fa-download"></i> Exporter mes données personnelles (RGPD)
+        </button>
+        <button onclick="deleteClientAccount()" class="hover:text-red-600 underline flex items-center gap-1.5 text-slate-400 cursor-pointer">
+          <i class="fa-solid fa-user-xmark"></i> Supprimer mon compte (Droit à l'oubli)
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Modal 3: Espace Administration — God Mode (Andrés Pino) -->
+  <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-5xl w-full p-0 overflow-hidden text-brand-charcoal">
+    <!-- Admin Header -->
+    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 p-6 sm:p-8 text-white flex flex-wrap justify-between items-center gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-2xl shadow-lg">
+          👑
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="font-serif text-2xl font-bold">Panneau d'Administration</h3>
+            <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">God Mode</span>
+          </div>
+          <p class="text-xs text-white/70">Gérant : Andrés Pino • <code class="text-emerald-300">pino.spacesverts@gmail.com</code></p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="handleLogout()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+        </button>
+        <button onclick="document.getElementById('modal-window-admin').close()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Admin Sub-Navigation Tabs -->
+    <div class="flex flex-wrap border-b border-slate-200 bg-slate-50 text-xs font-bold px-6 pt-2 gap-2">
+      <button type="button" onclick="switchAdminTab('kpis')" id="adm-tab-kpis" class="adm-tab py-2.5 px-4 rounded-t-xl border-b-2 border-emerald-700 text-emerald-800 bg-white">
+        <i class="fa-solid fa-chart-pie mr-1.5"></i> Tableau de bord & KPIs
+      </button>
+      <button type="button" onclick="switchAdminTab('leads')" id="adm-tab-leads" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+        <i class="fa-solid fa-address-book mr-1.5"></i> Leads & Devis (<span id="adm-leads-badge">4</span>)
+      </button>
+      <button type="button" onclick="switchAdminTab('factures')" id="adm-tab-factures" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+        <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> Factures & Unipros
+      </button>
+      <button type="button" onclick="switchAdminTab('promos')" id="adm-tab-promos" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+        <i class="fa-solid fa-tags mr-1.5"></i> Promotions & Codes
+      </button>
+      <button type="button" onclick="switchAdminTab('impersonate')" id="adm-tab-impersonate" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+        <i class="fa-solid fa-user-secret mr-1.5"></i> Voir comme client
+      </button>
+    </div>
+
+    <!-- Admin Tab Content Body -->
+    <div class="p-6 sm:p-8 max-h-[60vh] overflow-y-auto space-y-6">
+      <!-- 1. Tab KPIs -->
+      <div id="adm-content-kpis" class="adm-content space-y-6">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <span class="text-[11px] font-bold uppercase text-slate-500">Chiffre d'Affaires</span>
+            <span class="block text-2xl font-extrabold text-brand-green mt-1">14 850 €</span>
+            <span class="text-xxs text-emerald-700 font-bold">+18% ce trimestre</span>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <span class="text-[11px] font-bold uppercase text-slate-500">Total Leads reçus</span>
+            <span class="block text-2xl font-extrabold text-blue-700 mt-1" id="adm-kpi-leads">24</span>
+            <span class="text-xxs text-blue-700 font-bold">18 Particuliers • 6 B2B</span>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <span class="text-[11px] font-bold uppercase text-slate-500">Économies Unipros générées</span>
+            <span class="block text-2xl font-extrabold text-emerald-600 mt-1">6 420 €</span>
+            <span class="text-xxs text-slate-500">Crédit 50% déduit</span>
+          </div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <span class="text-[11px] font-bold uppercase text-slate-500">Taux de conversion</span>
+            <span class="block text-2xl font-extrabold text-amber-600 mt-1">68 %</span>
+            <span class="text-xxs text-slate-500">Devis envoyés → Signés</span>
+          </div>
+        </div>
+
+        <!-- Répartition Raíles de Paiement (DOCUMENTO_MAESTRO.md §2.3) -->
+        <div class="p-6 bg-brand-light rounded-2xl border border-brand-accent/20 space-y-4">
+          <h4 class="font-bold text-sm text-brand-green flex items-center gap-2">
+            <i class="fa-solid fa-scale-balanced"></i> Répartition des Prestations : Raíl A (Unipros) vs Raíl B (Direct)
+          </h4>
+          <div class="w-full bg-slate-200 h-4 rounded-full overflow-hidden flex">
+            <div style="width: 78%" class="bg-emerald-600 h-full text-white text-[9px] font-bold flex items-center justify-center">78% Unipros (SAP 50%)</div>
+            <div style="width: 22%" class="bg-slate-700 h-full text-white text-[9px] font-bold flex items-center justify-center">22% Direct / B2B</div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div class="p-3 bg-white rounded-xl border border-emerald-200">
+              <span class="font-bold text-emerald-800">Raíl A : Coopérative Unipros (Services à la Personne)</span>
+              <p class="text-slate-600 mt-1">Particuliers uniquement. Tonte, taille, désherbage. Facture émise par Unipros, 50% crédit fiscal, paiement CB/CESU/Virement.</p>
+            </div>
+            <div class="p-3 bg-white rounded-xl border border-slate-200">
+              <span class="font-bold text-slate-800">Raíl B : Facturation Directe (Pino Espaces Verts)</span>
+              <p class="text-slate-600 mt-1">Copropriétés, syndics, création paysagère, gros chantiers B2B. TVA art. 293 B, virement/chèque direct Andrés.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Tab Leads & Devis CRM -->
+      <div id="adm-content-leads" class="adm-content hidden space-y-4">
+        <div class="flex justify-between items-center">
+          <h4 class="font-bold text-sm text-slate-800">Gestion des Prospects & Demandes de Devis (CRM)</h4>
+          <span class="text-xs text-slate-500">Mise à jour en temps réel</span>
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 border-b border-slate-200 font-bold uppercase text-[10px]">
+              <tr>
+                <th class="p-3">Date</th>
+                <th class="p-3">Client</th>
+                <th class="p-3">Contact</th>
+                <th class="p-3">Commune</th>
+                <th class="p-3">Prestation</th>
+                <th class="p-3">Budget estimé</th>
+                <th class="p-3">Statut</th>
+                <th class="p-3 text-right">Actions rapides</th>
+              </tr>
+            </thead>
+            <tbody id="adm-leads-table-body" class="divide-y divide-slate-100">
+              <!-- Populated dynamically by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 3. Tab Factures -->
+      <div id="adm-content-factures" class="adm-content hidden space-y-4">
+        <div class="flex justify-between items-center">
+          <h4 class="font-bold text-sm text-slate-800">Historique des Factures & Dossiers Fiscaux</h4>
+          <button onclick="alert('Simulation: Module de création de facture Unipros prêt pour Hito 2.')" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3 py-1.5 rounded-lg cursor-pointer">
+            + Nouvelle Facture
+          </button>
+        </div>
+        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 border-b border-slate-200 font-bold uppercase text-[10px]">
+              <tr>
+                <th class="p-3">N° Facture</th>
+                <th class="p-3">Client</th>
+                <th class="p-3">Type</th>
+                <th class="p-3">Date</th>
+                <th class="p-3">Montant TTC</th>
+                <th class="p-3">Reste Client</th>
+                <th class="p-3">Statut</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr>
+                <td class="p-3 font-mono font-bold">#FAC-2026-081</td>
+                <td class="p-3 font-semibold">Sophie Dupont</td>
+                <td class="p-3"><span class="bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded text-xxs">Unipros SAP</span></td>
+                <td class="p-3 text-slate-500">14/08/2026</td>
+                <td class="p-3 font-bold">240,00 €</td>
+                <td class="p-3 text-emerald-700 font-bold">120,00 €</td>
+                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 text-xxs font-bold px-2 py-0.5 rounded-full">Acquittée</span></td>
+              </tr>
+              <tr>
+                <td class="p-3 font-mono font-bold">#FAC-2026-080</td>
+                <td class="p-3 font-semibold">Résidence Les Cèdres (Syndic)</td>
+                <td class="p-3"><span class="bg-slate-100 text-slate-800 font-bold px-2 py-0.5 rounded text-xxs">Direct B2B</span></td>
+                <td class="p-3 text-slate-500">10/08/2026</td>
+                <td class="p-3 font-bold">1 250,00 €</td>
+                <td class="p-3 text-slate-900 font-bold">1 250,00 €</td>
+                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 text-xxs font-bold px-2 py-0.5 rounded-full">Acquittée</span></td>
+              </tr>
+              <tr>
+                <td class="p-3 font-mono font-bold">#FAC-2026-079</td>
+                <td class="p-3 font-semibold">Marc Dubois</td>
+                <td class="p-3"><span class="bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded text-xxs">Unipros SAP</span></td>
+                <td class="p-3 text-slate-500">02/08/2026</td>
+                <td class="p-3 font-bold">380,00 €</td>
+                <td class="p-3 text-emerald-700 font-bold">190,00 €</td>
+                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 text-xxs font-bold px-2 py-0.5 rounded-full">Acquittée</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 4. Tab Promos -->
+      <div id="adm-content-promos" class="adm-content hidden space-y-4">
+        <h4 class="font-bold text-sm text-slate-800">Gestion des Campagnes & Codes Réductions</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="p-5 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-2">
+            <span class="text-xxs font-bold uppercase text-emerald-800 bg-emerald-200/60 px-2 py-0.5 rounded-full">Campagne Publique</span>
+            <h5 class="text-xl font-mono font-extrabold text-emerald-900">PELABOLA</h5>
+            <p class="text-xs text-slate-600">-20% sur la première prestation d'entretien de jardin (Plafond 150€ de remise). Utilisable par tout nouveau visiteur.</p>
+            <span class="text-xs font-bold text-emerald-700 block">Statut : Active permanente</span>
+          </div>
+
+          <div class="p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+            <span class="text-xxs font-bold uppercase text-slate-600 bg-slate-200 px-2 py-0.5 rounded-full">Codes Inscriptions Uniques</span>
+            <h5 class="text-xl font-mono font-extrabold text-slate-800">PINO-XXXX</h5>
+            <p class="text-xs text-slate-600">Codes uniques générés à la création de chaque compte client particulier. Limité à 1 usage par foyer fiscal.</p>
+            <span class="text-xs font-bold text-slate-700 block" id="adm-unique-codes-count">Codes créés : 12</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Tab Impersonate -->
+      <div id="adm-content-impersonate" class="adm-content hidden space-y-4">
+        <div class="p-5 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-3">
+          <h4 class="font-bold text-sm text-amber-900 flex items-center gap-2">
+            <i class="fa-solid fa-user-secret"></i> Outil d'Impersonation Client (Voir comme client)
+          </h4>
+          <p class="text-xs text-slate-700 leading-relaxed">
+            Conformément à la spécification <code>DOCUMENTO_MAESTRO.md §3.4</code>, cet outil vous permet d'ouvrir et de prévisualiser l'Espace Client exact d'un particulier ou d'un pro pour lui porter assistance sans connaître son mot de passe.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <select id="adm-impersonate-select" class="flex-1 px-3 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-600">
+              <option value="sophie.dupont@bordeaux.fr">Sophie Dupont (Bordeaux - 33000)</option>
+              <option value="marc.dubois@talence.fr">Marc Dubois (Talence - 33400)</option>
+              <option value="residence.cedres@pro.fr">Résidence Les Cèdres (B2B - Mérignac)</option>
+            </select>
+            <button onclick="startImpersonationFromAdmin()" class="bg-amber-700 hover:bg-amber-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition-colors shadow cursor-pointer">
+              <i class="fa-solid fa-eye mr-1.5"></i> Ouvrir l'Espace de ce client
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
   <!-- Header / Navigation -->
   <header class="sticky top-0 z-30 bg-[#fafaf6]/90 backdrop-blur-md border-b border-brand-accent/20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between">
@@ -572,7 +1086,7 @@
         <span class="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-brand-green">Pino Espaces Verts</span>
       </a>
       
-      <nav class="hidden md:flex items-center gap-8 font-medium text-sm text-brand-charcoal/80">
+      <nav class="hidden md:flex items-center gap-6 font-medium text-sm text-brand-charcoal/80">
         <button type="button" onclick="openWindowModal('services')" class="hover:text-brand-vivid transition-colors flex items-center gap-1.5 cursor-pointer py-1">
           <span>Services</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-40"></i>
         </button>
@@ -588,6 +1102,14 @@
         <button type="button" onclick="openWindowModal('devis')" class="bg-brand-vivid hover:bg-brand-green text-white px-5 py-2.5 rounded-full transition-all duration-200 shadow-md hover:shadow-lg font-bold flex items-center gap-2 cursor-pointer">
           <i class="fa-solid fa-file-invoice"></i> Devis Gratuit
         </button>
+
+        <!-- Auth / Portal Navigation Button (Client & Admin) -->
+        <div id="desktop-auth-container" class="flex items-center gap-2 pl-2 border-l border-brand-accent/20">
+          <button type="button" id="nav-auth-btn" onclick="handleAuthNavClick()" class="border border-emerald-700/30 hover:border-emerald-700 bg-white hover:bg-emerald-50 text-emerald-900 px-4 py-2 rounded-full transition-all duration-200 shadow-xs hover:shadow text-xs font-bold flex items-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-user-circle text-sm text-emerald-700" id="nav-auth-icon"></i>
+            <span id="nav-auth-text">Connexion</span>
+          </button>
+        </div>
       </nav>
       
       <!-- Mobile menu button -->
@@ -613,6 +1135,14 @@
       <button type="button" onclick="openWindowModal('devis'); document.getElementById('mobile-menu').classList.add('hidden');" class="block w-full text-center bg-brand-vivid hover:bg-brand-green text-white py-3 rounded-xl font-bold shadow-md">
         📝 Demander mon Devis Gratuit
       </button>
+
+      <!-- Mobile Auth Button -->
+      <div id="mobile-auth-container" class="pt-2 border-t border-brand-accent/20">
+        <button type="button" id="mobile-nav-auth-btn" onclick="handleAuthNavClick(); document.getElementById('mobile-menu').classList.add('hidden');" class="w-full text-left py-2.5 px-3 rounded-xl font-bold text-emerald-950 bg-emerald-50/80 border border-emerald-200 flex items-center justify-between">
+          <span id="mobile-nav-auth-text"><i class="fa-solid fa-user-circle text-emerald-700 mr-2"></i> Connexion / Mon Espace</span>
+          <i class="fa-solid fa-arrow-right-to-bracket text-xs text-emerald-700"></i>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -3010,6 +3540,30 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         waBtn.href = `https://wa.me/33651594034?text=${encodeURIComponent(waText)}`;
       }
 
+      // Save lead locally to pino_leads for Admin CRM
+      try {
+        const newLeadObj = {
+          id: refCode,
+          date: new Date().toLocaleDateString('fr-FR'),
+          time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+          name: nameVal || 'Client Particulier',
+          phone: phoneVal,
+          email: emailVal,
+          commune: postalVal,
+          service: serviceVal,
+          surface: surfaceVal ? surfaceVal + ' m²' : 'Non précisée',
+          budget: budgetVal,
+          details: detailsVal || 'Aucun',
+          status: 'Nouveau'
+        };
+        const currentLeads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+        currentLeads.unshift(newLeadObj);
+        localStorage.setItem('pino_leads', JSON.stringify(currentLeads));
+        if (typeof renderAdminLeads === 'function') renderAdminLeads();
+      } catch (errLeads) {
+        console.log('Error saving lead locally:', errLeads);
+      }
+
       // Show Corroboration and track
       setTimeout(() => {
         devisForm.classList.add('hidden');
@@ -3201,6 +3755,493 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
   </style>
 
   <script>
+    // =========================================================================
+    // GOUVERNANCE AUTHENTIFICATION & ESPACES MEMBRES (Client & God Mode Andrés)
+    // =========================================================================
+    const ADMIN_CREDENTIALS = {
+      email: 'pino.spacesverts@gmail.com',
+      pass: 'Pino2678186113180309K@'
+    };
+
+    // Pre-seed default demo users if not present
+    const initDefaultUsers = () => {
+      if (!localStorage.getItem('pino_users')) {
+        const defaultUsers = [
+          {
+            id: 'usr_client_001',
+            email: 'sophie.dupont@bordeaux.fr',
+            pass: 'Pino2026!',
+            fullName: 'Sophie Dupont',
+            phone: '06 24 55 18 90',
+            commune: '33000 Bordeaux',
+            role: 'client',
+            promoCode: 'PINO-4821',
+            createdDate: '15/05/2026'
+          },
+          {
+            id: 'usr_client_002',
+            email: 'marc.dubois@talence.fr',
+            pass: 'Client33!',
+            fullName: 'Marc Dubois',
+            phone: '06 88 12 40 77',
+            commune: '33400 Talence',
+            role: 'client',
+            promoCode: 'PINO-9134',
+            createdDate: '10/06/2026'
+          }
+        ];
+        localStorage.setItem('pino_users', JSON.stringify(defaultUsers));
+      }
+    };
+
+    // Pre-seed default leads for the CRM
+    const initDefaultLeads = () => {
+      if (!localStorage.getItem('pino_leads')) {
+        const defaultLeads = [
+          {
+            id: '#DEV-PINO-2026-8812',
+            date: '15/09/2026',
+            time: '14:20',
+            name: 'Jean-Christophe Bernard',
+            phone: '06 14 22 90 18',
+            email: 'jc.bernard@gmail.com',
+            commune: '33700 Mérignac',
+            service: 'Taille de haie & Tonte',
+            surface: '450 m²',
+            budget: '400',
+            details: 'Haie de laurier de 35 mètres de long à rabattre de 50cm.',
+            status: 'Nouveau'
+          },
+          {
+            id: '#DEV-PINO-2026-8419',
+            date: '14/09/2026',
+            time: '11:05',
+            name: 'Résidence Parc Bordelais',
+            phone: '05 56 90 12 34',
+            email: 'syndic.parc@copro-bordeaux.fr',
+            commune: '33000 Bordeaux',
+            service: 'B2B Copropriété',
+            surface: '1200 m²',
+            budget: '1500',
+            details: 'Contrat annuel pour tonte pelouse commune et allées.',
+            status: 'Devis envoyé'
+          },
+          {
+            id: '#DEV-PINO-2026-7934',
+            date: '12/09/2026',
+            time: '09:45',
+            name: 'Claire Villeneuve',
+            phone: '06 77 41 09 88',
+            email: 'claire.v@orange.fr',
+            commune: '33400 Talence',
+            service: 'Remise en état',
+            surface: '250 m²',
+            budget: '350',
+            details: 'Désherbage et taille de massifs avant l\'automne.',
+            status: 'Gagné'
+          },
+          {
+            id: '#DEV-PINO-2026-7512',
+            date: '10/09/2026',
+            time: '16:30',
+            name: 'Alain Rougier',
+            phone: '06 31 09 87 65',
+            email: 'alain.rougier@bbox.fr',
+            commune: '33130 Bègles',
+            service: 'Débroussaillage',
+            surface: '600 m²',
+            budget: '600',
+            details: 'Terrain en friche en fond de parcelle.',
+            status: 'Contacté'
+          }
+        ];
+        localStorage.setItem('pino_leads', JSON.stringify(defaultLeads));
+      }
+    };
+
+    window.getCurrentUser = () => {
+      try {
+        return JSON.parse(localStorage.getItem('pino_current_user')) || null;
+      } catch (e) {
+        return null;
+      }
+    };
+
+    // Toggle password visibility
+    window.togglePasswordVisibility = (inputId, btn) => {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = '<i class="fa-regular fa-eye-slash"></i>';
+      } else {
+        input.type = 'password';
+        btn.innerHTML = '<i class="fa-regular fa-eye"></i>';
+      }
+    };
+
+    // Switch between Login and Register tabs
+    window.switchAuthTab = (tab) => {
+      const loginForm = document.getElementById('auth-login-form');
+      const registerForm = document.getElementById('auth-register-form');
+      const tabLogin = document.getElementById('tab-auth-login');
+      const tabRegister = document.getElementById('tab-auth-register');
+      const errorMsg = document.getElementById('login-error-msg');
+      if (errorMsg) errorMsg.classList.add('hidden');
+
+      if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        tabLogin.classList.add('border-b-2', 'border-emerald-700', 'text-emerald-800', 'bg-white');
+        tabLogin.classList.remove('text-slate-500');
+        tabRegister.classList.remove('border-b-2', 'border-emerald-700', 'text-emerald-800', 'bg-white');
+        tabRegister.classList.add('text-slate-500');
+      } else {
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        tabRegister.classList.add('border-b-2', 'border-emerald-700', 'text-emerald-800', 'bg-white');
+        tabRegister.classList.remove('text-slate-500');
+        tabLogin.classList.remove('border-b-2', 'border-emerald-700', 'text-emerald-800', 'bg-white');
+        tabLogin.classList.add('text-slate-500');
+      }
+    };
+
+    // Handle Login submission
+    window.handleLoginSubmit = (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('login-email');
+      const passInput = document.getElementById('login-password');
+      const errorMsg = document.getElementById('login-error-msg');
+      const errorText = document.getElementById('login-error-text');
+
+      const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+      const pass = passInput ? passInput.value : '';
+
+      // 1. Check Admin credentials
+      if (email === ADMIN_CREDENTIALS.email.toLowerCase() && pass === ADMIN_CREDENTIALS.pass) {
+        const adminUser = {
+          role: 'admin',
+          email: ADMIN_CREDENTIALS.email,
+          fullName: 'Andrés Pino',
+          isAdmin: true
+        };
+        localStorage.setItem('pino_current_user', JSON.stringify(adminUser));
+        updateAuthUI();
+        document.getElementById('modal-window-auth').close();
+        renderAdminLeads();
+        document.getElementById('modal-window-admin').showModal();
+        showNotificationToast('👑 Bienvenue Andrés ! Accès Administrateur (God Mode) activé.', 'success');
+        return;
+      }
+
+      // 2. Check Client credentials
+      const users = JSON.parse(localStorage.getItem('pino_users') || '[]');
+      const client = users.find(u => u.email.toLowerCase() === email && u.pass === pass);
+      if (client) {
+        localStorage.setItem('pino_current_user', JSON.stringify(client));
+        updateAuthUI();
+        document.getElementById('modal-window-auth').close();
+        populateClientPortal(client);
+        document.getElementById('modal-window-client').showModal();
+        showNotificationToast(`👋 Bienvenue dans votre Espace Client, ${client.fullName} !`, 'success');
+        return;
+      }
+
+      // 3. Fallback error
+      if (errorMsg) {
+        errorMsg.classList.remove('hidden');
+        if (errorText) {
+          errorText.textContent = "Identifiants non reconnus. Vérifiez votre e-mail et mot de passe.";
+        }
+      }
+    };
+
+    // Handle Register submission
+    window.handleRegisterSubmit = (e) => {
+      e.preventDefault();
+      const fullName = document.getElementById('reg-fullname').value.trim();
+      const email = document.getElementById('reg-email').value.trim().toLowerCase();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const commune = document.getElementById('reg-commune').value.trim() || 'Bordeaux';
+      const pass = document.getElementById('reg-password').value;
+
+      const users = JSON.parse(localStorage.getItem('pino_users') || '[]');
+      if (users.some(u => u.email.toLowerCase() === email)) {
+        alert("Un compte existe déjà avec cette adresse e-mail. Veuillez vous connecter.");
+        switchAuthTab('login');
+        document.getElementById('login-email').value = email;
+        return;
+      }
+
+      // Generate unique promo code (PINO-XXXX)
+      const rand = Math.floor(1000 + Math.random() * 9000);
+      const uniqueCode = `PINO-${rand}`;
+
+      const newClient = {
+        id: `usr_${Date.now()}`,
+        email,
+        pass,
+        fullName,
+        phone,
+        commune,
+        role: 'client',
+        promoCode: uniqueCode,
+        createdDate: new Date().toLocaleDateString('fr-FR')
+      };
+
+      users.push(newClient);
+      localStorage.setItem('pino_users', JSON.stringify(users));
+      localStorage.setItem('pino_current_user', JSON.stringify(newClient));
+
+      updateAuthUI();
+      document.getElementById('modal-window-auth').close();
+      populateClientPortal(newClient);
+      document.getElementById('modal-window-client').showModal();
+      showNotificationToast(`🎉 Compte créé avec succès ! Votre code -20% est ${uniqueCode}.`, 'success');
+    };
+
+    // Populate Client Portal with current user data
+    window.populateClientPortal = (client) => {
+      if (!client) return;
+      document.getElementById('client-display-name').textContent = client.fullName || 'Client Particulier';
+      document.getElementById('client-display-email').innerHTML = `${client.email} • <span>${client.commune || 'Bordeaux (33)'}</span>`;
+      document.getElementById('client-promo-code').textContent = client.promoCode || 'PINO-2026';
+    };
+
+    // Logout
+    window.handleLogout = () => {
+      localStorage.removeItem('pino_current_user');
+      sessionStorage.removeItem('pino_impersonating');
+      const banner = document.getElementById('client-impersonation-banner');
+      if (banner) banner.classList.add('hidden');
+
+      const adminModal = document.getElementById('modal-window-admin');
+      if (adminModal && adminModal.open) adminModal.close();
+      const clientModal = document.getElementById('modal-window-client');
+      if (clientModal && clientModal.open) clientModal.close();
+
+      updateAuthUI();
+      showNotificationToast('Vous avez été déconnecté avec succès.', 'info');
+    };
+
+    // Nav click handler
+    window.handleAuthNavClick = () => {
+      const user = getCurrentUser();
+      if (!user) {
+        document.getElementById('modal-window-auth').showModal();
+      } else if (user.role === 'admin' || user.isAdmin) {
+        renderAdminLeads();
+        document.getElementById('modal-window-admin').showModal();
+      } else {
+        populateClientPortal(user);
+        document.getElementById('modal-window-client').showModal();
+      }
+    };
+
+    // Update Nav UI based on session
+    window.updateAuthUI = () => {
+      const user = getCurrentUser();
+      const navText = document.getElementById('nav-auth-text');
+      const navIcon = document.getElementById('nav-auth-icon');
+      const navBtn = document.getElementById('nav-auth-btn');
+      const mobileNavText = document.getElementById('mobile-nav-auth-text');
+
+      if (!navText) return;
+
+      if (!user) {
+        navText.textContent = "Connexion";
+        if (navIcon) navIcon.className = "fa-solid fa-user-circle text-sm text-emerald-700";
+        if (navBtn) {
+          navBtn.className = "border border-emerald-700/30 hover:border-emerald-700 bg-white hover:bg-emerald-50 text-emerald-900 px-4 py-2 rounded-full transition-all duration-200 shadow-xs hover:shadow text-xs font-bold flex items-center gap-2 cursor-pointer";
+        }
+        if (mobileNavText) {
+          mobileNavText.innerHTML = `<i class="fa-solid fa-user-circle text-emerald-700 mr-2"></i> Connexion / Mon Espace`;
+        }
+      } else if (user.role === 'admin' || user.isAdmin) {
+        navText.textContent = "👑 Andrés (Admin)";
+        if (navIcon) navIcon.className = "fa-solid fa-crown text-sm text-amber-500";
+        if (navBtn) {
+          navBtn.className = "border border-amber-400 bg-slate-900 hover:bg-slate-800 text-amber-300 px-4 py-2 rounded-full transition-all duration-200 shadow-sm text-xs font-bold flex items-center gap-2 cursor-pointer";
+        }
+        if (mobileNavText) {
+          mobileNavText.innerHTML = `👑 <strong>Andrés (Espace Admin)</strong>`;
+        }
+      } else {
+        const shortName = (user.fullName || 'Client').split(' ')[0];
+        navText.textContent = `👤 Mon Espace (${shortName})`;
+        if (navIcon) navIcon.className = "fa-solid fa-user-check text-sm text-emerald-700";
+        if (navBtn) {
+          navBtn.className = "border border-emerald-600 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 px-4 py-2 rounded-full transition-all duration-200 shadow-xs text-xs font-bold flex items-center gap-2 cursor-pointer";
+        }
+        if (mobileNavText) {
+          mobileNavText.innerHTML = `👤 <strong>Mon Espace (${user.fullName || 'Client'})</strong>`;
+        }
+      }
+    };
+
+    // Switch Admin Tabs
+    window.switchAdminTab = (tabKey) => {
+      document.querySelectorAll('.adm-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.adm-tab').forEach(el => {
+        el.classList.remove('border-b-2', 'border-emerald-700', 'text-emerald-800', 'bg-white');
+        el.classList.add('text-slate-500');
+      });
+
+      const targetContent = document.getElementById(`adm-content-${tabKey}`);
+      const targetTab = document.getElementById(`adm-tab-${tabKey}`);
+      if (targetContent) targetContent.classList.remove('hidden');
+      if (targetTab) {
+        targetTab.classList.add('border-b-2', 'border-emerald-700', 'text-emerald-800', 'bg-white');
+        targetTab.classList.remove('text-slate-500');
+      }
+    };
+
+    // Render Admin Leads in table
+    window.renderAdminLeads = () => {
+      const leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+      const tbody = document.getElementById('adm-leads-table-body');
+      const badge = document.getElementById('adm-leads-badge');
+      const kpi = document.getElementById('adm-kpi-leads');
+
+      if (badge) badge.textContent = leads.length;
+      if (kpi) kpi.textContent = leads.length;
+      if (!tbody) return;
+
+      if (leads.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">Aucun lead enregistré pour le moment.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = leads.map((l, idx) => {
+        let statusBadge = `<span class="bg-blue-100 text-blue-800 text-xxs font-bold px-2 py-0.5 rounded-full">${l.status}</span>`;
+        if (l.status === 'Gagné') {
+          statusBadge = `<span class="bg-emerald-100 text-emerald-800 text-xxs font-bold px-2 py-0.5 rounded-full">Gagné</span>`;
+        } else if (l.status === 'Contacté') {
+          statusBadge = `<span class="bg-amber-100 text-amber-800 text-xxs font-bold px-2 py-0.5 rounded-full">Contacté</span>`;
+        } else if (l.status === 'Devis envoyé') {
+          statusBadge = `<span class="bg-purple-100 text-purple-800 text-xxs font-bold px-2 py-0.5 rounded-full">Devis envoyé</span>`;
+        }
+
+        const phoneClean = (l.phone || '').replace(/\s+/g, '');
+        const waLink = phoneClean ? `https://wa.me/33${phoneClean.startsWith('0') ? phoneClean.substring(1) : phoneClean}?text=${encodeURIComponent(`Bonjour ${l.name}, c'est Andrés de Pino Espaces Verts concernant votre demande de devis pour ${l.service}.`)}` : '#';
+
+        return `
+          <tr class="hover:bg-slate-50/80">
+            <td class="p-3 text-slate-500 whitespace-nowrap">${l.date} <span class="text-xxs text-slate-400">${l.time || ''}</span></td>
+            <td class="p-3 font-bold text-slate-900">${l.name}</td>
+            <td class="p-3 text-slate-600">
+              ${l.phone ? `<a href="tel:${l.phone}" class="text-emerald-700 hover:underline block"><i class="fa-solid fa-phone text-[10px] mr-1"></i>${l.phone}</a>` : ''}
+              ${l.email ? `<a href="mailto:${l.email}" class="text-slate-400 hover:underline text-xxs block">${l.email}</a>` : ''}
+            </td>
+            <td class="p-3 text-slate-600">${l.commune}</td>
+            <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded text-xxs font-semibold">${l.service}</span></td>
+            <td class="p-3 font-bold text-brand-green">${l.budget} €</td>
+            <td class="p-3">${statusBadge}</td>
+            <td class="p-3 text-right whitespace-nowrap">
+              ${phoneClean ? `<a href="${waLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center w-7 h-7 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 mr-1" title="WhatsApp"><i class="fa-brands fa-whatsapp text-xs"></i></a>` : ''}
+              ${l.phone ? `<a href="tel:${l.phone}" class="inline-flex items-center justify-center w-7 h-7 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 mr-1" title="Appeler"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
+              <button onclick="cycleLeadStatus(${idx})" class="inline-flex items-center justify-center w-7 h-7 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 cursor-pointer" title="Changer statut"><i class="fa-solid fa-rotate text-xs"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    // Cycle lead status
+    window.cycleLeadStatus = (index) => {
+      const leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+      if (!leads[index]) return;
+      const flow = ['Nouveau', 'Contacté', 'Devis envoyé', 'Gagné', 'Perdu'];
+      const curIdx = flow.indexOf(leads[index].status);
+      leads[index].status = flow[(curIdx + 1) % flow.length];
+      localStorage.setItem('pino_leads', JSON.stringify(leads));
+      renderAdminLeads();
+    };
+
+    // Impersonation
+    window.startImpersonationFromAdmin = () => {
+      const select = document.getElementById('adm-impersonate-select');
+      if (!select) return;
+      const email = select.value;
+      const users = JSON.parse(localStorage.getItem('pino_users') || '[]');
+      const client = users.find(u => u.email === email) || {
+        fullName: select.options[select.selectedIndex].text.split(' (')[0],
+        email: email,
+        commune: 'Bordeaux Métropole',
+        promoCode: 'PINO-PREVIEW'
+      };
+
+      document.getElementById('modal-window-admin').close();
+      const banner = document.getElementById('client-impersonation-banner');
+      if (banner) banner.classList.remove('hidden');
+      populateClientPortal(client);
+      document.getElementById('modal-window-client').showModal();
+    };
+
+    window.exitImpersonation = () => {
+      const banner = document.getElementById('client-impersonation-banner');
+      if (banner) banner.classList.add('hidden');
+      document.getElementById('modal-window-client').close();
+      document.getElementById('modal-window-admin').showModal();
+    };
+
+    // Client space actions
+    window.bookClientIntervention = () => {
+      const user = getCurrentUser();
+      document.getElementById('modal-window-client').close();
+      openWindowModal('devis');
+      if (user) {
+        if (document.getElementById('name')) document.getElementById('name').value = user.fullName || '';
+        if (document.getElementById('email')) document.getElementById('email').value = user.email || '';
+        if (document.getElementById('phone') && user.phone) document.getElementById('phone').value = user.phone;
+        if (document.getElementById('postal-code') && user.commune) document.getElementById('postal-code').value = user.commune;
+      }
+    };
+
+    window.downloadFakeInvoice = (facRef) => {
+      showNotificationToast(`📄 Téléchargement de la facture ${facRef} (PDF simulation avec mentions SAP & Unipros).`, 'info');
+    };
+
+    window.exportClientDataJson = () => {
+      const user = getCurrentUser();
+      if (!user) return;
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(user, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `donnees_personnelles_pino_${user.email}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showNotificationToast("Export RGPD généré avec succès.", "success");
+    };
+
+    window.deleteClientAccount = () => {
+      if (confirm("Conformément au RGPD (Art. 17), souhaitez-vous supprimer votre compte ?\n\nNote légale : Les factures déjà émises seront conservées 10 ans selon les obligations fiscales du Code de commerce (L. 123-22).")) {
+        handleLogout();
+        showNotificationToast("Votre compte personnel a été supprimé et anonymisé.", "info");
+      }
+    };
+
+    // Toast notification utility
+    window.showNotificationToast = (message, type = 'info') => {
+      const existing = document.getElementById('app-notification-toast');
+      if (existing) existing.remove();
+
+      const toast = document.createElement('div');
+      toast.id = 'app-notification-toast';
+      const bgColor = type === 'success' ? 'bg-emerald-800' : (type === 'error' ? 'bg-red-800' : 'bg-slate-900');
+      toast.className = `fixed top-6 right-6 z-50 ${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-white/20 text-xs sm:text-sm font-semibold flex items-center gap-3 transition-all duration-300 animate-bounce`;
+      toast.innerHTML = `<span>${message}</span> <button onclick="this.parentElement.remove()" class="text-white/60 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button>`;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        if (toast && toast.parentElement) {
+          toast.classList.remove('animate-bounce');
+          toast.classList.add('opacity-0', 'translate-y-2');
+          setTimeout(() => toast.remove(), 400);
+        }
+      }, 4000);
+    };
+
     // ─── SECTION WINDOW MODALS CONTROLLER ───
     window.openWindowModal = (sectionKey) => {
       // Normalize aliases
@@ -3214,7 +4255,13 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         'b2b': 'modal-window-b2b',
         'entreprises': 'modal-window-b2b',
         'devis': 'modal-window-devis',
-        'contact': 'modal-window-devis'
+        'contact': 'modal-window-devis',
+        'auth': 'modal-window-auth',
+        'connexion': 'modal-window-auth',
+        'login': 'modal-window-auth',
+        'client': 'modal-window-client',
+        'espace': 'modal-window-client',
+        'admin': 'modal-window-admin'
       };
 
       const targetId = map[sectionKey] || ('modal-window-' + sectionKey);
@@ -3242,11 +4289,20 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
             }
           }, 150);
         }
+
+        // Render admin leads if opening admin
+        if (targetId === 'modal-window-admin') {
+          renderAdminLeads();
+        }
       }
     };
 
     // Close on backdrop click for all section windows
     document.addEventListener('DOMContentLoaded', () => {
+      initDefaultUsers();
+      initDefaultLeads();
+      updateAuthUI();
+
       document.querySelectorAll('.section-window').forEach(dialog => {
         dialog.addEventListener('click', (e) => {
           const rect = dialog.getBoundingClientRect();
@@ -3260,10 +4316,10 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         });
       });
 
-      // Handle hash navigation (e.g. #services, #devis, #galerie)
+      // Handle hash navigation (e.g. #services, #devis, #connexion, #admin)
       const checkHash = () => {
         const h = window.location.hash.replace('#', '').toLowerCase();
-        if (['services', 'forfaits', 'realisations', 'galerie', 'unipros', 'b2b', 'entreprises', 'devis'].includes(h)) {
+        if (['services', 'forfaits', 'realisations', 'galerie', 'unipros', 'b2b', 'entreprises', 'devis', 'connexion', 'auth', 'admin', 'espace'].includes(h)) {
           window.openWindowModal(h);
         }
       };
