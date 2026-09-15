@@ -9,6 +9,17 @@ Fuente: `DOCUMENTO_MAESTRO.md` §9. Cada tarea: una sesión, criterios, verifica
 - [x] SQL + RLS `docs/sql/001_initial_schema.sql`
 - [x] AGENTS.md / plan de implementación
 
+## Remediación V2.0 (auditoría 2026-09-15)
+
+- [x] Quitar Firebase Auth/SDK del cliente (error dominio GitHub Pages)
+- [x] Cablear Supabase JS + `signInWithOAuth({ google })` + redirect del origen
+- [x] Logo Unipros en header (enlace `unipros.coop`)
+- [x] Chat flotante = `fa-comments`
+- [x] Modal auth `max-h-[80vh] overflow-y-auto` + CGV bajo Google
+- [x] Cupón: sin email público; CTA Google; código solo con `user_id`
+- [x] SQL `docs/sql/002_cupones_rls.sql`
+- [ ] Pegar `url` + `anonKey` en `assets/js/supabase-config.js` y autorizar `jomstudiovzla.github.io`
+
 ## Hito 1 — Infra UE
 
 - [ ] Tarea: Crear proyecto Supabase región `eu-west-3` y firmar DPA

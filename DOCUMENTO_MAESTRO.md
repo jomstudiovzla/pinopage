@@ -4,6 +4,7 @@
 **Titular:** Andrés Pino (Entrepreneur Individuel / Micro-entreprise)  
 **Territorio:** Bordeaux Métropole y Gironde (33), France  
 **Versión:** 2.0 — 15 septiembre 2026  
+**Remediación viva:** [`DOCUMENTO_REMEDIACION_V2.md`](./DOCUMENTO_REMEDIACION_V2.md) (auditoría OAuth / Unipros / chat / cupones).  
 **Estado:** Especificación viva (fuente de verdad). Toda implementación futura debe alinearse aquí.  
 **Idioma de producto:** Francés. Idioma de gobernanza interna: Español.
 

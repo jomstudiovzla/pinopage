@@ -5,7 +5,7 @@
 - **Repositorio remoto**: [https://github.com/jomstudiovzla/pinopage](https://github.com/jomstudiovzla/pinopage)
 - **URL pública (GitHub Pages)**: [https://jomstudiovzla.github.io/pinopage/](https://jomstudiovzla.github.io/pinopage/)
 - **Rama principal**: `main`
-- **Estado del build v1**: `built` (HTTP 200 OK) — Firebase Authentication (Google OAuth + Email/Pass) real en producción sobre `crm-jom`, reglas Firestore blindadas, sin credenciales en texto plano.
+- **Estado del build v1**: remediación V2 en curso — **Firebase Auth eliminado** (error `unauthorized-domain`). Cliente Supabase listo; faltan `url`/`anonKey` en `assets/js/supabase-config.js`. UX: logo Unipros en header, chat `fa-comments`, modal auth con scroll, cupón solo con sesión.
 - **Estado v2**: **especificación completa (Hito 0)**.
 - **Localhost**: `http://127.0.0.1:8080/` (`python3 -m http.server 8080`)
 

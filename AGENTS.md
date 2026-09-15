@@ -35,7 +35,10 @@ Co-Authored-By: Grok 4.6 <noreply@x.ai>
 - Role lives in `app_metadata.role`, never `user_metadata`.
 - Supabase region: **`eu-west-3`**. Pin Edge Functions to Paris.
 - Two payment rails: `unipros` (deep-link only) vs `direct`. No card forms.
-- Promo: keep campaign `PELABOLA`; unique `PINO-XXXX` on signup. Chatbot never prints PELABOLA in chat.
+- Auth: **Supabase only**. No Firebase. Config in `assets/js/supabase-config.js` (anon key).
+- Promo: unique coupon after verified `user_id`. No public email field. Chatbot never prints a raw code.
+- Header must keep Unipros logo → `https://unipros.coop` (`target=_blank`).
+- Chat toggle uses `fa-comments`, not the pine logo.
 - Chatbot routing: garden/devis → Andrés; Unipros/URSSAF/7DB → Unipros support.
 - RLS: `(select auth.uid())`, `TO authenticated`, UPDATE `WITH CHECK`.
 - Never put `SERVICE_ROLE` in client code. Never invent SIRET/capital social.
