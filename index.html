@@ -167,6 +167,35 @@
       background-color: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(4px);
     }
+
+    /* Draggable Modal Header & Drag-to-Close Styles */
+    .modal-drag-header {
+      cursor: grab;
+      touch-action: pan-y;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .modal-drag-header:active {
+      cursor: grabbing;
+    }
+    .modal-drag-pill {
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .modal-drag-header:hover .modal-drag-pill {
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+    .modal-dragging {
+      transition: none !important;
+      will-change: transform, opacity;
+    }
+    .modal-snap-back {
+      transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.25s ease !important;
+    }
+    .modal-dismissing {
+      transition: transform 0.25s cubic-bezier(0.32, 0, 0.67, 0), opacity 0.25s ease !important;
+      transform: translateY(105vh) !important;
+      opacity: 0 !important;
+    }
   </style>
 </head>
 <body class="bg-brand-light text-brand-charcoal font-sans antialiased overflow-x-hidden">
@@ -570,19 +599,23 @@
 
   <!-- Modal 1: Fenêtre d'Authentification (Client & Admin) -->
   <dialog id="modal-window-auth" class="section-window bg-white rounded-3xl shadow-2xl border border-brand-accent/30 max-w-md w-full p-0 overflow-hidden text-brand-charcoal">
-    <div class="bg-gradient-to-r from-[#2d4d36] to-[#1e5138] p-6 text-white flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-white text-lg">
-          🌲
+    <!-- Draggable Header -->
+    <div class="modal-drag-header bg-gradient-to-r from-[#2d4d36] to-[#1e5138] px-6 pt-2.5 pb-4 text-white select-none">
+      <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-2 cursor-grab active:cursor-grabbing transition-colors" title="Glisser vers le bas pour fermer"></div>
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-white text-lg">
+            🌲
+          </div>
+          <div>
+            <h3 class="font-serif text-xl font-bold">Espace Membres</h3>
+            <p class="text-xs text-emerald-200">Pino Espaces Verts • Particuliers, Pros & Admin</p>
+          </div>
         </div>
-        <div>
-          <h3 class="font-serif text-xl font-bold">Espace Membres</h3>
-          <p class="text-xs text-emerald-200">Pino Espaces Verts • Particuliers, Pros & Admin</p>
-        </div>
+        <button onclick="document.getElementById('modal-window-auth').close()" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
       </div>
-      <button onclick="document.getElementById('modal-window-auth').close()" class="w-8 h-8 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
     </div>
 
     <!-- Tabs: Connexion vs Inscription -->
@@ -596,6 +629,38 @@
     </div>
 
     <div class="p-6">
+      <!-- Bouton Google Universel -->
+      <div class="mb-4">
+        <button type="button" onclick="handleGoogleSignIn()" class="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-slate-50 text-slate-800 font-bold rounded-xl border border-slate-300 shadow-xs hover:shadow transition-all text-xs sm:text-sm cursor-pointer group">
+          <svg class="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span id="google-auth-btn-label">Continuer avec Google</span>
+        </button>
+
+        <div class="relative flex py-2 items-center">
+          <div class="flex-grow border-t border-slate-200"></div>
+          <span class="flex-shrink mx-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">ou par e-mail</span>
+          <div class="flex-grow border-t border-slate-200"></div>
+        </div>
+
+        <!-- Remplissage Rapide en 1-Clic pour Démo & Test -->
+        <div class="flex items-center justify-between gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xxs">
+          <span class="text-slate-500 font-bold"><i class="fa-solid fa-bolt text-amber-500 mr-1"></i>Démo 1-Clic :</span>
+          <div class="flex gap-1.5">
+            <button type="button" onclick="quickFillAdminLogin()" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg font-extrabold flex items-center gap-1 transition-colors cursor-pointer" title="Remplir et connecter Andrés (Gérant)">
+              👑 Gérant
+            </button>
+            <button type="button" onclick="quickFillClientLogin()" class="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 rounded-lg font-extrabold flex items-center gap-1 transition-colors cursor-pointer" title="Remplir client de test">
+              👤 Client
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Connexion Form -->
       <form id="auth-login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
         <div>
@@ -687,6 +752,130 @@
     </div>
   </dialog>
 
+  <!-- Google OAuth Account Picker Dialog (Multi-Account & Andrés Admin) -->
+  <dialog id="modal-google-selector" class="section-window bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-md w-full p-0 overflow-hidden text-brand-charcoal">
+    <!-- Draggable Header -->
+    <div class="modal-drag-header bg-gradient-to-r from-slate-900 via-[#1b4332] to-slate-900 px-6 pt-3 pb-5 text-white select-none cursor-grab active:cursor-grabbing">
+      <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-3 cursor-grab active:cursor-grabbing transition-colors modal-drag-pill" title="Glisser vers le bas pour fermer"></div>
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-xs">
+            <svg class="w-4 h-4" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-white">Connexion Google Sécurisée</h3>
+            <p class="text-[10px] text-emerald-300">Pino Espaces Verts OAuth 2.0</p>
+          </div>
+        </div>
+        <button type="button" onclick="document.getElementById('modal-google-selector').close()" class="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer la fenêtre">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="p-6 space-y-4">
+      <div class="text-center space-y-1">
+        <h4 class="font-serif font-bold text-lg text-slate-900">Choisir un compte Google</h4>
+        <p class="text-xs text-slate-500">Pour accéder directement à votre espace sur <span class="font-semibold text-emerald-800">Pino Espaces Verts</span></p>
+      </div>
+
+      <!-- Accounts List -->
+      <div class="divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+        <!-- 1. Andrés Pino (Admin Google Email) -->
+        <button type="button" onclick="selectGoogleAccount('pino.spacesverts@gmail.com', 'Andrés Pino', 'admin')" class="w-full p-3.5 flex items-center justify-between hover:bg-emerald-50 transition-colors text-left group cursor-pointer bg-emerald-50/40">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-emerald-800 text-amber-300 font-bold flex items-center justify-center text-base shadow-xs border-2 border-amber-400">
+              👑
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-xs text-slate-900 group-hover:text-emerald-900">Andrés Pino</span>
+                <span class="bg-amber-100 text-amber-900 border border-amber-300 text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase">Gérant / Admin</span>
+              </div>
+              <span class="text-xxs text-slate-500 font-mono">pino.spacesverts@gmail.com</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 text-emerald-700 font-bold text-xs">
+            <span>Connexion 1-clic</span>
+            <i class="fa-solid fa-chevron-right text-xs group-hover:translate-x-1 transition-transform"></i>
+          </div>
+        </button>
+
+        <!-- 2. Marc Dubois (Client test Google) -->
+        <button type="button" onclick="selectGoogleAccount('marc.dubois@gmail.com', 'Marc Dubois', 'client')" class="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors text-left group cursor-pointer">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-blue-700 text-white font-bold flex items-center justify-center text-sm shadow-xs">
+              MD
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-xs text-slate-900 group-hover:text-emerald-900">Marc Dubois</span>
+                <span class="bg-blue-50 text-blue-800 text-[9px] font-bold px-1.5 py-0.2 rounded-full">Client Particulier</span>
+              </div>
+              <span class="text-xxs text-slate-500 font-mono">marc.dubois@gmail.com</span>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-slate-300 group-hover:text-emerald-700 transition-transform group-hover:translate-x-1"></i>
+        </button>
+
+        <!-- 3. Sophie Dupont (Client test Google) -->
+        <button type="button" onclick="selectGoogleAccount('sophie.dupont@bordeaux.fr', 'Sophie Dupont', 'client')" class="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors text-left group cursor-pointer">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-purple-700 text-white font-bold flex items-center justify-center text-sm shadow-xs">
+              SD
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-xs text-slate-900 group-hover:text-emerald-900">Sophie Dupont</span>
+                <span class="bg-purple-50 text-purple-800 text-[9px] font-bold px-1.5 py-0.2 rounded-full">Client Particulier</span>
+              </div>
+              <span class="text-xxs text-slate-500 font-mono">sophie.dupont@bordeaux.fr</span>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-slate-300 group-hover:text-emerald-700 transition-transform group-hover:translate-x-1"></i>
+        </button>
+
+        <!-- 4. Add another Google account toggle -->
+        <button type="button" onclick="toggleCustomGoogleInput()" class="w-full p-3.5 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left text-slate-700 font-medium text-xs cursor-pointer">
+          <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-sm border border-slate-200">
+            <i class="fa-solid fa-user-plus"></i>
+          </div>
+          <span>Utiliser un autre compte Google...</span>
+        </button>
+      </div>
+
+      <!-- Custom Google Account Inline Form -->
+      <div id="custom-google-form" class="hidden p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+        <h5 class="text-xs font-bold text-slate-800">Ajouter un nouveau compte Google</h5>
+        <div>
+          <label class="block text-xxs font-bold text-slate-600 mb-1">Nom complet</label>
+          <input type="text" id="custom-google-name" placeholder="Ex: Lucas Mercier" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600" />
+        </div>
+        <div>
+          <label class="block text-xxs font-bold text-slate-600 mb-1">Adresse e-mail Google</label>
+          <input type="email" id="custom-google-email" placeholder="lucas.mercier@gmail.com" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-emerald-600" />
+        </div>
+        <div class="flex gap-2 pt-1">
+          <button type="button" onclick="submitCustomGoogleAccount()" class="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2 rounded-xl text-xs transition-colors cursor-pointer">
+            Se connecter
+          </button>
+          <button type="button" onclick="toggleCustomGoogleInput()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition-colors cursor-pointer">
+            Annuler
+          </button>
+        </div>
+      </div>
+
+      <p class="text-[10px] text-slate-400 text-center leading-relaxed">
+        Pour continuer, Google transmet votre nom, adresse e-mail et validation de profil à Pino Espaces Verts conformément au RGPD.
+      </p>
+    </div>
+  </dialog>
+
   <!-- Modal 2: Espace Client (Conforme DOCUMENTO_MAESTRO.md §3.4) -->
   <dialog id="modal-window-client" class="section-window bg-white rounded-3xl shadow-2xl border border-brand-accent/30 max-w-4xl w-full p-0 overflow-hidden text-brand-charcoal">
     <!-- Impersonation Audit Banner (Visible if admin is previewing client) -->
@@ -697,27 +886,30 @@
       </button>
     </div>
 
-    <!-- Client Header -->
-    <div class="bg-gradient-to-r from-[#2d4d36] to-[#1e5138] p-6 sm:p-8 text-white flex flex-wrap justify-between items-center gap-4">
-      <div class="flex items-center gap-4">
-        <div class="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center font-bold text-2xl">
-          👤
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h3 class="font-serif text-2xl font-bold" id="client-display-name">Sophie Dupont</h3>
-            <span class="bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">Particulier SAP</span>
+    <!-- Client Draggable Header -->
+    <div class="modal-drag-header bg-gradient-to-r from-[#2d4d36] to-[#1e5138] px-6 sm:px-8 pt-3 pb-6 sm:pb-8 text-white select-none">
+      <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-3 cursor-grab active:cursor-grabbing transition-colors" title="Glisser vers le bas pour fermer"></div>
+      <div class="flex flex-wrap justify-between items-center gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center font-bold text-2xl">
+            👤
           </div>
-          <p class="text-xs text-white/75" id="client-display-email">sophie.dupont@bordeaux.fr • <span id="client-display-commune">Bordeaux (33000)</span></p>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-serif text-2xl font-bold" id="client-display-name">Sophie Dupont</h3>
+              <span class="bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">Particulier SAP</span>
+            </div>
+            <p class="text-xs text-white/75" id="client-display-email">sophie.dupont@bordeaux.fr • <span id="client-display-commune">Bordeaux (33000)</span></p>
+          </div>
         </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button onclick="handleLogout()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
-        </button>
-        <button onclick="document.getElementById('modal-window-client').close()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="handleLogout()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+          </button>
+          <button onclick="document.getElementById('modal-window-client').close()" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer la fenêtre">
+            <i class="fa-solid fa-xmark text-base"></i>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -860,27 +1052,30 @@
 
   <!-- Modal 3: Espace Administration — God Mode (Andrés Pino) -->
   <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-5xl w-full p-0 overflow-hidden text-brand-charcoal">
-    <!-- Admin Header -->
-    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 p-6 sm:p-8 text-white flex flex-wrap justify-between items-center gap-4">
-      <div class="flex items-center gap-4">
-        <div class="w-14 h-14 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-2xl shadow-lg">
-          👑
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h3 class="font-serif text-2xl font-bold">Panneau d'Administration</h3>
-            <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">God Mode</span>
+    <!-- Admin Header (Draggable) -->
+    <div class="modal-drag-header bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 sm:px-8 pt-3 pb-6 sm:pb-8 text-white select-none cursor-grab active:cursor-grabbing">
+      <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-3 cursor-grab active:cursor-grabbing transition-colors modal-drag-pill" title="Glisser vers le bas pour fermer"></div>
+      <div class="flex flex-wrap justify-between items-center gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-2xl shadow-lg">
+            👑
           </div>
-          <p class="text-xs text-white/70">Gérant : Andrés Pino • <code class="text-emerald-300">pino.spacesverts@gmail.com</code></p>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-serif text-2xl font-bold">Panneau d'Administration</h3>
+              <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">God Mode</span>
+            </div>
+            <p class="text-xs text-white/70">Gérant : Andrés Pino • <code class="text-emerald-300">pino.spacesverts@gmail.com</code></p>
+          </div>
         </div>
-      </div>
-      <div class="flex items-center gap-2">
-        <button onclick="handleLogout()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer">
-          <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
-        </button>
-        <button onclick="document.getElementById('modal-window-admin').close()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="handleLogout()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+          </button>
+          <button onclick="document.getElementById('modal-window-admin').close()" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer la fenêtre">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -897,6 +1092,9 @@
       </button>
       <button type="button" onclick="switchAdminTab('promos')" id="adm-tab-promos" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-tags mr-1.5"></i> Promotions & Codes
+      </button>
+      <button type="button" onclick="switchAdminTab('users')" id="adm-tab-users" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+        <i class="fa-solid fa-users mr-1.5"></i> Utilisateurs & Base (<span id="adm-users-badge">3</span>)
       </button>
       <button type="button" onclick="switchAdminTab('impersonate')" id="adm-tab-impersonate" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-user-secret mr-1.5"></i> Voir comme client
@@ -1050,6 +1248,42 @@
             <h5 class="text-xl font-mono font-extrabold text-slate-800">PINO-XXXX</h5>
             <p class="text-xs text-slate-600">Codes uniques générés à la création de chaque compte client particulier. Limité à 1 usage par foyer fiscal.</p>
             <span class="text-xs font-bold text-slate-700 block" id="adm-unique-codes-count">Codes créés : 12</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Users (Database Live View: Google & Standard) -->
+      <div id="adm-content-users" class="adm-content hidden space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-database text-emerald-700"></i> Base de Données des Utilisateurs (Google & Standard)
+            </h4>
+            <p class="text-xs text-slate-500">Tous les comptes enregistrés en direct via Google OAuth ou création de compte sécurisée.</p>
+          </div>
+          <button type="button" onclick="renderAdminUsers()" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl border border-emerald-200 transition-colors flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-arrows-rotate"></i> Actualiser
+          </button>
+        </div>
+
+        <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-xxs">
+                <tr>
+                  <th class="p-3">Utilisateur</th>
+                  <th class="p-3">Email</th>
+                  <th class="p-3">Méthode</th>
+                  <th class="p-3">Rôle</th>
+                  <th class="p-3">Code Réduction</th>
+                  <th class="p-3">Date</th>
+                  <th class="p-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="adm-users-table-body" class="divide-y divide-slate-200 bg-white">
+                <!-- Dynamically populated by renderAdminUsers() -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1419,21 +1653,23 @@
 
   <!-- Modal Window: Nos Services & Forfaits d'Entretien -->
   <dialog id="modal-window-services" class="section-window max-w-5xl w-[96%] max-h-[90vh] rounded-3xl bg-[#faf9f5] p-0 border border-brand-accent/25 shadow-2xl overflow-hidden m-auto">
-    <!-- Sticky Window Header -->
-    <div class="sticky top-0 z-30 bg-gradient-to-r from-brand-green to-[#234e38] text-white px-5 sm:px-7 py-3.5 sm:py-4 flex items-center justify-between shadow-md">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shrink-0">
-          🌿
+    <!-- Sticky Window Header (Draggable to close) -->
+    <div class="modal-drag-header sticky top-0 z-30 bg-gradient-to-r from-brand-green to-[#234e38] text-white px-5 sm:px-7 pt-2.5 pb-3.5 sm:pb-4 shadow-md select-none">
+      <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-2 cursor-grab active:cursor-grabbing transition-colors" title="Glisser vers le bas pour fermer"></div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shrink-0">
+            🌿
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base leading-tight">Nos Services & Forfaits d'Entretien</h3>
+            <p class="text-[11px] text-emerald-100 leading-tight hidden sm:block">Prestations de jardinage à Bordeaux Métropole • 50% de crédit d'impôt immédiat</p>
+          </div>
         </div>
-        <div>
-          <h3 class="font-bold text-sm sm:text-base leading-tight">Nos Services & Forfaits d'Entretien</h3>
-          <p class="text-[11px] text-emerald-100 leading-tight hidden sm:block">Prestations de jardinage à Bordeaux Métropole • 50% de crédit d'impôt immédiat</p>
-        </div>
+        <button type="button" onclick="document.getElementById('modal-window-services').close()" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer la fenêtre">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
       </div>
-      <button type="button" onclick="document.getElementById('modal-window-services').close()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer" aria-label="Fermer la fenêtre">
-        <i class="fa-solid fa-xmark text-sm"></i>
-        <span>Fermer [ESC]</span>
-      </button>
     </div>
 
     <!-- Scrollable Window Content -->
@@ -1641,21 +1877,23 @@
 
   <!-- Modal Window: Nos Réalisations Récentes & Avant / Après -->
   <dialog id="modal-window-realisations" class="section-window max-w-5xl w-[96%] max-h-[90vh] rounded-3xl bg-[#faf9f5] p-0 border border-brand-accent/25 shadow-2xl overflow-hidden m-auto">
-    <!-- Sticky Window Header -->
-    <div class="sticky top-0 z-30 bg-gradient-to-r from-brand-green to-[#234e38] text-white px-5 sm:px-7 py-3.5 sm:py-4 flex items-center justify-between shadow-md">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shrink-0">
-          📸
+    <!-- Sticky Window Header (Draggable to close) -->
+    <div class="modal-drag-header sticky top-0 z-30 bg-gradient-to-r from-brand-green to-[#234e38] text-white px-5 sm:px-7 pt-2.5 pb-3.5 sm:pb-4 shadow-md select-none">
+      <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-2 cursor-grab active:cursor-grabbing transition-colors" title="Glisser vers le bas pour fermer"></div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shrink-0">
+            📸
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base leading-tight">Nos Réalisations Récentes & Avant / Après</h3>
+            <p class="text-[11px] text-emerald-100 leading-tight hidden sm:block">Chantiers réels en Gironde • Curseur interactif et descriptifs de travaux</p>
+          </div>
         </div>
-        <div>
-          <h3 class="font-bold text-sm sm:text-base leading-tight">Nos Réalisations Récentes & Avant / Après</h3>
-          <p class="text-[11px] text-emerald-100 leading-tight hidden sm:block">Chantiers réels en Gironde • Curseur interactif et descriptifs de travaux</p>
-        </div>
+        <button type="button" onclick="document.getElementById('modal-window-realisations').close()" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer la fenêtre">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
       </div>
-      <button type="button" onclick="document.getElementById('modal-window-realisations').close()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer" aria-label="Fermer la fenêtre">
-        <i class="fa-solid fa-xmark text-sm"></i>
-        <span>Fermer [ESC]</span>
-      </button>
     </div>
 
     <!-- Scrollable Window Content -->
@@ -2164,21 +2402,23 @@
 
   <!-- Modal Window: Avantage Fiscal 50% & Coopérative Unipros (SAP) -->
   <dialog id="modal-window-unipros" class="section-window max-w-5xl w-[96%] max-h-[90vh] rounded-3xl bg-[#faf9f5] p-0 border border-brand-accent/25 shadow-2xl overflow-hidden m-auto">
-    <!-- Sticky Window Header -->
-    <div class="sticky top-0 z-30 bg-gradient-to-r from-brand-green to-[#234e38] text-white px-5 sm:px-7 py-3.5 sm:py-4 flex items-center justify-between shadow-md">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shrink-0">
-          🏛️
+    <!-- Sticky Window Header (Draggable to close) -->
+    <div class="modal-drag-header sticky top-0 z-30 bg-gradient-to-r from-brand-green to-[#234e38] text-white px-5 sm:px-7 pt-2.5 pb-3.5 sm:pb-4 shadow-md select-none">
+      <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-2 cursor-grab active:cursor-grabbing transition-colors" title="Glisser vers le bas pour fermer"></div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shrink-0">
+            🏛️
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base leading-tight">Avantage Fiscal 50% & Coopérative Unipros (SAP)</h3>
+            <p class="text-[11px] text-emerald-100 leading-tight hidden sm:block">Avance Immédiate Urssaf • Facturation directe à -50% pour les particuliers</p>
+          </div>
         </div>
-        <div>
-          <h3 class="font-bold text-sm sm:text-base leading-tight">Avantage Fiscal 50% & Coopérative Unipros (SAP)</h3>
-          <p class="text-[11px] text-emerald-100 leading-tight hidden sm:block">Avance Immédiate Urssaf • Facturation directe à -50% pour les particuliers</p>
-        </div>
+        <button type="button" onclick="document.getElementById('modal-window-unipros').close()" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer la fenêtre">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
       </div>
-      <button type="button" onclick="document.getElementById('modal-window-unipros').close()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer" aria-label="Fermer la fenêtre">
-        <i class="fa-solid fa-xmark text-sm"></i>
-        <span>Fermer [ESC]</span>
-      </button>
     </div>
 
     <!-- Scrollable Window Content -->
@@ -2290,21 +2530,23 @@
 
   <!-- Modal Window: Espaces Verts Professionnels & Copropriétés (B2B) -->
   <dialog id="modal-window-b2b" class="section-window max-w-5xl w-[96%] max-h-[90vh] rounded-3xl bg-[#faf9f5] p-0 border border-brand-accent/25 shadow-2xl overflow-hidden m-auto">
-    <!-- Sticky Window Header -->
-    <div class="sticky top-0 z-30 bg-gradient-to-r from-brand-green to-[#234e38] text-white px-5 sm:px-7 py-3.5 sm:py-4 flex items-center justify-between shadow-md">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shrink-0">
-          🏢
+    <!-- Sticky Window Header (Draggable to close) -->
+    <div class="modal-drag-header sticky top-0 z-30 bg-gradient-to-r from-brand-green to-[#234e38] text-white px-5 sm:px-7 pt-2.5 pb-3.5 sm:pb-4 shadow-md select-none">
+      <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-2 cursor-grab active:cursor-grabbing transition-colors" title="Glisser vers le bas pour fermer"></div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shrink-0">
+            🏢
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base leading-tight">Espaces Verts Professionnels & Copropriétés (B2B)</h3>
+            <p class="text-[11px] text-emerald-100 leading-tight hidden sm:block">Contrats annuels sur-mesure pour syndics, entreprises, parkings et commerces</p>
+          </div>
         </div>
-        <div>
-          <h3 class="font-bold text-sm sm:text-base leading-tight">Espaces Verts Professionnels & Copropriétés (B2B)</h3>
-          <p class="text-[11px] text-emerald-100 leading-tight hidden sm:block">Contrats annuels sur-mesure pour syndics, entreprises, parkings et commerces</p>
-        </div>
+        <button type="button" onclick="document.getElementById('modal-window-b2b').close()" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer la fenêtre">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
       </div>
-      <button type="button" onclick="document.getElementById('modal-window-b2b').close()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer" aria-label="Fermer la fenêtre">
-        <i class="fa-solid fa-xmark text-sm"></i>
-        <span>Fermer [ESC]</span>
-      </button>
     </div>
 
     <!-- Scrollable Window Content -->
@@ -2417,21 +2659,23 @@
 
   <!-- Modal Window: Demande de Devis Gratuit sous 24h -->
   <dialog id="modal-window-devis" class="section-window max-w-5xl w-[96%] max-h-[90vh] rounded-3xl bg-[#faf9f5] p-0 border border-brand-accent/25 shadow-2xl overflow-hidden m-auto">
-    <!-- Sticky Window Header -->
-    <div class="sticky top-0 z-30 bg-gradient-to-r from-brand-green to-[#234e38] text-white px-5 sm:px-7 py-3.5 sm:py-4 flex items-center justify-between shadow-md">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shrink-0">
-          📝
+    <!-- Sticky Window Header (Draggable to close) -->
+    <div class="modal-drag-header sticky top-0 z-30 bg-gradient-to-r from-brand-green to-[#234e38] text-white px-5 sm:px-7 pt-2.5 pb-3.5 sm:pb-4 shadow-md select-none">
+      <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-2 cursor-grab active:cursor-grabbing transition-colors" title="Glisser vers le bas pour fermer"></div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shrink-0">
+            📝
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base leading-tight">Demande de Devis Gratuit sous 24h</h3>
+            <p class="text-[11px] text-emerald-100 leading-tight hidden sm:block">Estimation en ligne immédiate • Tarifs sans engagement pour vos extérieurs</p>
+          </div>
         </div>
-        <div>
-          <h3 class="font-bold text-sm sm:text-base leading-tight">Demande de Devis Gratuit sous 24h</h3>
-          <p class="text-[11px] text-emerald-100 leading-tight hidden sm:block">Estimation en ligne immédiate • Tarifs sans engagement pour vos extérieurs</p>
-        </div>
+        <button type="button" onclick="document.getElementById('modal-window-devis').close()" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer la fenêtre">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
       </div>
-      <button type="button" onclick="document.getElementById('modal-window-devis').close()" class="bg-white/15 hover:bg-white/25 text-white px-3 py-1.5 rounded-full text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer" aria-label="Fermer la fenêtre">
-        <i class="fa-solid fa-xmark text-sm"></i>
-        <span>Fermer [ESC]</span>
-      </button>
     </div>
 
     <!-- Scrollable Window Content -->
@@ -3763,35 +4007,212 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       pass: 'Pino2678186113180309K@'
     };
 
-    // Pre-seed default demo users if not present
+    // Pre-seed default demo users if not present (including Andrés God Mode & Google clients)
     const initDefaultUsers = () => {
-      if (!localStorage.getItem('pino_users')) {
-        const defaultUsers = [
-          {
-            id: 'usr_client_001',
-            email: 'sophie.dupont@bordeaux.fr',
-            pass: 'Pino2026!',
-            fullName: 'Sophie Dupont',
-            phone: '06 24 55 18 90',
-            commune: '33000 Bordeaux',
-            role: 'client',
-            promoCode: 'PINO-4821',
-            createdDate: '15/05/2026'
-          },
-          {
-            id: 'usr_client_002',
-            email: 'marc.dubois@talence.fr',
-            pass: 'Client33!',
-            fullName: 'Marc Dubois',
-            phone: '06 88 12 40 77',
-            commune: '33400 Talence',
-            role: 'client',
-            promoCode: 'PINO-9134',
-            createdDate: '10/06/2026'
-          }
-        ];
-        localStorage.setItem('pino_users', JSON.stringify(defaultUsers));
+      let users = [];
+      try {
+        users = JSON.parse(localStorage.getItem('pino_users')) || [];
+      } catch (e) {
+        users = [];
       }
+
+      // Always ensure Andrés Admin is in database
+      const adminIdx = users.findIndex(u => u.email && u.email.toLowerCase() === ADMIN_CREDENTIALS.email.toLowerCase());
+      const adminEntry = {
+        id: 'usr_admin_andres',
+        email: ADMIN_CREDENTIALS.email,
+        pass: ADMIN_CREDENTIALS.pass,
+        fullName: 'Andrés Pino',
+        phone: '+33 6 51 59 40 34',
+        commune: 'Bordeaux Métropole',
+        role: 'admin',
+        authProvider: 'google',
+        promoCode: 'PELABOLA',
+        createdDate: '01/01/2026'
+      };
+      if (adminIdx >= 0) {
+        users[adminIdx] = { ...users[adminIdx], ...adminEntry };
+      } else {
+        users.unshift(adminEntry);
+      }
+
+      // Seed Sophie Dupont
+      if (!users.some(u => u.email && u.email.toLowerCase() === 'sophie.dupont@bordeaux.fr')) {
+        users.push({
+          id: 'usr_client_001',
+          email: 'sophie.dupont@bordeaux.fr',
+          pass: 'Pino2026!',
+          fullName: 'Sophie Dupont',
+          phone: '06 24 55 18 90',
+          commune: '33000 Bordeaux',
+          role: 'client',
+          authProvider: 'email',
+          promoCode: 'PINO-4821',
+          createdDate: '15/05/2026'
+        });
+      }
+
+      // Seed Marc Dubois (Google client)
+      if (!users.some(u => u.email && (u.email.toLowerCase() === 'marc.dubois@gmail.com' || u.email.toLowerCase() === 'marc.dubois@talence.fr'))) {
+        users.push({
+          id: 'usr_client_002',
+          email: 'marc.dubois@gmail.com',
+          pass: 'Client33!',
+          fullName: 'Marc Dubois',
+          phone: '06 88 12 40 77',
+          commune: '33400 Talence',
+          role: 'client',
+          authProvider: 'google',
+          promoCode: 'PINO-9134',
+          createdDate: '10/06/2026'
+        });
+      }
+
+      localStorage.setItem('pino_users', JSON.stringify(users));
+    };
+
+    // 1-Click fast fill for Admin and Client login
+    window.quickFillAdminLogin = () => {
+      const emailInput = document.getElementById('login-email');
+      const passInput = document.getElementById('login-password');
+      if (emailInput) emailInput.value = ADMIN_CREDENTIALS.email;
+      if (passInput) passInput.value = ADMIN_CREDENTIALS.pass;
+      switchAuthTab('login');
+      showNotificationToast('👑 Identifiants Gérant Andrés Pino préremplis.', 'info');
+    };
+
+    window.quickFillClientLogin = () => {
+      const emailInput = document.getElementById('login-email');
+      const passInput = document.getElementById('login-password');
+      if (emailInput) emailInput.value = 'marc.dubois@gmail.com';
+      if (passInput) passInput.value = 'Client33!';
+      switchAuthTab('login');
+      showNotificationToast('👤 Identifiants Client Démo préremplis.', 'info');
+    };
+
+    // Open Google Account Picker
+    window.handleGoogleSignIn = () => {
+      const authModal = document.getElementById('modal-window-auth');
+      if (authModal && authModal.open) authModal.close();
+      const gModal = document.getElementById('modal-google-selector');
+      if (gModal) gModal.showModal();
+    };
+
+    // Toggle custom Google input
+    window.toggleCustomGoogleInput = () => {
+      const form = document.getElementById('custom-google-form');
+      if (form) form.classList.toggle('hidden');
+    };
+
+    // Submit custom Google account
+    window.submitCustomGoogleAccount = () => {
+      const nameInput = document.getElementById('custom-google-name');
+      const emailInput = document.getElementById('custom-google-email');
+      const name = nameInput ? nameInput.value.trim() : '';
+      const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
+
+      if (!email || !email.includes('@')) {
+        alert('Veuillez entrer une adresse e-mail Google valide.');
+        return;
+      }
+
+      const role = (email === ADMIN_CREDENTIALS.email.toLowerCase()) ? 'admin' : 'client';
+      selectGoogleAccount(email, name || email.split('@')[0], role);
+    };
+
+    // Select Google Account (Admin Andrés or Client)
+    window.selectGoogleAccount = (email, name, role) => {
+      const gModal = document.getElementById('modal-google-selector');
+      if (gModal && gModal.open) gModal.close();
+
+      const normEmail = email.trim().toLowerCase();
+      let users = JSON.parse(localStorage.getItem('pino_users') || '[]');
+
+      // 1. Admin login (Andrés Pino)
+      if (normEmail === ADMIN_CREDENTIALS.email.toLowerCase() || role === 'admin') {
+        const adminUser = {
+          id: 'usr_admin_andres',
+          role: 'admin',
+          email: ADMIN_CREDENTIALS.email,
+          fullName: 'Andrés Pino',
+          authProvider: 'google',
+          isAdmin: true
+        };
+
+        // Sync in pino_users
+        const idx = users.findIndex(u => u.email && u.email.toLowerCase() === normEmail);
+        if (idx >= 0) {
+          users[idx] = { ...users[idx], ...adminUser };
+        } else {
+          users.unshift(adminUser);
+        }
+        localStorage.setItem('pino_users', JSON.stringify(users));
+        localStorage.setItem('pino_current_user', JSON.stringify(adminUser));
+
+        // Sync to Firestore if online
+        if (typeof firestoreDb !== 'undefined' && firestoreDb) {
+          try {
+            firestoreDb.collection('pino_users').doc(ADMIN_CREDENTIALS.email).set({
+              email: ADMIN_CREDENTIALS.email,
+              fullName: 'Andrés Pino',
+              role: 'admin',
+              authProvider: 'google',
+              lastLogin: new Date().toISOString()
+            }, { merge: true }).catch(() => {});
+          } catch(e) {}
+        }
+
+        updateAuthUI();
+        renderAdminLeads();
+        renderAdminUsers();
+        document.getElementById('modal-window-admin').showModal();
+        showNotificationToast('👑 Connecté avec Google : Andrés Pino (Gérant / God Mode)', 'success');
+        return;
+      }
+
+      // 2. Client Google login
+      let client = users.find(u => u.email && u.email.toLowerCase() === normEmail);
+      if (!client) {
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        const uniquePromo = `PINO-${rand}`;
+        client = {
+          id: `usr_g_${Date.now()}`,
+          email: normEmail,
+          fullName: name || 'Client Particulier',
+          phone: '06 ** ** ** **',
+          commune: 'Bordeaux Métropole',
+          role: 'client',
+          authProvider: 'google',
+          promoCode: uniquePromo,
+          createdDate: new Date().toLocaleDateString('fr-FR')
+        };
+        users.push(client);
+        localStorage.setItem('pino_users', JSON.stringify(users));
+      } else {
+        client.authProvider = 'google';
+        if (name && (client.fullName === 'Client Particulier' || !client.fullName)) client.fullName = name;
+        localStorage.setItem('pino_users', JSON.stringify(users));
+      }
+
+      // Sync to Firestore if online
+      if (typeof firestoreDb !== 'undefined' && firestoreDb) {
+        try {
+          firestoreDb.collection('pino_users').doc(normEmail).set({
+            email: normEmail,
+            fullName: client.fullName,
+            role: 'client',
+            authProvider: 'google',
+            promoCode: client.promoCode,
+            lastLogin: new Date().toISOString()
+          }, { merge: true }).catch(() => {});
+        } catch(e) {}
+      }
+
+      localStorage.setItem('pino_current_user', JSON.stringify(client));
+      updateAuthUI();
+      populateClientPortal(client);
+      document.getElementById('modal-window-client').showModal();
+      showNotificationToast(`👋 Connecté avec Google : Bienvenue ${client.fullName} !`, 'success');
     };
 
     // Pre-seed default leads for the CRM
@@ -3906,7 +4327,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }
     };
 
-    // Handle Login submission
+    // Handle Login submission (robust with trim & database lookup)
     window.handleLoginSubmit = (e) => {
       e.preventDefault();
       const emailInput = document.getElementById('login-email');
@@ -3914,29 +4335,32 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       const errorMsg = document.getElementById('login-error-msg');
       const errorText = document.getElementById('login-error-text');
 
-      const email = emailInput ? emailInput.value.trim().toLowerCase() : '';
-      const pass = passInput ? passInput.value : '';
+      const email = (emailInput ? emailInput.value : '').trim().toLowerCase();
+      const pass = (passInput ? passInput.value : '').trim();
 
       // 1. Check Admin credentials
       if (email === ADMIN_CREDENTIALS.email.toLowerCase() && pass === ADMIN_CREDENTIALS.pass) {
         const adminUser = {
+          id: 'usr_admin_andres',
           role: 'admin',
           email: ADMIN_CREDENTIALS.email,
           fullName: 'Andrés Pino',
+          authProvider: 'password',
           isAdmin: true
         };
         localStorage.setItem('pino_current_user', JSON.stringify(adminUser));
         updateAuthUI();
         document.getElementById('modal-window-auth').close();
         renderAdminLeads();
+        renderAdminUsers();
         document.getElementById('modal-window-admin').showModal();
         showNotificationToast('👑 Bienvenue Andrés ! Accès Administrateur (God Mode) activé.', 'success');
         return;
       }
 
-      // 2. Check Client credentials
+      // 2. Check Client credentials in database
       const users = JSON.parse(localStorage.getItem('pino_users') || '[]');
-      const client = users.find(u => u.email.toLowerCase() === email && u.pass === pass);
+      const client = users.find(u => u.email && u.email.toLowerCase() === email && (u.pass === pass || (!u.pass && u.authProvider === 'google')));
       if (client) {
         localStorage.setItem('pino_current_user', JSON.stringify(client));
         updateAuthUI();
@@ -4094,6 +4518,9 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         targetTab.classList.add('border-b-2', 'border-emerald-700', 'text-emerald-800', 'bg-white');
         targetTab.classList.remove('text-slate-500');
       }
+      if (tabKey === 'users') {
+        renderAdminUsers();
+      }
     };
 
     // Render Admin Leads in table
@@ -4242,6 +4669,152 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }, 4000);
     };
 
+    // Render Admin Users table in God Mode
+    window.renderAdminUsers = () => {
+      const users = JSON.parse(localStorage.getItem('pino_users') || '[]');
+      const tbody = document.getElementById('adm-users-table-body');
+      const badge = document.getElementById('adm-users-badge');
+      if (badge) badge.textContent = users.length;
+      if (!tbody) return;
+
+      if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">Aucun utilisateur enregistré.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = users.map((u) => {
+        const isAdm = u.role === 'admin' || u.isAdmin || (u.email && u.email.toLowerCase() === ADMIN_CREDENTIALS.email.toLowerCase());
+        const roleBadge = isAdm
+          ? '<span class="bg-amber-100 text-amber-900 border border-amber-300 font-bold px-2 py-0.5 rounded-full text-xxs">👑 Gérant / Admin</span>'
+          : '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-xxs">👤 Client</span>';
+
+        const methodBadge = (u.authProvider === 'google')
+          ? '<span class="inline-flex items-center gap-1 bg-white border border-slate-300 text-slate-700 font-bold px-2 py-0.5 rounded text-xxs shadow-2xs"><svg class="w-3 h-3 inline" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg> Google</span>'
+          : '<span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded text-xxs"><i class="fa-solid fa-envelope text-[10px]"></i> E-mail</span>';
+
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="p-3 font-bold text-slate-900">${u.fullName || 'Utilisateur'}</td>
+            <td class="p-3 text-slate-600 font-mono text-xxs">${u.email}</td>
+            <td class="p-3">${methodBadge}</td>
+            <td class="p-3">${roleBadge}</td>
+            <td class="p-3 font-mono font-bold text-emerald-700">${u.promoCode || '—'}</td>
+            <td class="p-3 text-slate-500 text-xxs">${u.createdDate || '15/09/2026'}</td>
+            <td class="p-3 text-right">
+              ${!isAdm ? `<button onclick="admInspectClient('${u.email}')" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xxs font-bold transition-colors cursor-pointer"><i class="fa-solid fa-eye mr-1"></i>Voir espace</button>` : '<span class="text-xxs text-amber-700 font-bold">Admin Principal</span>'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    window.admInspectClient = (email) => {
+      const users = JSON.parse(localStorage.getItem('pino_users') || '[]');
+      const client = users.find(u => u.email === email);
+      if (client) {
+        document.getElementById('modal-window-admin').close();
+        const banner = document.getElementById('client-impersonation-banner');
+        if (banner) banner.classList.remove('hidden');
+        populateClientPortal(client);
+        document.getElementById('modal-window-client').showModal();
+      }
+    };
+
+    // ─── DRAG-DOWN-TO-CLOSE GESTURE CONTROLLER ───
+    window.initModalDragToClose = () => {
+      const headers = document.querySelectorAll('.modal-drag-header');
+      headers.forEach(header => {
+        const dialog = header.closest('dialog');
+        if (!dialog) return;
+
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+
+        const onStart = (clientY, target) => {
+          if (target.closest('button') || target.closest('a') || target.closest('input') || target.closest('select') || target.closest('textarea')) {
+            return false;
+          }
+          startY = clientY;
+          currentY = clientY;
+          isDragging = true;
+          dialog.classList.remove('modal-snap-back', 'modal-dismissing');
+          dialog.classList.add('modal-dragging');
+          return true;
+        };
+
+        const onMove = (clientY, e) => {
+          if (!isDragging) return;
+          currentY = clientY;
+          const deltaY = currentY - startY;
+          if (deltaY > 0) {
+            if (e.cancelable) e.preventDefault();
+            dialog.style.transform = `translateY(${deltaY}px)`;
+            const opacity = Math.max(0.3, 1 - (deltaY / 600));
+            dialog.style.opacity = opacity;
+          } else {
+            dialog.style.transform = '';
+            dialog.style.opacity = '';
+          }
+        };
+
+        const onEnd = () => {
+          if (!isDragging) return;
+          isDragging = false;
+          dialog.classList.remove('modal-dragging');
+          const deltaY = currentY - startY;
+
+          if (deltaY > 75) {
+            dialog.classList.add('modal-dismissing');
+            setTimeout(() => {
+              dialog.close();
+              dialog.classList.remove('modal-dismissing');
+              dialog.style.transform = '';
+              dialog.style.opacity = '';
+            }, 260);
+          } else {
+            dialog.classList.add('modal-snap-back');
+            dialog.style.transform = '';
+            dialog.style.opacity = '';
+            setTimeout(() => {
+              dialog.classList.remove('modal-snap-back');
+            }, 260);
+          }
+        };
+
+        // Touch events
+        header.addEventListener('touchstart', (e) => {
+          if (e.touches && e.touches.length === 1) {
+            onStart(e.touches[0].clientY, e.target);
+          }
+        }, { passive: true });
+
+        header.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches.length === 1) {
+            onMove(e.touches[0].clientY, e);
+          }
+        }, { passive: false });
+
+        header.addEventListener('touchend', onEnd);
+        header.addEventListener('touchcancel', onEnd);
+
+        // Mouse events
+        header.addEventListener('mousedown', (e) => {
+          if (e.button !== 0) return;
+          if (onStart(e.clientY, e.target)) {
+            const onMouseMove = (moveEvent) => onMove(moveEvent.clientY, moveEvent);
+            const onMouseUp = () => {
+              window.removeEventListener('mousemove', onMouseMove);
+              window.removeEventListener('mouseup', onMouseUp);
+              onEnd();
+            };
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+          }
+        });
+      });
+    };
+
     // ─── SECTION WINDOW MODALS CONTROLLER ───
     window.openWindowModal = (sectionKey) => {
       // Normalize aliases
@@ -4290,9 +4863,10 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           }, 150);
         }
 
-        // Render admin leads if opening admin
+        // Render admin leads and users if opening admin
         if (targetId === 'modal-window-admin') {
           renderAdminLeads();
+          renderAdminUsers();
         }
       }
     };
@@ -4302,6 +4876,8 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       initDefaultUsers();
       initDefaultLeads();
       updateAuthUI();
+      initModalDragToClose();
+      renderAdminUsers();
 
       document.querySelectorAll('.section-window').forEach(dialog => {
         dialog.addEventListener('click', (e) => {
