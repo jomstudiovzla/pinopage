@@ -1252,38 +1252,95 @@
         </div>
       </div>
 
-      <!-- Tab Users (Database Live View: Google & Standard) -->
-      <div id="adm-content-users" class="adm-content hidden space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2">
-              <i class="fa-solid fa-database text-emerald-700"></i> Base de Données des Utilisateurs (Google & Standard)
-            </h4>
-            <p class="text-xs text-slate-500">Tous les comptes enregistrés en direct via Google OAuth ou création de compte sécurisée.</p>
+      <!-- Tab Users (Database Live View: Google & Standard + Cloud Firestore & Sessions) -->
+      <div id="adm-content-users" class="adm-content hidden space-y-6">
+        <!-- Live Cloud Backend Banner -->
+        <div class="p-4 bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 text-white rounded-2xl border border-emerald-500/30 flex flex-wrap items-center justify-between gap-3 shadow-md">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-600/30 border border-emerald-400/40 flex items-center justify-center text-xl text-emerald-400">
+              <i class="fa-solid fa-cloud"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="font-bold text-sm text-white">Google Cloud Firestore Connecté</h4>
+                <span class="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> crm-jom (Actif)
+                </span>
+              </div>
+              <p class="text-xxs text-white/70">ID Projet : <code>crm-jom</code> • Collections : <code>pino_users</code>, <code>pino_sessions</code>, <code>pino_coupons</code>, <code>leads</code></p>
+            </div>
           </div>
-          <button type="button" onclick="renderAdminUsers()" class="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-xl border border-emerald-200 transition-colors flex items-center gap-1.5 cursor-pointer">
-            <i class="fa-solid fa-arrows-rotate"></i> Actualiser
-          </button>
+          <div class="flex flex-wrap items-center gap-2">
+            <a href="https://console.firebase.google.com/project/crm-jom/firestore/databases/-default-/data/pino_users" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-arrow-up-right-from-square text-xxs"></i> Ouvrir Console Firebase
+            </a>
+            <button type="button" onclick="renderAdminUsers()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl border border-white/20 transition-all flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-arrows-rotate"></i> Synchroniser Cloud
+            </button>
+          </div>
         </div>
 
-        <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
-              <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-xxs">
-                <tr>
-                  <th class="p-3">Utilisateur</th>
-                  <th class="p-3">Email</th>
-                  <th class="p-3">Méthode</th>
-                  <th class="p-3">Rôle</th>
-                  <th class="p-3">Code Réduction</th>
-                  <th class="p-3">Date</th>
-                  <th class="p-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody id="adm-users-table-body" class="divide-y divide-slate-200 bg-white">
-                <!-- Dynamically populated by renderAdminUsers() -->
-              </tbody>
-            </table>
+        <!-- Section 1: Utilisateurs Enregistrés -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h5 class="font-bold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-users text-emerald-700"></i> Comptes Utilisateurs Cloud & Locaux (<span id="adm-users-badge">3</span>)
+            </h5>
+            <span class="text-xxs text-slate-500 font-medium">Synchronisation temps réel avec <code>pino_users</code></span>
+          </div>
+
+          <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-xxs">
+                  <tr>
+                    <th class="p-3">Utilisateur</th>
+                    <th class="p-3">Email</th>
+                    <th class="p-3">Méthode</th>
+                    <th class="p-3">Rôle</th>
+                    <th class="p-3">Code Promo</th>
+                    <th class="p-3">Dernière Connexion</th>
+                    <th class="p-3 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="adm-users-table-body" class="divide-y divide-slate-200 bg-white">
+                  <!-- Dynamically populated by renderAdminUsers() -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Journal des Sessions Actives & Connexions en direct -->
+        <div class="space-y-3 pt-2">
+          <div class="flex items-center justify-between">
+            <h5 class="font-bold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-shield-halved text-blue-700"></i> Journal des Sessions en Direct (Collection <code>pino_sessions</code>)
+            </h5>
+            <a href="https://console.firebase.google.com/project/crm-jom/firestore/databases/-default-/data/pino_sessions" target="_blank" rel="noopener noreferrer" class="text-xxs text-blue-700 hover:underline font-bold flex items-center gap-1">
+              <span>Voir dans Firebase</span> <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+            </a>
+          </div>
+
+          <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-xxs">
+                  <tr>
+                    <th class="p-3">Session ID</th>
+                    <th class="p-3">Utilisateur Connecté</th>
+                    <th class="p-3">Rôle</th>
+                    <th class="p-3">Navigateur / Appareil</th>
+                    <th class="p-3">Localisation</th>
+                    <th class="p-3">Heure de Connexion</th>
+                    <th class="p-3 text-right">Statut</th>
+                  </tr>
+                </thead>
+                <tbody id="adm-sessions-table-body" class="divide-y divide-slate-200 bg-white">
+                  <!-- Dynamically populated by renderAdminSessions() -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -4166,6 +4223,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         renderAdminLeads();
         renderAdminUsers();
         document.getElementById('modal-window-admin').showModal();
+        recordSessionAudit(adminUser);
         showNotificationToast('👑 Connecté avec Google : Andrés Pino (Gérant / God Mode)', 'success');
         return;
       }
@@ -4212,7 +4270,8 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       updateAuthUI();
       populateClientPortal(client);
       document.getElementById('modal-window-client').showModal();
-      showNotificationToast(`👋 Connecté avec Google : Bienvenue ${client.fullName} !`, 'success');
+      recordSessionAudit(client);
+        showNotificationToast(`👋 Connecté avec Google : Bienvenue ${client.fullName} !`, 'success');
     };
 
     // Pre-seed default leads for the CRM
@@ -4354,6 +4413,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         renderAdminLeads();
         renderAdminUsers();
         document.getElementById('modal-window-admin').showModal();
+        recordSessionAudit(adminUser);
         showNotificationToast('👑 Bienvenue Andrés ! Accès Administrateur (God Mode) activé.', 'success');
         return;
       }
@@ -4367,6 +4427,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         document.getElementById('modal-window-auth').close();
         populateClientPortal(client);
         document.getElementById('modal-window-client').showModal();
+        recordSessionAudit(client);
         showNotificationToast(`👋 Bienvenue dans votre Espace Client, ${client.fullName} !`, 'success');
         return;
       }
@@ -4669,8 +4730,155 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }, 4000);
     };
 
-    // Render Admin Users table in God Mode
-    window.renderAdminUsers = () => {
+    // Record session into Firestore pino_sessions
+    window.recordSessionAudit = (user) => {
+      if (!user || !user.email) return;
+      const sessId = 'sess_' + Date.now();
+      const sessData = {
+        sessionUser: user.email,
+        userName: user.fullName || 'Utilisateur',
+        role: user.role || 'client',
+        authProvider: user.authProvider || 'password',
+        loginTime: new Date().toLocaleString('fr-FR'),
+        ipCity: user.commune || 'Bordeaux Métropole',
+        device: navigator.userAgent.includes('Mobile') ? 'Smartphone (Mobile)' : 'Ordinateur (Desktop)',
+        status: 'Actif'
+      };
+
+      let sessions = [];
+      try {
+        sessions = JSON.parse(localStorage.getItem('pino_sessions')) || [];
+      } catch(e) { sessions = []; }
+      sessions.unshift(sessData);
+      if (sessions.length > 20) sessions = sessions.slice(0, 20);
+      localStorage.setItem('pino_sessions', JSON.stringify(sessions));
+
+      if (typeof firestoreDb !== 'undefined' && firestoreDb) {
+        try {
+          firestoreDb.collection('pino_sessions').doc(sessId).set({
+            ...sessData,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          }).catch(err => console.warn('Firestore session sync:', err));
+        } catch(e) {}
+      }
+    };
+
+    // Render Admin Users table in God Mode with Firestore live sync
+    window.renderAdminUsers = async () => {
+      let users = JSON.parse(localStorage.getItem('pino_users') || '[]');
+      const tbody = document.getElementById('adm-users-table-body');
+      const badge = document.getElementById('adm-users-badge');
+
+      if (typeof firestoreDb !== 'undefined' && firestoreDb) {
+        try {
+          const snapshot = await firestoreDb.collection('pino_users').get();
+          if (!snapshot.empty) {
+            snapshot.forEach(doc => {
+              const cloudUser = doc.data();
+              const existingIdx = users.findIndex(u => u.email && u.email.toLowerCase() === doc.id.toLowerCase());
+              if (existingIdx >= 0) {
+                users[existingIdx] = { ...users[existingIdx], ...cloudUser };
+              } else {
+                users.push({ id: doc.id, ...cloudUser });
+              }
+            });
+            localStorage.setItem('pino_users', JSON.stringify(users));
+          }
+        } catch(e) {
+          console.warn('Firestore cloud fetch users:', e);
+        }
+      }
+
+      if (badge) badge.textContent = users.length;
+      if (tbody) {
+        if (users.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">Aucun utilisateur enregistré.</td></tr>';
+        } else {
+          tbody.innerHTML = users.map((u) => {
+            const isAdm = u.role === 'admin' || u.isAdmin || (u.email && u.email.toLowerCase() === ADMIN_CREDENTIALS.email.toLowerCase());
+            const roleBadge = isAdm
+              ? '<span class="bg-amber-100 text-amber-900 border border-amber-300 font-bold px-2 py-0.5 rounded-full text-xxs">👑 Gérant / Admin</span>'
+              : '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-xxs">👤 Client</span>';
+
+            const methodBadge = (u.authProvider === 'google')
+              ? '<span class="inline-flex items-center gap-1 bg-white border border-slate-300 text-slate-700 font-bold px-2 py-0.5 rounded text-xxs shadow-2xs"><svg class="w-3 h-3 inline" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg> Google</span>'
+              : '<span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded text-xxs"><i class="fa-solid fa-envelope text-[10px]"></i> E-mail</span>';
+
+            return `
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="p-3 font-bold text-slate-900">${u.fullName || 'Utilisateur'}</td>
+                <td class="p-3 text-slate-600 font-mono text-xxs">${u.email}</td>
+                <td class="p-3">${methodBadge}</td>
+                <td class="p-3">${roleBadge}</td>
+                <td class="p-3 font-mono font-bold text-emerald-700">${u.promoCode || '—'}</td>
+                <td class="p-3 text-slate-500 text-xxs">${u.lastLogin || u.createdDate || '15/09/2026'}</td>
+                <td class="p-3 text-right">
+                  ${!isAdm ? `<button onclick="admInspectClient('${u.email}')" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xxs font-bold transition-colors cursor-pointer mr-1"><i class="fa-solid fa-eye mr-1"></i>Voir espace</button>` : '<span class="text-xxs text-amber-700 font-bold">Admin Principal</span>'}
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+
+      renderAdminSessions();
+      return;
+    };
+
+    // Render Admin Sessions table
+    window.renderAdminSessions = async () => {
+      let sessions = JSON.parse(localStorage.getItem('pino_sessions') || '[]');
+      const tbody = document.getElementById('adm-sessions-table-body');
+      if (!tbody) return;
+
+      if (typeof firestoreDb !== 'undefined' && firestoreDb) {
+        try {
+          const snap = await firestoreDb.collection('pino_sessions').limit(15).get();
+          if (!snap.empty) {
+            const cloudSess = [];
+            snap.forEach(doc => {
+              cloudSess.push({ id: doc.id, ...doc.data() });
+            });
+            sessions = cloudSess;
+          }
+        } catch(e) {
+          console.warn('Firestore cloud fetch sessions:', e);
+        }
+      }
+
+      if (sessions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">Aucune session enregistrée.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = sessions.map((s, idx) => {
+        const isAdm = s.role === 'admin' || (s.sessionUser && s.sessionUser.toLowerCase() === ADMIN_CREDENTIALS.email.toLowerCase());
+        const rolePill = isAdm
+          ? '<span class="bg-amber-100 text-amber-900 border border-amber-300 font-bold px-2 py-0.5 rounded-full text-xxs">👑 Admin</span>'
+          : '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-xxs">👤 Client</span>';
+
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="p-3 font-mono text-xxs text-slate-400">#${s.id || ('sess_' + (1000 + idx))}</td>
+            <td class="p-3">
+              <span class="font-bold text-slate-900 block">${s.userName || 'Utilisateur'}</span>
+              <span class="text-xxs text-slate-400 font-mono">${s.sessionUser}</span>
+            </td>
+            <td class="p-3">${rolePill}</td>
+            <td class="p-3 text-slate-600 text-xxs"><i class="fa-solid fa-laptop mr-1 text-slate-400"></i>${s.device || 'Navigateur Web'}</td>
+            <td class="p-3 text-slate-600 text-xxs">${s.ipCity || 'Bordeaux (33)'}</td>
+            <td class="p-3 text-slate-500 text-xxs font-mono">${s.loginTime || '15/09/2026 18:30'}</td>
+            <td class="p-3 text-right">
+              <span class="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full text-xxs">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> ${s.status || 'Actif'}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    window.unusedOldRender = () => {
       const users = JSON.parse(localStorage.getItem('pino_users') || '[]');
       const tbody = document.getElementById('adm-users-table-body');
       const badge = document.getElementById('adm-users-badge');

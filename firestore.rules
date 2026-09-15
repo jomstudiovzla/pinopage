@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /pino_users/{docId} {
+      allow read, write: if true;
+    }
+    match /pino_sessions/{docId} {
+      allow read, write: if true;
+    }
+    match /pino_coupons/{docId} {
+      allow read, write: if true;
+    }
+    match /leads/{docId} {
+      allow read, write: if true;
+    }
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
