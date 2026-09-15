@@ -1,0 +1,21 @@
+{
+  "name": "Pino Espaces Verts",
+  "short_name": "Pino EV",
+  "description": "Entretien et aménagement de jardins à Bordeaux et alentours.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#faf6f0",
+  "theme_color": "#2d6a4f",
+  "icons": [
+    {
+      "src": "assets/logo/Logo pino.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/logo/Logo completo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
