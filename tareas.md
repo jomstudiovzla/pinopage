@@ -100,6 +100,12 @@ Fuente: `DOCUMENTO_MAESTRO.md` §9. Cada tarea: una sesión, criterios, verifica
 - [ ] Tarea: Analíticas Unipros vs Directo + redenciones promo + conversión registro
   - Acceptance: números = queries, no localStorage.
   - Verify: seed conocido.
+- [x] Tarea: Hub de Prospection Multicanal (LeBonCoin, FB, Nextdoor, Yoojo, NeedHelp, AlloVoisins)
+  - Acceptance: Enlaces directos Gironde 33, generador de pitch interactivo con Avance Immédiate 50% SAP (WhatsApp, SMS, copiar), pipeline interactivo de estados y conversión en 1-clic a Devis oficial CRM.
+  - Verify: Probado en panel admin con datos semilla y reglas Firebase RTDB `/platform_leads`.
+- [x] Tarea: Modal de emisión de facturas `#modal-nouvelle-facture` + Attestation Fiscale SAP (Case 7DB)
+  - Acceptance: Correlativo `#FAC-2026-XXX`, avance 50% SAP deducido, descarga PDF attestation DGFiP y facture client.
+  - Verify: Probado en Espace Client y panel de Facturas de Andrés.
 
 ## Hito 5 — Omnicanal y legal
 

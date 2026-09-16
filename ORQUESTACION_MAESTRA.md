@@ -4,7 +4,7 @@
 > **Proyecto:** Pino Espaces Verts (v1 PWA Live + Transición v2)  
 > **Repositorio:** `https://github.com/jomstudiovzla/pinopage` | Rama: `main`  
 > **URL Producción:** `https://jomstudiovzla.github.io/pinopage/`  
-> **Último Commit:** `251375d` (Sincronización tiempo real + contadores dinámicos + facturas Firebase)  
+> **Último Commit:** `23c4f49` (Hub de prospection 6 plateformes + blindaje de auth y facturación SAP)  
 
 ---
 
@@ -19,15 +19,25 @@
      - **Correo Formal al Cliente**: Despachado directamente a la bandeja del cliente con desglose fiscal (Crédito de impuesto 50% URSSAF/Unipros, neto a pagar, fecha estimada y duración) vía FormSubmit.
      - Se eliminaron las ventanas emergentes de Gmail (`window.open`), chimes ruidosos y banners flotantes invasivos.
 3. **Portal del Cliente Dinámico y Sincronizado en Tiempo Real**:
-   - Se corrigió el error del contador que mostraba *"0 Demande(s)"* teniendo cotizaciones activas: ahora refleja la cantidad exacta y el estado dinámico (`X proposition(s) chiffrée(s) reçue(s)`).
-   - El contador de facturas se actualiza en vivo con los trabajos finalizados.
-   - Se implementaron listeners duales en `assets/js/pino-db.js`: `listenClientNotifications` y `listenClientQuotes`, permitiendo que el cliente vea los cambios de estado y las respuestas de Andrés **en tiempo real sin recargar la página**.
-4. **Pestaña de Facturas en Admin Dinamizada**:
-   - Se erradicaron los datos estáticos de prueba (Sophie Dupont / Marc Dubois).
-   - Se implementó `renderAdminFactures()` enlazado a Firebase RTDB y Supabase (`/jobs`), calculando automáticamente el crédito fiscal SAP del 50% y el neto del cliente.
-5. **Autenticación e Identidad**:
-   - Detección automática del rol Administrador para `pino.spacesverts@gmail.com` y `pino.espacesverts@gmail.com`.
-   - Google Auth operativo para clientes particulares.
+   - Contador dinámico en vivo (`X proposition(s) chiffrée(s) reçue(s)`).
+   - Contador de facturas y trabajos finalizados actualizado al instante.
+   - Listeners reactivos en `pino-db.js`: reflejo inmediato de respuestas y propuestas sin recargar.
+   - Frise chronologique de 4 etapas (*Demande transmise ➔ Proposition reçue ➔ Accord client ➔ Chantier & Facture 7DB*) y FAQs fiscales.
+   - Botón de 1-clic *"Accepter cette proposition (0€ à payer maintenant)"*.
+4. **Modal "Nouvelle Facture" & Facturas Formales**:
+   - Modal `#modal-nouvelle-facture` con numeración `#FAC-2026-XXX`, selector de lead para autocompletado, desglose del 50% SAP URSSAF y persistencia en `/jobs`.
+   - Generador oficial de **Attestation Fiscale SAP (Case 7DB)** para deducción IRPF (Art. 199 sexdecies del CGI, declaración SAP529241671 Unipros) y Facture PDF imprimible.
+5. **Autenticación Blindada e Irrevocable**:
+   - Detección automática de God Mode para `pino.spacesverts@gmail.com` y `pino.espacesverts@gmail.com`.
+   - Cierre de sesión atómico (`handleLogout`) con Firebase y Supabase signOut, flag `pino_explicit_logout` y destrucción inmediata de insignias/notificaciones si no hay sesión.
+   - Control de acceso estricto a modales (`admin` y `client`).
+6. **Hub de Prospection Multicanal (6 Plateformes Gironde)**:
+   - Pestaña `Prospection 6 Plateformes` en el CRM de administración.
+   - Enlaces directos pre-filtrados a las búsquedas de Gironde / Burdeos en **LeBonCoin, Facebook Marketplace, Nextdoor, Yoojo, NeedHelp y AlloVoisins**.
+   - **Générateur Instantané de Pitch** con cálculo en vivo de la Avance Immédiate 50% SAP y despacho directo a WhatsApp, SMS o portapapeles.
+   - Pipeline de oportunidades con avance de estados cíclico y **conversión en 1-clic a Devis Oficial CRM**.
+   - Modal rápido `#modal-add-platform-lead` para capturar anuncios en 20 segundos.
+   - Persistencia en Firebase RTDB (`/platform_leads`) con reglas de seguridad desplegadas y fallback local.
 
 ---
 
@@ -37,11 +47,9 @@
    - Crear y cablear los buckets `invoices` y `dossiers` con URLs firmadas con expiración de 60 segundos para descargas privadas de comprobantes fiscales Unipros (Attestation Fiscale SAP).
 2. **Migración Definitiva de Leads Históricos**:
    - Script para sincronizar leads antiguos de LocalStorage y Firebase hacia las tablas relacionales de Supabase Postgres (`docs/sql/001_initial_schema.sql`).
-3. **Automatización de Factura Unipros**:
-   - Actualmente el botón *"Nouvelle Facture"* muestra un aviso. Debe abrir un modal que permita convertir un *Lead* aceptado en una *Factura* formal con número correlativo `#FAC-2026-XXX`.
-4. **Hito 2 — Arquitectura Next.js 15 (v2)**:
+3. **Hito 2 — Arquitectura Next.js 15 (v2)**:
    - Transicionar de la SPA estática actual `index.html` hacia el framework Next.js 15 en `/app`, manteniendo la paleta verde/crema (`#f2f6f0` / `#1e5138`), cero tema oscuro, y server components para SEO.
-5. **Consentimiento CNIL Estricto**:
+4. **Consentimiento CNIL Estricto**:
    - Banner de cookies con botones de rechazo explícito antes de inyectar scripts de analítica.
 
 ---
