@@ -11,6 +11,6 @@
     "sw.js"
   ],
   "step": "Corrections validées en localhost:8080 et déployées sur le dépôt GitHub Pages. Le client en France peut se connecter immédiatement sans erreur.",
-  "last_commit": "pending",
-  "timestamp": "2026-09-16T11:12:00-04:00"
+  "last_commit": "f750a19",
+  "timestamp": "2026-09-16T11:14:30-04:00"
 }
