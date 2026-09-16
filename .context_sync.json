@@ -1,20 +1,18 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Sincronización Total GitHub + PWA Service Worker v3",
-  "current_phase": "Hito 1 — Código y Repositorio 100% al Día",
-  "action": "Verificados y confirmados los commits en GitHub (a104e66 y 43ce25d). Actualizado sw.js a v3 con estrategia network-first para navegación y purga automática de cachés antiguas, resolviendo problemas de caché en navegadores.",
+  "active_goal": "Migración a Firebase Realtime Database y Firebase Auth (pagepino-e8e97)",
+  "current_phase": "Firebase Conectado — Esperando Web API Key",
+  "action": "Integrado Firebase SDK v10 (compat) en index.html, creado assets/js/firebase-config.js con databaseURL de Europa (europe-west1), adaptado pino-db.js para leer y escribir en Firebase Realtime Database (/leads, /users, /jobs, /coupons, /audit_logs), configurado Google Popup Auth y Email/Password.",
   "files": [
-    "sw.js",
-    "index.html",
+    "assets/js/firebase-config.js",
     "assets/js/pino-db.js",
-    "assets/js/supabase-config.js",
-    "docs/sql/004_admin_roles_and_jobs.sql",
-    "docs/sql/FULL_MIGRATION_MASTER.sql",
+    "index.html",
     "CURRENT_STATE.md"
   ],
   "repo_url": "https://github.com/jomstudiovzla/pinopage.git",
   "live_url": "https://jomstudiovzla.github.io/pinopage/",
-  "latest_commit": "43ce25d",
-  "timestamp": "2026-09-15T21:50:55-04:00"
+  "firebase_project_id": "pagepino-e8e97",
+  "firebase_rtdb_url": "https://pagepino-e8e97-default-rtdb.europe-west1.firebasedatabase.app",
+  "timestamp": "2026-09-15T22:11:10-04:00"
 }

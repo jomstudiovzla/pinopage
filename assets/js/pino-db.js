@@ -1,27 +1,28 @@
 /**
- * pino-db.js — Capa de datos Supabase para Pino Espaces Verts v1
- * ---------------------------------------------------------------
- * Todas las operaciones de base de datos se centralizan aquí.
- * El cliente (window.pinoSupabase) es inicializado en supabase-config.js
- * y luego consumido desde index.html.
+ * pino-db.js — Capa de datos Firebase Realtime Database para Pino Espaces Verts
+ * ---------------------------------------------------------------------------
+ * Proyecto: pagepino-e8e97
+ * Realtime Database: https://pagepino-e8e97-default-rtdb.europe-west1.firebasedatabase.app
  *
- * Tablas usadas:
- *   public.leads            — formularios de devis B2C/B2B
- *   public.profiles         — perfiles de clientes autenticados
- *   public.promotions       — campaña PELABOLA y cupones 1:1
- *   public.promo_redemptions — registro de canjes
- *   public.cupones          — cupón 1:1 por cliente (tabla legacy)
- *   public.audit_logs       — sesiones y eventos (solo admin)
- *
- * Nunca exponer service_role en el cliente.
+ * Módulos:
+ *   /leads       — Solicitudes de presupuesto y devis
+ *   /users       — Perfiles de clientes y administrador (Andrés Pino)
+ *   /jobs        — Trabajos realizados, facturación y horas (CRM)
+ *   /coupons     — Cupones de descuento 1:1 (PELABOLA)
+ *   /audit_logs  — Auditoría de sesiones y accesos
  */
 
 (function (global) {
   'use strict';
 
-  /* ─────────────────────────────────────────────────────────
-   *  Helpers
-   * ───────────────────────────────────────────────────────── */
+  function rtdb() {
+    if (global.pinoRtdb) return global.pinoRtdb;
+    if (typeof firebase !== 'undefined' && firebase.database) {
+      try { return firebase.database(); } catch(e) {}
+    }
+    return null;
+  }
+
   function sb() {
     return global.pinoSupabase || null;
   }
@@ -31,428 +32,414 @@
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  LEADS — Guardar demande de devis en Supabase
+   *  LEADS — Guardar demande de devis
    * ───────────────────────────────────────────────────────── */
   async function saveLead(data) {
-    /**
-     * data: {
-     *   name, email, phone, commune, service_type,
-     *   surface_m2, budget_eur, frequency, details,
-     *   ref_code, source, user_id (optional)
-     * }
-     * Retorna { ok: true, id } o { ok: false, error }
-     */
-    const client = sb();
-    if (!client) return { ok: false, error: 'Supabase no disponible' };
-
     const payload = {
       full_name:    data.name     || null,
       email:        data.email    || null,
       phone:        data.phone    || null,
       commune:      data.commune  || null,
-      // Campos enriquecidos (agregarínse en 003_leads_enrichment.sql)
       service_type: data.service  || 'Entretien',
       surface_m2:   data.surface  ? (parseInt(data.surface, 10) || null) : null,
       budget_eur:   data.budget   ? (parseFloat(data.budget)   || null) : null,
-      frequency:    data.frequency || null,
+      frequency:    data.frequency|| null,
       details:      data.details  || null,
       ref_code:     data.refCode  || null,
-      source:       'web_devis',   // enum lead_source
-      status:       'new',          // enum lead_status (Supabase)
-      is_b2b:       data.isB2B    || false,
-      lead_type:    data.isB2B ? 'b2b' : 'b2c',
-      user_id:      data.userId   || null,
-      garden_description: data.details || null,
+      source:       'web_devis',
+      status:       'new',
+      created_at:   new Date().toISOString(),
     };
 
-    try {
-      const { data: row, error } = await client
-        .from('leads')
-        .insert(payload)
-        .select('id')
-        .single();
-
-      if (error) throw error;
-      return { ok: true, id: row?.id };
-    } catch (err) {
-      log('saveLead', err);
-      return { ok: false, error: err.message };
-    }
-  }
-
-  /* ─────────────────────────────────────────────────────────
-   *  LEADS — Cargar todos los leads (solo admin)
-   * ───────────────────────────────────────────────────────── */
-  async function fetchLeads({ limit = 100, status = null } = {}) {
-    const client = sb();
-    if (!client) return { ok: false, data: [] };
-
-    try {
-      let query = client
-        .from('leads')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(limit);
-
-      if (status) query = query.eq('status', status);
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return { ok: true, data: data || [] };
-    } catch (err) {
-      log('fetchLeads', err);
-      return { ok: false, data: [] };
-    }
-  }
-
-  /* ─────────────────────────────────────────────────────────
-   *  LEADS — Actualizar estado (solo admin)
-   * ───────────────────────────────────────────────────────── */
-  async function updateLeadStatus(leadId, newStatus) {
-    /**
-     * Mapea el estado en franés del CRM al enum de Supabase.
-     * Si el enum está extendido con los valores FR (003_leads_enrichment.sql),
-     * pasa el valor directamente; si no, mapea al inglés.
-     */
-    const client = sb();
-    if (!client) return { ok: false };
-
-    // Intentar primero con el estado FR (funciona si se ejecutó la migración)
-    // Si falla, mapear al enum en inglés original
-    const frToEn = {
-      'Nouveau':      'new',
-      'Contacté':    'contacted',
-      'Devis envoyé': 'quoted',
-      'Gagné':       'won',
-      'Perdu':        'lost',
-    };
-
-    const statusToSend = newStatus;
-
-    try {
-      const { error } = await client
-        .from('leads')
-        .update({ status: statusToSend })
-        .eq('id', leadId);
-
-      if (error) {
-        // Si hay error de enum, intentar con el valor en inglés
-        const enStatus = frToEn[newStatus] || 'new';
-        const { error: error2 } = await client
-          .from('leads')
-          .update({ status: enStatus })
-          .eq('id', leadId);
-        if (error2) throw error2;
+    const db = rtdb();
+    if (db) {
+      try {
+        const ref = db.ref('leads').push();
+        await ref.set({ ...payload, id: ref.key });
+        return { ok: true, id: ref.key };
+      } catch (err) {
+        log('saveLead:rtdb', err);
       }
+    }
 
-      return { ok: true };
-    } catch (err) {
-      log('updateLeadStatus', err);
+    // Fallback Supabase si estuviera disponible
+    const client = sb();
+    if (client) {
+      try {
+        const { data: row, error } = await client.from('leads').insert(payload).select('id').single();
+        if (!error) return { ok: true, id: row.id };
+      } catch (err) {
+        log('saveLead:sb', err);
+      }
+    }
+
+    // Fallback localStorage
+    try {
+      const leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+      const id = 'lead_' + Date.now();
+      leads.unshift({ ...payload, id });
+      localStorage.setItem('pino_leads', JSON.stringify(leads));
+      return { ok: true, id };
+    } catch(e) {
       return { ok: false };
     }
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  LEADS — Cargar leads (solo admin)
+   * ───────────────────────────────────────────────────────── */
+  async function fetchLeads(limit = 100) {
+    const db = rtdb();
+    if (db) {
+      try {
+        const snap = await db.ref('leads').limitToLast(limit).once('value');
+        const val = snap.val() || {};
+        const list = Object.keys(val).map(k => ({ id: k, ...val[k] })).reverse();
+        return { ok: true, data: list };
+      } catch (err) {
+        log('fetchLeads:rtdb', err);
+      }
+    }
+
+    const client = sb();
+    if (client) {
+      try {
+        const { data, error } = await client.from('leads').select('*').order('created_at', { ascending: false }).limit(limit);
+        if (!error && data) return { ok: true, data };
+      } catch (err) {
+        log('fetchLeads:sb', err);
+      }
+    }
+
+    return { ok: false, data: [] };
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  LEADS — Cambiar estado de lead
+   * ───────────────────────────────────────────────────────── */
+  async function updateLeadStatus(leadId, newStatus) {
+    const db = rtdb();
+    if (db) {
+      try {
+        await db.ref('leads/' + leadId).update({ status: newStatus, updated_at: new Date().toISOString() });
+        return { ok: true };
+      } catch (err) {
+        log('updateLeadStatus:rtdb', err);
+      }
+    }
+
+    const client = sb();
+    if (client) {
+      try {
+        const { error } = await client.from('leads').update({ status: newStatus }).eq('id', leadId);
+        if (!error) return { ok: true };
+      } catch (err) {
+        log('updateLeadStatus:sb', err);
+      }
+    }
+
+    return { ok: false };
   }
 
   /* ─────────────────────────────────────────────────────────
    *  PROFILES — Upsert perfil al login
    * ───────────────────────────────────────────────────────── */
-  async function upsertProfile(sbUser, extra = {}) {
-    const client = sb();
-    if (!client || !sbUser?.id) return { ok: false };
+  async function upsertProfile(fbUser, extra = {}) {
+    if (!fbUser?.uid) return { ok: false };
 
-    const normEmail = (sbUser.email || '').toLowerCase();
+    const normEmail = (fbUser.email || '').toLowerCase();
     const isAdmin = normEmail === 'pino.spacesverts@gmail.com' ||
-                    normEmail === 'pino.espacesverts@gmail.com' ||
-                    sbUser.app_metadata?.role === 'admin';
+                    normEmail === 'pino.espacesverts@gmail.com';
 
     const payload = {
-      id:           sbUser.id,
-      email:        sbUser.email,
-      full_name:    extra.fullName || meta.full_name || meta.name || null,
-      phone:        extra.phone    || meta.phone || null,
-      commune:      extra.commune  || null,
-      role:         isAdmin ? 'admin' : 'client',
+      id:            fbUser.uid,
+      uid:           fbUser.uid,
+      email:         fbUser.email,
+      full_name:     extra.fullName || fbUser.displayName || (isAdmin ? 'Andrés Pino' : 'Client Particulier'),
+      phone:         extra.phone    || fbUser.phoneNumber || null,
+      commune:       extra.commune  || 'Bordeaux',
+      role:          isAdmin ? 'admin' : 'client',
+      isAdmin:       isAdmin,
       auth_provider: extra.provider || 'google',
-      avatar_url:   meta.avatar_url || meta.picture || null,
-      updated_at:   new Date().toISOString(),
+      avatar_url:    fbUser.photoURL || null,
+      updated_at:    new Date().toISOString(),
     };
 
-    try {
-      const { error } = await client
-        .from('profiles')
-        .upsert(payload, { onConflict: 'id' });
-
-      if (error) throw error;
-      return { ok: true };
-    } catch (err) {
-      log('upsertProfile', err);
-      return { ok: false };
+    const db = rtdb();
+    if (db) {
+      try {
+        await db.ref('users/' + fbUser.uid).update(payload);
+        return { ok: true };
+      } catch (err) {
+        log('upsertProfile:rtdb', err);
+      }
     }
-  }
 
-  /* ─────────────────────────────────────────────────────────
-   *  PROFILES — Fetch todos (solo admin)
-   * ───────────────────────────────────────────────────────── */
-  async function fetchProfiles({ limit = 200 } = {}) {
     const client = sb();
-    if (!client) return { ok: false, data: [] };
-
-    try {
-      const { data, error } = await client
-        .from('profiles')
-        .select('id, email, full_name, role, phone, commune, welcome_promo_code, auth_provider, avatar_url, created_at')
-        .order('created_at', { ascending: false })
-        .limit(limit);
-
-      if (error) throw error;
-      return { ok: true, data: data || [] };
-    } catch (err) {
-      log('fetchProfiles', err);
-      return { ok: false, data: [] };
+    if (client) {
+      try {
+        await client.from('profiles').upsert(payload, { onConflict: 'id' });
+        return { ok: true };
+      } catch (err) {
+        log('upsertProfile:sb', err);
+      }
     }
+
+    return { ok: false };
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  CUPONES — Leer cupón del usuario autenticado
+   *  PROFILES — Cargar lista de usuarios (solo admin)
+   * ───────────────────────────────────────────────────────── */
+  async function fetchProfiles(limit = 100) {
+    const db = rtdb();
+    if (db) {
+      try {
+        const snap = await db.ref('users').limitToLast(limit).once('value');
+        const val = snap.val() || {};
+        const list = Object.keys(val).map(k => ({ id: k, ...val[k] })).reverse();
+        return { ok: true, data: list };
+      } catch (err) {
+        log('fetchProfiles:rtdb', err);
+      }
+    }
+
+    const client = sb();
+    if (client) {
+      try {
+        const { data, error } = await client.from('profiles').select('*').order('created_at', { ascending: false }).limit(limit);
+        if (!error && data) return { ok: true, data };
+      } catch (err) {
+        log('fetchProfiles:sb', err);
+      }
+    }
+
+    return { ok: false, data: [] };
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  CUPONES — Obtener cupón de usuario
    * ───────────────────────────────────────────────────────── */
   async function fetchUserCoupon(userId) {
-    const client = sb();
-    if (!client || !userId) return null;
+    if (!userId) return null;
 
-    try {
-      // Intentar primero en tabla cupones (legacy 1:1)
-      const { data: couponRow } = await client
-        .from('cupones')
-        .select('codigo_cupon, estado')
-        .eq('cliente_id', userId)
-        .maybeSingle();
-
-      if (couponRow?.codigo_cupon) return couponRow;
-
-      // Fallback: tabla profiles.welcome_promo_code
-      const { data: profile } = await client
-        .from('profiles')
-        .select('welcome_promo_code')
-        .eq('id', userId)
-        .maybeSingle();
-
-      if (profile?.welcome_promo_code) {
-        return { codigo_cupon: profile.welcome_promo_code, estado: 'valido' };
+    const db = rtdb();
+    if (db) {
+      try {
+        const snap = await db.ref('coupons/' + userId).once('value');
+        return snap.val() || null;
+      } catch (err) {
+        log('fetchUserCoupon:rtdb', err);
       }
-
-      return null;
-    } catch (err) {
-      log('fetchUserCoupon', err);
-      return null;
     }
+
+    const client = sb();
+    if (client) {
+      try {
+        const { data } = await client.from('cupones').select('*').eq('user_id', userId).single();
+        if (data) return data;
+      } catch(e) {}
+    }
+
+    return null;
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  PROMO — Registrar canje de PELABOLA
+   *  CUPONES — Canjear PELABOLA
    * ───────────────────────────────────────────────────────── */
-  async function redeemPelabola(userData) {
-    /**
-     * userData: { userId, email, name, commune }
-     * Registra el canje en promo_redemptions y devuelve el código.
-     */
-    const client = sb();
-    if (!client) return { ok: false, code: 'PELABOLA' };
+  async function redeemPelabola(userId, email) {
+    const couponData = {
+      user_id:       userId,
+      email:         email,
+      codigo_cupon:  'PELABOLA',
+      descuento_eur: 20.00,
+      estado:        'valid',
+      created_at:    new Date().toISOString(),
+    };
 
-    try {
-      // Verificar que la promo PELABOLA existe y está activa
-      const { data: promo } = await client
-        .from('promotions')
-        .select('id, code, percent_off, active')
-        .eq('code', 'PELABOLA')
-        .eq('active', true)
-        .maybeSingle();
-
-      if (!promo) {
-        // Si no hay tabla aún, devolvemos el código igual (funciona offline)
-        return { ok: true, code: 'PELABOLA', offline: true };
+    const db = rtdb();
+    if (db) {
+      try {
+        await db.ref('coupons/' + userId).set(couponData);
+        return { ok: true, coupon: couponData };
+      } catch (err) {
+        log('redeemPelabola:rtdb', err);
       }
-
-      // Verificar que este usuario/email no lo haya canjeado ya
-      const { data: existing } = await client
-        .from('promo_redemptions')
-        .select('id')
-        .eq('promotion_id', promo.id)
-        .eq('email', userData.email)
-        .maybeSingle();
-
-      if (existing) {
-        return { ok: true, code: 'PELABOLA', alreadyRedeemed: true };
-      }
-
-      // Insertar canje
-      await client.from('promo_redemptions').insert({
-        promotion_id: promo.id,
-        user_id:      userData.userId || null,
-        email:        userData.email  || null,
-        commune:      userData.commune || null,
-      });
-
-      return { ok: true, code: 'PELABOLA' };
-    } catch (err) {
-      log('redeemPelabola', err);
-      return { ok: true, code: 'PELABOLA', offline: true }; // graceful degradation
     }
+
+    const client = sb();
+    if (client) {
+      try {
+        const { data, error } = await client.from('cupones').upsert(couponData, { onConflict: 'user_id' }).select().single();
+        if (!error) return { ok: true, coupon: data };
+      } catch(e) {}
+    }
+
+    return { ok: true, coupon: couponData };
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  AUDIT — Registrar sesión (solo admin puede leer)
+   *  AUDIT — Registrar sesión
    * ───────────────────────────────────────────────────────── */
-  async function recordAuditSession(userProfile) {
-    const client = sb();
-    // Sin Supabase o sin user, usar solo localStorage (ya hecho en index.html)
-    if (!client || !userProfile?.uid) return;
+  async function recordAuditSession(user) {
+    const payload = {
+      sessionUser: user.email,
+      fullName:    user.fullName,
+      role:        user.role || 'client',
+      action:      'connexion',
+      created_at:  new Date().toISOString(),
+    };
 
-    try {
-      await client.from('audit_logs').insert({
-        user_id:     userProfile.uid,
-        event_type:  'login',
-        description: `Login via ${userProfile.authProvider || 'unknown'}`,
-        metadata: {
-          email:      userProfile.email,
-          role:       userProfile.role,
-          device:     navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop',
-          commune:    userProfile.commune || null,
-        }
-      });
-    } catch (err) {
-      // audit_logs puede no estar disponible para clientes (RLS) — silencioso
-      log('recordAuditSession', err);
+    const db = rtdb();
+    if (db) {
+      try {
+        await db.ref('audit_logs').push(payload);
+      } catch (e) {}
     }
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  ADMIN — KPIs agregados desde Supabase
+   *  KPIS — Métricas del panel admin
    * ───────────────────────────────────────────────────────── */
   async function fetchAdminKPIs() {
-    const client = sb();
-    if (!client) return null;
+    const db = rtdb();
+    if (db) {
+      try {
+        const [lSnap, uSnap, jSnap] = await Promise.all([
+          db.ref('leads').once('value'),
+          db.ref('users').once('value'),
+          db.ref('jobs').once('value')
+        ]);
+        const leads = Object.values(lSnap.val() || {});
+        const users = Object.values(uSnap.val() || {});
+        const jobs = Object.values(jSnap.val() || {});
 
-    try {
-      const [
-        { count: totalLeads },
-        { count: newLeads },
-        { count: totalClients },
-        { data: promoRow }
-      ] = await Promise.all([
-        client.from('leads').select('*', { count: 'exact', head: true }),
-        client.from('leads').select('*', { count: 'exact', head: true }).eq('status', 'Nouveau'),
-        client.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'client'),
-        client.from('promo_redemptions').select('id', { count: 'exact', head: false }).limit(1),
-      ]);
+        const charged = jobs.reduce((s, j) => s + (parseFloat(j.amount_charged) || 0), 0);
+        const paid = jobs.reduce((s, j) => s + (parseFloat(j.amount_paid) || 0), 0);
 
-      return {
-        totalLeads:   totalLeads  || 0,
-        newLeads:     newLeads    || 0,
-        totalClients: totalClients|| 0,
-      };
-    } catch (err) {
-      log('fetchAdminKPIs', err);
-      return null;
+        return {
+          ok: true,
+          data: {
+            totalLeads: leads.length,
+            totalUsers: users.length,
+            totalJobs: jobs.length,
+            totalCharged: charged,
+            totalPaid: paid
+          }
+        };
+      } catch (err) {
+        log('fetchAdminKPIs:rtdb', err);
+      }
     }
+
+    return { ok: false };
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  JOBS — Guardar trabajo realizado (solo admin)
+   *  JOBS CRM — Guardar trabajo realizado
    * ───────────────────────────────────────────────────────── */
   async function saveJob(data) {
-    /**
-     * data: { clientName, clientEmail, clientPhone, clientCommune,
-     *   clientId, serviceType, description, dateStart, dateEnd,
-     *   hoursSpent, amountCharged, amountPaid, paymentStatus,
-     *   paymentMethod, notes, createdBy }
-     */
-    const client = sb();
-    if (!client) return { ok: false };
-
     const payload = {
       client_id:       data.clientId     || null,
       client_name:     data.clientName   || '',
       client_email:    data.clientEmail  || null,
       client_phone:    data.clientPhone  || null,
       client_commune:  data.clientCommune|| null,
-      service_type:    data.serviceType  || 'Entretien',
+      service_type:    data.serviceType  || 'Entretien jardin',
       description:     data.description  || null,
       date_start:      data.dateStart    || null,
       date_end:        data.dateEnd      || null,
-      hours_spent:     data.hoursSpent   ? parseFloat(data.hoursSpent) : null,
-      amount_charged:  data.amountCharged? parseFloat(data.amountCharged) : null,
+      hours_spent:     data.hoursSpent   ? parseFloat(data.hoursSpent)   : null,
+      amount_charged:  data.amountCharged? parseFloat(data.amountCharged): null,
       amount_paid:     data.amountPaid   ? parseFloat(data.amountPaid)   : 0,
       payment_status:  data.paymentStatus|| 'pending',
       payment_method:  data.paymentMethod|| null,
       notes:           data.notes        || null,
       created_by:      data.createdBy    || null,
+      created_at:      new Date().toISOString()
     };
 
-    try {
-      const { data: row, error } = await client
-        .from('jobs')
-        .insert(payload)
-        .select('id')
-        .single();
-
-      if (error) throw error;
-      return { ok: true, id: row.id };
-    } catch (err) {
-      log('saveJob', err);
-      return { ok: false };
-    }
-  }
-
-  /* ─────────────────────────────────────────────────────────
-   *  JOBS — Cargar lista de trabajos (solo admin)
-   * ───────────────────────────────────────────────────────── */
-  async function fetchJobs({ limit = 200, clientId = null, status = null } = {}) {
-    const client = sb();
-    if (!client) return { ok: false, data: [] };
-
-    try {
-      let q = client
-        .from('jobs_summary')
-        .select('*')
-        .limit(limit);
-
-      if (clientId) q = q.eq('client_id', clientId);
-      if (status)   q = q.eq('payment_status', status);
-
-      let { data, error } = await q;
-      if (error) {
-        let qFallback = client.from('jobs').select('*').order('created_at', { ascending: false }).limit(limit);
-        if (clientId) qFallback = qFallback.eq('client_id', clientId);
-        if (status)   qFallback = qFallback.eq('payment_status', status);
-        const fbRes = await qFallback;
-        if (fbRes.error) throw fbRes.error;
-        data = fbRes.data || [];
+    const db = rtdb();
+    if (db) {
+      try {
+        const ref = db.ref('jobs').push();
+        await ref.set({ ...payload, id: ref.key });
+        return { ok: true, id: ref.key };
+      } catch (err) {
+        log('saveJob:rtdb', err);
       }
-      return { ok: true, data: data || [] };
-    } catch (err) {
-      log('fetchJobs', err);
-      return { ok: false, data: [] };
     }
+
+    const client = sb();
+    if (client) {
+      try {
+        const { data: row, error } = await client.from('jobs').insert(payload).select('id').single();
+        if (!error && row) return { ok: true, id: row.id };
+      } catch (err) {
+        log('saveJob:sb', err);
+      }
+    }
+
+    return { ok: false };
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  JOBS — Actualizar trabajo (solo admin)
+   *  JOBS CRM — Cargar lista de trabajos
+   * ───────────────────────────────────────────────────────── */
+  async function fetchJobs({ limit = 200, status = null } = {}) {
+    const db = rtdb();
+    if (db) {
+      try {
+        const snap = await db.ref('jobs').limitToLast(limit).once('value');
+        const val = snap.val() || {};
+        let list = Object.keys(val).map(k => ({ id: k, ...val[k] })).reverse();
+        if (status) list = list.filter(j => j.payment_status === status);
+        return { ok: true, data: list };
+      } catch (err) {
+        log('fetchJobs:rtdb', err);
+      }
+    }
+
+    const client = sb();
+    if (client) {
+      try {
+        let q = client.from('jobs').select('*').order('created_at', { ascending: false }).limit(limit);
+        if (status) q = q.eq('payment_status', status);
+        const { data, error } = await q;
+        if (!error && data) return { ok: true, data };
+      } catch (err) {
+        log('fetchJobs:sb', err);
+      }
+    }
+
+    return { ok: false, data: [] };
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  JOBS CRM — Actualizar trabajo
    * ───────────────────────────────────────────────────────── */
   async function updateJob(jobId, patch) {
-    const client = sb();
-    if (!client) return { ok: false };
-
-    try {
-      const { error } = await client
-        .from('jobs')
-        .update(patch)
-        .eq('id', jobId);
-
-      if (error) throw error;
-      return { ok: true };
-    } catch (err) {
-      log('updateJob', err);
-      return { ok: false };
+    const db = rtdb();
+    if (db) {
+      try {
+        await db.ref('jobs/' + jobId).update({ ...patch, updated_at: new Date().toISOString() });
+        return { ok: true };
+      } catch (err) {
+        log('updateJob:rtdb', err);
+      }
     }
+
+    const client = sb();
+    if (client) {
+      try {
+        const { error } = await client.from('jobs').update(patch).eq('id', jobId);
+        if (!error) return { ok: true };
+      } catch (err) {
+        log('updateJob:sb', err);
+      }
+    }
+
+    return { ok: false };
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -461,27 +448,32 @@
   function exportJobsCSV(jobs) {
     const headers = [
       'Cliente','Email','Commune','Servicio','Descripción',
-      'Fecha inicio','Fecha fin','Días','Horas','Monto (€)',
+      'Fecha inicio','Fecha fin','Horas','Monto (€)',
       'Pagado (€)','Pendiente (€)','Estado pago','Método pago','Notas'
     ];
 
-    const rows = jobs.map(j => [
-      j.client_name    || '',
-      j.client_email   || '',
-      j.client_commune || '',
-      j.service_type   || '',
-      (j.description   || '').replace(/"/g, '""'),
-      j.date_start     || '',
-      j.date_end       || '',
-      j.days_worked    || '',
-      j.hours_spent    || '',
-      j.amount_charged || 0,
-      j.amount_paid    || 0,
-      j.amount_pending || 0,
-      j.payment_status || '',
-      j.payment_method || '',
-      (j.notes         || '').replace(/"/g, '""'),
-    ].map(v => `"${v}"`).join(','));
+    const rows = jobs.map(j => {
+      const charged = parseFloat(j.amount_charged) || 0;
+      const paid = parseFloat(j.amount_paid) || 0;
+      const pending = charged - paid;
+
+      return [
+        j.client_name    || '',
+        j.client_email   || '',
+        j.client_commune || '',
+        j.service_type   || '',
+        (j.description   || '').replace(/"/g, '""'),
+        j.date_start     || '',
+        j.date_end       || '',
+        j.hours_spent    || '',
+        charged.toFixed(2),
+        paid.toFixed(2),
+        pending.toFixed(2),
+        j.payment_status || '',
+        j.payment_method || '',
+        (j.notes         || '').replace(/"/g, '""'),
+      ].map(v => `"${v}"`).join(',');
+    });
 
     const csv = [headers.join(','), ...rows].join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -494,10 +486,9 @@
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  EXPORT — Generar PDF de trabajos (usa jsPDF si disponible)
+   *  EXPORT — Generar PDF de trabajos con jsPDF
    * ───────────────────────────────────────────────────────── */
   function exportJobsPDF(jobs) {
-    // Si jsPDF está cargado (se inyecta desde index.html vía CDN)
     if (typeof window.jspdf !== 'undefined' || typeof window.jsPDF !== 'undefined') {
       const { jsPDF } = window.jspdf || window;
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
@@ -569,13 +560,11 @@
       return;
     }
 
-    // Fallback: si jsPDF no está disponible, exportar como CSV
-    console.warn('[pino-db] jsPDF no disponible, exportando como CSV');
     exportJobsCSV(jobs);
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  Exportar al objeto global window.PinoDB
+   *  Exportar a window.PinoDB
    * ───────────────────────────────────────────────────────── */
   global.PinoDB = {
     saveLead,
@@ -587,7 +576,6 @@
     redeemPelabola,
     recordAuditSession,
     fetchAdminKPIs,
-    // Jobs CRM
     saveJob,
     fetchJobs,
     updateJob,
@@ -596,4 +584,3 @@
   };
 
 })(window);
-

@@ -95,11 +95,13 @@
     }
   </script>
   
-  <!-- Supabase Auth (EU) — Firebase retiré (auth/unauthorized-domain) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/supabase-config.js"></script>
+  <!-- Firebase Compat SDK v10 (App, Auth, Realtime Database) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="assets/js/firebase-config.js"></script>
 
-  <!-- Capa de datos Supabase centralizada -->
+  <!-- Capa de datos centralizada -->
   <script src="assets/js/pino-db.js"></script>
   
   <!-- Base de Connaissances & Moteur Intelligent Chatbot -->
@@ -4051,18 +4053,19 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       return null;
     };
 
-    window.processAuthenticatedUser = async (sbUser, method = 'google', registrationProfile = null) => {
-      if (!sbUser || !sbUser.email) return;
+    window.processAuthenticatedUser = async (user, method = 'google', registrationProfile = null) => {
+      if (!user || !user.email) return;
 
-      const normEmail = sbUser.email.trim().toLowerCase();
-      const isAdmin = isPinoEmail(normEmail) || sbUser.app_metadata?.role === 'admin';
-      const meta = sbUser.user_metadata || {};
-      const displayName = registrationProfile?.fullName || meta.full_name || meta.name || (isAdmin ? 'Andrés Pino' : 'Client Particulier');
-      const phone = registrationProfile?.phone || meta.phone || '';
+      const normEmail = user.email.trim().toLowerCase();
+      const isAdmin = isPinoEmail(normEmail) || user.app_metadata?.role === 'admin';
+      const meta = user.user_metadata || {};
+      const displayName = registrationProfile?.fullName || user.displayName || meta.full_name || meta.name || (isAdmin ? 'Andrés Pino' : 'Client Particulier');
+      const phone = registrationProfile?.phone || user.phoneNumber || meta.phone || '';
       const commune = registrationProfile?.commune || 'Bordeaux Métropole';
+      const uid = user.uid || user.id;
 
       let userProfile = {
-        uid: sbUser.id,
+        uid: uid,
         email: normEmail,
         fullName: displayName,
         phone: phone,
@@ -4070,31 +4073,29 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         role: isAdmin ? 'admin' : 'client',
         isAdmin: isAdmin,
         authProvider: method,
-        photoURL: meta.avatar_url || meta.picture || null,
+        photoURL: user.photoURL || meta.avatar_url || meta.picture || null,
         promoCode: '',
         lastLogin: new Date().toISOString()
       };
 
-      // ── Supabase: upsert perfil + leer cupón 1:1 ──
+      // ── Base de datos (Firebase RTDB / Supabase): upsert perfil + leer cupón 1:1 ──
       if (window.PinoDB) {
-        // 1. Guardar/actualizar perfil en Supabase
-        PinoDB.upsertProfile(sbUser, {
+        PinoDB.upsertProfile(user, {
           fullName: displayName, phone, commune, provider: method
         }).catch(() => {});
 
-        // 2. Leer cupón asignado (tabla cupones o profiles.welcome_promo_code)
         try {
-          const couponRow = await PinoDB.fetchUserCoupon(sbUser.id);
-          if (couponRow && couponRow.codigo_cupon) {
-            userProfile.promoCode = couponRow.codigo_cupon;
-            userProfile.promoStatus = couponRow.estado;
+          const couponRow = await PinoDB.fetchUserCoupon(uid);
+          if (couponRow && (couponRow.codigo_cupon || couponRow.code)) {
+            userProfile.promoCode = couponRow.codigo_cupon || couponRow.code;
+            userProfile.promoStatus = couponRow.estado || couponRow.status;
           }
         } catch (err) {
           console.warn('[pino] fetchUserCoupon:', err);
         }
       }
 
-      // ── Registro de sesión (local + Supabase audit) ──
+      // ── Registro de sesión (local + audit) ──
       recordSessionAudit(userProfile);
       localStorage.setItem('pino_current_user', JSON.stringify(userProfile));
 
@@ -4115,8 +4116,9 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         renderAdminLeads();
         renderAdminUsers();
         loadAdminKPIs();
+        renderAdminJobs();
         document.getElementById('modal-window-admin').showModal();
-        showNotificationToast('Bienvenue Andrés. Accès administrateur Supabase.', 'success');
+        showNotificationToast('Bienvenue Andrés. Accès administrateur.', 'success');
       } else {
         populateClientPortal(userProfile);
         document.getElementById('modal-window-client').showModal();
@@ -4125,29 +4127,41 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
     };
 
     window.handleGoogleSignIn = async () => {
-      const sb = window.requireSupabase();
-      if (!sb) return;
       const label = document.getElementById('google-auth-btn-label');
       const originalText = label ? label.textContent : 'Continuer avec Google';
       if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Connexion Google...';
+
       try {
-        const { error } = await sb.auth.signInWithOAuth({
-          provider: 'google',
-          options: {
-            redirectTo: window.PINO_SITE_URL || (window.location.origin + '/'),
-            skipBrowserRedirect: false,
-            queryParams: { prompt: 'select_account', access_type: 'online' }
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
+          const result = await firebase.auth().signInWithPopup(provider);
+          if (result && result.user) {
+            await processAuthenticatedUser(result.user, 'google');
           }
-        });
-        if (error) throw error;
-      } catch (error) {
-        console.error('Supabase Google Sign-In:', error);
-        const raw = (error && error.message) ? error.message : '';
-        let msg = raw || 'Échec de connexion avec Google.';
-        if (/provider|unsupported|disabled|validation/i.test(raw)) {
-          msg = "Google n'est pas encore activé. Dans Supabase : Authentication → Providers → Google → ON.";
+        } else if (window.pinoSupabase) {
+          const { error } = await window.pinoSupabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: window.PINO_SITE_URL || (window.location.origin + '/'),
+              queryParams: { prompt: 'select_account' }
+            }
+          });
+          if (error) throw error;
+        } else {
+          throw new Error("Service d'authentification non initialisé.");
         }
-        showNotificationToast(msg, 'error');
+      } catch (error) {
+        console.error('Google Sign-In Error:', error);
+        if (error.code === 'auth/popup-blocked') {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          await firebase.auth().signInWithRedirect(provider);
+        } else if (error.code === 'auth/configuration-not-found' || error.code === 'auth/invalid-api-key') {
+          showNotificationToast("Veuillez renseigner l'apiKey Firebase dans assets/js/firebase-config.js.", 'error');
+        } else {
+          showNotificationToast(error.message || 'Échec de connexion avec Google.', 'error');
+        }
+      } finally {
         if (label) label.textContent = originalText;
       }
     };
@@ -4167,13 +4181,18 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Vérification...';
       }
       try {
-        const sb = window.requireSupabase();
-        if (!sb) throw new Error('Supabase indisponible.');
-        const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-        if (error) throw error;
-        await processAuthenticatedUser(data.user, 'password');
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+          const cred = await firebase.auth().signInWithEmailAndPassword(email, pass);
+          await processAuthenticatedUser(cred.user, 'password');
+        } else if (window.pinoSupabase) {
+          const { data, error } = await window.pinoSupabase.auth.signInWithPassword({ email, password: pass });
+          if (error) throw error;
+          await processAuthenticatedUser(data.user, 'password');
+        } else {
+          throw new Error('Service d\'authentification non disponible.');
+        }
       } catch (err) {
-        console.error('Supabase Login:', err);
+        console.error('Login Error:', err);
         if (errorMsg) {
           errorMsg.classList.remove('hidden');
           if (errorText) errorText.textContent = err.message || 'Identifiants non reconnus.';
@@ -4199,24 +4218,26 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Création...';
       }
       try {
-        const sb = window.requireSupabase();
-        if (!sb) throw new Error('Supabase indisponible.');
-        const { data, error } = await sb.auth.signUp({
-          email,
-          password: pass,
-          options: {
-            data: { full_name: fullName, phone, commune },
-            emailRedirectTo: window.PINO_SITE_URL
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+          const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
+          if (cred.user.updateProfile) {
+            await cred.user.updateProfile({ displayName: fullName });
           }
-        });
-        if (error) throw error;
-        if (data.user && data.session) {
-          await processAuthenticatedUser(data.user, 'password', { fullName, phone, commune });
-        } else {
-          showNotificationToast('Compte créé. Vérifiez votre e-mail pour confirmer (RGPD).', 'success');
+          await processAuthenticatedUser(cred.user, 'password', { fullName, phone, commune });
+        } else if (window.pinoSupabase) {
+          const { data, error } = await window.pinoSupabase.auth.signUp({
+            email, password: pass,
+            options: { data: { full_name: fullName, phone, commune }, emailRedirectTo: window.PINO_SITE_URL }
+          });
+          if (error) throw error;
+          if (data.user && data.session) {
+            await processAuthenticatedUser(data.user, 'password', { fullName, phone, commune });
+          } else {
+            showNotificationToast('Compte créé avec succès.', 'success');
+          }
         }
       } catch (err) {
-        console.error('Supabase Register:', err);
+        console.error('Register Error:', err);
         alert(err.message || 'Erreur lors de la création du compte.');
       } finally {
         if (submitBtn) {
@@ -4226,31 +4247,36 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }
     };
 
-    (async function bindSupabaseSession() {
-      const sb = window.pinoSupabase;
-      if (!sb) {
-        if (typeof refreshCouponSection === 'function') refreshCouponSection();
-        return;
+    (function bindAuthSessions() {
+      // 1. Firebase Auth listener
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        try {
+          firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+              const cur = getCurrentUser();
+              if (!cur || cur.uid !== user.uid) {
+                await processAuthenticatedUser(user, user.providerData?.[0]?.providerId || 'google');
+              }
+            } else {
+              localStorage.removeItem('pino_current_user');
+              updateAuthUI();
+              if (typeof refreshCouponSection === 'function') refreshCouponSection();
+            }
+          });
+          return;
+        } catch (e) {
+          console.warn('Firebase onAuthStateChanged error:', e);
+        }
       }
-      const { data } = await sb.auth.getSession();
-      if (data && data.session && data.session.user) {
-        await processAuthenticatedUser(data.session.user, data.session.user.app_metadata?.provider || 'google');
-      } else if (typeof refreshCouponSection === 'function') {
-        refreshCouponSection();
-      }
-      sb.auth.onAuthStateChange(async (event, session) => {
-        if (session && session.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')) {
-          const cur = getCurrentUser();
-          if (!cur || cur.uid !== session.user.id) {
-            await processAuthenticatedUser(session.user, session.user.app_metadata?.provider || 'google');
+
+      // 2. Supabase fallback listener
+      if (window.pinoSupabase) {
+        window.pinoSupabase.auth.getSession().then(({ data }) => {
+          if (data && data.session && data.session.user) {
+            processAuthenticatedUser(data.session.user, 'google');
           }
-        }
-        if (event === 'SIGNED_OUT') {
-          localStorage.removeItem('pino_current_user');
-          updateAuthUI();
-          if (typeof refreshCouponSection === 'function') refreshCouponSection();
-        }
-      });
+        });
+      }
     })();
 
     // Pre-seed default leads for the CRM
