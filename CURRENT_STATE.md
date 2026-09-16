@@ -21,9 +21,16 @@
   - `/audit_logs`: Registro de sesiones y actividad.
 - [x] Corrección de `fetchLeads`, `fetchProfiles`, y `fetchJobs` en `pino-db.js`: normalización de parámetros numéricos/objeto para prevenir errores en `Query.limitToLast`.
 - [x] Sincronización bidireccional de Leads en Firebase Realtime Database: los presupuestos enviados por clientes se guardan en `/leads` y se reflejan inmediatamente tanto en el panel admin como en el portal del cliente.
-- [x] Portal del Cliente operativo (`renderClientQuotes` y `renderClientInvoices`): visualización de presupuestos enviados, propuestas formales de Andrés Pino con desglose del 50% de crédito Unipros y facturas fiscales.
-- [x] Rediseño y espaciado generoso del CRM y panel de administración:
-  - Eliminación de textos microscópicos (`text-xxs`), reemplazados por tipografía legible (`text-xs sm:text-sm font-bold`).
-  - Columnas con anchos mínimos definidos (`min-w-[880px]`), evitando el apiñamiento de teléfonos y direcciones.
-  - Mayor altura y anchura del modal (`max-w-6xl w-full max-h-[80vh]`).
-  - Tarjetas de resumen financiero proporcionadas y armonizadas con el diseño general.
+- [x] Sistema Dual de Notificación de Respuesta a Devis (En la App + En el Correo del Cliente):
+  - **Notificación en la página (In-App Temps Réel)**:
+    - Registro en tiempo real en `/client_notifications/{sanitizedEmail}/{notifId}` y `/quotes_responses/{leadId}` en Firebase Realtime Database.
+    - Listener en vivo `listenClientNotifications` activo tanto para usuarios autenticados como para correos de leads previos.
+    - Chime auditivo sutil generado por Web Audio API (`playNotificationChime`).
+    - Banner flotante interactivo (`#client-devis-floating-toast`) con monto TTC, descuento del 50% Unipros, fecha y botón directo a validar la oferta.
+    - Badge contador pulsante en el botón del menú de navegación (`Mon Espace`).
+    - Tarjeta de propuesta formal en el portal del cliente con botón para descargar / imprimir el Devis oficial en PDF (`printLeadQuotePDF`).
+  - **Notificación al Correo del Cliente (Email Dispatch & 1-Click Corroboration)**:
+    - Generación automatizada de plantilla formal de devis en francés con todas las menciones legales de Unipros y URSSAF.
+    - Modal de corroboración post-envío (`modal-devis-sent-success`) con apertura automática en 1-clic de Gmail Web Compose (`mail.google.com/mail/?view=cm...`) con destinatario, asunto y desglose listos para enviar.
+    - Alternativas directas vía Mailto (Outlook, Apple Mail) y WhatsApp al teléfono del cliente.
+    - Registro de auditoría y respaldo de despacho en segundo plano.

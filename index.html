@@ -930,6 +930,102 @@
     </form>
   </dialog>
 
+  <!-- Modal: Devis Envoyé & Notification E-mail Client (Corroboration 1-Clic) -->
+  <dialog id="modal-devis-sent-success" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-lg w-full p-0 overflow-hidden text-brand-charcoal">
+    <div class="modal-drag-header bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 px-6 py-5 text-white flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-xl shadow-inner">
+          <i class="fa-solid fa-paper-plane"></i>
+        </span>
+        <div>
+          <h3 class="font-serif text-lg font-bold">Devis Transmis au Client !</h3>
+          <p class="text-xs text-emerald-100" id="sent-success-ref">Réf: —</p>
+        </div>
+      </div>
+      <button type="button" onclick="document.getElementById('modal-devis-sent-success').close()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center cursor-pointer">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+      <!-- Status Badges -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+        <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center gap-2.5 text-emerald-950 font-bold">
+          <span class="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs shadow-xs">
+            <i class="fa-solid fa-bell"></i>
+          </span>
+          <div>
+            <div class="text-[10px] text-emerald-700 font-semibold uppercase">Notification en Ligne</div>
+            <div class="text-xs">Active dans l'Espace Client</div>
+          </div>
+        </div>
+        <div class="p-3 bg-blue-50 rounded-2xl border border-blue-200 flex items-center gap-2.5 text-blue-950 font-bold">
+          <span class="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xs shadow-xs">
+            <i class="fa-solid fa-envelope"></i>
+          </span>
+          <div>
+            <div class="text-[10px] text-blue-700 font-semibold uppercase">E-mail du Client</div>
+            <div id="sent-success-email-dest" class="truncate max-w-[140px] text-xs">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Recap Card -->
+      <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-2">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-200 font-bold text-slate-800">
+          <span id="sent-success-client-name">Client : —</span>
+          <span id="sent-success-service" class="bg-slate-200 text-slate-700 px-2 py-0.5 rounded-lg text-[10px]">—</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center pt-1">
+          <div class="p-2 bg-white rounded-xl border border-slate-200">
+            <span class="text-[10px] text-slate-400 block uppercase font-bold">Total TTC</span>
+            <strong class="text-sm font-black text-slate-900" id="sent-success-total">0,00 €</strong>
+          </div>
+          <div class="p-2 bg-white rounded-xl border border-slate-200">
+            <span class="text-[10px] text-emerald-700 block uppercase font-bold">Crédit 50%</span>
+            <strong class="text-sm font-black text-emerald-700" id="sent-success-credit">- 0,00 €</strong>
+          </div>
+          <div class="p-2 bg-emerald-700 text-white rounded-xl shadow-xs">
+            <span class="text-[10px] text-emerald-200 block uppercase font-bold">Net Client</span>
+            <strong class="text-sm font-black" id="sent-success-net">0,00 €</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dispatch Call To Actions -->
+      <div class="space-y-2.5 pt-1">
+        <p class="text-xs text-slate-600 font-bold flex items-center gap-1.5">
+          <i class="fa-solid fa-paper-plane text-emerald-700"></i> Expédier l'e-mail officiel au client :
+        </p>
+
+        <!-- 1-Click Gmail Action -->
+        <a id="sent-success-gmail-btn" href="#" target="_blank" rel="noopener noreferrer"
+          class="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white font-extrabold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-brands fa-google text-base"></i> Envoyer l'E-mail Officiel au Client via Gmail (1-clic)
+        </a>
+
+        <!-- Mailto Action -->
+        <a id="sent-success-mailto-btn" href="#"
+          class="w-full py-2.5 px-4 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-envelope text-slate-500"></i> Envoyer via l'application Mail (Outlook, Apple Mail)
+        </a>
+
+        <!-- WhatsApp Action -->
+        <a id="sent-success-wa-btn" href="#" target="_blank" rel="noopener noreferrer"
+          class="w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-brands fa-whatsapp text-base"></i> Transmettre le récapitulatif par WhatsApp au client
+        </a>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button type="button" onclick="document.getElementById('modal-devis-sent-success').close()"
+          class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer">
+          Terminer
+        </button>
+      </div>
+    </div>
+  </dialog>
+
   <!-- Modal 3: Espace Administration — God Mode (Andrés Pino) -->
   <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-full p-0 overflow-hidden text-brand-charcoal">
     <!-- Admin Header (Draggable) -->
@@ -3976,6 +4072,12 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         const currentLeads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
         currentLeads.unshift(newLeadObj);
         localStorage.setItem('pino_leads', JSON.stringify(currentLeads));
+        if (emailVal) {
+          localStorage.setItem('pino_last_client_email', emailVal.trim().toLowerCase());
+          if (typeof initClientNotificationListener === 'function') {
+            initClientNotificationListener(emailVal);
+          }
+        }
         if (typeof renderAdminLeads === 'function') renderAdminLeads();
         if (emailVal && typeof renderClientQuotes === 'function') renderClientQuotes(emailVal);
       } catch (errLeads) {
@@ -4711,8 +4813,12 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
                     class="flex-1 py-2.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl text-center flex items-center justify-center gap-1.5 transition-colors shadow-xs">
                     <i class="fa-brands fa-whatsapp text-sm"></i> Valider sur WhatsApp
                   </a>
+                  <button type="button" onclick="printLeadQuotePDF(quotes[${quotes.indexOf(q)}])"
+                    class="py-2.5 px-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-bold rounded-xl text-center flex items-center justify-center gap-1.5 transition-colors cursor-pointer" title="Télécharger ou imprimer le devis officiel">
+                    <i class="fa-solid fa-file-pdf text-red-600"></i> Devis PDF
+                  </button>
                   <a href="tel:0651594034"
-                    class="py-2.5 px-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold rounded-xl text-center flex items-center justify-center gap-1.5 transition-colors">
+                    class="py-2.5 px-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-bold rounded-xl text-center flex items-center justify-center gap-1.5 transition-colors">
                     <i class="fa-solid fa-phone text-emerald-700"></i> Appeler Andrés
                   </a>
                 </div>
@@ -4874,6 +4980,19 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         if (mobileNavText) {
           mobileNavText.innerHTML = `👤 <strong>Mon Espace (${user.fullName || 'Client'})</strong>`;
         }
+        if (user.email && typeof initClientNotificationListener === 'function') {
+          initClientNotificationListener(user.email);
+        }
+      }
+
+      // Check offline client email if not logged in
+      if (!user) {
+        try {
+          const lastEmail = localStorage.getItem('pino_last_client_email') || '';
+          if (lastEmail && typeof initClientNotificationListener === 'function') {
+            initClientNotificationListener(lastEmail);
+          }
+        } catch(e) {}
       }
     };
 
@@ -5093,11 +5212,11 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       const notes      = document.getElementById('resp-notes').value;
       const applyCoupon= document.getElementById('resp-apply-coupon').checked;
 
-      const clientName  = document.getElementById('resp-client-name').value;
-      const clientEmail = document.getElementById('resp-client-email').value;
-      const clientPhone = document.getElementById('resp-client-phone').value;
-      const service     = document.getElementById('resp-client-service').value;
-      const commune     = document.getElementById('resp-client-commune').value;
+      const clientName  = document.getElementById('resp-client-name').value || 'Client Particulier';
+      const clientEmail = document.getElementById('resp-client-email').value || '';
+      const clientPhone = document.getElementById('resp-client-phone').value || '';
+      const service     = document.getElementById('resp-client-service').value || 'Entretien espaces verts';
+      const commune     = document.getElementById('resp-client-commune').value || 'Bordeaux Métropole';
 
       if (!leadId) { showNotificationToast('Erreur : ID du lead manquant.', 'error'); return; }
       if (price < 20) { showNotificationToast('Le montant minimum est de 20 €.', 'error'); return; }
@@ -5106,10 +5225,14 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Envoi en cours…';
 
+      const creditImpot = price * 0.50;
+      const netClient   = price * 0.50;
+      const shortRef    = (leadId || '').slice(-6).toUpperCase();
+
       const responseData = {
         price_ttc:       price,
-        credit_impot:    price * 0.50,
-        net_client:      price * 0.50,
+        credit_impot:    creditImpot,
+        net_client:      netClient,
         duration:        duration,
         date_proposed:   dateIntv,
         equipment:       equipment,
@@ -5123,6 +5246,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       };
 
       try {
+        // 1. Sauvegarder dans Firebase Realtime Database
         if (window.PinoDB) {
           const result = await PinoDB.saveLeadResponse(leadId, responseData);
           if (result.ok) {
@@ -5133,7 +5257,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
               clientPhone:    clientPhone,
               clientCommune:  commune,
               serviceType:    service,
-              description:    `Devis #${leadId.slice(-6)} — ${notes || 'Intervention standard'}`,
+              description:    `Devis #${shortRef} — ${notes || 'Intervention standard'}`,
               dateStart:      dateIntv || null,
               hoursSpent:     null,
               amountCharged:  price,
@@ -5146,16 +5270,120 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           }
         }
 
-        // Update local lead status
+        // 2. Mettre à jour l'état local dans localStorage
         const leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
         const localLead = leads.find(l => (l.sbId || l.id) === leadId);
         if (localLead) {
           localLead.status = 'Devis envoyé';
+          localLead.response = {
+            ...responseData,
+            responded_by: 'Andrés Pino',
+            responded_at: new Date().toISOString()
+          };
           localStorage.setItem('pino_leads', JSON.stringify(leads));
         }
 
+        // 3. Préparer l'e-mail officiel pour le client
+        const mailSubject = `[Pino Espaces Verts] Votre Devis #${shortRef} — ${price.toFixed(2)} € TTC (Avance Immédiate 50% Unipros)`;
+        const mailBody = `Bonjour ${clientName},
+
+J'ai bien étudié votre demande concernant vos travaux d'espaces verts et j'ai le plaisir de vous transmettre votre proposition de devis chiffrée :
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RÉCAPITULATIF DE L'INTERVENTION :
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Référence du devis : #${shortRef}
+• Prestation : ${service}
+• Localisation du chantier : ${commune}
+• Durée estimée : ${duration}
+• Date d'intervention proposée : ${dateIntv ? new Date(dateIntv).toLocaleDateString('fr-FR') : 'À convenir selon vos disponibilités'}
+• Matériel & outillage : ${equipment || 'Matériel professionnel & évacuation des déchets verts comprise'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DÉTAIL DU PRIX & CRÉDIT D'IMPÔT IMMÉDIAT (50%) :
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Montant Total Facturé : ${price.toFixed(2)} € TTC
+• Avance Immédiate 50% (URSSAF / Coopérative Unipros) : - ${creditImpot.toFixed(2)} €
+👉 RESTE RÉEL À VOTRE CHARGE : ${netClient.toFixed(2)} €
+${applyCoupon ? '• Remise fidélité de bienvenue (-20%) prise en compte dans cette estimation.' : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MESSAGE D'ANDRÉS PINO :
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"${notes || 'Intervention soignée et conforme aux normes des Services à la Personne (SAP).'}"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACCÉDER À VOTRE ESPACE CLIENT :
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Vous pouvez consulter, valider et télécharger votre devis officiel directement en ligne sur notre site :
+https://jomstudiovzla.github.io/pinopage/?espace_client=1
+
+Pour confirmer cette date ou pour toute question, vous pouvez me répondre directement à cet e-mail ou me joindre par téléphone / WhatsApp au 06 51 59 40 34.
+
+Bien cordialement,
+Andrés Pino — Pino Espaces Verts
+Artisan Paysagiste & Membre Déclaré de la Coopérative Unipros
+Téléphone : 06 51 59 40 34 | Email : pino.spacesverts@gmail.com
+Bordeaux Métropole & Gironde (33)
+Site web : https://jomstudiovzla.github.io/pinopage/`;
+
+        // Compose links
+        const gmailUrl  = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(clientEmail)}&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+        const mailtoUrl = `mailto:${encodeURIComponent(clientEmail)}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+
+        const cleanPhone = (clientPhone || '').replace(/[^0-9]/g, '');
+        const intlPhone  = cleanPhone.startsWith('0') ? '33' + cleanPhone.slice(1) : cleanPhone;
+        const waText     = `Bonjour ${clientName}, c'est Andrés Pino. Je viens de préparer votre devis #${shortRef} pour votre jardin (${price.toFixed(2)}€ TTC, soit seulement ${netClient.toFixed(2)}€ net après 50% d'avance immédiate Unipros). Vous pouvez le consulter sur votre espace client : https://jomstudiovzla.github.io/pinopage/?espace_client=1`;
+        const waUrl      = intlPhone ? `https://wa.me/${intlPhone}?text=${encodeURIComponent(waText)}` : `https://wa.me/33651594034?text=${encodeURIComponent(waText)}`;
+
+        // 4. Background dispatch via Web3Forms (audit)
+        try {
+          fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+              access_key: '646876c1-a20d-48d6-953e-8c3b7a5a4c9b',
+              subject: `[Devis Transmis #${shortRef}] Pour ${clientName} (${clientEmail})`,
+              message: mailBody,
+              client_email: clientEmail,
+              price: price + ' € TTC'
+            })
+          }).catch(() => {});
+        } catch(e) {}
+
+        // 5. Populate and open Corroboration Confirmation Modal
         document.getElementById('modal-lead-response').close();
-        showNotificationToast(`✅ Devis envoyé à ${clientName} — ${price.toFixed(2)} € TTC (net client: ${(price * 0.5).toFixed(2)} €)`, 'success');
+
+        const successModal = document.getElementById('modal-devis-sent-success');
+        if (successModal) {
+          document.getElementById('sent-success-ref').textContent        = `Réf: #${shortRef}`;
+          document.getElementById('sent-success-client-name').textContent = `Client : ${clientName}`;
+          document.getElementById('sent-success-email-dest').textContent  = clientEmail || 'Non renseigné';
+          document.getElementById('sent-success-service').textContent     = `${service} (${commune})`;
+          document.getElementById('sent-success-total').textContent       = `${price.toFixed(2)} €`;
+          document.getElementById('sent-success-credit').textContent      = `- ${creditImpot.toFixed(2)} €`;
+          document.getElementById('sent-success-net').textContent         = `${netClient.toFixed(2)} €`;
+
+          const gmailBtn  = document.getElementById('sent-success-gmail-btn');
+          const mailtoBtn = document.getElementById('sent-success-mailto-btn');
+          const waBtn     = document.getElementById('sent-success-wa-btn');
+
+          if (gmailBtn)  gmailBtn.href  = gmailUrl;
+          if (mailtoBtn) mailtoBtn.href = mailtoUrl;
+          if (waBtn) {
+            waBtn.href = waUrl;
+            waBtn.style.display = clientPhone ? 'flex' : 'none';
+          }
+
+          successModal.showModal();
+
+          // Also attempt to open Gmail compose automatically
+          try {
+            window.open(gmailUrl, '_blank');
+          } catch(popErr) {}
+        }
+
+        showNotificationToast(`✅ Devis #${shortRef} enregistré et notifié ! Fenêtre Gmail ouverte pour validation de l'envoi.`, 'success');
         renderAdminLeads();
         if (typeof renderAdminJobs === 'function') renderAdminJobs();
 
@@ -5166,6 +5394,270 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enregistrer & Envoyer le Devis au Client';
       }
+    };
+
+    // ─────────────────────────────────────────────────────────
+    //  Client Notifications — Audio Chime & In-App Real-time
+    // ─────────────────────────────────────────────────────────
+    window.playNotificationChime = () => {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        if (ctx.state === 'suspended') ctx.resume();
+        const now = ctx.currentTime;
+
+        // Tone 1: E5 (659.25 Hz)
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(659.25, now);
+        gain1.gain.setValueAtTime(0, now);
+        gain1.gain.linearRampToValueAtTime(0.20, now + 0.04);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.45);
+
+        // Tone 2: A5 (880 Hz)
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(880, now + 0.15);
+        gain2.gain.setValueAtTime(0, now + 0.15);
+        gain2.gain.linearRampToValueAtTime(0.25, now + 0.18);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.start(now + 0.15);
+        osc2.stop(now + 0.75);
+      } catch (e) {}
+    };
+
+    let _activeClientNotifListener = null;
+    let _activeClientNotifEmail = null;
+    let _seenNotifIds = new Set();
+
+    window.initClientNotificationListener = (clientEmail) => {
+      if (!clientEmail) return;
+      const normEmail = clientEmail.trim().toLowerCase();
+      if (_activeClientNotifEmail === normEmail && _activeClientNotifListener) return;
+
+      if (_activeClientNotifListener) {
+        try { _activeClientNotifListener(); } catch(e) {}
+        _activeClientNotifListener = null;
+      }
+      _activeClientNotifEmail = normEmail;
+
+      if (window.PinoDB && typeof PinoDB.listenClientNotifications === 'function') {
+        _activeClientNotifListener = PinoDB.listenClientNotifications(normEmail, (notifs) => {
+          const unread = (notifs || []).filter(n => !n.read);
+          updateClientNotificationUI(unread);
+        });
+      }
+    };
+
+    window.updateClientNotificationUI = (unreadList) => {
+      const toast = document.getElementById('client-devis-floating-toast');
+      const navBtn = document.getElementById('nav-auth-btn');
+      let badge = document.getElementById('nav-auth-notif-badge');
+
+      if (!unreadList || unreadList.length === 0) {
+        if (badge) badge.remove();
+        if (toast) toast.classList.add('hidden');
+        return;
+      }
+
+      // Add or update badge on navbar button
+      if (navBtn) {
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.id = 'nav-auth-notif-badge';
+          badge.className = 'ml-1.5 px-1.5 py-0.5 bg-red-500 text-white font-black text-[10px] rounded-full animate-pulse shadow-xs';
+          navBtn.appendChild(badge);
+        }
+        badge.textContent = String(unreadList.length);
+      }
+
+      // Show floating toast for the latest unread notification
+      const latest = unreadList[0];
+      if (latest && !_seenNotifIds.has(latest.id)) {
+        _seenNotifIds.add(latest.id);
+        playNotificationChime();
+        showFloatingDevisNotification(latest);
+      }
+    };
+
+    window.showFloatingDevisNotification = (notif) => {
+      const toast = document.getElementById('client-devis-floating-toast');
+      if (!toast || !notif) return;
+
+      const sub = document.getElementById('client-toast-subtitle');
+      const tot = document.getElementById('client-toast-total');
+      const net = document.getElementById('client-toast-net');
+      const meta= document.getElementById('client-toast-meta');
+
+      if (sub) sub.textContent = `Devis #${(notif.lead_id || notif.id || '').slice(-6).toUpperCase()} chiffré par Andrés Pino`;
+      if (tot) tot.textContent = `${parseFloat(notif.price_ttc || 0).toFixed(2)} € TTC`;
+      if (net) net.textContent = `${parseFloat(notif.net_client || (notif.price_ttc * 0.5) || 0).toFixed(2)} €`;
+      if (meta) {
+        const parts = [];
+        if (notif.date_proposed) parts.push(`📅 ${new Date(notif.date_proposed).toLocaleDateString('fr-FR')}`);
+        if (notif.duration) parts.push(`⏱️ ${notif.duration}`);
+        if (notif.service) parts.push(`🌿 ${notif.service}`);
+        meta.textContent = parts.join(' • ') || 'Crédit d\'impôt Unipros 50% déduit';
+      }
+
+      toast.dataset.notifId = notif.id;
+      toast.dataset.clientEmail = notif.client_email || _activeClientNotifEmail || '';
+      toast.classList.remove('hidden');
+    };
+
+    window.dismissClientToast = async (specificId) => {
+      const toast = document.getElementById('client-devis-floating-toast');
+      if (!toast) return;
+      const notifId = specificId || toast.dataset.notifId;
+      const email   = toast.dataset.clientEmail || _activeClientNotifEmail;
+
+      toast.classList.add('hidden');
+      if (notifId && email && window.PinoDB && typeof PinoDB.markNotificationRead === 'function') {
+        await PinoDB.markNotificationRead(email, notifId);
+      }
+    };
+
+    window.openClientPortalFromToast = async () => {
+      const toast = document.getElementById('client-devis-floating-toast');
+      const notifId = toast ? toast.dataset.notifId : null;
+      await dismissClientToast(notifId);
+
+      const user = getCurrentUser();
+      if (user) {
+        populateClientPortal(user);
+        document.getElementById('modal-window-client').showModal();
+        switchClientTab('quotes');
+      } else {
+        openWindowModal('connexion');
+        showNotificationToast('Connectez-vous pour consulter et valider votre devis officiel.', 'info');
+      }
+    };
+
+    // Printable PDF / HTML Quote Function
+    window.printLeadQuotePDF = (quote) => {
+      if (!quote) return;
+      const ref = quote.ref_code || quote.id || 'DEV-2026';
+      const resp = quote.response || {};
+      const total = parseFloat(resp.price_ttc || quote.budget || 0).toFixed(2);
+      const credit = parseFloat(resp.credit_impot || total * 0.5).toFixed(2);
+      const net = parseFloat(resp.net_client || total * 0.5).toFixed(2);
+
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        showNotificationToast('Veuillez autoriser les pop-ups pour imprimer le devis.', 'error');
+        return;
+      }
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+          <meta charset="UTF-8">
+          <title>Devis ${ref} — Pino Espaces Verts</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 40px; color: #1e293b; line-height: 1.5; }
+            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #047857; padding-bottom: 20px; }
+            .logo { font-size: 24px; font-weight: 800; color: #047857; }
+            .coop-tag { background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; margin-top: 30px; gap: 24px; font-size: 13px; }
+            .table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+            .table th { background: #f8fafc; padding: 10px; text-align: left; font-size: 12px; border-bottom: 1px solid #e2e8f0; }
+            .table td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+            .totals { margin-top: 25px; margin-left: auto; width: 360px; font-size: 13px; }
+            .totals-row { display: flex; justify-content: space-between; padding: 6px 0; }
+            .highlight { font-size: 16px; font-weight: 900; color: #047857; border-top: 2px solid #047857; padding-top: 10px; margin-top: 6px; }
+            .legal { margin-top: 40px; font-size: 10px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+            @media print { body { margin: 20px; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="logo">🌲 Pino Espaces Verts</div>
+              <div style="font-size: 12px; color: #475569; margin-top: 4px;">Artisan Paysagiste — Andrés Pino</div>
+              <div style="font-size: 12px; color: #475569;">Bordeaux Métropole & Gironde (33)</div>
+              <div style="font-size: 12px; color: #475569;">Tél : 06 51 59 40 34 • pino.spacesverts@gmail.com</div>
+            </div>
+            <div style="text-align: right;">
+              <span class="coop-tag">Membre de la Coopérative Unipros</span>
+              <h2 style="margin: 8px 0 4px 0; color: #0f172a; font-size: 20px;">DEVIS N° ${ref}</h2>
+              <div style="font-size: 12px; color: #64748b;">Date d'émission : ${new Date().toLocaleDateString('fr-FR')}</div>
+            </div>
+          </div>
+
+          <div class="info-grid">
+            <div>
+              <strong style="color: #047857;">CLIENT :</strong><br>
+              <strong>${quote.name || 'Client Particulier'}</strong><br>
+              ${quote.email || ''}<br>
+              ${quote.phone || ''}<br>
+              📍 ${quote.commune || 'Bordeaux'}
+            </div>
+            <div>
+              <strong style="color: #047857;">DÉTAILS INTERVENTION :</strong><br>
+              <strong>Prestation :</strong> ${quote.service_type || quote.service || 'Entretien espaces verts'}<br>
+              <strong>Durée estimée :</strong> ${resp.duration || 'Selon chantier'}<br>
+              <strong>Date proposée :</strong> ${resp.date_proposed ? new Date(resp.date_proposed).toLocaleDateString('fr-FR') : 'À convenir ensemble'}
+            </div>
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Désignation des travaux</th>
+                <th>Durée</th>
+                <th style="text-align: right;">Montant TTC</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong>${quote.service_type || quote.service || 'Entretien & Aménagement paysager'}</strong><br>
+                  <span style="font-size: 11px; color: #64748b;">${resp.equipment ? 'Matériel : ' + resp.equipment : 'Évacuation des déchets verts comprise'}</span><br>
+                  ${resp.notes ? '<span style="font-size: 11px; color: #475569; font-style: italic;">Note : ' + resp.notes + '</span>' : ''}
+                </td>
+                <td>${resp.duration || '1 intervention'}</td>
+                <td style="text-align: right; font-weight: bold;">${total} €</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="totals">
+            <div class="totals-row">
+              <span>Montant Total Facturé TTC :</span>
+              <strong>${total} €</strong>
+            </div>
+            <div class="totals-row" style="color: #047857;">
+              <span>Avance Immédiate 50% (URSSAF / Unipros) :</span>
+              <strong>- ${credit} €</strong>
+            </div>
+            <div class="totals-row highlight">
+              <span>👉 RESTE RÉEL À VOTRE CHARGE :</span>
+              <span>${net} €</span>
+            </div>
+          </div>
+
+          <div class="legal">
+            <p><strong>Dispositif Avance Immédiate du Crédit d'Impôt :</strong> En faisant appel à Pino Espaces Verts via la Coopérative Unipros (déclarée SAP sous le n° SAP529241671), vous bénéficiez de 50% de déduction fiscale immédiate sur vos prestations d'entretien de jardin (art. 199 sexdecies du CGI). Aucun fonds à avancer.</p>
+            <p style="margin-top: 15px;">Devis valable 30 jours à compter de son émission. Bon pour accord le : .................... Signature du client :</p>
+          </div>
+
+          <script>
+            window.onload = function() { window.print(); }
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
     };
 
     // Impersonation
@@ -5975,6 +6467,45 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }
     });
   </script>
+
+  <!-- Floating Client Quote Notification Toast (In-App Real-time) -->
+  <div id="client-devis-floating-toast" class="hidden fixed bottom-5 right-5 z-[9999] max-w-md w-[calc(100vw-2.5rem)] sm:w-96 bg-white border-2 border-emerald-500 rounded-3xl shadow-2xl p-4 space-y-3">
+    <div class="flex items-start justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+          🔔
+        </div>
+        <div>
+          <h4 class="font-black text-slate-900 text-sm leading-tight">Nouveau Devis Chiffré !</h4>
+          <p class="text-[11px] text-slate-500" id="client-toast-subtitle">Andrés Pino a répondu à votre demande</p>
+        </div>
+      </div>
+      <button type="button" onclick="dismissClientToast()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-xs cursor-pointer" title="Fermer">
+        ✕
+      </button>
+    </div>
+
+    <div class="p-3 bg-gradient-to-br from-emerald-50 to-teal-50/50 rounded-2xl border border-emerald-200 text-xs text-slate-700 space-y-1">
+      <div class="flex justify-between font-medium">
+        <span>Montant Total Facturé :</span>
+        <strong id="client-toast-total" class="text-slate-900">0,00 € TTC</strong>
+      </div>
+      <div class="flex justify-between text-emerald-800 font-extrabold text-sm pt-1 border-t border-emerald-200/60">
+        <span>👉 Net client (Avance 50%) :</span>
+        <strong id="client-toast-net" class="text-emerald-800">0,00 €</strong>
+      </div>
+      <div id="client-toast-meta" class="text-[10px] text-slate-500 pt-0.5"></div>
+    </div>
+
+    <div class="flex gap-2 pt-0.5">
+      <button type="button" onclick="openClientPortalFromToast()" class="flex-1 py-2.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+        <i class="fa-solid fa-file-invoice"></i> Consulter l'Offre & Valider
+      </button>
+      <button type="button" onclick="dismissClientToast()" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition-all cursor-pointer">
+        Plus tard
+      </button>
+    </div>
+  </div>
 
 </body>
 </html>

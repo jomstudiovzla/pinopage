@@ -171,6 +171,33 @@
           lead_id: leadId,
           ...payload
         });
+
+        // In-app real-time notification record for client
+        const rawEmail = responseData.client_email || '';
+        const sanitizedEmail = rawEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+        if (sanitizedEmail) {
+          const notifId = 'notif_' + Date.now();
+          await db.ref('client_notifications/' + sanitizedEmail + '/' + notifId).set({
+            id: notifId,
+            lead_id: leadId,
+            type: 'devis_response',
+            title: 'Proposition de Devis reçue !',
+            client_name: responseData.client_name || '',
+            client_email: rawEmail,
+            service: responseData.service_type || 'Entretien jardin',
+            commune: responseData.commune || '',
+            price_ttc: responseData.price_ttc,
+            credit_impot: responseData.credit_impot,
+            net_client: responseData.net_client,
+            duration: responseData.duration || '',
+            date_proposed: responseData.date_proposed || '',
+            equipment: responseData.equipment || '',
+            notes: responseData.notes || '',
+            read: false,
+            created_at: new Date().toISOString()
+          });
+        }
+
         return { ok: true };
       } catch (err) {
         log('saveLeadResponse:rtdb', err);
@@ -178,6 +205,61 @@
     }
 
     return { ok: true, fallback: true };
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  NOTIFICATIONS — Écoute et gestion temps réel pour les clients
+   * ───────────────────────────────────────────────────────── */
+  function listenClientNotifications(clientEmail, callback) {
+    if (!clientEmail || typeof callback !== 'function') return () => {};
+    const sanitizedEmail = clientEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+    const db = rtdb();
+    if (!db) return () => {};
+
+    const notifRef = db.ref('client_notifications/' + sanitizedEmail);
+    const listener = (snap) => {
+      const val = snap.val() || {};
+      const list = Object.keys(val).map(k => ({ id: k, ...val[k] })).reverse();
+      callback(list);
+    };
+    notifRef.on('value', listener);
+
+    return () => notifRef.off('value', listener);
+  }
+
+  async function fetchClientNotifications(clientEmail) {
+    if (!clientEmail) return { ok: false, data: [] };
+    const sanitizedEmail = clientEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+    const db = rtdb();
+    if (db) {
+      try {
+        const snap = await db.ref('client_notifications/' + sanitizedEmail).once('value');
+        const val = snap.val() || {};
+        const list = Object.keys(val).map(k => ({ id: k, ...val[k] })).reverse();
+        return { ok: true, data: list };
+      } catch (err) {
+        log('fetchClientNotifications:rtdb', err);
+      }
+    }
+    return { ok: false, data: [] };
+  }
+
+  async function markNotificationRead(clientEmail, notifId) {
+    if (!clientEmail || !notifId) return { ok: false };
+    const sanitizedEmail = clientEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+    const db = rtdb();
+    if (db) {
+      try {
+        await db.ref('client_notifications/' + sanitizedEmail + '/' + notifId).update({
+          read: true,
+          read_at: new Date().toISOString()
+        });
+        return { ok: true };
+      } catch (err) {
+        log('markNotificationRead:rtdb', err);
+      }
+    }
+    return { ok: false };
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -657,6 +739,9 @@
     updateJob,
     exportJobsCSV,
     exportJobsPDF,
+    listenClientNotifications,
+    fetchClientNotifications,
+    markNotificationRead,
   };
 
 })(window);
