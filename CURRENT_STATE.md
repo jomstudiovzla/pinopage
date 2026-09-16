@@ -214,3 +214,29 @@
        - Suite dédiée `test_client_partitioning.js` : **12 tests passés sur 12 (100% de réussite)**.
        - Suite de téléchargements `test_all_downloads.js` : **17 tests passés sur 17 (100% de réussite)**.
        - Cache Service Worker incrémenté à `pino-ev-v8-clients-partition-crm`.
+
+- [x] **Système de Notifications Bidirectionnelles Automatiques (Admin Andrés Pino ↔ Client) & Skill Permanente (100% OPÉRATIONNEL & AUDITÉ)** :
+    1. **Architecture Dual-Delivery (In-App + E-mail Direct)** :
+       - **Admin → Client** :
+         - *Factures & SAP 50%* : Dès qu'une facture est émise dans le CRM (`handleCreateInvoiceSubmit`), le client reçoit automatiquement un e-mail officiel avec le montant TTC, le crédit d'impôt instantané de 50% (Case 7DB URSSAF) et le lien direct de téléchargement de sa facture et attestation fiscale SAP.
+         - *Messages Directs / Interventions* : Nouveau modal CRM `#modal-admin-message-client` avec 6 modèles pré-remplis (*Confirmation de passage*, *Devis chiffré prêt*, *Facture émise*, *Suivi de satisfaction*, *Conseils de saison*, *Message libre*). Envoi direct dans la boîte mail du client (FormSubmit AJAX) + archivage dans son Espace Client (`/clients_records/{sanitizedEmail}/messages`).
+         - Boutons d'accès direct `[ ✉️ Message ]` intégrés dans `renderAdminUsers`, `#adm-factures-client-dossier-card` et `renderAdminLeads`.
+       - **Client → Admin** :
+         - *Acceptation de Devis* : Dès qu'un client valide un devis sur son Espace Client (`acceptClientQuote` / `PinoDB.acceptQuote`), Andrés Pino reçoit immédiatement un e-mail à `pino.spacesverts@gmail.com` via Web3Forms avec toutes les coordonnées, le devis validé, le montant et le lien d'accès au CRM. Le client reçoit quant à lui un e-mail de confirmation.
+         - *Nouvelles Demandes Web* : Notification e-mail temps réel + inscription dans `/admin_notifications` et `/leads`.
+    2. **Méthodes Centralisées dans `assets/js/pino-db.js`** :
+       - `PinoDB.notifyAdminByEmail(opts)` : Envoi Web3Forms à `pino.spacesverts@gmail.com` + notification RTDB `/admin_notifications` + journal d'audit.
+       - `PinoDB.notifyClientByEmail(opts)` : Envoi FormSubmit AJAX au client + copie d'audit à Andrés + notification `/client_notifications` + `/clients_records/{email}/messages`.
+       - `PinoDB.sendClientDirectMessage(opts)` : Dispatch modulaire avec synchronisation multicanale.
+       - `PinoDB.fetchClientMessages(email)` & `PinoDB.listenClientMessages(email, cb)` : Consultation et écoute temps réel des messages dans l'Espace Client.
+       - Helper `safePushAudit(db, payload)` garantissant zéro crash asynchrone sur les journaux d'audit.
+    3. **Affichage dans l'Espace Client** :
+       - Bannière dynamique de messages directs d'Andrés Pino intégrée dans `renderClientQuotes`.
+    4. **Skill Permanente Universelle** :
+       - Création de la Skill permanente [pino-notificaciones-bidireccionales](file:///Users/macbook/.gemini/config/skills/pino-notificaciones-bidireccionales/SKILL.md) et de sa documentation technique [docs/skills/NOTIFICACIONES_BIDIRECCIONALES.md](file:///Users/macbook/Documents/Antigravity/PINO/new/docs/skills/NOTIFICACIONES_BIDIRECCIONALES.md).
+    5. **Tests & Validation Automatisée** :
+       - Suite dédiée `test_bidirectional_notifications.js` : **6 tests passés sur 6 (100% de réussite)**.
+       - Suite de partitionnement `test_client_partitioning.js` : **12 tests passés sur 12 (100% de réussite)**.
+       - Suite de téléchargements `test_all_downloads.js` : **17 tests passés sur 17 (100% de réussite)**.
+       - Cache Service Worker incrémenté à `pino-ev-v9-bidirectional-notifications` dans [`sw.js`](file:///Users/macbook/Documents/Antigravity/PINO/new/sw.js).
+

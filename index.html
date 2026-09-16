@@ -926,6 +926,101 @@
     </form>
   </dialog>
 
+  <!-- Modal: Message Direct / E-mail Client (Andrés Pino CRM) -->
+  <dialog id="modal-admin-message-client" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-2xl w-[96%] max-h-[90vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
+    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 py-4 text-white flex justify-between items-center shrink-0">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-400/30 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-paper-plane"></i>
+        </span>
+        <div>
+          <h3 class="font-serif text-xl font-bold">Envoyer un Message au Client</h3>
+          <p class="text-xs text-white/70">Notification instantanée Espace Client + Envoi E-mail direct</p>
+        </div>
+      </div>
+      <button type="button" onclick="document.getElementById('modal-admin-message-client').close()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center cursor-pointer transition-colors" title="Fermer">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <form id="admin-message-client-form" onsubmit="handleSendAdminDirectMessage(event)" class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
+      <!-- Fiche Récapitulative du Destinataire -->
+      <div class="p-3.5 bg-emerald-50/70 rounded-2xl border border-emerald-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div>
+          <span class="text-[10px] font-bold text-emerald-800 uppercase block">Destinataire</span>
+          <span id="adm-msg-client-display-name" class="font-bold text-slate-900 text-sm">Nom du Client</span>
+          <span id="adm-msg-client-display-email" class="text-slate-600 block font-mono text-xs">client@email.fr</span>
+        </div>
+        <div class="text-right">
+          <span id="adm-msg-client-display-phone" class="text-slate-600 font-semibold block"><i class="fa-solid fa-phone text-emerald-600 mr-1"></i>—</span>
+          <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full mt-1">
+            <i class="fa-solid fa-bell"></i> Synchronisation App & Mail
+          </span>
+        </div>
+      </div>
+
+      <input type="hidden" id="adm-msg-client-email" />
+      <input type="hidden" id="adm-msg-client-name" />
+      <input type="hidden" id="adm-msg-client-phone" />
+
+      <!-- Sélecteur de Modèle Rapide -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1" for="adm-msg-template-select">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-500 mr-1"></i> Modèle rapide pré-rempli
+        </label>
+        <select id="adm-msg-template-select" onchange="handleAdminMessageTemplateChange()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-none bg-white font-medium">
+          <option value="custom">✏️ Message libre / personnalisé</option>
+          <option value="intervention_confirm">📅 Confirmation de passage / intervention chantier</option>
+          <option value="quote_ready">🌿 Devis chiffré disponible (50% Avance Immédiate)</option>
+          <option value="invoice_ready">🧾 Facture disponible & Attestation SAP téléchargeable</option>
+          <option value="followup_review">⭐ Suivi de satisfaction & fin de travaux</option>
+          <option value="seasonal_tips">🍂 Conseil entretien de saison pour votre jardin</option>
+        </select>
+      </div>
+
+      <!-- Objet du Message -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1" for="adm-msg-subject">
+          Objet du message / Titre de la notification <span class="text-red-500">*</span>
+        </label>
+        <input type="text" id="adm-msg-subject" required placeholder="Ex: Confirmation de notre intervention de jeudi matin"
+          class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-none font-medium" />
+      </div>
+
+      <!-- Corps du Message -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1" for="adm-msg-body">
+          Message personnalisé <span class="text-red-500">*</span>
+        </label>
+        <textarea id="adm-msg-body" rows="5" required placeholder="Saisissez votre message pour le client..."
+          class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-none font-normal leading-relaxed"></textarea>
+      </div>
+
+      <!-- Options d'envoi -->
+      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs">
+        <label class="flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+          <input type="checkbox" id="adm-msg-send-email" checked class="rounded text-emerald-600 focus:ring-emerald-500" />
+          <span><i class="fa-solid fa-envelope text-emerald-600 mr-1"></i> Envoyer un e-mail direct dans la boîte de réception du client</span>
+        </label>
+        <label class="flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+          <input type="checkbox" id="adm-msg-send-inapp" checked class="rounded text-emerald-600 focus:ring-emerald-500" />
+          <span><i class="fa-solid fa-mobile-screen text-blue-600 mr-1"></i> Publier la notification dans l'Espace Client sécurisé</span>
+        </label>
+      </div>
+
+      <div class="flex items-center gap-3 pt-3 border-t border-slate-200">
+        <button type="submit" id="adm-msg-submit-btn"
+          class="flex-1 py-3 px-5 bg-gradient-to-r from-emerald-700 to-teal-800 hover:from-emerald-800 hover:to-teal-900 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-paper-plane"></i> Envoyer le Message & Notifier par E-mail
+        </button>
+        <button type="button" onclick="document.getElementById('modal-admin-message-client').close()"
+          class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer">
+          Annuler
+        </button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Modal: Nouvelle Facture & Dossier Fiscal SAP (Andrés Pino) -->
   <dialog id="modal-nouvelle-facture" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-2xl w-[96%] max-h-[90vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
     <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 py-4 text-white flex justify-between items-center shrink-0">
@@ -1968,6 +2063,9 @@
               <span class="text-[10px] uppercase font-bold text-amber-600 block">Reste Dû</span>
               <span id="adm-dossier-total-due" class="text-sm font-black text-amber-700">0.00 €</span>
             </div>
+            <button type="button" onclick="openAdminMessageForCurrentDossier()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer" title="Envoyer un message direct / e-mail à ce client">
+              <i class="fa-solid fa-paper-plane"></i> Message
+            </button>
             <button type="button" onclick="handleAdminFacturesClientFilterChange('ALL')" class="px-2.5 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 transition-colors cursor-pointer" title="Revenir à tous les clients">
               <i class="fa-solid fa-xmark mr-1"></i> Tous
             </button>
@@ -5857,8 +5955,36 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
       const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
 
+      // Messages reçus d'Andrés Pino
+      let directMessages = [];
+      if (window.PinoDB && typeof PinoDB.fetchClientMessages === 'function') {
+        try {
+          const msgRes = await PinoDB.fetchClientMessages(email);
+          if (msgRes.ok && Array.isArray(msgRes.data)) {
+            directMessages = msgRes.data;
+          }
+        } catch(e) {}
+      }
+
+      let messagesHtml = '';
+      if (directMessages.length > 0) {
+        messagesHtml = `
+          <div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50/60 border-2 border-amber-300 rounded-2xl shadow-xs space-y-2 mb-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-amber-950 flex items-center gap-2">
+                <i class="fa-solid fa-envelope-open-text text-amber-600 text-sm"></i>
+                Message direct d'Andrés Pino (${directMessages.length})
+              </span>
+              <span class="text-[10px] text-amber-700 font-medium">${directMessages[0].created_at ? new Date(directMessages[0].created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}</span>
+            </div>
+            <div class="text-xs text-slate-800 font-semibold">${escapeFn(directMessages[0].subject || 'Information sur votre chantier')}</div>
+            <p class="text-xs text-slate-700 whitespace-pre-line bg-white/70 p-3 rounded-xl border border-amber-200/60 leading-relaxed">${escapeFn(directMessages[0].message)}</p>
+          </div>
+        `;
+      }
+
       window._cachedClientQuotes = quotes;
-      listEl.innerHTML = quotes.map(q => {
+      listEl.innerHTML = messagesHtml + quotes.map(q => {
         const ref = q.ref_code || q.id || 'Demande';
         const service = q.service_type || q.service || 'Entretien jardin';
         const budget = parseFloat(q.budget_eur || q.budget) || 0;
@@ -6595,6 +6721,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
                 ${phoneDigits ? `<a href="${waLink}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors" title="WhatsApp"><i class="fa-brands fa-whatsapp text-sm"></i></a>` : ''}
                 ${phoneClean ? `<a href="tel:${escapeFn(phoneClean)}" class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors" title="Appeler"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
                 <button onclick="openLeadRepairModal('${escapeFn(leadKey)}')" class="inline-flex items-center justify-center w-8 h-8 bg-amber-50 text-amber-800 border border-amber-200 rounded-xl hover:bg-amber-100 transition-colors cursor-pointer shadow-2xs" title="Réparer / Qualifier"><i class="fa-solid fa-screwdriver-wrench text-xs"></i></button>
+                <button onclick="openAdminMessageClientModal('${escapeFn(mailClean)}', '${escapeFn(l.name)}', '${escapeFn(l.phone || '')}')" class="inline-flex items-center justify-center w-8 h-8 bg-amber-100 text-amber-900 border border-amber-300 rounded-xl hover:bg-amber-200 transition-colors cursor-pointer shadow-2xs" title="Envoyer un message ou e-mail direct au client"><i class="fa-solid fa-paper-plane text-xs"></i></button>
                 <button onclick="printLeadQuotePDF('${escapeFn(leadKey)}')" class="inline-flex items-center justify-center w-8 h-8 bg-purple-50 text-purple-700 border border-purple-200 rounded-xl hover:bg-purple-100 transition-colors cursor-pointer shadow-2xs" title="Visualiser & Télécharger Devis PDF"><i class="fa-solid fa-file-pdf text-xs"></i></button>
                 <button onclick="openLeadResponseModal('${escapeFn(leadKey)}')" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-700 text-white rounded-xl hover:bg-emerald-800 transition-colors cursor-pointer shadow-xs" title="Établir un Devis & Répondre"><i class="fa-solid fa-file-invoice-dollar text-xs"></i></button>
                 <button onclick="openNewInvoiceModalForLead('${escapeFn(leadKey)}')" class="inline-flex items-center justify-center w-8 h-8 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors cursor-pointer shadow-xs" title="Créer Facture à partir de ce devis"><i class="fa-solid fa-receipt text-xs"></i></button>
@@ -7525,6 +7652,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
                 <td class="p-3 text-right whitespace-nowrap">
                   ${!isAdm ? `
                     <div class="flex items-center justify-end gap-1">
+                      <button onclick="openAdminMessageClientModal('${escapeHtml(u.email)}', '${escapeHtml(u.fullName || '')}', '${escapeHtml(u.phone || '')}')" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg text-xxs font-bold transition-colors cursor-pointer" title="Envoyer un message direct / e-mail à ce client"><i class="fa-solid fa-paper-plane mr-1"></i>Message</button>
                       <button onclick="admFilterFacturesByClient('${escapeHtml(u.email)}')" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xxs font-bold transition-colors cursor-pointer" title="Consulter les factures de ce dossier client"><i class="fa-solid fa-receipt mr-1"></i>Factures</button>
                       <button onclick="admFilterLeadsByClient('${escapeHtml(u.email)}')" class="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-800 rounded-lg text-xxs font-bold transition-colors cursor-pointer" title="Consulter les devis de ce client"><i class="fa-solid fa-file-lines mr-1"></i>Devis</button>
                       <button onclick="admInspectClient('${escapeHtml(u.email)}')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xxs font-bold transition-colors cursor-pointer" title="Voir l'espace client"><i class="fa-solid fa-eye mr-1"></i>Espace</button>
@@ -8758,6 +8886,26 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         } catch(e) {}
       }
 
+      // 3. Notification par e-mail direct au client + Copie audit
+      if (clientEmail && window.PinoDB && typeof PinoDB.notifyClientByEmail === 'function') {
+        const isUnipros = (paymentMethod || '').toLowerCase() === 'unipros';
+        const netClient = isUnipros ? (amountCharged * 0.5) : amountCharged;
+        PinoDB.notifyClientByEmail({
+          clientEmail: clientEmail,
+          clientName: clientName,
+          subject: `🧾 [FACTURE PINO] Facture ${facNumber} & Attestation Fiscale 50% SAP`,
+          type: 'invoice_issued',
+          facNumber: facNumber,
+          amountCharged: amountCharged.toFixed(2),
+          netClient: netClient.toFixed(2),
+          message: `Votre facture ${facNumber} d'un montant de ${amountCharged.toFixed(2)} € TTC pour la prestation "${serviceType}" est désormais disponible.\n\n` +
+            (isUnipros
+              ? `Grâce à notre adhésion à la coopérative déclarée Unipros, vous bénéficiez de l'Avance Immédiate du Crédit d'Impôt SAP de 50% (URSSAF - Case 7DB). Votre reste à charge effectif s'élève à seulement ${netClient.toFixed(2)} €.\n\n`
+              : '') +
+            `Votre attestation fiscale officielle et le détail de vos prestations sont téléchargeables immédiatement depuis votre Espace Client.`
+        }).catch(err => console.warn('[pino] notifyClientByEmail invoice error:', err));
+      }
+
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
@@ -8809,6 +8957,18 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
             localStorage.setItem('pino_leads', JSON.stringify(local));
           }
         } catch(e) {}
+
+        if (window.PinoDB && typeof PinoDB.notifyAdminByEmail === 'function') {
+          PinoDB.notifyAdminByEmail({
+            subject: `🎉 [DEVIS ACCEPTÉ] Proposition validée par ${clientName}`,
+            type: 'quote_accepted',
+            clientName: clientName,
+            clientEmail: clientEmail || user.email || '',
+            clientPhone: user.phone || '',
+            leadId: quoteId,
+            message: `Le client ${clientName} a validé le devis #${String(quoteId).slice(-6)} depuis son Espace Client.`
+          }).catch(() => {});
+        }
       }
 
       showNotificationToast('🎉 Devis accepté ! Andrés Pino a été notifié et confirme votre passage sous 24h.', 'success');
@@ -8818,6 +8978,165 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       }
       if (typeof renderAdminLeads === 'function') {
         renderAdminLeads();
+      }
+    };
+
+    // ─────────────────────────────────────────────────────────
+    // GESTION DU MODAL DE MESSAGERIE DIRECTE CLIENT (Andrés Pino)
+    // ─────────────────────────────────────────────────────────
+    window.openAdminMessageClientModal = (email, name = '', phone = '', defaultSubject = '', defaultMsg = '', defaultTemplate = 'custom') => {
+      const modal = document.getElementById('modal-admin-message-client');
+      if (!modal) return;
+
+      const rawEmail = (email || '').trim();
+      const rawName = (name || '').trim() || 'Client Particulier';
+      const rawPhone = (phone || '').trim();
+
+      const emailInput = document.getElementById('adm-msg-client-email');
+      const nameInput = document.getElementById('adm-msg-client-name');
+      const phoneInput = document.getElementById('adm-msg-client-phone');
+      if (emailInput) emailInput.value = rawEmail;
+      if (nameInput) nameInput.value = rawName;
+      if (phoneInput) phoneInput.value = rawPhone;
+
+      const nameDisplay = document.getElementById('adm-msg-client-display-name');
+      const emailDisplay = document.getElementById('adm-msg-client-display-email');
+      const phoneDisplay = document.getElementById('adm-msg-client-display-phone');
+      if (nameDisplay) nameDisplay.textContent = rawName;
+      if (emailDisplay) emailDisplay.textContent = rawEmail || 'E-mail non renseigné';
+      if (phoneDisplay) {
+        phoneDisplay.innerHTML = rawPhone
+          ? `<i class="fa-solid fa-phone text-emerald-600 mr-1"></i> ${escapeHtml(rawPhone)}`
+          : '<span class="text-slate-400">Aucun téléphone</span>';
+      }
+
+      const selectTpl = document.getElementById('adm-msg-template-select');
+      if (selectTpl) selectTpl.value = defaultTemplate;
+
+      const subjInput = document.getElementById('adm-msg-subject');
+      const bodyInput = document.getElementById('adm-msg-body');
+      if (subjInput) subjInput.value = defaultSubject || `Information concernant vos espaces verts — Pino Espaces Verts`;
+      if (bodyInput) bodyInput.value = defaultMsg || `Bonjour ${rawName},\n\n`;
+
+      if (defaultTemplate !== 'custom') {
+        handleAdminMessageTemplateChange();
+      }
+
+      modal.showModal();
+    };
+
+    window.openAdminMessageForCurrentDossier = () => {
+      const activeFilter = (window._activeFacturesClientFilter || 'ALL').trim();
+      if (activeFilter === 'ALL' || !activeFilter) {
+        showNotificationToast('Veuillez sélectionner un dossier client spécifique.', 'info');
+        return;
+      }
+      const clientName = document.getElementById('adm-dossier-client-name')?.textContent || 'Client';
+      const clientEmail = activeFilter;
+      const clientPhone = document.getElementById('adm-dossier-client-phone')?.textContent?.replace(/[^0-9+]/g, '') || '';
+      openAdminMessageClientModal(clientEmail, clientName, clientPhone);
+    };
+
+    window.handleAdminMessageTemplateChange = () => {
+      const tpl = document.getElementById('adm-msg-template-select')?.value;
+      const clientName = document.getElementById('adm-msg-client-name')?.value || 'Client';
+      const subjInput = document.getElementById('adm-msg-subject');
+      const bodyInput = document.getElementById('adm-msg-body');
+      if (!subjInput || !bodyInput) return;
+
+      switch (tpl) {
+        case 'intervention_confirm':
+          subjInput.value = `📅 [CONFIRMATION] Passage prévu pour l'entretien de votre jardin`;
+          bodyInput.value = `Bonjour ${clientName},\n\nJe vous confirme notre passage d'intervention d'entretien d'espaces verts prévu cette semaine.\n\nNotre équipe sera équipée de tout le matériel professionnel nécessaire (taille-haies, tondeuse autoportée et broyeur).\n\nN'hésitez pas à me signaler par retour de mail ou par SMS tout aménagement ou consigne spécifique d'accès à votre propriété.\n\nÀ très bientôt,\nAndrés Pino`;
+          break;
+        case 'quote_ready':
+          subjInput.value = `🌿 [DEVIS DISPONIBLE] Votre proposition chiffrée (50% Avance Immédiate SAP)`;
+          bodyInput.value = `Bonjour ${clientName},\n\nVotre proposition de devis détaillée est désormais disponible et consultable en direct sur votre Espace Client.\n\nPour rappel, en tant que client particulier, vous bénéficiez immédiatement de 50% de crédit d'impôt en temps réel grâce à l'Avance Immédiate URSSAF via la coopérative Unipros (Case 7DB).\n\nVous pouvez valider votre devis en un seul clic sur votre Espace Client pour bloquer votre date d'intervention.\n\nRestant à votre entière écoute,\nAndrés Pino`;
+          break;
+        case 'invoice_ready':
+          subjInput.value = `🧾 [FACTURE DISPONIBLE] Facture & Attestation Fiscale SAP 50%`;
+          bodyInput.value = `Bonjour ${clientName},\n\nVotre facture correspondant aux travaux d'espaces verts réalisés ainsi que votre attestation fiscale officielle pour votre déclaration de revenus sont disponibles au téléchargement PDF dans votre Espace Client.\n\nMerci pour votre confiance et pour la recommandation de nos services auprès de votre entourage !\n\nBien cordialement,\nAndrés Pino`;
+          break;
+        case 'followup_review':
+          subjInput.value = `⭐ Suivi de chantier et satisfaction — Pino Espaces Verts`;
+          bodyInput.value = `Bonjour ${clientName},\n\nSuite à notre récente intervention dans votre jardin, je tenais à m'assurer de votre entière satisfaction quant à la qualité de nos prestations et à la propreté du chantier.\n\nSi vous avez un moment, votre avis compte beaucoup pour nous ! N'hésitez pas à nous faire part de vos retours.\n\nBien cordialement,\nAndrés Pino`;
+          break;
+        case 'seasonal_tips':
+          subjInput.value = `🍂 Conseils d'artisan paysagiste pour la saison — Pino Espaces Verts`;
+          bodyInput.value = `Bonjour ${clientName},\n\nC'est la période idéale pour préparer votre jardin aux changements de saison (taille des arbustes, scarification de pelouse, paillage protecteur).\n\nSi vous souhaitez programmer une visite d'entretien ou un rafraîchissement complet, contactez-moi pour réserver un créneau.\n\nBien cordialement,\nAndrés Pino`;
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.handleSendAdminDirectMessage = async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('adm-msg-submit-btn');
+      const originalText = submitBtn ? submitBtn.innerHTML : 'Envoyer';
+
+      const email = (document.getElementById('adm-msg-client-email')?.value || '').trim();
+      const name = (document.getElementById('adm-msg-client-name')?.value || '').trim() || 'Client Particulier';
+      const phone = (document.getElementById('adm-msg-client-phone')?.value || '').trim();
+      const subject = (document.getElementById('adm-msg-subject')?.value || '').trim();
+      const message = (document.getElementById('adm-msg-body')?.value || '').trim();
+      const sendEmail = document.getElementById('adm-msg-send-email')?.checked;
+      const sendInApp = document.getElementById('adm-msg-send-inapp')?.checked;
+      const templateType = document.getElementById('adm-msg-template-select')?.value || 'custom';
+
+      if (!email && sendEmail) {
+        showNotificationToast('Veuillez renseigner une adresse e-mail valide.', 'error');
+        return;
+      }
+      if (!subject || !message) {
+        showNotificationToast('Veuillez remplir l\'objet et le corps du message.', 'error');
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Envoi en cours...';
+      }
+
+      try {
+        let sentOk = false;
+        if (window.PinoDB && typeof PinoDB.sendClientDirectMessage === 'function') {
+          const res = await PinoDB.sendClientDirectMessage({
+            clientEmail: email,
+            clientName: name,
+            clientPhone: phone,
+            subject: subject,
+            message: message,
+            templateType: templateType,
+            notifyEmail: sendEmail
+          });
+          sentOk = res && res.ok;
+        }
+
+        document.getElementById('modal-admin-message-client').close();
+        showNotificationToast(`✅ Message transmis à ${name}${sendEmail ? ' par e-mail et ' : ''} dans son Espace Client.`, 'success');
+
+        try {
+          let localMsgs = JSON.parse(localStorage.getItem('pino_admin_messages') || '[]');
+          localMsgs.unshift({
+            id: 'msg_' + Date.now(),
+            clientEmail: email,
+            clientName: name,
+            subject: subject,
+            message: message,
+            sent_at: new Date().toISOString()
+          });
+          localStorage.setItem('pino_admin_messages', JSON.stringify(localMsgs));
+        } catch(err) {}
+
+      } catch (err) {
+        console.error('[pino] handleSendAdminDirectMessage error:', err);
+        showNotificationToast('Erreur lors de l\'envoi du message. Réessayez.', 'error');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        }
       }
     };
 

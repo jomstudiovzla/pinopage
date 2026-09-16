@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v8-clients-partition-crm';
+const CACHE_NAME = 'pino-ev-v9-bidirectional-notifications';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',

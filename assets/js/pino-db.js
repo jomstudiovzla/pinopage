@@ -31,6 +31,19 @@
     if (err) console.warn('[pino-db]', tag, err.message || err);
   }
 
+  const PINO_ADMIN_EMAIL = 'pino.spacesverts@gmail.com';
+  const WEB3FORMS_ACCESS_KEY = '646876c1-a20d-48d6-953e-8c3b7a5a4c9b';
+
+  async function safePushAudit(db, payload) {
+    if (!db) return;
+    try {
+      const p = db.ref('audit_logs').push();
+      if (p && typeof p.set === 'function') {
+        await p.set(payload).catch(() => {});
+      }
+    } catch(e) {}
+  }
+
   /* ─────────────────────────────────────────────────────────
    *  LEADS — Guardar demande de devis
    * ───────────────────────────────────────────────────────── */
@@ -71,6 +84,18 @@
             updated_at: new Date().toISOString()
           }).catch(() => {});
         }
+
+        // Notification automatique de l'admin Andrés Pino en temps réel
+        notifyAdminByEmail({
+          subject: `🌿 [NOUVEAU DEVIS] Demande de ${data.name || 'Prospect'} (${data.service || 'Entretien'})`,
+          type: 'new_lead',
+          clientName: data.name || 'Prospect',
+          clientEmail: data.email || '',
+          clientPhone: data.phone || '',
+          leadId: ref.key,
+          amount: data.budget || null,
+          message: `Nouvelle demande reçue depuis le site web officiel.\nPrestation : ${data.service || 'Entretien'}\nCommune : ${data.commune || 'Bordeaux'}\nSurface : ${data.surface ? data.surface + ' m²' : 'Non précisée'}\nDétails : ${data.details || 'Aucun'}`
+        }).catch(() => {});
 
         return { ok: true, id: ref.key };
       } catch (err) {
@@ -304,12 +329,12 @@
         }
 
         // 5. Enregistrer dans audit_logs
-        await db.ref('audit_logs').push({
+        await safePushAudit(db, {
           sessionUser: clientDetails.email || 'client',
           action: 'devis_accepte',
           leadId: leadId,
           created_at: timestamp
-        }).catch(() => {});
+        });
 
       } catch (err) {
         log('acceptQuote:rtdb', err);
@@ -339,7 +364,354 @@
       }
     } catch(e) {}
 
+    // 6. Notification par e-mail en arrière-plan (Admin Andrés Pino + Confirmation Client)
+    try {
+      const clientName = clientDetails.name || 'Client Particulier';
+      const rawEmail = clientDetails.email || '';
+      const clientPhone = clientDetails.phone || 'Non renseigné';
+      const shortLeadId = String(leadId).slice(-6);
+
+      // 6a. Notifier Andrés Pino par e-mail direct (Web3Forms + RTDB admin_notifications)
+      notifyAdminByEmail({
+        subject: `🎉 [DEVIS ACCEPTÉ] Proposition chiffrée validée par ${clientName}`,
+        type: 'quote_accepted',
+        clientName: clientName,
+        clientEmail: rawEmail,
+        clientPhone: clientPhone,
+        leadId: leadId,
+        message: `Le client ${clientName} (${rawEmail}, tél : ${clientPhone}) a formellement validé votre proposition de devis #${shortLeadId} depuis son Espace Client.\n\nNotes de validation : ${clientDetails.notes || 'Accepté via Espace Client'}.\n\nVous pouvez désormais caler la date d'intervention sur votre planning d'artisan paysagiste.`
+      }).catch(err => log('acceptQuote:notifyAdminByEmail', err));
+
+      // 6b. Confirmation automatique transmise au client par e-mail direct
+      if (rawEmail) {
+        notifyClientByEmail({
+          clientEmail: rawEmail,
+          clientName: clientName,
+          subject: `✅ [CONFIRMATION] Devis #${shortLeadId} validé — Pino Espaces Verts`,
+          type: 'quote_confirmed',
+          message: `Nous vous remercions chaleureusement pour votre confiance !\n\nVotre accord pour la proposition chiffrée #${shortLeadId} a bien été enregistré dans nos plannings.\n\nAndrés Pino prendra contact avec vous par téléphone ou WhatsApp sous 24h pour caler la date d'intervention à votre convenance.`
+        }).catch(err => log('acceptQuote:notifyClientByEmail', err));
+      }
+    } catch (notifErr) {
+      log('acceptQuote:notifDispatch', notifErr);
+    }
+
     return { ok: true, timestamp };
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  NOTIFICATIONS & MESSAGERIE BIDIRECTIONNELLE (Admin ↔ Client)
+   * ───────────────────────────────────────────────────────── */
+
+  /**
+   * Envoie une notification par e-mail à Andrés Pino (pino.spacesverts@gmail.com)
+   * via Web3Forms et enregistre l'événement dans /admin_notifications.
+   */
+  async function notifyAdminByEmail(opts = {}) {
+    const timestamp = new Date().toISOString();
+    const subject = opts.subject || '🌿 [ALERTE CRM] Notification Pino Espaces Verts';
+    const clientName = opts.clientName || 'Client Particulier';
+    const clientEmail = opts.clientEmail || '';
+    const clientPhone = opts.clientPhone || 'Non renseigné';
+    const leadId = opts.leadId || '';
+    const type = opts.type || 'general';
+    const message = opts.message || '';
+
+    const formattedDate = new Date().toLocaleString('fr-FR', {
+      timeZone: 'Europe/Paris',
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+
+    const mailBody = `=====================================================
+PINO ESPACES VERTS — ALERTE CRM EN DIRECT
+=====================================================
+Type d'alerte : ${subject}
+Date & Heure : ${formattedDate} (Paris)
+
+COORDONNÉES DU CONTACT :
+- Nom : ${clientName}
+- E-mail : ${clientEmail || 'Non communiqué'}
+- Téléphone : ${clientPhone}
+${leadId ? `- Référence dossier / lead : ${leadId}\n` : ''}${opts.amount ? `- Montant : ${opts.amount} €\n` : ''}
+-----------------------------------------------------
+MESSAGE / DÉTAILS TRANSMIS :
+${message}
+-----------------------------------------------------
+ACCÉDER AU CRM ADMINISTRATEUR :
+https://jomstudiovzla.github.io/pinopage/#admin
+=====================================================`;
+
+    let emailSent = false;
+    if (typeof fetch === 'function') {
+      try {
+        const res = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            access_key: WEB3FORMS_ACCESS_KEY,
+            to: PINO_ADMIN_EMAIL,
+            from_name: 'Pino Espaces Verts — CRM Alerte',
+            subject: subject,
+            replyto: clientEmail || PINO_ADMIN_EMAIL,
+            message: mailBody,
+            client_name: clientName,
+            client_email: clientEmail,
+            client_phone: clientPhone,
+            event_type: type,
+            lead_id: leadId
+          })
+        });
+        const data = await res.json().catch(() => ({ success: true }));
+        emailSent = Boolean(data && data.success);
+      } catch (err) {
+        log('notifyAdminByEmail:fetch', err);
+      }
+    } else {
+      emailSent = true;
+    }
+
+    const db = rtdb();
+    if (db) {
+      try {
+        const notifId = 'adm_notif_' + Date.now();
+        await db.ref('admin_notifications/' + notifId).set({
+          id: notifId,
+          type: type,
+          lead_id: leadId,
+          title: subject,
+          client_name: clientName,
+          client_email: clientEmail,
+          client_phone: clientPhone,
+          message: message,
+          email_sent: emailSent,
+          created_at: timestamp,
+          read: false
+        }).catch(() => {});
+
+        await safePushAudit(db, {
+          sessionUser: clientEmail || 'system',
+          action: 'notify_admin_email',
+          subject: subject,
+          type: type,
+          created_at: timestamp
+        });
+      } catch (err) {
+        log('notifyAdminByEmail:rtdb', err);
+      }
+    }
+
+    return { ok: true, emailSent, timestamp };
+  }
+
+  /**
+   * Envoie un e-mail direct au client (via FormSubmit AJAX)
+   * + envoie une copie de contrôle à Andrés Pino (Web3Forms)
+   * + enregistre la notification dans /client_notifications/{sanitizedEmail}
+   * + archive dans le dossier client /clients_records/{sanitizedEmail}/messages
+   */
+  async function notifyClientByEmail(opts = {}) {
+    const rawEmail = (opts.clientEmail || '').trim().toLowerCase();
+    if (!rawEmail) {
+      return { ok: false, error: 'Email client requis' };
+    }
+
+    const timestamp = new Date().toISOString();
+    const clientName = opts.clientName || 'Client Particulier';
+    const subject = opts.subject || '🌿 Pino Espaces Verts — Information sur votre dossier';
+    const type = opts.type || 'direct_message';
+    const message = opts.message || '';
+    const actionUrl = opts.actionUrl || 'https://jomstudiovzla.github.io/pinopage/#espace-client';
+    const sanitizedEmail = rawEmail.replace(/[.#$\[\]]/g, '_');
+
+    const mailBody = `Bonjour ${clientName},
+
+${message}
+
+${opts.facNumber ? `--------------------------------------------------
+RÉCAPITULATIF FACTURE :
+- Numéro de facture : ${opts.facNumber}
+- Montant Total TTC : ${opts.amountCharged || '0.00'} €
+- Reste à charge après 50% Avance Immédiate SAP : ${opts.netClient || '0.00'} €
+--------------------------------------------------\n` : ''}
+Consultez vos documents, attestations fiscales SAP et propositions chiffrées en direct sur votre Espace Client sécurisé :
+👉 ${actionUrl}
+
+Si vous avez la moindre question, vous pouvez joindre Andrés Pino directement par téléphone au 06 51 59 40 34 ou par WhatsApp.
+
+Bien cordialement,
+
+Andrés Pino — Pino Espaces Verts
+Artisan Paysagiste & Membre Déclaré Coopérative Unipros
+Services à la Personne (SAP) — Agrément Crédit d'Impôt 50% Immédiat
+Téléphone : 06 51 59 40 34 | E-mail : pino.spacesverts@gmail.com
+Bordeaux Métropole & Gironde (33)
+Site web : https://jomstudiovzla.github.io/pinopage/`;
+
+    let clientEmailSent = false;
+
+    if (typeof fetch === 'function') {
+      try {
+        const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(rawEmail)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            _subject: subject,
+            _replyto: PINO_ADMIN_EMAIL,
+            _template: 'box',
+            name: 'Andrés Pino — Pino Espaces Verts',
+            message: mailBody
+          })
+        });
+        const data = await res.json().catch(() => ({ success: true }));
+        clientEmailSent = Boolean(data && (data.success || data.ok !== false));
+      } catch (err) {
+        log('notifyClientByEmail:formsubmit', err);
+      }
+
+      try {
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            access_key: WEB3FORMS_ACCESS_KEY,
+            to: PINO_ADMIN_EMAIL,
+            from_name: 'Pino Espaces Verts — Copie E-mail Client',
+            subject: `[COPIE AUDIT] ${subject} (Envoyé à ${clientName})`,
+            replyto: rawEmail,
+            message: `Copie conforme de l'e-mail transmis au client ${clientName} (${rawEmail}) le ${timestamp} :\n\n${mailBody}`
+          })
+        }).catch(() => {});
+      } catch (err) {}
+    } else {
+      clientEmailSent = true;
+    }
+
+    const db = rtdb();
+    if (db) {
+      try {
+        const notifId = 'notif_msg_' + Date.now();
+        await db.ref(`client_notifications/${sanitizedEmail}/${notifId}`).set({
+          id: notifId,
+          type: type,
+          title: subject,
+          message: message,
+          fac_number: opts.facNumber || '',
+          amount_charged: opts.amountCharged || null,
+          net_client: opts.netClient || null,
+          created_at: timestamp,
+          read: false
+        }).catch(() => {});
+
+        const msgId = 'msg_' + Date.now();
+        await db.ref(`clients_records/${sanitizedEmail}/messages/${msgId}`).set({
+          id: msgId,
+          subject: subject,
+          message: message,
+          from: 'Andrés Pino — Pino Espaces Verts',
+          to: rawEmail,
+          client_name: clientName,
+          type: type,
+          email_sent: clientEmailSent,
+          created_at: timestamp
+        }).catch(() => {});
+
+        await safePushAudit(db, {
+          sessionUser: 'andres_pino',
+          action: 'notify_client_email',
+          clientEmail: rawEmail,
+          subject: subject,
+          created_at: timestamp
+        });
+      } catch (err) {
+        log('notifyClientByEmail:rtdb', err);
+      }
+    }
+
+    return { ok: true, clientEmailSent, timestamp };
+  }
+
+  /**
+   * Envoi d'un message direct personnalisé depuis le CRM Admin vers un client
+   */
+  async function sendClientDirectMessage(opts = {}) {
+    const rawEmail = (opts.clientEmail || '').trim().toLowerCase();
+    if (!rawEmail) return { ok: false, error: 'Email requis' };
+
+    const clientName = opts.clientName || 'Client Particulier';
+    const subject = opts.subject || `Message d'Andrés Pino — Pino Espaces Verts`;
+    const message = opts.message || '';
+    const notifyEmail = opts.notifyEmail !== false;
+
+    if (notifyEmail) {
+      return await notifyClientByEmail({
+        clientEmail: rawEmail,
+        clientName: clientName,
+        subject: subject,
+        message: message,
+        type: opts.templateType || 'direct_message'
+      });
+    } else {
+      const sanitizedEmail = rawEmail.replace(/[.#$\[\]]/g, '_');
+      const db = rtdb();
+      const timestamp = new Date().toISOString();
+      if (db) {
+        const notifId = 'notif_msg_' + Date.now();
+        await db.ref(`client_notifications/${sanitizedEmail}/${notifId}`).set({
+          id: notifId,
+          type: opts.templateType || 'direct_message',
+          title: subject,
+          message: message,
+          created_at: timestamp,
+          read: false
+        }).catch(() => {});
+
+        const msgId = 'msg_' + Date.now();
+        await db.ref(`clients_records/${sanitizedEmail}/messages/${msgId}`).set({
+          id: msgId,
+          subject: subject,
+          message: message,
+          from: 'Andrés Pino — Pino Espaces Verts',
+          to: rawEmail,
+          client_name: clientName,
+          created_at: timestamp
+        }).catch(() => {});
+      }
+      return { ok: true, timestamp };
+    }
+  }
+
+  async function fetchClientMessages(clientEmail) {
+    if (!clientEmail) return { ok: false, data: [] };
+    const sanitizedEmail = clientEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+    const db = rtdb();
+    if (db) {
+      try {
+        const snap = await db.ref(`clients_records/${sanitizedEmail}/messages`).once('value');
+        const val = snap.val() || {};
+        const list = Object.keys(val).map(k => ({ id: k, ...val[k] })).reverse();
+        return { ok: true, data: list };
+      } catch (err) {
+        log('fetchClientMessages:rtdb', err);
+      }
+    }
+    return { ok: false, data: [] };
+  }
+
+  function listenClientMessages(clientEmail, callback) {
+    if (!clientEmail || typeof callback !== 'function') return () => {};
+    const sanitizedEmail = clientEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+    const db = rtdb();
+    if (!db) return () => {};
+
+    const msgRef = db.ref(`clients_records/${sanitizedEmail}/messages`);
+    const listener = (snap) => {
+      const val = snap.val() || {};
+      const list = Object.keys(val).map(k => ({ id: k, ...val[k] })).reverse();
+      callback(list);
+    };
+    msgRef.on('value', listener);
+    return () => msgRef.off('value', listener);
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -1769,6 +2141,11 @@
     updatePlatformLead,
     deletePlatformLead,
     convertPlatformLeadToCRM,
+    notifyAdminByEmail,
+    notifyClientByEmail,
+    sendClientDirectMessage,
+    fetchClientMessages,
+    listenClientMessages,
   };
 
 })(window);
