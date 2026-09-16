@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v3-crm-jobs';
+const CACHE_NAME = 'pino-ev-v4-security-audit';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',

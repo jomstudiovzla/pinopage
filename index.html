@@ -220,7 +220,7 @@
   </div>
 
   <!-- Simulated Admin Analytics Modal (Alt + A shortcut or link in footer) -->
-  <dialog id="analytics-modal" class="bg-white p-6 rounded-3xl shadow-2xl border border-brand-accent/30 max-w-lg w-full">
+  <dialog id="analytics-modal" class="bg-white p-6 rounded-3xl shadow-2xl border border-brand-accent/30 max-w-lg w-[96%] max-h-[90vh] overflow-y-auto m-auto">
     <div class="flex justify-between items-center mb-6">
       <h3 class="font-serif text-2xl font-bold text-brand-green"><i class="fa-solid fa-chart-line mr-2"></i>Tableau de Bord Andrés</h3>
       <button onclick="document.getElementById('analytics-modal').close()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -249,7 +249,7 @@
   </dialog>
 
   <!-- 1. Mentions Légales Complètes (LCEN n° 2004-575) -->
-  <dialog id="legal-modal" class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-brand-accent/20 max-w-3xl w-full max-h-[85vh] overflow-y-auto">
+  <dialog id="legal-modal" class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-brand-accent/20 max-w-3xl w-[96%] max-h-[85vh] overflow-y-auto m-auto">
     <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
@@ -305,7 +305,7 @@
   </dialog>
 
   <!-- 2. Conditions Générales de Vente (CGV) Complètes -->
-  <dialog id="cgv-modal" class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-brand-accent/20 max-w-3xl w-full max-h-[85vh] overflow-y-auto">
+  <dialog id="cgv-modal" class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-brand-accent/20 max-w-3xl w-[96%] max-h-[85vh] overflow-y-auto m-auto">
     <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
@@ -362,7 +362,7 @@
   </dialog>
 
   <!-- 3. Politique de Confidentialité (RGPD Complète) -->
-  <dialog id="privacy-modal" class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-brand-accent/20 max-w-3xl w-full max-h-[85vh] overflow-y-auto">
+  <dialog id="privacy-modal" class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-brand-accent/20 max-w-3xl w-[96%] max-h-[85vh] overflow-y-auto m-auto">
     <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
@@ -410,7 +410,7 @@
   </dialog>
 
   <!-- 4. Médiation de la Consommation (Art. L. 612-1 du Code de la consommation) -->
-  <dialog id="mediation-modal" class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-brand-accent/20 max-w-2xl w-full max-h-[85vh] overflow-y-auto">
+  <dialog id="mediation-modal" class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-brand-accent/20 max-w-2xl w-[96%] max-h-[85vh] overflow-y-auto m-auto">
     <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
@@ -445,7 +445,7 @@
   </dialog>
 
   <!-- 5. Conditions Promotion PELABOLA -->
-  <dialog id="promo-modal" class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-brand-accent/20 max-w-2xl w-full">
+  <dialog id="promo-modal" class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl border border-brand-accent/20 max-w-2xl w-[96%] max-h-[85vh] overflow-y-auto m-auto">
     <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
@@ -470,7 +470,7 @@
   </dialog>
 
   <!-- Gallery Lightbox Modal (PDF Página 4) -->
-  <dialog id="gallery-modal" class="bg-white p-0 rounded-3xl shadow-2xl border-2 border-brand-accent/30 max-w-3xl w-full overflow-hidden backdrop:bg-black/70">
+  <dialog id="gallery-modal" class="bg-white p-0 rounded-3xl shadow-2xl border-2 border-brand-accent/30 max-w-3xl w-[96%] overflow-hidden backdrop:bg-black/70 m-auto">
     <div class="relative">
       <button onclick="document.getElementById('gallery-modal').close()" class="absolute top-4 right-4 z-20 w-10 h-10 bg-black/60 hover:bg-black text-white rounded-full flex items-center justify-center transition-colors shadow-lg">
         <i class="fa-solid fa-xmark text-lg"></i>
@@ -605,7 +605,7 @@
   <!-- ========================================================================= -->
 
   <!-- Modal 1: Fenêtre d'Authentification (Client & Admin) -->
-  <dialog id="modal-window-auth" class="section-window bg-white rounded-3xl shadow-2xl border border-brand-accent/30 max-w-md w-[96%] max-h-[80vh] overflow-y-auto text-brand-charcoal p-0">
+  <dialog id="modal-window-auth" class="section-window bg-white rounded-3xl shadow-2xl border border-brand-accent/30 max-w-md w-[96%] max-h-[80vh] overflow-y-auto text-brand-charcoal p-0 m-auto">
     <!-- Draggable Header -->
     <div class="modal-drag-header bg-gradient-to-r from-[#2d4d36] to-[#1e5138] px-6 pt-2.5 pb-4 text-white select-none">
       <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-2 cursor-grab active:cursor-grabbing transition-colors" title="Glisser vers le bas pour fermer"></div>
@@ -650,7 +650,7 @@
   </dialog>
 
 <!-- Modal 2: Espace Client (Conforme DOCUMENTO_MAESTRO.md §3.4) -->
-  <dialog id="modal-window-client" class="section-window bg-white rounded-3xl shadow-2xl border border-brand-accent/30 max-w-4xl w-full p-0 overflow-hidden text-brand-charcoal">
+  <dialog id="modal-window-client" class="section-window bg-white rounded-3xl shadow-2xl border border-brand-accent/30 max-w-4xl w-[96%] max-h-[92vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
     <!-- Impersonation Audit Banner (Visible if admin is previewing client) -->
     <div id="client-impersonation-banner" class="hidden bg-amber-500 text-slate-900 px-6 py-2.5 font-bold text-xs flex justify-between items-center">
       <span><i class="fa-solid fa-eye mr-2"></i> Mode Aperçu Gérant : Vous visualisez cet espace comme le client.</span>
@@ -660,7 +660,7 @@
     </div>
 
     <!-- Client Draggable Header -->
-    <div class="modal-drag-header bg-gradient-to-r from-[#2d4d36] to-[#1e5138] px-6 sm:px-8 pt-3 pb-6 sm:pb-8 text-white select-none">
+    <div class="modal-drag-header bg-gradient-to-r from-[#2d4d36] to-[#1e5138] px-6 sm:px-8 pt-3 pb-6 sm:pb-8 text-white select-none shrink-0">
       <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-3 cursor-grab active:cursor-grabbing transition-colors" title="Glisser vers le bas pour fermer"></div>
       <div class="flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center gap-4">
@@ -686,9 +686,11 @@
       </div>
     </div>
 
-    <!-- 3 Key Metric Hero Counters -->
-    <div class="p-6 sm:p-8 bg-[#faf8f2] border-b border-brand-accent/20">
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <!-- Client Scrollable Container -->
+    <div class="flex-1 overflow-y-auto">
+      <!-- 3 Key Metric Hero Counters -->
+      <div class="p-4 sm:p-6 bg-[#faf8f2] border-b border-brand-accent/20">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <!-- Card 1: Avantage 20% (Mon Coupon) -->
         <div class="bg-white p-5 rounded-2xl border border-brand-accent/20 shadow-xs">
           <div class="flex items-center justify-between">
@@ -736,7 +738,7 @@
     </div>
 
     <!-- Client Content Body -->
-    <div class="p-6 sm:p-8 space-y-8 max-h-[50vh] overflow-y-auto">
+    <div class="p-4 sm:p-8 space-y-6 sm:space-y-8">
       <!-- Section 1: Mes Demandes de Devis & Propositions d'Andrés Pino -->
       <div class="space-y-4">
         <div class="flex items-center justify-between">
@@ -814,11 +816,12 @@
         </div>
       </div>
     </div>
+    </div>
   </dialog>
 
   <!-- Modal: Répondre au Lead / Établir Devis Chiffré (Andrés Pino) -->
-  <dialog id="modal-lead-response" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-2xl w-full p-0 overflow-hidden text-brand-charcoal">
-    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 py-5 text-white flex justify-between items-center">
+  <dialog id="modal-lead-response" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-2xl w-[96%] max-h-[90vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
+    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 py-5 text-white flex justify-between items-center shrink-0">
       <div class="flex items-center gap-3">
         <span class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center justify-center text-lg">
           <i class="fa-solid fa-file-invoice-dollar"></i>
@@ -833,7 +836,7 @@
       </button>
     </div>
 
-    <form id="lead-response-form" onsubmit="handleSendLeadResponse(event)" class="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+    <form id="lead-response-form" onsubmit="handleSendLeadResponse(event)" class="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1">
       <input type="hidden" id="resp-lead-id" />
       <input type="hidden" id="resp-client-email" />
       <input type="hidden" id="resp-client-name" />
@@ -869,61 +872,50 @@
           <span class="absolute left-3.5 top-2.5 text-emerald-800 font-bold text-base">€</span>
           <input type="number" id="resp-price" min="20" step="5" required placeholder="Ex: 240"
             oninput="calcResponseUnipros(this.value)"
-            class="w-full pl-9 pr-4 py-2.5 bg-white rounded-xl border-2 border-emerald-300 focus:outline-none focus:border-emerald-600 text-base font-extrabold text-slate-900" />
+            class="w-full pl-9 pr-4 py-2.5 text-lg font-mono font-black text-emerald-950 bg-white border-2 border-emerald-300 rounded-xl focus:border-emerald-600 focus:outline-none" />
         </div>
-        <div id="resp-calc-preview" class="p-3 bg-white rounded-xl border border-emerald-200 text-xs text-slate-700 space-y-1">
-          <div class="flex justify-between font-medium"><span>Montant facturé TTC :</span> <strong id="resp-calc-total">0,00 € TTC</strong></div>
-          <div class="flex justify-between text-emerald-700 font-medium"><span>Avance Immédiate 50% (URSSAF / Unipros) :</span> <strong id="resp-calc-credit">- 0,00 €</strong></div>
-          <div class="flex justify-between text-sm font-extrabold text-slate-900 pt-1 border-t border-slate-100"><span>👉 Reste réel à la charge du client :</span> <strong class="text-emerald-800" id="resp-calc-net">0,00 €</strong></div>
+
+        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-emerald-200/60 text-xs">
+          <div class="p-2.5 bg-white/80 rounded-xl border border-emerald-100">
+            <span class="text-slate-500 block text-[10px] font-semibold uppercase">Crédit d'impôt Unipros (50%)</span>
+            <span id="resp-calc-credit" class="text-base font-mono font-bold text-emerald-700">0.00 €</span>
+          </div>
+          <div class="p-2.5 bg-emerald-100/60 rounded-xl border border-emerald-300">
+            <span class="text-emerald-900 block text-[10px] font-bold uppercase">Reste net client</span>
+            <span id="resp-calc-net" class="text-base font-mono font-black text-emerald-900">0.00 €</span>
+          </div>
         </div>
       </div>
 
-      <!-- Intervention Duration & Date -->
+      <!-- Planning & Matériel -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1" for="resp-duration">
-            <i class="fa-solid fa-clock text-emerald-700 mr-1"></i> Durée estimée d'intervention <span class="text-red-500">*</span>
-          </label>
-          <input type="text" id="resp-duration" placeholder="Ex: 3h30 ou 1 demi-journée" required
-            class="w-full px-3.5 py-2.5 bg-white rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600 text-xs font-semibold" />
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="resp-duration">Durée estimée</label>
+          <input type="text" id="resp-duration" placeholder="Ex: 1 demi-journée (4h)"
+            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-none" />
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1" for="resp-date">
-            <i class="fa-solid fa-calendar text-emerald-700 mr-1"></i> Date d'intervention proposée
-          </label>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="resp-date">Date d'intervention proposée</label>
           <input type="date" id="resp-date"
-            class="w-full px-3.5 py-2.5 bg-white rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600 text-xs font-semibold" />
+            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-none" />
         </div>
       </div>
 
-      <!-- Equipment & Supplies -->
       <div>
-        <label class="block text-xs font-bold text-slate-700 mb-1" for="resp-equipment">
-          <i class="fa-solid fa-toolbox text-emerald-700 mr-1"></i> Matériel, outillage & évacuation
-        </label>
-        <input type="text" id="resp-equipment" placeholder="Ex: Tondeuse pro, taille-haie thermique, évacuation déchets verts comprise"
-          class="w-full px-3.5 py-2.5 bg-white rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600 text-xs font-semibold" />
+        <label class="block text-xs font-bold text-slate-700 mb-1" for="resp-equipment">Matériel & Équipements prévus</label>
+        <input type="text" id="resp-equipment" placeholder="Ex: Tondeuse autoportée, rotofil, taille-haie thermique Stihl, broyeur"
+          class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-none" />
       </div>
 
-      <!-- Personalized message / Notes -->
       <div>
-        <label class="block text-xs font-bold text-slate-700 mb-1" for="resp-notes">
-          <i class="fa-solid fa-comment-dots text-emerald-700 mr-1"></i> Message personnalisé d'Andrés Pino pour le client
-        </label>
-        <textarea id="resp-notes" rows="3" placeholder="Précisez ici les détails du travail ou des conseils particuliers..."
-          class="w-full p-3 bg-white rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600 text-xs"></textarea>
+        <label class="block text-xs font-bold text-slate-700 mb-1" for="resp-notes">Note ou Message personnalisé pour le client</label>
+        <textarea id="resp-notes" rows="3" placeholder="Ex: Bonjour, suite à votre demande, nous pouvons intervenir jeudi matin. L'évacuation des déchets verts en filière de compostage est incluse."
+          class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-none"></textarea>
       </div>
 
-      <!-- Coupon check -->
-      <div class="flex items-center gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-950">
-        <input type="checkbox" id="resp-apply-coupon" checked class="w-4 h-4 text-emerald-600 rounded" />
-        <label for="resp-apply-coupon" class="font-bold">Inclure la mention du coupon de bienvenue (-20% déduit) dans l'offre</label>
-      </div>
-
-      <!-- Submit button -->
-      <div class="pt-2 flex flex-col sm:flex-row gap-3">
-        <button type="submit" id="resp-submit-btn"
-          class="flex-1 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+      <div class="flex items-center gap-3 pt-3 border-t border-slate-200">
+        <button type="submit"
+          class="flex-1 py-3 px-5 bg-gradient-to-r from-emerald-700 to-teal-800 hover:from-emerald-800 hover:to-teal-900 text-white font-extrabold text-xs rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
           <i class="fa-solid fa-paper-plane"></i> Enregistrer & Envoyer le Devis au Client
         </button>
         <button type="button" onclick="document.getElementById('modal-lead-response').close()"
@@ -935,8 +927,8 @@
   </dialog>
 
   <!-- Modal: Nouvelle Facture & Dossier Fiscal SAP (Andrés Pino) -->
-  <dialog id="modal-nouvelle-facture" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-2xl w-full p-0 overflow-hidden text-brand-charcoal">
-    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 py-4 text-white flex justify-between items-center">
+  <dialog id="modal-nouvelle-facture" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-2xl w-[96%] max-h-[90vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
+    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 py-4 text-white flex justify-between items-center shrink-0">
       <div class="flex items-center gap-3">
         <span class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center justify-center text-lg">
           <i class="fa-solid fa-file-invoice"></i>
@@ -951,7 +943,7 @@
       </button>
     </div>
 
-    <form id="admin-new-invoice-form" onsubmit="handleCreateInvoiceSubmit(event)" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+    <form id="admin-new-invoice-form" onsubmit="handleCreateInvoiceSubmit(event)" class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
       <input type="hidden" id="fac-linked-lead-id" />
 
       <!-- Correlatif e información general -->
@@ -1248,8 +1240,8 @@
   </dialog>
 
   <!-- Modal: Prévisualisation Universelle & Téléchargement / Impression Directe (Zero Popup Block) -->
-  <dialog id="modal-document-preview" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-4xl w-full p-0 overflow-hidden text-brand-charcoal">
-    <div class="bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 px-6 py-4 text-white flex flex-wrap justify-between items-center gap-3 select-none">
+  <dialog id="modal-document-preview" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-4xl w-[96%] max-h-[92vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
+    <div class="bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 px-6 py-4 text-white flex flex-wrap justify-between items-center gap-3 select-none shrink-0">
       <div class="flex items-center gap-2.5">
         <div class="w-9 h-9 rounded-xl bg-amber-400/20 border border-amber-400/40 text-amber-300 flex items-center justify-center font-bold text-base">
           <i class="fa-solid fa-file-invoice"></i>
@@ -1271,16 +1263,16 @@
         </button>
       </div>
     </div>
-    <div class="p-4 sm:p-6 max-h-[75vh] overflow-y-auto bg-slate-100/70">
-      <div id="document-preview-container" class="bg-white shadow-md rounded-2xl p-6 sm:p-10 max-w-3xl mx-auto border border-slate-200">
+    <div class="p-3 sm:p-6 overflow-y-auto flex-1 bg-slate-100/70">
+      <div id="document-preview-container" class="bg-white shadow-md rounded-2xl p-4 sm:p-10 max-w-3xl mx-auto border border-slate-200">
         <!-- Document HTML will be injected here -->
       </div>
     </div>
   </dialog>
 
   <!-- Modal: Réparation & Qualification de Réponse / Lead -->
-  <dialog id="modal-repair-lead" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-700 max-w-xl w-full p-0 overflow-hidden text-brand-charcoal">
-    <div class="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 px-6 py-4 text-white flex justify-between items-center select-none">
+  <dialog id="modal-repair-lead" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-700 max-w-xl w-[96%] max-h-[90vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
+    <div class="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 px-6 py-4 text-white flex justify-between items-center select-none shrink-0">
       <div class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-xl bg-amber-400/20 border border-amber-400/40 text-amber-300 flex items-center justify-center font-bold text-sm">
           <i class="fa-solid fa-screwdriver-wrench"></i>
@@ -1294,7 +1286,7 @@
         <i class="fa-solid fa-xmark text-sm"></i>
       </button>
     </div>
-    <div class="p-6 space-y-4 text-xs">
+    <div class="p-4 sm:p-6 space-y-3 sm:space-y-4 text-xs overflow-y-auto flex-1">
       <!-- Info Lead -->
       <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
         <div class="flex justify-between items-center">
@@ -1367,8 +1359,8 @@
   <iframe id="pino-silent-print-frame" style="position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;"></iframe>
 
   <!-- Modal: Ajouter un Prospect Multi-Plateforme (LeBonCoin, Facebook, etc.) -->
-  <dialog id="modal-add-platform-lead" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-700 max-w-lg w-full p-0 overflow-hidden text-brand-charcoal">
-    <div class="bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 px-6 py-4 text-white flex justify-between items-center select-none">
+  <dialog id="modal-add-platform-lead" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-700 max-w-lg w-[96%] max-h-[90vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
+    <div class="bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 px-6 py-4 text-white flex justify-between items-center select-none shrink-0">
       <div class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-xl bg-amber-400/20 border border-amber-400/40 text-amber-300 flex items-center justify-center font-bold text-sm">
           <i class="fa-solid fa-bullseye"></i>
@@ -1382,7 +1374,7 @@
         <i class="fa-solid fa-xmark text-sm"></i>
       </button>
     </div>
-    <form id="form-add-platform-lead" onsubmit="handleCreatePlatformLead(event)" class="p-6 space-y-4 text-xs">
+    <form id="form-add-platform-lead" onsubmit="handleCreatePlatformLead(event)" class="p-4 sm:p-6 space-y-3 sm:space-y-4 text-xs overflow-y-auto flex-1">
       <div>
         <label class="block font-bold text-slate-700 mb-1">Plateforme source *</label>
         <select id="plt-new-platform" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-800 font-medium focus:ring-2 focus:ring-emerald-600 focus:outline-hidden">
@@ -1438,9 +1430,9 @@
   </dialog>
 
   <!-- Modal 3: Espace Administration — God Mode (Andrés Pino) -->
-  <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-full p-0 overflow-hidden text-brand-charcoal">
+  <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-[96%] max-h-[92vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
     <!-- Admin Header (Draggable) -->
-    <div class="modal-drag-header bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 sm:px-8 pt-3 pb-6 sm:pb-8 text-white select-none cursor-grab active:cursor-grabbing">
+    <div class="modal-drag-header bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 sm:px-8 pt-3 pb-6 sm:pb-8 text-white select-none cursor-grab active:cursor-grabbing shrink-0">
       <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-3 cursor-grab active:cursor-grabbing transition-colors modal-drag-pill" title="Glisser vers le bas pour fermer"></div>
       <div class="flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center gap-4">
@@ -1466,39 +1458,39 @@
       </div>
     </div>
 
-    <!-- Admin Sub-Navigation Tabs -->
-    <div class="flex flex-wrap border-b border-slate-200 bg-slate-50 text-xs font-bold px-6 pt-2 gap-2">
-      <button type="button" onclick="switchAdminTab('kpis')" id="adm-tab-kpis" class="adm-tab py-2.5 px-4 rounded-t-xl border-b-2 border-emerald-700 text-emerald-800 bg-white">
+    <!-- Admin Sub-Navigation Tabs (Horizontal swipeable on mobile) -->
+    <div class="flex overflow-x-auto no-scrollbar sm:flex-wrap border-b border-slate-200 bg-slate-50 text-xs font-bold px-3 sm:px-6 pt-2 gap-1.5 sm:gap-2 shrink-0">
+      <button type="button" onclick="switchAdminTab('kpis')" id="adm-tab-kpis" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl border-b-2 border-emerald-700 text-emerald-800 bg-white">
         <i class="fa-solid fa-chart-pie mr-1.5"></i> Tableau de bord & KPIs
       </button>
-      <button type="button" onclick="switchAdminTab('leads')" id="adm-tab-leads" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('leads')" id="adm-tab-leads" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-address-book mr-1.5"></i> Leads & Devis (<span id="adm-leads-badge">0</span>)
       </button>
-      <button type="button" onclick="switchAdminTab('prospection')" id="adm-tab-prospection" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('prospection')" id="adm-tab-prospection" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-bullseye mr-1.5 text-amber-600"></i> Prospection 6 Plateformes (<span id="adm-platform-leads-badge">0</span>)
       </button>
-      <button type="button" onclick="switchAdminTab('factures')" id="adm-tab-factures" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('factures')" id="adm-tab-factures" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> Factures & Unipros
       </button>
-      <button type="button" onclick="switchAdminTab('promos')" id="adm-tab-promos" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('promos')" id="adm-tab-promos" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-tags mr-1.5"></i> Promotions & Codes
       </button>
-      <button type="button" onclick="switchAdminTab('users')" id="adm-tab-users" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('users')" id="adm-tab-users" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-users mr-1.5"></i> Utilisateurs & Base (<span id="adm-users-badge">3</span>)
       </button>
-      <button type="button" onclick="switchAdminTab('impersonate')" id="adm-tab-impersonate" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('impersonate')" id="adm-tab-impersonate" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-user-secret mr-1.5"></i> Voir comme client
       </button>
-      <button type="button" onclick="switchAdminTab('travaux'); renderAdminJobs()" id="adm-tab-travaux" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('travaux'); renderAdminJobs()" id="adm-tab-travaux" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-briefcase mr-1.5"></i> Travaux CRM (<span id="adm-jobs-badge">0</span>)
       </button>
-      <button type="button" onclick="switchAdminTab('config'); renderAdminQualityConfig();" id="adm-tab-config" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('config'); renderAdminQualityConfig();" id="adm-tab-config" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-sliders mr-1.5 text-emerald-700"></i> Configuration & Qualité (<span id="adm-repair-badge">0</span>)
       </button>
     </div>
 
     <!-- Admin Tab Content Body -->
-    <div class="p-6 sm:p-8 max-h-[80vh] overflow-y-auto space-y-6">
+    <div class="p-4 sm:p-8 overflow-y-auto flex-1 space-y-6">
       <!-- 1. Tab KPIs -->
       <div id="adm-content-kpis" class="adm-content space-y-6">
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -5316,7 +5308,13 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         }).catch(() => {});
 
         try {
-          const couponRow = await PinoDB.fetchUserCoupon(uid);
+          let couponRow = await PinoDB.fetchUserCoupon(uid);
+          if (!couponRow && !isAdmin) {
+            const shortSuffix = uid.replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() || Math.floor(1000 + Math.random() * 9000);
+            const welcomeCode = `PINO-${shortSuffix}`;
+            const res = await PinoDB.redeemPelabola(uid, normEmail, welcomeCode);
+            if (res && res.coupon) couponRow = res.coupon;
+          }
           if (couponRow && (couponRow.codigo_cupon || couponRow.code)) {
             userProfile.promoCode = couponRow.codigo_cupon || couponRow.code;
             userProfile.promoStatus = couponRow.estado || couponRow.status;
@@ -6092,7 +6090,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
     window.populateClientPortal = (client) => {
       if (!client) return;
       document.getElementById('client-display-name').textContent = client.fullName || 'Client Particulier';
-      document.getElementById('client-display-email').innerHTML = `${client.email} • <span>${client.commune || 'Bordeaux (33)'}</span>`;
+      document.getElementById('client-display-email').innerHTML = `${escapeHtml(client.email || '')} • <span>${escapeHtml(client.commune || 'Bordeaux (33)')}</span>`;
       document.getElementById('client-promo-code').textContent = client.promoCode || '—';
       if (typeof refreshCouponSection === 'function') refreshCouponSection();
       renderClientQuotes(client.email);
@@ -6367,19 +6365,21 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           qualPill = `<button type="button" onclick="openLeadRepairModal('${escapeFn(l.sbId || l.id)}')" class="mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors flex items-center gap-1 cursor-pointer animate-pulse" title="Cliquer pour réparer ce devis"><i class="fa-solid fa-triangle-exclamation"></i> À réparer</button>`;
         }
 
-        const phoneClean = (l.phone || '').replace(/\s+/g, '');
-        const waLink = phoneClean ? `https://wa.me/33${phoneClean.startsWith('0') ? phoneClean.substring(1) : phoneClean}?text=${encodeURIComponent(`Bonjour ${l.name}, c'est Andrés de Pino Espaces Verts concernant votre demande de devis pour ${l.service}.`)}` : '#';
+        const phoneClean = (l.phone || '').replace(/[^0-9+]/g, '');
+        const phoneDigits = phoneClean.replace(/[^0-9]/g, '');
+        const waLink = phoneDigits ? `https://wa.me/33${phoneDigits.startsWith('0') ? phoneDigits.substring(1) : phoneDigits}?text=${encodeURIComponent(`Bonjour ${l.name || ''}, c'est Andrés de Pino Espaces Verts concernant votre demande de devis pour ${l.service || ''}.`)}` : '#';
+        const mailClean = (l.email || '').replace(/["'<>]/g, '').trim();
 
         return `
           <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100 text-xs sm:text-sm">
             <td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
-              <div class="font-bold text-slate-900">${l.date}</div>
-              <div class="text-xs text-slate-400 mt-0.5">${l.time ? 'à ' + l.time : ''}</div>
+              <div class="font-bold text-slate-900">${escapeFn(l.date)}</div>
+              <div class="text-xs text-slate-400 mt-0.5">${l.time ? 'à ' + escapeFn(l.time) : ''}</div>
             </td>
             <td class="py-3.5 px-4 font-bold text-slate-900">${escapeFn(l.name)}</td>
             <td class="py-3.5 px-4">
-              ${l.phone ? `<a href="tel:${l.phone}" class="text-emerald-700 font-semibold hover:underline flex items-center gap-1.5"><i class="fa-solid fa-phone text-xs text-emerald-600"></i> ${escapeFn(l.phone)}</a>` : '<span class="text-slate-400 text-xs">—</span>'}
-              ${l.email ? `<a href="mailto:${l.email}" class="text-slate-500 hover:underline text-xs flex items-center gap-1.5 mt-1"><i class="fa-solid fa-envelope text-xs text-slate-400"></i> ${escapeFn(l.email)}</a>` : ''}
+              ${phoneClean ? `<a href="tel:${escapeFn(phoneClean)}" class="text-emerald-700 font-semibold hover:underline flex items-center gap-1.5"><i class="fa-solid fa-phone text-xs text-emerald-600"></i> ${escapeFn(l.phone)}</a>` : '<span class="text-slate-400 text-xs">—</span>'}
+              ${mailClean ? `<a href="mailto:${encodeURIComponent(mailClean)}" class="text-slate-500 hover:underline text-xs flex items-center gap-1.5 mt-1"><i class="fa-solid fa-envelope text-xs text-slate-400"></i> ${escapeFn(l.email)}</a>` : ''}
             </td>
             <td class="py-3.5 px-4 font-medium text-slate-700">${escapeFn(l.commune)}</td>
             <td class="py-3.5 px-4">
@@ -6393,8 +6393,8 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
             </td>
             <td class="py-3.5 px-4 text-right whitespace-nowrap">
               <div class="flex items-center justify-end gap-1.5">
-                ${phoneClean ? `<a href="${waLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors" title="WhatsApp"><i class="fa-brands fa-whatsapp text-sm"></i></a>` : ''}
-                ${l.phone ? `<a href="tel:${l.phone}" class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors" title="Appeler"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
+                ${phoneDigits ? `<a href="${waLink}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors" title="WhatsApp"><i class="fa-brands fa-whatsapp text-sm"></i></a>` : ''}
+                ${phoneClean ? `<a href="tel:${escapeFn(phoneClean)}" class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors" title="Appeler"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
                 <button onclick="openLeadRepairModal('${escapeFn(l.sbId || l.id)}')" class="inline-flex items-center justify-center w-8 h-8 bg-amber-50 text-amber-800 border border-amber-200 rounded-xl hover:bg-amber-100 transition-colors cursor-pointer shadow-2xs" title="Réparer / Qualifier"><i class="fa-solid fa-screwdriver-wrench text-xs"></i></button>
                 <button onclick="openLeadResponseModal(${idx})" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-700 text-white rounded-xl hover:bg-emerald-800 transition-colors cursor-pointer shadow-xs" title="Établir un Devis & Répondre"><i class="fa-solid fa-file-invoice-dollar text-xs"></i></button>
                 <button onclick="openNewInvoiceModalForLead(${idx})" class="inline-flex items-center justify-center w-8 h-8 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors cursor-pointer shadow-xs" title="Créer Facture à partir de ce devis"><i class="fa-solid fa-receipt text-xs"></i></button>
@@ -7370,6 +7370,8 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           loadAdminKPIs();
           renderAdminJobs();
           if (typeof renderAdminProspection === 'function') renderAdminProspection();
+          if (typeof renderAdminFactures === 'function') renderAdminFactures();
+          if (typeof renderAdminQualityConfig === 'function') renderAdminQualityConfig();
         }
       }
     };
@@ -8264,8 +8266,10 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         const plt = PLATFORM_CONFIG[item.platform] || { name: item.platform, icon: 'fa-globe', badgeBg: 'bg-slate-100 text-slate-700 border-slate-200' };
         const st = STATUS_CYCLE[item.status] || STATUS_CYCLE['a_contacter'];
         const budgetStr = item.budget ? `${parseFloat(item.budget).toFixed(0)} €` : 'À débattre';
-        const phoneLink = item.phone ? `<a href="tel:${esc(item.phone)}" class="text-emerald-700 hover:underline font-bold block mt-0.5"><i class="fa-solid fa-phone text-xxs"></i> ${esc(item.phone)}</a>` : '';
-        const urlBtn = item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-colors" title="Voir l'annonce source"><i class="fa-solid fa-arrow-up-right-from-square text-xxs"></i></a>` : '';
+        const cleanPhone = (item.phone || '').replace(/[^0-9+]/g, '');
+        const phoneLink = cleanPhone ? `<a href="tel:${escapeFn(cleanPhone)}" class="text-emerald-700 hover:underline font-bold block mt-0.5"><i class="fa-solid fa-phone text-xxs"></i> ${esc(item.phone)}</a>` : '';
+        const safeUrl = (item.url && /^https?:\/\//i.test(item.url.trim())) ? encodeURI(item.url.trim()) : '';
+        const urlBtn = safeUrl ? `<a href="${esc(safeUrl)}" target="_blank" rel="noopener noreferrer" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-colors" title="Voir l'annonce source"><i class="fa-solid fa-arrow-up-right-from-square text-xxs"></i></a>` : '';
         const isConverted = item.status === 'converti';
 
         return `
@@ -9172,7 +9176,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       initModalDragToClose();
       renderAdminUsers();
 
-      document.querySelectorAll('.section-window').forEach(dialog => {
+      document.querySelectorAll('dialog').forEach(dialog => {
         dialog.addEventListener('click', (e) => {
           const rect = dialog.getBoundingClientRect();
           const isInDialog = (

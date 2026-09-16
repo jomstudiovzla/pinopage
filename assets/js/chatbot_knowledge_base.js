@@ -316,12 +316,12 @@ window.resolveChatbotQuery = function(userText) {
         </div>
 
         <p class="text-[11px] text-slate-600 italic">
-          Pour recevoir et débloquer votre code officiel, renseignez simplement votre adresse e-mail dans la section dédiée ci-dessous :
+          Pour débloquer votre code promotionnel officiel et vérifié, connectez-vous simplement avec votre compte Google dans la section dédiée :
         </p>
 
         <div class="pt-1">
-          <button onclick="if(window.goToCouponSection) window.goToCouponSection();" class="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
-            <i class="fa-solid fa-envelope-open-text"></i> Débloquer mon coupon de -20%
+          <button onclick="if(window.goToCouponSection) window.goToCouponSection();" class="w-full py-2.5 px-4 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-shield-halved"></i> Obtenir mon code unique (-20%)
           </button>
         </div>
       </div>

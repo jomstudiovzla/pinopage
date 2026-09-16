@@ -100,11 +100,33 @@
      - Botones de 1-clic: *Copiar al portapapeles*, *Abrir en WhatsApp con texto pre-cargado*, *Enviar por SMS*.
   3. **Pipeline Interactivo de Oportunidades & Ciclo de Venta**:
      - Filtros por plataforma (*Toutes, LeBonCoin, Facebook, Nextdoor, Yoojo, NeedHelp, AlloVoisins*).
-     - Tabla responsiva con badges por canal, datos de contacto, enlaces directos a anuncios, notas y presupuesto.
+     - Tabla responsiva con badges por canal, datos de contacto, enlaces directos à anuncios, notas y presupuesto.
      - Badges de estado con avance cíclico interactivo (*À contacter ➔ Message envoyé ➔ En discussion ➔ Converti en Devis ➔ Non retenu*).
-     - **Conversión en 1-Clic a Devis Oficial CRM**: Transfiere la oportunidad directamente a la tabla oficial de `/leads` con correlativo, notifica con toast y redirige a la pestaña de Leads para cotización inmediata.
+     - **Conversión en 1-Clic à Devis Oficial CRM**: Transfiere la oportunidad directamente à la tabla oficial de `/leads` con correlativo, notifica con toast y redirige à la pestaña de Leads para cotización inmediata.
   4. **Modal Rápido de Registro (`#modal-add-platform-lead`)**:
      - Permite registrar cualquier anuncio detectado en menos de 20 segundos con selector de plataforma, detalles, comuna y enlace.
   5. **Backend y Persistencia Firebase RTDB (`/platform_leads`)**:
      - Métodos implementados en `assets/js/pino-db.js`: `savePlatformLead`, `fetchPlatformLeads` (con datos semilla realistas de Gironde), `updatePlatformLead`, `deletePlatformLead`, `convertPlatformLeadToCRM`.
      - Reglas de seguridad `platform_leads` desplegadas a Firebase `crm-jom`.
+
+- [x] **Auditoría Integral de Ciberseguridad, Responsividad Móvil y Limpieza de Código (100% COMPLETADO Y OPERATIVO)**:
+  1. **Limpieza de Archivos Muertos y Huérfanos**:
+     - Eliminación de archivos redundantes (`assets/images/Copia de quiero_que_me_hagas_una_202605171317.jpeg` y `index.html.bak_before_modals`), aligerando el repositorio y evitando colisiones.
+  2. **Blindaje de Reglas de Seguridad Firebase (RTDB & Firestore)**:
+     - `database.rules.json`: Erradicación del `.write: true` global en `/leads`. Se restringió a creación pública de nuevos leads (`!data.exists()`) y edición/borrado solo para Andrés Pino o el email verificado del cliente.
+     - Protección anti-tampering en `/coupons/$uid`: solo creación de cupón único al 20% verificado (`!data.exists() && newData.child('descuento_pct').val() == 20`), imposibilitando manipulación de porcentajes o duplicidad.
+     - Bloqueo de escalada de privilegios en `/users/$uid`: imposibilita asignar `isAdmin: true` a usuarios regulares.
+     - `firestore.rules`: Implementación de la función `isAdmin()` para ambos correos oficiales de Andrés Pino (`pino.spacesverts@gmail.com` y `pino.espacesverts@gmail.com`), restringiendo auditorías de sesión y colecciones privadas.
+  3. **Auto-Generación y Entrega Zero-Trust de Cupón Bienvenida**:
+     - Al iniciar sesión con Google, el cliente verificado recibe de forma automática e inmediata su código único `PINO-XXXX` (-20%) registrado en la base de datos sin necesidad de formularios públicos vulnerables a spoofing.
+     - Actualización de `assets/js/chatbot_knowledge_base.js` guiando pedagógicamente al usuario a autenticarse para reclamar su cupón verificado.
+  4. **Adaptabilidad Visual y Ergonomía 100% Responsiva (Móvil, Tablet, Desktop)**:
+     - Normalización de los 16 cuadros de diálogo nativos `<dialog>` con dimensiones `w-[96%] max-h-[90vh] flex flex-col m-auto`, encabezados fijos `shrink-0` y cuerpos scrolleables `overflow-y-auto`, eliminando desbordamientos y recortes de botones de acción en pantallas pequeñas.
+     - Navegación del panel Admin (`#modal-window-admin`) con pestañas deslizables horizontalmente (`overflow-x-auto no-scrollbar sm:flex-wrap`) para perfecta visualización en teléfonos.
+     - Cierre universal de modales al tocar el fondo/backdrop en cualquier dispositivo móvil o tablet.
+     - Inicialización inmediata de las vistas de facturas y configuración de calidad al abrir el panel de administración.
+  5. **Sanitización de Protocolos y Prevención de XSS**:
+     - Sanitización estricta de enlaces telefónicos `tel:` (solo dígitos y `+`), sanitización de `mailto:` y verificación estricta de protocolo `^https?://` en URLs externas de prospección.
+     - Escapado HTML riguroso en el encabezado del portal cliente (`escapeHtml`).
+  6. **Caché y PWA**:
+     - Actualización de versión en `sw.js` a `pino-ev-v4-security-audit` para renovación instantánea de caché en navegadores de clientes.

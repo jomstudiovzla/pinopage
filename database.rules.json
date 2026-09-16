@@ -2,24 +2,30 @@
   "rules": {
     "leads": {
       ".read": "auth != null",
-      ".write": true
+      ".indexOn": ["email", "status", "created_at"],
+      "$leadId": {
+        ".write": "!data.exists() || (auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || data.child('email').val() === auth.token.email))"
+      }
     },
     "users": {
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')",
-        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
+        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || (auth.uid === $uid && (!newData.child('isAdmin').exists() || newData.child('isAdmin').val() === false || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')))"
       },
       ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')",
       ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
     },
     "jobs": {
       ".read": "auth != null",
-      ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
+      ".indexOn": ["client_email", "payment_status", "created_at"],
+      "$jobId": {
+        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
+      }
     },
     "coupons": {
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')",
-        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
+        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || (auth.uid === $uid && !data.exists() && newData.child('descuento_pct').val() == 20))"
       },
       ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')",
       ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
@@ -30,11 +36,15 @@
     },
     "quotes_responses": {
       ".read": "auth != null",
-      ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
+      "$leadId": {
+        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || data.child('client_email').val() === auth.token.email)"
+      }
     },
     "client_notifications": {
-      ".read": "auth != null",
-      ".write": "auth != null"
+      "$sanitizedEmail": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
     },
     "admin_notifications": {
       ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')",
@@ -42,7 +52,9 @@
     },
     "platform_leads": {
       ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')",
-      ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
+      "$pltId": {
+        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
+      }
     }
   }
 }
