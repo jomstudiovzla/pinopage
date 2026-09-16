@@ -1,17 +1,15 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Implementación P1: Modal Nouvelle Facture, botón Accepter cette proposition y Attestation Fiscale SAP (Case 7DB)",
+  "active_goal": "Mejoras y utilidades pedagógicas para facilitar la solicitud de presupuesto y comprensión de propuestas",
   "current_phase": "Hito 3 — CRM + Facturación Fiscal SAP + Espace Client",
-  "action": "Modal Nouvelle Facture funcional con guardado en Firebase RTDB /jobs, botón Accepter proposition en tiempo real y generación imprimible de Attestation Fiscale SAP (Case 7DB)",
+  "action": "Implementación de Stepper pedagógico 3 etapas, asistente express de superficie/jardín, modal de ejemplo de devis explicado, frise chronologique 4 étapes y decodificador fiscal FAQ en Espace Client",
   "files": [
     "index.html",
-    "assets/js/pino-db.js",
-    "database.rules.json",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "P1 completado al 100%. Listo para P2 (filtros avanzados y armonización mobile) o Hito 2 (Next.js 15)",
-  "last_commit": "67879bc",
-  "timestamp": "2026-09-16T00:44:30-04:00"
+  "step": "Completado y validado con pruebas de sintaxis JavaScript. Listo para commit y sincronización con GitHub.",
+  "last_commit": "45af85c",
+  "timestamp": "2026-09-16T01:09:00-04:00"
 }

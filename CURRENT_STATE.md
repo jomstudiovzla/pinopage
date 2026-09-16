@@ -41,3 +41,21 @@
      - `printFactureClientPDF`: Generación de factura detallada con membrete, desgloses y exoneración/mentions SAP.
      - Acceso inmediato tanto desde el Espace Client como desde el panel de Facturas de Andrés.
   4. **Despliegue de Reglas RTDB**: Desplegadas a `crm-jom` vía Firebase CLI con validación de sintaxis aprobada.
+- [x] **Mejoras y Utilidades Pedagógicas de Devis & Respuestas (100% COMPLETADAS Y VERIFICADAS)**:
+  1. **Stepper Visual de 3 Pasos en Demande de Devis**:
+     - Guía interactiva *"Comment ça se passe ? • 3 Étapes Simples"* al inicio de la sección de devis:
+       - *Étape 1 : Expression du besoin (1 min)* — 100% gratuit, 0€ à avancer, aucune carte bancaire requise.
+       - *Étape 2 : Chiffrage sous 24h par Andrés* — Application directe de l'Avance Immédiate 50% URSSAF (Coopérative Unipros).
+       - *Étape 3 : Validation & Travaux* — Validation libre en 1 clic sans acompte requis.
+  2. **Guide de Sélection Rapide selon le Jardin & Simulateur en Direct**:
+     - 4 chips interactivos por tamaño de exterior (`< 150 m²`, `150–400 m²`, `400–800 m²`, `> 800 m²`) con pre-llenado automático de superficie y presupuesto recomendado.
+     - Tarjeta educativa en 3 columnas en tiempo real: Total facturé TTC vs Avance Immédiate 50% URSSAF vs Reste à charge réel payé par le client.
+     - Tip de envío de fotos por WhatsApp para agilizar chiffrage sin visita previa.
+  3. **Modal Pédagogique "Exemple de Devis Expliqué" (`#modal-exemple-devis`)**:
+     - Demostración visual accesible desde el Hero, la sección de devis y el Espace Client (`openWindowModal('exemple-devis')`).
+     - Desglose con membrete oficial Unipros (SAP529241671), 4 callouts educativos sobre la ausencia de anticipos, deducción directa URSSAF y disponibilidad de la Attestation Fiscale Case 7DB.
+  4. **Décryptage Pédagogique & Frise Chronologique dans l'Espace Client**:
+     - Frise chronologique de 4 étapes sur chaque devis (*1. Demande transmise ➔ 2. Proposition chiffrée reçue ➔ 3. Accord client ➔ 4. Chantier & Facture 7DB*).
+     - Accordéon interactif FAQ (Acompte, règlement sécurisé Unipros, attestation DGFiP).
+     - Micro-copy rassurante sur les boutons : *"Accepter cette proposition (0€ à payer maintenant)"*.
+     - Carte d'accueil pédagogique dynamique quand il y a 0 devis.

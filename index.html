@@ -1099,6 +1099,150 @@
     </form>
   </dialog>
 
+  <!-- Modal Pédagogique: Exemple de Devis Expliqué & Simulation Avance Immédiate 50% -->
+  <dialog id="modal-exemple-devis" class="section-window max-w-3xl w-[96%] max-h-[90vh] rounded-3xl bg-[#faf9f5] p-0 border border-brand-accent/25 shadow-2xl overflow-hidden m-auto">
+    <!-- Sticky Header (Draggable) -->
+    <div class="modal-drag-header sticky top-0 z-30 bg-gradient-to-r from-brand-green to-[#234e38] text-white px-5 sm:px-7 pt-2.5 pb-3.5 sm:pb-4 shadow-md select-none">
+      <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-2 cursor-grab active:cursor-grabbing transition-colors modal-drag-pill" title="Glisser vers le bas pour fermer"></div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-lg shrink-0">
+            📄
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base leading-tight">Exemple de Devis Expliqué</h3>
+            <p class="text-[11px] text-emerald-100 leading-tight hidden sm:block">Comment se lit votre devis & déduction directe des 50% d'Avance Immédiate</p>
+          </div>
+        </div>
+        <button type="button" onclick="document.getElementById('modal-exemple-devis').close()" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer la fenêtre">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scrollable Body -->
+    <div class="p-5 sm:p-7 space-y-5 max-h-[calc(90vh-70px)] overflow-y-auto">
+      <!-- Reassurance Banner -->
+      <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-start gap-3">
+        <span class="w-9 h-9 rounded-xl bg-emerald-700 text-white flex items-center justify-center text-base shrink-0 shadow-2xs">
+          <i class="fa-solid fa-lightbulb"></i>
+        </span>
+        <div class="text-xs text-emerald-950 space-y-1">
+          <strong class="font-bold block text-sm">Transparence totale, zéro démarche compliquée :</strong>
+          <span>Voici fidèlement le format de proposition détaillée qu'Andrés Pino vous transmet sous 24h après votre demande. Les 50% du fisc sont déjà calculés et déduits !</span>
+        </div>
+      </div>
+
+      <!-- Sample Interactive Card -->
+      <div class="bg-white p-5 sm:p-6 rounded-3xl border-2 border-emerald-600 shadow-md space-y-4">
+        <!-- Top bar -->
+        <div class="flex flex-wrap justify-between items-center gap-2 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-black text-slate-900 text-sm">Devis #DEV-EXEMPLE-2026</span>
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+              📄 Proposition chiffrée reçue
+            </span>
+          </div>
+          <span class="bg-emerald-50 text-emerald-900 border border-emerald-200 px-3 py-1 rounded-lg text-xs font-bold">
+            🌿 Tonte & Taille de Haies (350 m²) • Bordeaux
+          </span>
+        </div>
+
+        <!-- 3-Column Financial Breakdown Card -->
+        <div class="p-4 bg-emerald-50/80 rounded-2xl border-2 border-emerald-300 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold text-emerald-900 uppercase tracking-wider">
+              💰 Répartition Financière Officielle
+            </span>
+            <span class="text-[10px] font-bold bg-emerald-200/80 text-emerald-900 px-2.5 py-0.5 rounded-full">
+              Agrément SAP n° 529241671
+            </span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center pt-1">
+            <div class="p-3 bg-white rounded-xl border border-slate-200 text-center sm:text-left">
+              <span class="text-[11px] text-slate-500 block">Total facturé artisan</span>
+              <strong class="text-lg font-bold text-slate-900">240,00 € TTC</strong>
+              <span class="text-[10px] text-slate-400 block">Travaux + évacuation pro</span>
+            </div>
+            <div class="p-3 bg-white rounded-xl border border-emerald-300 text-center sm:text-left">
+              <span class="text-[11px] text-emerald-700 block font-bold">Avance Immédiate 50%</span>
+              <strong class="text-lg font-bold text-emerald-700">- 120,00 €</strong>
+              <span class="text-[10px] text-emerald-600 block">Payé par l'État (URSSAF)</span>
+            </div>
+            <div class="p-3 bg-emerald-700 text-white rounded-xl shadow-xs text-center sm:text-left">
+              <span class="text-[11px] text-emerald-100 block font-bold">👉 Ce que vous payez</span>
+              <strong class="text-2xl font-black">120,00 €</strong>
+              <span class="text-[10px] text-emerald-200 block">Prélevé après intervention</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tasks details -->
+        <div class="space-y-2 text-xs text-slate-800 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div class="font-bold text-slate-900 uppercase tracking-wide text-xs flex items-center justify-between">
+            <span>📋 Prestations incluses dans cette offre :</span>
+            <span class="text-slate-400 font-normal">Évacuation déchetterie comprise</span>
+          </div>
+          <ul class="space-y-1.5 pt-1 text-slate-700">
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Tonte intégrale de la pelouse (350 m²) avec tondeuse professionnelle et finitions au rotofil</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Taille soignée des haies de lauriers sur 20 mètres linéaires (hauteur 2m, faces et sommet)</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Soufflage complet des allées, terrasses et massifs</li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-600"></i> Ramassage et évacuation de 100% des déchets verts en centre de compostage agréé</li>
+          </ul>
+          <div class="pt-2 border-t border-slate-200 text-slate-600 italic">
+            <strong>Note d'Andrés Pino :</strong> "Intervention sous 5 jours ouvrés à votre convenance. Matériel thermique professionnel fourni, aucune manipulation de votre part."
+          </div>
+        </div>
+
+        <!-- 4 Explanatory Callouts Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div class="p-3.5 bg-brand-light rounded-xl border border-brand-accent/20 space-y-1">
+            <h6 class="font-bold text-brand-green text-xs flex items-center gap-1.5">
+              <i class="fa-solid fa-coins text-amber-600"></i> 1. Zéro avance de trésorerie
+            </h6>
+            <p class="text-[11px] text-slate-600 leading-relaxed">
+              Contrairement au crédit d'impôt d'autrefois, vous ne payez pas 240 € pour attendre l'année suivante : les 50% sont déduits dès la facturation.
+            </p>
+          </div>
+          <div class="p-3.5 bg-brand-light rounded-xl border border-brand-accent/20 space-y-1">
+            <h6 class="font-bold text-brand-green text-xs flex items-center gap-1.5">
+              <i class="fa-solid fa-handshake text-emerald-700"></i> 2. Zéro acompte à la signature
+            </h6>
+            <p class="text-[11px] text-slate-600 leading-relaxed">
+              Accepter la proposition bloque le passage d'Andrés sans sortir votre carte bancaire. Le règlement n'a lieu qu'après réalisation des travaux.
+            </p>
+          </div>
+          <div class="p-3.5 bg-brand-light rounded-xl border border-brand-accent/20 space-y-1">
+            <h6 class="font-bold text-brand-green text-xs flex items-center gap-1.5">
+              <i class="fa-brands fa-whatsapp text-green-600"></i> 3. Échange direct avec Andrés
+            </h6>
+            <p class="text-[11px] text-slate-600 leading-relaxed">
+              Une remarque ou un besoin d'ajuster la date ? Vous écrivez à Andrés sur WhatsApp ou l'appelez directement en 1 clic.
+            </p>
+          </div>
+          <div class="p-3.5 bg-brand-light rounded-xl border border-brand-accent/20 space-y-1">
+            <h6 class="font-bold text-brand-green text-xs flex items-center gap-1.5">
+              <i class="fa-solid fa-file-shield text-blue-600"></i> 4. Attestation Fiscale Case 7DB
+            </h6>
+            <p class="text-[11px] text-slate-600 leading-relaxed">
+              Dès la fin de la prestation, votre attestation officielle (mentionnant l'Art. 199 sexdecies du CGI et la Case 7DB) est disponible dans votre espace.
+            </p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row gap-2.5">
+          <button type="button" onclick="document.getElementById('modal-exemple-devis').close(); openWindowModal('devis');" class="flex-1 py-3 px-4 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs sm:text-sm rounded-xl text-center flex items-center justify-center gap-2 shadow-md cursor-pointer transition-all">
+            <i class="fa-solid fa-paper-plane"></i> Demander mon devis personnalisé gratuit
+          </button>
+          <a href="https://wa.me/33651594034?text=Bonjour%20Andr%C3%A9s%2C%20j'ai%20consult%C3%A9%20l'exemple%20de%20devis%20et%20j'aimerais%20une%20estimation%20pour%20mon%20jardin" target="_blank" rel="noopener" class="py-3 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs rounded-xl text-center flex items-center justify-center gap-2 shadow-xs transition-colors">
+            <i class="fa-brands fa-whatsapp text-sm"></i> Échanger sur WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
   <!-- Modal 3: Espace Administration — God Mode (Andrés Pino) -->
   <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-full p-0 overflow-hidden text-brand-charcoal">
     <!-- Admin Header (Draggable) -->
@@ -1780,6 +1924,17 @@
           </button>
           <button type="button" onclick="window.open('https://wa.me/33651594034', '_blank'); trackConversion('whatsapp_click')" class="bg-white hover:bg-brand-light text-brand-green border-2 border-brand-accent/40 text-base font-bold px-8 py-4 rounded-full shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer">
             <i class="fa-brands fa-whatsapp text-lg text-green-500"></i> WhatsApp Andrés Pino
+          </button>
+        </div>
+        <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-3 text-xs text-brand-charcoal/80">
+          <span class="flex items-center gap-1.5 font-semibold text-emerald-800">
+            <i class="fa-solid fa-bolt text-amber-500"></i> Réponse sous 24h
+          </span>
+          <span class="flex items-center gap-1.5 font-semibold text-emerald-800">
+            <i class="fa-solid fa-percent text-emerald-600"></i> 50% Avance Immédiate URSSAF
+          </span>
+          <button type="button" onclick="openWindowModal('exemple-devis')" class="text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1 cursor-pointer">
+            <i class="fa-solid fa-circle-question text-xxs"></i> Comment fonctionne le devis ?
           </button>
         </div>
       </div>
@@ -3005,7 +3160,70 @@
     <!-- Scrollable Window Content -->
     <div class="overflow-y-auto max-h-[calc(90vh-68px)]">
         <!-- Contact & Devis Section (Fase 1 / 3) -->
-  <section id="devis" class="py-20 bg-brand-light relative">
+  <section id="devis" class="py-12 sm:py-16 bg-brand-light relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10">
+      <!-- Stepper Pédagogique Visuel en 3 Étapes -->
+      <div class="bg-white p-5 sm:p-7 rounded-3xl border-2 border-brand-accent/20 shadow-md">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+          <div>
+            <span class="inline-block text-[11px] font-extrabold text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full uppercase tracking-wider">
+              🌱 Comment ça se passe ? • 3 Étapes Simples
+            </span>
+            <h4 class="font-serif text-xl sm:text-2xl font-extrabold text-brand-green mt-1">
+              Votre Devis d'Entretien sans Stress & sans Engagement
+            </h4>
+          </div>
+          <button type="button" onclick="openWindowModal('exemple-devis')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs">
+            <i class="fa-solid fa-eye text-amber-700"></i> Voir un exemple de devis expliqué
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Step 1 -->
+          <div class="p-4 bg-emerald-50/70 rounded-2xl border border-emerald-200 space-y-1.5">
+            <div class="flex items-center gap-2.5 mb-1">
+              <span class="w-8 h-8 rounded-xl bg-brand-green text-white font-black text-xs flex items-center justify-center shadow-xs">1</span>
+              <h5 class="font-extrabold text-brand-green text-sm">Votre besoin (1 min)</h5>
+            </div>
+            <p class="text-xs text-brand-charcoal/80 leading-relaxed">
+              Renseignez votre commune, surface et budget indicatif. <strong>100% gratuit</strong>, 0€ à avancer et sans carte bancaire.
+            </p>
+            <span class="inline-block text-[10px] text-emerald-800 font-extrabold bg-emerald-100 px-2 py-0.5 rounded-full">
+              ✓ Sans engagement
+            </span>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="p-4 bg-blue-50/70 rounded-2xl border border-blue-200 space-y-1.5">
+            <div class="flex items-center gap-2.5 mb-1">
+              <span class="w-8 h-8 rounded-xl bg-blue-700 text-white font-black text-xs flex items-center justify-center shadow-xs">2</span>
+              <h5 class="font-extrabold text-blue-900 text-sm">Chiffrage sous 24h</h5>
+            </div>
+            <p class="text-xs text-brand-charcoal/80 leading-relaxed">
+              Andrés étudie vos extérieurs et applique directement les <strong>50% d'Avance Immédiate URSSAF</strong> (Coopérative Unipros).
+            </p>
+            <span class="inline-block text-[10px] text-blue-800 font-extrabold bg-blue-100 px-2 py-0.5 rounded-full">
+              ✓ 50% déduits à la source
+            </span>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="p-4 bg-amber-50/70 rounded-2xl border border-amber-200 space-y-1.5">
+            <div class="flex items-center gap-2.5 mb-1">
+              <span class="w-8 h-8 rounded-xl bg-amber-700 text-white font-black text-xs flex items-center justify-center shadow-xs">3</span>
+              <h5 class="font-extrabold text-amber-950 text-sm">Validation & Travaux</h5>
+            </div>
+            <p class="text-xs text-brand-charcoal/80 leading-relaxed">
+              Consultez l'offre dans votre espace. Vous validez en <strong>1 clic</strong> si le tarif vous convient, ou échangez sur WhatsApp.
+            </p>
+            <span class="inline-block text-[10px] text-amber-900 font-extrabold bg-amber-100 px-2 py-0.5 rounded-full">
+              ✓ Zéro acompte requis
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12">
       <!-- Left info -->
       <div class="lg:col-span-5 space-y-6">
@@ -3154,6 +3372,47 @@
             </div>
           </div>
 
+          <!-- Aide au Chiffrage : Sélecteur express selon la taille de votre extérieur -->
+          <div class="p-4 bg-[#f4f7f2] rounded-2xl border-2 border-brand-accent/30 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-extrabold text-brand-green uppercase tracking-wide flex items-center gap-1.5">
+                <i class="fa-solid fa-ruler-combined text-brand-vivid"></i> Estimation rapide selon votre jardin
+              </span>
+              <span class="text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full uppercase">
+                Aide au choix
+              </span>
+            </div>
+            <p class="text-xs text-slate-600">
+              Cliquez sur votre typologie de terrain pour pré-remplir la surface et le budget estimatif recommandé :
+            </p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+              <button type="button" onclick="selectSurfaceGuide(100, 140, 'Petit jardin (< 150 m²)')" class="surface-guide-btn text-left p-2.5 bg-white hover:border-brand-green rounded-xl border border-slate-200 transition-all cursor-pointer shadow-2xs group">
+                <span class="text-base block mb-0.5">🏡</span>
+                <strong class="text-xs text-slate-800 block group-hover:text-brand-green">&lt; 150 m²</strong>
+                <span class="text-[10px] text-slate-500 block">Cour / Ville</span>
+                <span class="text-[10px] font-extrabold text-emerald-700 block mt-1">~70 € net</span>
+              </button>
+              <button type="button" onclick="selectSurfaceGuide(250, 240, 'Jardin standard (150–400 m²)')" class="surface-guide-btn text-left p-2.5 bg-white hover:border-brand-green rounded-xl border border-slate-200 transition-all cursor-pointer shadow-2xs group">
+                <span class="text-base block mb-0.5">🌳</span>
+                <strong class="text-xs text-slate-800 block group-hover:text-brand-green">150 – 400 m²</strong>
+                <span class="text-[10px] text-slate-500 block">Pavillon</span>
+                <span class="text-[10px] font-extrabold text-emerald-700 block mt-1">~120 € net</span>
+              </button>
+              <button type="button" onclick="selectSurfaceGuide(500, 420, 'Grand jardin (400–800 m²)')" class="surface-guide-btn text-left p-2.5 bg-white hover:border-brand-green rounded-xl border border-slate-200 transition-all cursor-pointer shadow-2xs group">
+                <span class="text-base block mb-0.5">🌲</span>
+                <strong class="text-xs text-slate-800 block group-hover:text-brand-green">400 – 800 m²</strong>
+                <span class="text-[10px] text-slate-500 block">Grand terrain</span>
+                <span class="text-[10px] font-extrabold text-emerald-700 block mt-1">~210 € net</span>
+              </button>
+              <button type="button" onclick="selectSurfaceGuide(1000, 750, 'Grand terrain (> 800 m²)')" class="surface-guide-btn text-left p-2.5 bg-white hover:border-brand-green rounded-xl border border-slate-200 transition-all cursor-pointer shadow-2xs group">
+                <span class="text-base block mb-0.5">🚜</span>
+                <strong class="text-xs text-slate-800 block group-hover:text-brand-green">&gt; 800 m²</strong>
+                <span class="text-[10px] text-slate-500 block">Propriété / Parc</span>
+                <span class="text-[10px] font-extrabold text-emerald-700 block mt-1">~375 € net</span>
+              </button>
+            </div>
+          </div>
+
           <!-- 3. OBLIGATOIRE : Presupuesto / Capital disponible (PDF Página 3) -->
           <div class="p-4 bg-amber-50/70 rounded-2xl border-2 border-yellow-400/60 space-y-2.5">
             <div class="flex items-center justify-between">
@@ -3182,9 +3441,23 @@
               </div>
             </div>
 
-            <!-- Tax benefit real-time preview -->
-            <div id="budget-calc-preview" class="text-xs text-amber-950 font-semibold bg-white p-2.5 rounded-xl border border-yellow-200">
-              💡 <em>Avec l'avance immédiate Unipros, vous ne déboursez que 50% de ce budget pour tous les travaux d'entretien éligibles !</em>
+            <!-- Tax benefit real-time preview (3-Column Educational Card) -->
+            <div id="budget-calc-preview" class="p-3 bg-white rounded-xl border border-yellow-300 text-xs space-y-1.5 shadow-2xs">
+              <div class="flex items-center justify-between text-slate-600">
+                <span>Tarif indicatif des travaux :</span>
+                <strong class="text-slate-900" id="calc-preview-total">350 € TTC</strong>
+              </div>
+              <div class="flex items-center justify-between text-emerald-700 font-semibold">
+                <span>Avance Immédiate URSSAF (-50%) :</span>
+                <strong id="calc-preview-tax">- 175 €</strong>
+              </div>
+              <div class="flex items-center justify-between text-slate-900 font-extrabold pt-1.5 border-t border-slate-100 text-sm">
+                <span>👉 Ce que vous déboursez réellement :</span>
+                <strong class="text-emerald-800 text-base" id="calc-preview-net">175 €</strong>
+              </div>
+              <p class="text-[10px] text-slate-500 italic pt-0.5">
+                💡 Zéro avance de trésorerie : l'URSSAF paie 50% directement à la coopérative Unipros (SAP n° 529241671). Vous ne réglez que les 50% restants.
+              </p>
             </div>
           </div>
 
@@ -3240,6 +3513,15 @@
             <div>
               <label class="block text-xs font-bold text-brand-green uppercase mb-1" for="details">Détails ou remarques (Optionnel)</label>
               <textarea id="details" rows="2" placeholder="Précisez un détail particulier (hauteur de haies, accès terrain...)" class="w-full px-4 py-2.5 bg-brand-light rounded-xl border border-slate-200 focus:outline-none focus:border-brand-vivid text-sm"></textarea>
+            </div>
+
+            <!-- WhatsApp Photo Tip -->
+            <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 flex items-start gap-2.5 text-xs text-emerald-950">
+              <i class="fa-brands fa-whatsapp text-green-600 text-lg mt-0.5 shrink-0"></i>
+              <div>
+                <strong class="font-bold block">📸 Astuce chiffrage express sans visite préalable :</strong>
+                <span>Vous pouvez aussi envoyer 1 ou 2 photos de votre haie ou jardin sur WhatsApp au <strong class="text-brand-green">+33 6 51 59 40 34</strong> avec votre nom pour recevoir une estimation chiffrée prioritaire !</span>
+              </div>
             </div>
           </div>
 
@@ -3916,13 +4198,20 @@
     const budgetPreview = document.getElementById('budget-calc-preview');
 
     const updateBudgetPreview = (amount) => {
-      if (!budgetPreview) return;
       const val = parseFloat(amount);
+      const totalEl = document.getElementById('calc-preview-total');
+      const taxEl = document.getElementById('calc-preview-tax');
+      const netEl = document.getElementById('calc-preview-net');
+
       if (!isNaN(val) && val > 0) {
         const half = Math.round(val / 2);
-        budgetPreview.innerHTML = `💡 <strong>Budget renseigné : ${val} €</strong> → Avec le crédit d'impôt Unipros 50%, vous ne déboursez que <strong>${half} €</strong> réels pour vos travaux d'entretien !`;
+        if (totalEl) totalEl.textContent = `${val.toFixed(0)} € TTC`;
+        if (taxEl) taxEl.textContent = `- ${half.toFixed(0)} €`;
+        if (netEl) netEl.textContent = `${half.toFixed(0)} €`;
       } else {
-        budgetPreview.innerHTML = `💡 <em>Avec l'avance immédiate Unipros, vous ne déboursez que 50% de ce budget pour tous les travaux d'entretien éligibles !</em>`;
+        if (totalEl) totalEl.textContent = '350 € TTC';
+        if (taxEl) taxEl.textContent = '- 175 €';
+        if (netEl) netEl.textContent = '175 €';
       }
     };
 
@@ -3931,6 +4220,25 @@
         budgetInput.value = amount;
         updateBudgetPreview(amount);
         budgetInput.focus();
+      }
+    };
+
+    window.selectSurfaceGuide = (sqm, suggestedBudget, label) => {
+      const surfaceInput = document.getElementById('surface');
+      if (surfaceInput) surfaceInput.value = sqm;
+      if (budgetInput) {
+        budgetInput.value = suggestedBudget;
+        updateBudgetPreview(suggestedBudget);
+      }
+      // Highlight active button visually
+      document.querySelectorAll('.surface-guide-btn').forEach(btn => {
+        btn.classList.remove('border-brand-green', 'bg-emerald-50/60', 'ring-2', 'ring-emerald-500');
+      });
+      if (typeof event !== 'undefined' && event && event.currentTarget) {
+        event.currentTarget.classList.add('border-brand-green', 'bg-emerald-50/60', 'ring-2', 'ring-emerald-500');
+      }
+      if (typeof showNotificationToast === 'function') {
+        showNotificationToast(`🌱 ${label} sélectionné : Surface ~${sqm} m² (Reste à charge réel ~${Math.round(suggestedBudget/2)} €)`, 'info');
       }
     };
 
@@ -4764,17 +5072,43 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
       if (quotes.length === 0) {
         listEl.innerHTML = `
-          <div class="p-6 text-center text-slate-500 text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-3">
-            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto text-xl">
-              <i class="fa-solid fa-file-circle-plus"></i>
+          <div class="p-6 bg-white rounded-3xl border-2 border-emerald-200/80 shadow-xs space-y-4">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xl shrink-0">
+                <i class="fa-solid fa-seedling"></i>
+              </div>
+              <div class="space-y-1">
+                <span class="inline-block text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
+                  Espace Personnel Particulier
+                </span>
+                <h5 class="font-serif text-lg font-bold text-brand-green">
+                  Vous n'avez pas encore de demande en cours
+                </h5>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  Demandez une estimation sans engagement en 1 minute. Andrés Pino vous répondra sous 24h avec la déduction directe de 50% URSSAF et votre coupon de bienvenue de -20% appliqué !
+                </p>
+              </div>
             </div>
-            <div>
-              <p class="font-bold text-slate-800 text-sm">Aucune demande de devis en cours</p>
-              <p class="text-slate-500 text-xs mt-1">Vous n'avez pas encore envoyé de demande. Cliquez ci-dessous pour obtenir une estimation gratuite sous 24h avec 50% de crédit d'impôt immédiat.</p>
+
+            <!-- Educational preview banner -->
+            <div class="p-4 bg-emerald-50/70 rounded-2xl border border-emerald-200 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5 text-xs text-emerald-950 font-semibold">
+                <i class="fa-solid fa-circle-question text-emerald-700 text-base"></i>
+                <span>Curieux de savoir comment se présente et se valide un devis ?</span>
+              </div>
+              <button type="button" onclick="openWindowModal('exemple-devis')" class="px-3.5 py-2 bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs">
+                <i class="fa-solid fa-eye text-amber-700"></i> Voir un exemple de devis expliqué
+              </button>
             </div>
-            <button type="button" onclick="bookClientIntervention()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer">
-              <i class="fa-solid fa-plus"></i> Demander un devis pré-rempli (-20%)
-            </button>
+
+            <div class="pt-1 flex flex-wrap gap-2 justify-center sm:justify-start">
+              <button type="button" onclick="bookClientIntervention()" class="px-5 py-3 bg-brand-vivid hover:bg-brand-green text-white rounded-xl text-xs font-extrabold transition-all shadow-md cursor-pointer flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle"></i> Demander mon premier devis gratuit (-20%)
+              </button>
+              <a href="https://wa.me/33651594034" target="_blank" rel="noopener" class="px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+                <i class="fa-brands fa-whatsapp text-green-600"></i> Discuter sur WhatsApp
+              </a>
+            </div>
           </div>
         `;
         return;
@@ -4791,24 +5125,31 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         const createdDate = q.created_at ? new Date(q.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : (q.date || '—');
         const st = q.status || 'Nouveau';
 
+        const resp = q.response || null;
+        const isAccepted = (st === 'Devis accepté' || st === 'Validé' || st === 'Gagné' || st === 'Accepté' || st === 'Facturé' || st === 'Terminé');
+        const isFinished = (st === 'Facturé' || st === 'Terminé');
+
         let statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">⏳ En cours d'évaluation</span>`;
         if (st === 'Devis envoyé') {
           statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">📄 Proposition chiffrée reçue</span>`;
-        } else if (st === 'Devis accepté' || st === 'Validé' || st === 'Gagné' || st === 'Accepté') {
+        } else if (isAccepted && !isFinished) {
           statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-700 text-white shadow-xs">✅ Devis accepté</span>`;
-        } else if (st === 'Facturé' || st === 'Terminé') {
-          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">🧾 Chantier facturé</span>`;
+        } else if (isFinished) {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">🧾 Chantier facturé & SAP</span>`;
         } else if (st === 'Contacté') {
           statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">📞 Prise de contact</span>`;
         }
 
-        const resp = q.response || null;
-        const isAccepted = (st === 'Devis accepté' || st === 'Validé' || st === 'Gagné' || st === 'Accepté' || st === 'Facturé' || st === 'Terminé');
+        // Timeline Step States
+        const step1Done = true;
+        const step2Done = (st === 'Devis envoyé' || resp !== null || isAccepted);
+        const step3Done = isAccepted;
+        const step4Done = isFinished;
 
         return `
-          <div class="p-5 bg-white rounded-2xl border-2 ${isAccepted ? 'border-emerald-700 shadow-md bg-emerald-50/10' : (resp ? 'border-emerald-500 shadow-sm' : 'border-slate-200')} space-y-4">
+          <div class="p-5 bg-white rounded-3xl border-2 ${isAccepted ? 'border-emerald-700 shadow-md bg-emerald-50/10' : (resp ? 'border-emerald-500 shadow-sm' : 'border-slate-200')} space-y-4">
             <!-- En-tête -->
-            <div class="flex flex-wrap justify-between items-center gap-2 pb-3 border-b border-slate-100">
+            <div class="flex flex-wrap justify-between items-center gap-2 pb-2 border-b border-slate-100">
               <div class="flex items-center gap-2">
                 <span class="font-mono font-black text-slate-900 text-sm">Devis #${escapeFn(ref)}</span>
                 ${statusBadge}
@@ -4819,34 +5160,72 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
               </div>
             </div>
 
+            <!-- Frise Chronologique / Timeline de Suivi Visuelle -->
+            <div class="grid grid-cols-4 gap-1 sm:gap-2 p-2.5 bg-slate-50 rounded-2xl text-[10px] sm:text-xs border border-slate-200">
+              <div class="flex items-center gap-1.5 font-bold ${step1Done ? 'text-emerald-800' : 'text-slate-400'}">
+                <span class="w-5 h-5 rounded-full ${step1Done ? 'bg-emerald-700 text-white' : 'bg-slate-200 text-slate-500'} flex items-center justify-center text-[10px] shrink-0 font-black">✓</span>
+                <span class="truncate">1. Demande</span>
+              </div>
+              <div class="flex items-center gap-1.5 font-bold ${step2Done ? 'text-emerald-800' : 'text-slate-400'}">
+                <span class="w-5 h-5 rounded-full ${step2Done ? 'bg-emerald-700 text-white' : 'bg-slate-200 text-slate-500'} flex items-center justify-center text-[10px] shrink-0 font-black">${step2Done ? '✓' : '2'}</span>
+                <span class="truncate">2. Chiffrage</span>
+              </div>
+              <div class="flex items-center gap-1.5 font-bold ${step3Done ? 'text-emerald-800' : (step2Done ? 'text-amber-800' : 'text-slate-400')}">
+                <span class="w-5 h-5 rounded-full ${step3Done ? 'bg-emerald-700 text-white' : (step2Done ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-500')} flex items-center justify-center text-[10px] shrink-0 font-black">${step3Done ? '✓' : '3'}</span>
+                <span class="truncate">3. Accord</span>
+              </div>
+              <div class="flex items-center gap-1.5 font-bold ${step4Done ? 'text-emerald-800' : 'text-slate-400'}">
+                <span class="w-5 h-5 rounded-full ${step4Done ? 'bg-emerald-700 text-white' : 'bg-slate-200 text-slate-500'} flex items-center justify-center text-[10px] shrink-0 font-black">${step4Done ? '✓' : '4'}</span>
+                <span class="truncate">4. Facture 7DB</span>
+              </div>
+            </div>
+
             <!-- Si Andrés a déjà chiffré le devis : Présentation simple et limpide -->
             ${resp ? `
               <!-- Bloc Prix Clair (Ce que vous payez) -->
-              <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200">
-                <div class="text-xs font-extrabold text-emerald-900 uppercase tracking-wider mb-2">
-                  💰 Tarif officiel avec Avance Immédiate de 50%
+              <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-extrabold text-emerald-900 uppercase tracking-wider">
+                    💰 Tarif officiel avec Avance Immédiate de 50%
+                  </span>
+                  <span class="text-[10px] font-bold bg-emerald-200 text-emerald-900 px-2.5 py-0.5 rounded-full">
+                    Agrément SAP n° 529241671
+                  </span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
                   <div class="p-3 bg-white rounded-xl border border-slate-200 text-center sm:text-left">
                     <span class="text-[11px] text-slate-500 block">Total facturé</span>
                     <strong class="text-base font-bold text-slate-900">${parseFloat(resp.price_ttc || 0).toFixed(2)} € TTC</strong>
+                    <span class="text-[10px] text-slate-400 block">Travaux + évacuation</span>
                   </div>
                   <div class="p-3 bg-white rounded-xl border border-emerald-200 text-center sm:text-left">
                     <span class="text-[11px] text-emerald-700 block font-bold">Avance 50% déduite</span>
                     <strong class="text-base font-bold text-emerald-700">- ${parseFloat(resp.credit_impot || 0).toFixed(2)} €</strong>
-                    <span class="text-[10px] text-emerald-600 block">Coopérative Unipros</span>
+                    <span class="text-[10px] text-emerald-600 block">Pris en charge État (URSSAF)</span>
                   </div>
                   <div class="p-3 bg-emerald-700 text-white rounded-xl shadow-xs text-center sm:text-left">
-                    <span class="text-[11px] text-emerald-100 block font-bold">👉 Ce que vous payez réellement</span>
+                    <span class="text-[11px] text-emerald-100 block font-bold">👉 Ce que vous payez</span>
                     <strong class="text-xl font-black">${parseFloat(resp.net_client || 0).toFixed(2)} €</strong>
+                    <span class="text-[10px] text-emerald-200 block">Prélevé après intervention</span>
                   </div>
+                </div>
+
+                <!-- Décryptage Pédagogique du tarif -->
+                <div class="p-3 bg-white/80 rounded-xl border border-emerald-200 text-xs text-emerald-950 space-y-1">
+                  <div class="font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-check text-emerald-700"></i> Pourquoi ne payez-vous que 50% ?
+                  </div>
+                  <p class="text-[11px] text-slate-600 leading-relaxed">
+                    Grâce à la <strong>Coopérative Unipros (SAP n° 529241671)</strong>, l'URSSAF applique l'Article 199 sexdecies du CGI en temps réel. Vous n'avez <strong>aucune avance de trésorerie</strong> à faire : seuls les 50% nets (${parseFloat(resp.net_client || 0).toFixed(2)} €) vous seront facturés.
+                  </p>
                 </div>
               </div>
 
               <!-- Ce qui est prévu dans votre jardin -->
-              <div class="space-y-2 text-xs sm:text-sm text-slate-800 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <div class="font-bold text-slate-900 text-xs uppercase tracking-wide">
-                  📋 Détails de l'intervention :
+              <div class="space-y-2 text-xs sm:text-sm text-slate-800 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                <div class="font-bold text-slate-900 text-xs uppercase tracking-wide flex items-center justify-between">
+                  <span>📋 Détails de l'intervention :</span>
+                  <span class="text-slate-400 font-normal">Matériel & évacuation pro</span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
                   <div><strong>🌿 Prestation :</strong> ${escapeFn(service)}</div>
@@ -4860,6 +5239,28 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
                   </div>
                 ` : ''}
               </div>
+
+              <!-- FAQ Pédagogique Interactive en 1 clic -->
+              <details class="group bg-white rounded-2xl border border-slate-200 overflow-hidden text-xs">
+                <summary class="p-3 font-bold text-slate-800 flex items-center justify-between cursor-pointer select-none hover:bg-slate-50 transition-colors">
+                  <span class="flex items-center gap-2"><i class="fa-solid fa-circle-question text-emerald-700"></i> Questions fréquentes sur cette proposition</span>
+                  <i class="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform text-xxs"></i>
+                </summary>
+                <div class="p-3.5 pt-0 space-y-2 text-slate-600 border-t border-slate-100 bg-slate-50/50">
+                  <div>
+                    <strong class="text-slate-800 block text-[11px]">Dois-je payer un acompte maintenant ?</strong>
+                    <span class="text-[11px]">Non, 0€ d'acompte. L'acceptation du devis bloque simplement votre créneau d'intervention.</span>
+                  </div>
+                  <div>
+                    <strong class="text-slate-800 block text-[11px]">Comment et quand se fait le règlement ?</strong>
+                    <span class="text-[11px]">Le règlement s'effectue après l'intervention via le portail sécurisé Unipros pour valider le prélèvement direct des 50% restants.</span>
+                  </div>
+                  <div>
+                    <strong class="text-slate-800 block text-[11px]">Où trouver l'attestation fiscale pour mes impôts ?</strong>
+                    <span class="text-[11px]">Dès clôture du chantier, votre attestation fiscale officielle mentionnant la <strong>Case 7DB</strong> (formulaire 2042 RICI) est téléchargeable dans l'onglet Factures ci-dessous.</span>
+                  </div>
+                </div>
+              </details>
 
               <!-- Boutons d'action -->
               ${isAccepted ? `
@@ -4889,7 +5290,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
                 <div class="pt-1 flex flex-col sm:flex-row gap-2.5">
                   <button type="button" onclick="acceptClientQuote('${escapeFn(q.sbId || q.id || ref)}', '${escapeFn(q.email || email)}')"
                     class="flex-1 py-3 px-4 bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] text-white font-extrabold text-xs sm:text-sm rounded-xl text-center flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer">
-                    <i class="fa-solid fa-circle-check text-base"></i> Accepter cette proposition
+                    <i class="fa-solid fa-circle-check text-base"></i> Accepter cette proposition (0€ à payer maintenant)
                   </button>
                   <a href="https://wa.me/33651594034?text=${encodeURIComponent(`Bonjour Andrés, je souhaite échanger au sujet de votre devis #${ref} pour un montant net de ${parseFloat(resp.net_client || 0).toFixed(2)}€.`)}"
                     target="_blank" rel="noopener"
@@ -4929,12 +5330,12 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
                 </p>
               ` : ''}
 
-              <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                <span class="text-slate-500">Andrés prépare votre chiffrage détaillé sous 24h.</span>
-                <a href="https://wa.me/33651594034?text=${encodeURIComponent(`Bonjour Andrés, je vous ai transmis la demande de devis ${ref}. Pouvez-vous m'indiquer vos disponibilités ?`)}"
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+                <span class="text-slate-500 font-medium">Andrés Pino prépare votre chiffrage détaillé sous 24h avec Avance Immédiate 50%.</span>
+                <a href="https://wa.me/33651594034?text=${encodeURIComponent(`Bonjour Andrés, je vous ai transmis la demande de devis #${ref}. Pouvez-vous m'indiquer vos disponibilités ?`)}"
                   target="_blank" rel="noopener"
                   class="text-emerald-700 font-bold hover:underline flex items-center gap-1">
-                  <i class="fa-brands fa-whatsapp"></i> Contacter Andrés
+                  <i class="fa-brands fa-whatsapp"></i> Échanger sur WhatsApp
                 </a>
               </div>
             `}
@@ -6056,8 +6457,12 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         'login': 'modal-window-auth',
         'client': 'modal-window-client',
         'espace': 'modal-window-client',
-        'admin': 'modal-window-admin'
+        'admin': 'modal-window-admin',
+        'exemple-devis': 'modal-exemple-devis',
+        'exemple': 'modal-exemple-devis'
       };
+
+      window.openExempleDevis = () => window.openWindowModal('exemple-devis');
 
       const targetId = map[sectionKey] || ('modal-window-' + sectionKey);
       const targetModal = document.getElementById(targetId);
