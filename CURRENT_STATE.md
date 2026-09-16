@@ -5,7 +5,7 @@
 - **Repositorio remoto**: [https://github.com/jomstudiovzla/pinopage](https://github.com/jomstudiovzla/pinopage)
 - **URL pública (GitHub Pages)**: [https://jomstudiovzla.github.io/pinopage/](https://jomstudiovzla.github.io/pinopage/)
 - **Rama principal**: `main`
-- **Estado del build v1**: remediación V2 — Firebase fuera. Proyecto Supabase **Page** `https://ziccgwonregaatuijyzb.supabase.co` (Ireland). Falta **anon key**. Header: wordmark 2 líneas + sello Unipros (sin aglomerar el nav).
+- **Estado del build v1**: clave publicable cableada (`sb_publishable_…`). Proyecto **Page** `https://ziccgwonregaatujyyzb.supabase.co`. Google Auth aún OFF. SQL de tablas pendiente de Run en el editor.
 - **Estado v2**: **especificación completa (Hito 0)**.
 - **Localhost**: `http://127.0.0.1:8080/` (`python3 -m http.server 8080`)
 

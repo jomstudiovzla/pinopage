@@ -1,10 +1,10 @@
 /**
- * Pino Espaces Verts — config pública de Supabase (anon key only).
- * Pegar url + anonKey del proyecto eu-west-3. Nunca service_role.
+ * Pino Espaces Verts — clave publicable (sb_publishable_…).
+ * Nunca service_role ni contraseña de Postgres en el cliente.
  */
 window.PINO_SUPABASE = {
   url: "https://ziccgwonregaatujyyzb.supabase.co",
-  anonKey: ""
+  anonKey: "sb_publishable_EAny8jZ7-KWclRpZQRhWdA_QjlbtfAb"
 };
 
 (function computeSiteUrl() {

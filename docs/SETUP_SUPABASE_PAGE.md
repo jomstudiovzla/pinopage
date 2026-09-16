@@ -6,14 +6,19 @@ URL ya cableada en `assets/js/supabase-config.js`:
 
 Región actual del proyecto: **West EU (Ireland) `eu-west-1`**. No es París; no se cambia a menos que se cree otro proyecto.
 
-## 1. Clave `anon` (obligatoria para el login Google)
+## 1. Clave publicable (ya en el cliente)
 
-1. Dashboard → Project Settings → API.
-2. Copiar **anon / public** (JWT que empieza por `eyJ`).
-3. Pegar en `assets/js/supabase-config.js` → `anonKey`.
-4. **Nunca** pegar `service_role` en el front.
+`assets/js/supabase-config.js` usa `sb_publishable_…` del proyecto **Page**. No pongas `service_role` ni la contraseña de Postgres en el front.
 
-Sin este paso el botón Google muestra el aviso de configuración (ahora abajo a la derecha, no encima del menú).
+CLI (cuando tengas un access token de Account → Access Tokens):
+
+```bash
+npx supabase login --token <ACCESS_TOKEN>
+npx supabase link --project-ref ziccgwonregaatujyyzb --yes
+npx supabase db push
+```
+
+Mientras tanto: SQL Editor → pegar `docs/sql/001` + `002` (ya copiados al portapapeles).
 
 ## 2. URLs de Auth
 

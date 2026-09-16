@@ -1266,7 +1266,7 @@
                 <i class="fa-solid fa-ticket text-amber-600"></i> Chèques CESU
               </span>
               <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-sm font-bold text-slate-800">
-                <i class="fa-solid fa-hand-holding-dollar text-slate-600"></i> Prélèvement / Espèces
+                <i class="fa-solid fa-building-columns text-emerald-700"></i> Prélèvement URSSAF
               </span>
             </div>
           </div>
@@ -3876,7 +3876,12 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         if (error) throw error;
       } catch (error) {
         console.error('Supabase Google Sign-In:', error);
-        showNotificationToast(error.message || 'Échec de connexion avec Google.', 'error');
+        const raw = (error && error.message) ? error.message : '';
+        let msg = raw || 'Échec de connexion avec Google.';
+        if (/provider|unsupported|disabled|validation/i.test(raw)) {
+          msg = "Google n'est pas encore activé. Dans Supabase : Authentication → Providers → Google → ON.";
+        }
+        showNotificationToast(msg, 'error');
         if (label) label.textContent = originalText;
       }
     };
