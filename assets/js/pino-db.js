@@ -747,16 +747,51 @@
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  EXPORT — Generar CSV de trabajos
+   *  EXPORT UTIL — Descarga segura de Blob en el navegador
    * ───────────────────────────────────────────────────────── */
-  function exportJobsCSV(jobs) {
+  function downloadFileBlob(blob, filename) {
+    try {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        try {
+          if (a.parentNode) a.parentNode.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch(e) {}
+      }, 3000);
+      return true;
+    } catch (err) {
+      console.error('[PinoDB] downloadFileBlob error:', err);
+      return false;
+    }
+  }
+
+  function exportDataToCSV(headers, rows, filename) {
+    const lines = [
+      headers.map(h => `"${String(h ?? '').replace(/"/g, '""')}"`).join(';'),
+      ...rows.map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(';'))
+    ];
+    const csvContent = lines.join('\r\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    return downloadFileBlob(blob, filename);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  EXPORT — Generar CSV de travaux
+   * ───────────────────────────────────────────────────────── */
+  function exportJobsCSV(jobs = []) {
     const headers = [
-      'Cliente','Email','Commune','Servicio','Descripción',
-      'Fecha inicio','Fecha fin','Horas','Monto (€)',
-      'Pagado (€)','Pendiente (€)','Estado pago','Método pago','Notas'
+      'Client','Email','Commune','Prestation','Description',
+      'Date début','Date fin','Heures','Facturé TTC (€)',
+      'Payé (€)','Reste (€)','Statut paiement','Mode de règlement','Notes'
     ];
 
-    const rows = jobs.map(j => {
+    const rows = (jobs || []).map(j => {
       const charged = parseFloat(j.amount_charged) || 0;
       const paid = parseFloat(j.amount_paid) || 0;
       const pending = charged - paid;
@@ -766,7 +801,7 @@
         j.client_email   || '',
         j.client_commune || '',
         j.service_type   || '',
-        (j.description   || '').replace(/"/g, '""'),
+        j.description    || '',
         j.date_start     || '',
         j.date_end       || '',
         j.hours_spent    || '',
@@ -775,96 +810,384 @@
         pending.toFixed(2),
         j.payment_status || '',
         j.payment_method || '',
-        (j.notes         || '').replace(/"/g, '""'),
-      ].map(v => `"${v}"`).join(',');
+        j.notes          || '',
+      ];
     });
 
-    const csv = [headers.join(','), ...rows].join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `pino_travaux_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const filename = `pino_travaux_${new Date().toISOString().slice(0,10)}.csv`;
+    return exportDataToCSV(headers, rows, filename);
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  EXPORT — Generar PDF de trabajos con jsPDF
+   *  EXPORT — Generar PDF de travaux con jsPDF
    * ───────────────────────────────────────────────────────── */
-  function exportJobsPDF(jobs) {
-    if (typeof window.jspdf !== 'undefined' || typeof window.jsPDF !== 'undefined') {
-      const { jsPDF } = window.jspdf || window;
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-      const now  = new Date().toLocaleDateString('fr-FR');
-      const GREEN = [76, 153, 0];
+  function exportJobsPDF(jobs = []) {
+    const jsPDFConstructor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    if (typeof jsPDFConstructor === 'function') {
+      try {
+        const doc = new jsPDFConstructor({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const now  = new Date().toLocaleDateString('fr-FR');
+        const GREEN = [30, 81, 56]; // #1e5138
 
-      // Cabecera
-      doc.setFillColor(...GREEN);
-      doc.rect(0, 0, 297, 18, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(13);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Pino Espaces Verts — Rapport des Travaux', 10, 12);
-      doc.setFontSize(9);
-      doc.text(`Généré le ${now}`, 240, 12);
+        // En-tête
+        doc.setFillColor(...GREEN);
+        doc.rect(0, 0, 297, 18, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Pino Espaces Verts — Rapport des Travaux & Facturation', 10, 12);
+        doc.setFontSize(9);
+        doc.text(`Généré le ${now}`, 235, 12);
 
-      // Resumen financiero
-      const totalCharged = jobs.reduce((s, j) => s + (parseFloat(j.amount_charged) || 0), 0);
-      const totalPaid    = jobs.reduce((s, j) => s + (parseFloat(j.amount_paid)    || 0), 0);
-      const totalHours   = jobs.reduce((s, j) => s + (parseFloat(j.hours_spent)    || 0), 0);
+        // Résumé financier
+        const totalCharged = (jobs || []).reduce((s, j) => s + (parseFloat(j.amount_charged) || 0), 0);
+        const totalPaid    = (jobs || []).reduce((s, j) => s + (parseFloat(j.amount_paid)    || 0), 0);
+        const totalHours   = (jobs || []).reduce((s, j) => s + (parseFloat(j.hours_spent)    || 0), 0);
 
-      doc.setTextColor(0, 0, 0);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Total travaux: ${jobs.length}   |   Facturé: ${totalCharged.toFixed(2)} €   |   Encaissé: ${totalPaid.toFixed(2)} €   |   Heures totales: ${totalHours.toFixed(1)} h`, 10, 25);
+        doc.setTextColor(15, 23, 42);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Total chantiers : ${jobs.length}   |   Facturé TTC : ${totalCharged.toFixed(2)} €   |   Encaissé : ${totalPaid.toFixed(2)} €   |   Heures cumulées : ${totalHours.toFixed(1)} h`, 10, 25);
 
-      // Tabla
-      const cols = ['Client','Service','Période','H.','Facturé €','Payé €','Statut','Mode','Notes'];
-      const colW = [38, 32, 30, 12, 22, 18, 20, 22, 42];
-      let y = 32;
+        // Tableau
+        const cols = ['Client','Prestation','Période','H.','Facturé €','Payé €','Statut','Mode','Notes'];
+        const colW = [38, 32, 30, 12, 22, 18, 20, 22, 42];
+        let y = 32;
 
-      // Encabezado tabla
-      doc.setFillColor(230, 245, 218);
-      doc.rect(10, y, 277, 7, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
-      let x = 10;
-      cols.forEach((c, i) => { doc.text(c, x + 1, y + 5); x += colW[i]; });
-      y += 8;
-
-      const statusLabel = { pending:'En attente', partial:'Partiel', paid:'Payé', cancelled:'Annulé' };
-      const methodLabel = { unipros:'Unipros', virement:'Virement', cheque:'Chèque', cesu:'CESU', especes:'Espèces', autre:'Autre' };
-
-      doc.setFont('helvetica', 'normal');
-      jobs.forEach((j, idx) => {
-        if (y > 190) { doc.addPage(); y = 15; }
-        if (idx % 2 === 0) { doc.setFillColor(248, 252, 243); doc.rect(10, y, 277, 7, 'F'); }
-        const period = [j.date_start, j.date_end].filter(Boolean).join(' → ');
-        const row = [
-          j.client_name   || '',
-          j.service_type  || '',
-          period,
-          j.hours_spent   ? String(j.hours_spent) : '',
-          j.amount_charged? `${parseFloat(j.amount_charged).toFixed(2)} €` : '',
-          j.amount_paid   ? `${parseFloat(j.amount_paid).toFixed(2)} €`    : '0.00 €',
-          statusLabel[j.payment_status] || j.payment_status || '',
-          methodLabel[j.payment_method] || j.payment_method || '',
-          (j.notes || '').slice(0, 50),
-        ];
-        x = 10;
-        row.forEach((v, i) => {
-          doc.text(String(v), x + 1, y + 5, { maxWidth: colW[i] - 2 });
-          x += colW[i];
-        });
+        doc.setFillColor(230, 245, 218);
+        doc.rect(10, y, 277, 7, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        let x = 10;
+        cols.forEach((c, i) => { doc.text(c, x + 1, y + 5); x += colW[i]; });
         y += 8;
-      });
 
-      doc.save(`pino_travaux_${new Date().toISOString().slice(0,10)}.pdf`);
-      return;
+        const statusLabel = { pending:'En attente', partial:'Partiel', paid:'Payé', cancelled:'Annulé' };
+        const methodLabel = { unipros:'Unipros SAP', virement:'Virement', cheque:'Chèque', cesu:'CESU', especes:'Espèces', autre:'Autre' };
+
+        doc.setFont('helvetica', 'normal');
+        (jobs || []).forEach((j, idx) => {
+          if (y > 185) { doc.addPage(); y = 15; }
+          if (idx % 2 === 0) { doc.setFillColor(248, 252, 243); doc.rect(10, y, 277, 7, 'F'); }
+          const period = [j.date_start, j.date_end].filter(Boolean).join(' → ') || 'Ponctuel';
+          const row = [
+            j.client_name   || 'Client',
+            j.service_type  || '',
+            period,
+            j.hours_spent   ? String(j.hours_spent) : '',
+            j.amount_charged? `${parseFloat(j.amount_charged).toFixed(2)} €` : '',
+            j.amount_paid   ? `${parseFloat(j.amount_paid).toFixed(2)} €`    : '0.00 €',
+            statusLabel[j.payment_status] || j.payment_status || '',
+            methodLabel[j.payment_method] || j.payment_method || '',
+            (j.notes || '').slice(0, 50),
+          ];
+          x = 10;
+          row.forEach((v, i) => {
+            doc.text(String(v), x + 1, y + 5, { maxWidth: colW[i] - 2 });
+            x += colW[i];
+          });
+          y += 8;
+        });
+
+        doc.save(`pino_travaux_${new Date().toISOString().slice(0,10)}.pdf`);
+        return true;
+      } catch (err) {
+        console.warn('[PinoDB] exportJobsPDF error, falling back to CSV:', err);
+      }
     }
 
-    exportJobsCSV(jobs);
+    return exportJobsCSV(jobs);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  EXPORT — Generar CSV y PDF de Leads / Devis
+   * ───────────────────────────────────────────────────────── */
+  function exportLeadsCSV(leads = []) {
+    const headers = [
+      'Réf Devis', 'Date', 'Client', 'Email', 'Téléphone', 'Commune',
+      'Prestation', 'Surface', 'Budget TTC (€)', 'Reste Net 50% SAP (€)',
+      'Statut', 'Diagnostic Qualité', 'Raison Qualité', 'Détails & Notes'
+    ];
+
+    const rows = (leads || []).map(l => {
+      const budget = parseFloat(l.response?.price_ttc || l.budget_eur || l.budget || 0) || 0;
+      const net = budget * 0.5;
+      const dateStr = l.created_at ? new Date(l.created_at).toLocaleDateString('fr-FR') : (l.date || '—');
+      const qStatus = l.quality_status === 'bonne' ? 'Bonne réponse ⭐' : (l.quality_status === 'reparee' ? 'Réparée 🛠️' : 'À réparer ⚠️');
+
+      return [
+        l.ref_code || l.id || '',
+        dateStr,
+        l.name || 'Client',
+        l.email || '',
+        l.phone || '',
+        l.commune || '',
+        l.service_type || l.service || '',
+        l.surface ? `${l.surface} m²` : '',
+        budget.toFixed(2),
+        net.toFixed(2),
+        l.status || 'Nouveau',
+        qStatus,
+        l.quality_reason || '',
+        l.details || ''
+      ];
+    });
+
+    const filename = `pino_devis_leads_${new Date().toISOString().slice(0,10)}.csv`;
+    return exportDataToCSV(headers, rows, filename);
+  }
+
+  function exportLeadsPDF(leads = []) {
+    const jsPDFConstructor = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    if (typeof jsPDFConstructor === 'function') {
+      try {
+        const doc = new jsPDFConstructor({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const now  = new Date().toLocaleDateString('fr-FR');
+        const GREEN = [30, 81, 56];
+
+        doc.setFillColor(...GREEN);
+        doc.rect(0, 0, 297, 18, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Pino Espaces Verts — Registre des Devis & Prospects', 10, 12);
+        doc.setFontSize(9);
+        doc.text(`Généré le ${now}`, 235, 12);
+
+        doc.setTextColor(15, 23, 42);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Total devis & prospects : ${leads.length}`, 10, 25);
+
+        const cols = ['Réf','Date','Client','Contact','Commune','Prestation','Budget TTC','Reste 50%','Statut'];
+        const colW = [28, 22, 38, 38, 32, 40, 22, 22, 35];
+        let y = 32;
+
+        doc.setFillColor(230, 245, 218);
+        doc.rect(10, y, 277, 7, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        let x = 10;
+        cols.forEach((c, i) => { doc.text(c, x + 1, y + 5); x += colW[i]; });
+        y += 8;
+
+        doc.setFont('helvetica', 'normal');
+        (leads || []).forEach((l, idx) => {
+          if (y > 185) { doc.addPage(); y = 15; }
+          if (idx % 2 === 0) { doc.setFillColor(248, 252, 243); doc.rect(10, y, 277, 7, 'F'); }
+          const budget = parseFloat(l.response?.price_ttc || l.budget_eur || l.budget || 0) || 0;
+          const net = budget * 0.5;
+          const dateStr = l.created_at ? new Date(l.created_at).toLocaleDateString('fr-FR') : (l.date || '—');
+          const contact = [l.phone, l.email].filter(Boolean).join(' • ');
+
+          const row = [
+            l.ref_code || l.id || '',
+            dateStr,
+            l.name || 'Client',
+            contact,
+            l.commune || 'Gironde',
+            l.service_type || l.service || '',
+            budget > 0 ? `${budget.toFixed(0)} €` : '—',
+            net > 0 ? `${net.toFixed(0)} €` : '—',
+            l.status || 'Nouveau'
+          ];
+          x = 10;
+          row.forEach((v, i) => {
+            doc.text(String(v), x + 1, y + 5, { maxWidth: colW[i] - 2 });
+            x += colW[i];
+          });
+          y += 8;
+        });
+
+        doc.save(`pino_devis_prospects_${new Date().toISOString().slice(0,10)}.pdf`);
+        return true;
+      } catch (err) {
+        console.warn('[PinoDB] exportLeadsPDF error, falling back to CSV:', err);
+      }
+    }
+
+    return exportLeadsCSV(leads);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  EXPORT — Generar CSV de factures
+   * ───────────────────────────────────────────────────────── */
+  function exportFacturesCSV(jobs = []) {
+    const headers = [
+      'N° Facture', 'Date intervention', 'Client', 'Email', 'Téléphone',
+      'Commune', 'Prestation', 'Montant TTC (€)', 'Avance SAP 50% (€)',
+      'Net Payé Client (€)', 'Mode de règlement', 'Statut Facture', 'Notes'
+    ];
+
+    const rows = (jobs || []).map(j => {
+      const charged = parseFloat(j.amount_charged) || 0;
+      const isUnipros = (j.payment_method || 'unipros') === 'unipros';
+      const credit = isUnipros ? charged * 0.5 : 0;
+      const net = charged - credit;
+      const facNum = j.fac_number || `#FAC-${String(j.id || '').slice(-6).toUpperCase()}`;
+      const dateStr = j.date_start ? new Date(j.date_start).toLocaleDateString('fr-FR') : (j.created_at ? new Date(j.created_at).toLocaleDateString('fr-FR') : '—');
+
+      return [
+        facNum,
+        dateStr,
+        j.client_name || 'Client',
+        j.client_email || '',
+        j.client_phone || '',
+        j.client_commune || '',
+        j.service_type || '',
+        charged.toFixed(2),
+        credit.toFixed(2),
+        net.toFixed(2),
+        j.payment_method || 'unipros',
+        j.payment_status === 'paid' ? 'Payé' : 'En attente',
+        j.notes || ''
+      ];
+    });
+
+    const filename = `pino_factures_${new Date().toISOString().slice(0,10)}.csv`;
+    return exportDataToCSV(headers, rows, filename);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  EXPORT — Generar CSV de opportunités multi-plateformes
+   * ───────────────────────────────────────────────────────── */
+  function exportPlatformLeadsCSV(leads = []) {
+    const headers = [
+      'Plateforme', 'Date repérée', 'Nom / Contact', 'Commune',
+      'Prestation demandée', 'Budget indicatif (€)', 'Téléphone', 'Statut', 'Lien annonce', 'Notes'
+    ];
+
+    const rows = (leads || []).map(l => [
+      l.platform || '',
+      l.created_at ? new Date(l.created_at).toLocaleDateString('fr-FR') : '—',
+      l.name || 'Prospect',
+      l.commune || '',
+      l.service || '',
+      l.budget ? parseFloat(l.budget).toFixed(2) : '0.00',
+      l.phone || '',
+      l.status || 'a_contacter',
+      l.url || '',
+      l.notes || ''
+    ]);
+
+    const filename = `pino_prospection_6plateformes_${new Date().toISOString().slice(0,10)}.csv`;
+    return exportDataToCSV(headers, rows, filename);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  EXPORT — Generar CSV para el cliente de sus devis
+   * ───────────────────────────────────────────────────────── */
+  function exportClientQuotesCSV(quotes = [], clientName = 'Client') {
+    const headers = [
+      'Réf Devis', 'Date', 'Prestation', 'Budget estimé (€)',
+      'Avance 50% SAP (€)', 'Reste Net Client (€)', 'Statut'
+    ];
+
+    const rows = (quotes || []).map(q => {
+      const resp = q.response || {};
+      const total = parseFloat(resp.price_ttc || q.budget || 0) || 0;
+      const credit = total * 0.5;
+      const net = total - credit;
+      const dateStr = q.created_at ? new Date(q.created_at).toLocaleDateString('fr-FR') : (q.date || '—');
+
+      return [
+        q.ref_code || q.id || '',
+        dateStr,
+        q.service_type || q.service || 'Entretien jardin',
+        total.toFixed(2),
+        credit.toFixed(2),
+        net.toFixed(2),
+        q.status || 'En cours'
+      ];
+    });
+
+    const safeName = (clientName || 'client').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const filename = `mes_devis_pino_${safeName}_${new Date().toISOString().slice(0,10)}.csv`;
+    return exportDataToCSV(headers, rows, filename);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  QUALITÉ & RÉPARATION DES RÉPONSES / LEADS
+   * ───────────────────────────────────────────────────────── */
+  async function updateLeadQuality(leadId, qualityData = {}) {
+    const payload = {
+      quality_status: qualityData.status || 'bonne', // 'bonne' | 'mauvaise' | 'reparee'
+      quality_reason: qualityData.reason || '',
+      quality_score:  qualityData.score  || 80,
+      repaired_at:    qualityData.repaired_at || null,
+      repair_action:  qualityData.repair_action || null,
+      updated_at:     new Date().toISOString()
+    };
+
+    const db = rtdb();
+    if (db) {
+      try {
+        await db.ref('leads/' + leadId).update(payload);
+        return { ok: true };
+      } catch (err) {
+        log('updateLeadQuality:rtdb', err);
+      }
+    }
+
+    // LocalStorage fallback
+    try {
+      let leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+      const idx = leads.findIndex(l => l.id === leadId || l.ref_code === leadId || l.sbId === leadId);
+      if (idx >= 0) {
+        leads[idx] = { ...leads[idx], ...payload };
+        localStorage.setItem('pino_leads', JSON.stringify(leads));
+        return { ok: true };
+      }
+    } catch(e) {}
+
+    return { ok: false };
+  }
+
+  async function repairLead(leadId, repairType = 'relance_sap_50', customNotes = '') {
+    let repairActionDesc = '';
+    let statusUpdate = 'Relancé';
+
+    if (repairType === 'relance_sap_50') {
+      repairActionDesc = "Relance Avance Immédiate 50% SAP appliquée (Divise le reste à charge par 2)";
+    } else if (repairType === 'coupon_20') {
+      repairActionDesc = "Coupon Bienvenue -20% (PELABOLA) injecté dans le devis";
+    } else if (repairType === 'chiffrage_ajuste') {
+      repairActionDesc = `Chiffrage recalculé et ajusté : ${customNotes || 'Tarif adapté au budget'}`;
+    } else {
+      repairActionDesc = customNotes || 'Réparation manuelle effectuée par Andrés';
+    }
+
+    const updates = {
+      status: statusUpdate,
+      quality_status: 'reparee',
+      quality_reason: `Réparé : ${repairActionDesc}`,
+      quality_score: 85,
+      repaired_at: new Date().toISOString(),
+      repair_action: repairActionDesc,
+      updated_at: new Date().toISOString()
+    };
+
+    const db = rtdb();
+    if (db) {
+      try {
+        await db.ref('leads/' + leadId).update(updates);
+        return { ok: true, repairActionDesc };
+      } catch(err) {
+        log('repairLead:rtdb', err);
+      }
+    }
+
+    try {
+      let leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+      const idx = leads.findIndex(l => l.id === leadId || l.ref_code === leadId || l.sbId === leadId);
+      if (idx >= 0) {
+        leads[idx] = { ...leads[idx], ...updates };
+        localStorage.setItem('pino_leads', JSON.stringify(leads));
+        return { ok: true, repairActionDesc };
+      }
+    } catch(e) {}
+
+    return { ok: false };
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -1114,8 +1437,17 @@
     saveJob,
     fetchJobs,
     updateJob,
+    downloadFileBlob,
+    exportDataToCSV,
     exportJobsCSV,
     exportJobsPDF,
+    exportLeadsCSV,
+    exportLeadsPDF,
+    exportFacturesCSV,
+    exportPlatformLeadsCSV,
+    exportClientQuotesCSV,
+    updateLeadQuality,
+    repairLead,
     listenClientNotifications,
     listenClientQuotes,
     fetchClientNotifications,

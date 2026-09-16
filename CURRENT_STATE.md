@@ -27,20 +27,37 @@
   - Pestaña de Facturas en Admin (`#adm-factures-table-body`) dinamizada desde Firebase RTDB / Supabase (`renderAdminFactures`).
   - Despacho silencioso de devis por correo vía Web3Forms (auditoría a Andrés) + FormSubmit (directo al cliente) sin popup invasivo.
   - Limpieza completa de elementos huérfanos y validación de sintaxis JavaScript.
-- [x] **Tareas P1 Críticas / Inmediatas (100% COMPLETADAS Y VERIFICADAS)**:
-  1. **Modal "Nouvelle Facture" Funcional en Admin**:
-     - Se reemplazó el `alert()` del botón *"Nouvelle Facture"* por el modal [`#modal-nouvelle-facture`](file:///Users/macbook/Documents/Antigravity/PINO/new/index.html).
-     - Correlativo automático `#FAC-2026-XXX`, selector de leads para pre-llenado en 1-clic, cálculo en tiempo real de avance 50% SAP URSSAF y neto client.
-     - Persistencia directa en Firebase Realtime Database (`/jobs`), notificación in-app al cliente y actualización de tabla con columna de Acciones.
-  2. **Botón "Accepter cette proposition" en Espace Client**:
-     - Botón interactivo en las tarjetas de propuesta chiffrée del cliente.
-     - Actualización atómica del estado a `'Devis accepté'` en Firebase RTDB (`leads/{id}/status`), guardado de timestamp y datos de aceptación.
-     - Notificación automática a Andrés Pino (`admin_notifications`) y badge de confirmación visual verde en la tarjeta.
-  3. **Generación y Descarga de Comprobante Fiscal en PDF (Case 7DB)**:
-     - `printAttestationFiscaleSAP`: Generación oficial de la *Attestation Fiscale Annuelle Services à la Personne (SAP)* con referencia legal al Art. 199 sexdecies del CGI, N° de Déclaration SAP529241671 de la Coopérative Unipros, montos facturados, crédito del 50% y casilla **Case 7DB** del Formulario 2042 RICI de la DGFiP.
-     - `printFactureClientPDF`: Generación de factura detallada con membrete, desgloses y exoneración/mentions SAP.
-     - Acceso inmediato tanto desde el Espace Client como desde el panel de Facturas de Andrés.
-  4. **Despliegue de Reglas RTDB**: Desplegadas a `crm-jom` vía Firebase CLI con validación de sintaxis aprobada.
+- [x] **Moteur Universel d'Exportation PDF & Excel/CSV (100% OPÉRATIONNEL & TESTÉ)** :
+  1. **Téléchargement direct Blob / CSV fiabilisé dans `assets/js/pino-db.js`** :
+     - Correction du bug WebKit/Safari : `downloadFileBlob` effectue désormais l'insertion temporaire dans le DOM (`document.body.appendChild(a)`) et temporise la révocation de l'URL (`setTimeout(() => URL.revokeObjectURL(url), 3000)`).
+     - Export CSV avec encodage UTF-8 BOM (`\uFEFF`) et séparateur standard européen (`;`) pour compatibilité immédiate avec Microsoft Excel, Numbers et LibreOffice.
+     - Méthodes dédiées : `exportLeadsCSV`, `exportLeadsPDF`, `exportJobsCSV`, `exportJobsPDF`, `exportFacturesCSV`, `exportPlatformLeadsCSV`, et `exportClientQuotesCSV`.
+  2. **Génération PDF client-side directe sans blocage de popups** :
+     - Chargement de `html2pdf.bundle.min.js` (incluant `html2canvas` + `jsPDF`) dans le `<head>` de [`index.html`](file:///Users/macbook/Documents/Antigravity/PINO/new/index.html).
+     - Intégration du modal universel `#modal-document-preview` et de l'iframe silencieux `#pino-silent-print-frame`.
+     - Remplacement de tous les anciens `window.open('', '_blank')` qui étaient bloqués par les navigateurs par le contrôleur universel `displayOrDownloadDocument({ title, filename, htmlContent })`.
+     - Mise à jour complète de `printLeadQuotePDF`, `printAttestationFiscaleSAP` et `printFactureClientPDF`.
+  3. **Boutons d'exportation intégrés dans toutes les vues** :
+     - Admin Leads : *Export CSV* et *Rapport PDF*.
+     - Admin Prospection : *Export CSV*.
+     - Admin Factures : *Export Factures CSV*.
+     - Espace Client : *Exporter mes devis (CSV)*.
+
+- [x] **Contrôle Qualité & Moteur de Réparation des Réponses dans l'Administration (100% OPÉRATIONNEL)** :
+  1. **Nouvel onglet Admin "Configuration & Qualité" (`#adm-tab-config`)** :
+     - Badge dynamique en direct (`#adm-repair-badge`) comptant les devis en souffrance / à réparer.
+     - Vue dédiée `#adm-content-config` avec 4 cartes de KPIs : Total, ⭐ Bonnes Réponses, ⚠️ À Réparer, 🛠️ Réponses Réparées.
+  2. **Diagnostic algorithmique & classification continue** :
+     - Détection des devis sans réponse, devis sans accord après 48h, et budgets non renseignés.
+     - Badges visuels et interactifs par ligne dans la table Leads CRM et dans la table d'Audit Qualité.
+     - Bouton bascule immédiat `toggleLeadQuality` pour permuter entre Bonne (⭐) et À réparer (⚠️).
+  3. **Boîte de dialogue interactive de Réparation (`#modal-repair-lead`)** :
+     - 4 stratégies pré-configurées : ⚡ Relance Avance 50% SAP, 🎟️ Coupon Bienvenue -20%, ✏️ Ajuster le Montant / Forfait, ⭐ Valider comme Bonne.
+     - Message de relance personnalisé pré-généré et éditable.
+     - Envoi en 1-clic sur WhatsApp avec message pré-rempli ou validation dans la base.
+  4. **Auto-Réparation en 1 Clic (`autoRepairAllLeads`)** :
+     - Parcours de tous les devis en souffrance et application automatique de l'Avance 50% SAP et du coupon -20% `PELABOLA`.
+  5. **Export CSV de l'Audit Qualité (`exportQualityAuditCSV`)**.
 - [x] **Mejoras y Utilidades Pedagógicas de Devis & Respuestas (100% COMPLETADAS Y VERIFICADAS)**:
   1. **Stepper Visual de 3 Pasos en Demande de Devis**:
      - Guía interactiva *"Comment ça se passe ? • 3 Étapes Simples"* al inicio de la sección de devis.

@@ -110,8 +110,9 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-  <!-- jsPDF — generación de PDF en el cliente (solo panel admin) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <!-- jsPDF & html2pdf — génération et téléchargement de PDF universel (admin & client) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
     /* Custom Before/After Slider Styles */
@@ -801,6 +802,9 @@
           <span>Vos données Google sont protégées par le RGPD et utilisées exclusivement pour vos devis par Andrés Pino.</span>
         </div>
         <div class="flex items-center gap-3">
+          <button onclick="handleExportClientDataCSV()" class="hover:text-emerald-700 underline flex items-center gap-1.5 font-bold cursor-pointer">
+            <i class="fa-solid fa-file-csv"></i> Exporter mes devis (CSV)
+          </button>
           <button onclick="exportClientDataJson()" class="hover:text-emerald-700 underline flex items-center gap-1.5 font-bold cursor-pointer">
             <i class="fa-solid fa-download"></i> Exporter (RGPD)
           </button>
@@ -1243,6 +1247,125 @@
     </div>
   </dialog>
 
+  <!-- Modal: Prévisualisation Universelle & Téléchargement / Impression Directe (Zero Popup Block) -->
+  <dialog id="modal-document-preview" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-4xl w-full p-0 overflow-hidden text-brand-charcoal">
+    <div class="bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 px-6 py-4 text-white flex flex-wrap justify-between items-center gap-3 select-none">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-amber-400/20 border border-amber-400/40 text-amber-300 flex items-center justify-center font-bold text-base">
+          <i class="fa-solid fa-file-invoice"></i>
+        </div>
+        <div>
+          <h4 id="doc-preview-title" class="font-serif font-bold text-base">Aperçu du Document</h4>
+          <p id="doc-preview-subtitle" class="text-xs text-white/70">Pino Espaces Verts • Prêt pour téléchargement ou impression</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" id="btn-doc-download-pdf" onclick="triggerCurrentDocPDFDownload()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer">
+          <i class="fa-solid fa-download"></i> Télécharger PDF
+        </button>
+        <button type="button" id="btn-doc-direct-print" onclick="triggerCurrentDocPrint()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer">
+          <i class="fa-solid fa-print"></i> Imprimer
+        </button>
+        <button type="button" onclick="document.getElementById('modal-document-preview').close()" class="w-8 h-8 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+    </div>
+    <div class="p-4 sm:p-6 max-h-[75vh] overflow-y-auto bg-slate-100/70">
+      <div id="document-preview-container" class="bg-white shadow-md rounded-2xl p-6 sm:p-10 max-w-3xl mx-auto border border-slate-200">
+        <!-- Document HTML will be injected here -->
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Modal: Réparation & Qualification de Réponse / Lead -->
+  <dialog id="modal-repair-lead" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-700 max-w-xl w-full p-0 overflow-hidden text-brand-charcoal">
+    <div class="bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 px-6 py-4 text-white flex justify-between items-center select-none">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-amber-400/20 border border-amber-400/40 text-amber-300 flex items-center justify-center font-bold text-sm">
+          <i class="fa-solid fa-screwdriver-wrench"></i>
+        </div>
+        <div>
+          <h4 class="font-serif font-bold text-base">Réparation & Qualification de Réponse</h4>
+          <p class="text-[11px] text-white/70">Récupérer un prospect, ajuster un tarif ou relancer avec l'Avance SAP 50%</p>
+        </div>
+      </div>
+      <button type="button" onclick="document.getElementById('modal-repair-lead').close()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-4 text-xs">
+      <!-- Info Lead -->
+      <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+        <div class="flex justify-between items-center">
+          <span id="rep-lead-ref" class="font-extrabold text-emerald-800 text-sm">#DEV-2026-XXX</span>
+          <span id="rep-lead-badge" class="px-2 py-0.5 rounded-full text-xxs font-bold bg-amber-100 text-amber-800">⚠️ À réparer</span>
+        </div>
+        <div class="text-slate-800 font-bold" id="rep-lead-client">Client: —</div>
+        <div class="text-slate-500 text-xxs" id="rep-lead-details">Prestation: —</div>
+      </div>
+
+      <!-- Stratégie de réparation -->
+      <div>
+        <label class="block font-bold text-slate-700 mb-1.5">Action de réparation à appliquer :</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <button type="button" onclick="selectRepairAction('relance_sap_50')" id="rep-act-sap" class="rep-act-btn p-2.5 rounded-xl border border-emerald-600 bg-emerald-50/80 text-emerald-900 font-bold text-left text-xs transition-all flex items-start gap-2">
+            <i class="fa-solid fa-shield-halved text-emerald-700 mt-0.5"></i>
+            <div>
+              <span class="block">⚡ Relance Avance 50% SAP</span>
+              <span class="text-xxs text-slate-500 font-normal">Divise le reste à charge par 2 (argument imparable)</span>
+            </div>
+          </button>
+          <button type="button" onclick="selectRepairAction('coupon_20')" id="rep-act-coupon" class="rep-act-btn p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-left text-xs hover:bg-slate-50 transition-all flex items-start gap-2">
+            <i class="fa-solid fa-tag text-amber-600 mt-0.5"></i>
+            <div>
+              <span class="block">🎟️ Coupon Bienvenue -20%</span>
+              <span class="text-xxs text-slate-500 font-normal">Geste commercial pour déclencher la décision</span>
+            </div>
+          </button>
+          <button type="button" onclick="selectRepairAction('chiffrage_ajuste')" id="rep-act-chiffrage" class="rep-act-btn p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-left text-xs hover:bg-slate-50 transition-all flex items-start gap-2">
+            <i class="fa-solid fa-pen-ruler text-blue-600 mt-0.5"></i>
+            <div>
+              <span class="block">✏️ Ajuster le Montant / Forfait</span>
+              <span class="text-xxs text-slate-500 font-normal">Revoir le devis pour s'adapter au budget</span>
+            </div>
+          </button>
+          <button type="button" onclick="selectRepairAction('marquer_bonne')" id="rep-act-bonne" class="rep-act-btn p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-left text-xs hover:bg-slate-50 transition-all flex items-start gap-2">
+            <i class="fa-solid fa-star text-amber-500 mt-0.5"></i>
+            <div>
+              <span class="block">⭐ Valider comme Bonne Réponse</span>
+              <span class="text-xxs text-slate-500 font-normal">Classer manuellement comme qualifié / rentable</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Message de réparation / relance personnalisable -->
+      <div id="rep-message-block">
+        <label class="block font-bold text-slate-700 mb-1">Message de relance / rectification préparé :</label>
+        <textarea id="rep-pitch-text" rows="4" class="w-full p-3 rounded-xl border border-slate-300 font-mono text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-emerald-600"></textarea>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
+        <button type="button" onclick="document.getElementById('modal-repair-lead').close()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors cursor-pointer">
+          Annuler
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="dispatchRepairViaWhatsApp()" class="px-3.5 py-2 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp
+          </button>
+          <button type="button" onclick="confirmLeadRepairExecution()" class="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1.5">
+            <i class="fa-solid fa-check"></i> Enregistrer & Réparer
+          </button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Iframe silencieux pour impression sans blocage de popup -->
+  <iframe id="pino-silent-print-frame" style="position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;"></iframe>
+
   <!-- Modal: Ajouter un Prospect Multi-Plateforme (LeBonCoin, Facebook, etc.) -->
   <dialog id="modal-add-platform-lead" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-700 max-w-lg w-full p-0 overflow-hidden text-brand-charcoal">
     <div class="bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 px-6 py-4 text-white flex justify-between items-center select-none">
@@ -1369,6 +1492,9 @@
       <button type="button" onclick="switchAdminTab('travaux'); renderAdminJobs()" id="adm-tab-travaux" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-briefcase mr-1.5"></i> Travaux CRM (<span id="adm-jobs-badge">0</span>)
       </button>
+      <button type="button" onclick="switchAdminTab('config'); renderAdminQualityConfig();" id="adm-tab-config" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+        <i class="fa-solid fa-sliders mr-1.5 text-emerald-700"></i> Configuration & Qualité (<span id="adm-repair-badge">0</span>)
+      </button>
     </div>
 
     <!-- Admin Tab Content Body -->
@@ -1427,9 +1553,17 @@
             <h4 class="font-bold text-base text-slate-900">Gestion des Prospects & Demandes de Devis</h4>
             <p class="text-xs text-slate-500 mt-0.5">Demandes clients reçues en temps réel via Firebase Realtime Database</p>
           </div>
-          <button type="button" onclick="renderAdminLeads()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer">
-            <i class="fa-solid fa-arrows-rotate"></i> Actualiser
-          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="handleExportLeadsCSV()" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer">
+              <i class="fa-solid fa-file-csv"></i> Export CSV
+            </button>
+            <button type="button" onclick="handleExportLeadsPDF()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-xs">
+              <i class="fa-solid fa-file-pdf"></i> Rapport PDF
+            </button>
+            <button type="button" onclick="renderAdminLeads()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer">
+              <i class="fa-solid fa-arrows-rotate"></i> Actualiser
+            </button>
+          </div>
         </div>
 
         <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-xs">
@@ -1469,6 +1603,9 @@
             </p>
           </div>
           <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button type="button" onclick="handleExportPlatformLeadsCSV()" class="px-3 py-2.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer">
+              <i class="fa-solid fa-file-csv text-emerald-700"></i> Export CSV
+            </button>
             <button type="button" onclick="openAddPlatformLeadModal()" class="flex-1 sm:flex-initial px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer">
               <i class="fa-solid fa-plus"></i> Ajouter une annonce
             </button>
@@ -1762,9 +1899,14 @@
             <h4 class="font-bold text-base text-slate-900">Historique des Factures & Dossiers Fiscaux</h4>
             <p class="text-xs text-slate-500 mt-0.5">Factures Unipros SAP (Crédit d'impôt 50%) et factures directes B2B — données temps réel Firebase</p>
           </div>
-          <button type="button" onclick="openNewInvoiceModal()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 transition-colors shadow-xs">
-            <i class="fa-solid fa-plus"></i> Nouvelle Facture
-          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="handleExportFacturesCSV()" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer">
+              <i class="fa-solid fa-file-csv"></i> Export Factures CSV
+            </button>
+            <button type="button" onclick="openNewInvoiceModal()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 transition-colors shadow-xs">
+              <i class="fa-solid fa-plus"></i> Nouvelle Facture
+            </button>
+          </div>
         </div>
         <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-xs">
           <table class="min-w-[800px] w-full text-left text-xs sm:text-sm">
@@ -2149,6 +2291,115 @@
             <button onclick="startImpersonationFromAdmin()" class="bg-amber-700 hover:bg-amber-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition-colors shadow cursor-pointer">
               <i class="fa-solid fa-eye mr-1.5"></i> Ouvrir l'Espace de ce client
             </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Tab Configuration & Qualité des Réponses (Audit & Réparation) -->
+      <div id="adm-content-config" class="adm-content hidden space-y-6">
+        <!-- Header & Action Auto-Réparation -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gradient-to-r from-emerald-50 via-teal-50 to-slate-50 p-5 rounded-2xl border border-emerald-200">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                <i class="fa-solid fa-sliders"></i>
+              </span>
+              <h4 class="font-serif font-bold text-lg text-slate-900">Contrôle Qualité & Réparation des Réponses</h4>
+            </div>
+            <p class="text-xs text-slate-600 mt-1">
+              Surveillance intelligente de vos leads et devis. Détection automatique des demandes sans réponse, anomalies de budget, et <strong>réparation en 1 clic</strong> (relance Avance 50% SAP, coupon -20% ou ajustement forfaitaire).
+            </p>
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button type="button" onclick="autoRepairAllLeads()" class="flex-1 sm:flex-initial px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Tout Réparer en 1 Clic
+            </button>
+            <button type="button" onclick="exportQualityAuditCSV()" class="px-3.5 py-2.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer">
+              <i class="fa-solid fa-file-csv text-emerald-700"></i> Export Audit
+            </button>
+          </div>
+        </div>
+
+        <!-- KPIs Qualité -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="p-3.5 bg-white rounded-xl border border-slate-200 shadow-xxs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Total Réponses & Leads</span>
+            <span id="qual-kpi-total" class="block text-2xl font-extrabold text-slate-800 mt-0.5">0</span>
+            <span class="text-[11px] text-slate-500">Base CRM & Formulaires</span>
+          </div>
+          <div class="p-3.5 bg-emerald-50/70 rounded-xl border border-emerald-200 shadow-xxs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800">⭐ Bonnes Réponses</span>
+            <span id="qual-kpi-bonnes" class="block text-2xl font-extrabold text-emerald-700 mt-0.5">0</span>
+            <span class="text-[11px] text-emerald-700/80">Complètes, qualifiées & rentables</span>
+          </div>
+          <div class="p-3.5 bg-amber-50/80 rounded-xl border border-amber-200 shadow-xxs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800">⚠️ À Réparer / En Souffrance</span>
+            <span id="qual-kpi-mauvaises" class="block text-2xl font-extrabold text-amber-700 mt-0.5">0</span>
+            <span class="text-[11px] text-amber-700/80">Sans réponse > 24h ou sans budget</span>
+          </div>
+          <div class="p-3.5 bg-blue-50/70 rounded-xl border border-blue-200 shadow-xxs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-blue-800">🛠️ Réponses Réparées</span>
+            <span id="qual-kpi-reparees" class="block text-2xl font-extrabold text-blue-700 mt-0.5">0</span>
+            <span class="text-[11px] text-blue-700/80">Relance SAP ou coupon appliqué</span>
+          </div>
+        </div>
+
+        <!-- Filtres & Table d'audit de qualité -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+              <h5 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-emerald-700"></i> Registre d'Audit des Réponses & Leads
+              </h5>
+              <p class="text-xs text-slate-500">Chaque demande est analysée. Vous pouvez basculer manuellement son statut (Bonne / Mauvaise) ou ouvrir la réparation assistée.</p>
+            </div>
+            <div class="flex flex-wrap gap-1 text-xxs font-bold">
+              <button type="button" onclick="filterQualityLeads('all')" id="qual-flt-all" class="qual-flt-btn px-2.5 py-1 rounded-full bg-emerald-700 text-white cursor-pointer">Toutes</button>
+              <button type="button" onclick="filterQualityLeads('mauvaises')" id="qual-flt-mauvaises" class="qual-flt-btn px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">⚠️ À Réparer</button>
+              <button type="button" onclick="filterQualityLeads('bonnes')" id="qual-flt-bonnes" class="qual-flt-btn px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">⭐ Bonnes</button>
+              <button type="button" onclick="filterQualityLeads('reparees')" id="qual-flt-reparees" class="qual-flt-btn px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">🛠️ Réparées</button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto border border-slate-200 rounded-xl shadow-2xs">
+            <table class="min-w-[950px] w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-700 border-b border-slate-200 font-bold uppercase text-[11px]">
+                <tr>
+                  <th class="py-3 px-4 w-[110px]">Réf & Date</th>
+                  <th class="py-3 px-4 w-[180px]">Client & Commune</th>
+                  <th class="py-3 px-4 min-w-[200px]">Prestation & Budget</th>
+                  <th class="py-3 px-4 w-[130px]">Diagnostic Qualité</th>
+                  <th class="py-3 px-4 min-w-[200px]">Action de Réparation</th>
+                  <th class="py-3 px-4 text-right w-[160px]">Intervention</th>
+                </tr>
+              </thead>
+              <tbody id="adm-quality-table-body" class="divide-y divide-slate-100">
+                <!-- Rendu dynamique par renderAdminQualityConfig -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Guide Stratégique des Bonnes & Mauvaises Réponses -->
+        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
+          <h5 class="font-bold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-graduation-cap text-emerald-700"></i> Critères de Qualification Pino Espaces Verts
+          </h5>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xxs text-slate-600">
+            <div class="bg-white p-3.5 rounded-xl border border-emerald-200 space-y-1">
+              <span class="font-bold text-emerald-800 block text-xs">⭐ Qu'est-ce qu'une "Bonne Réponse" ?</span>
+              <p>• Lead avec coordonnées complètes (téléphone ou email valide).</p>
+              <p>• Prestation située dans la Gironde (Bordeaux Métropole, CUB, Libournais, Bassin).</p>
+              <p>• Proposition chiffrée envoyée avec avantage Avance 50% SAP déduit.</p>
+              <p>• Chantier validé, en cours ou facturé avec satisfaction client.</p>
+            </div>
+            <div class="bg-white p-3.5 rounded-xl border border-amber-200 space-y-1">
+              <span class="font-bold text-amber-800 block text-xs">⚠️ Qu'est-ce qu'une "Mauvaise Réponse" à réparer ?</span>
+              <p>• Demande reçue sans devis envoyé depuis plus de 24h (risque de perte client).</p>
+              <p>• Devis chiffré sans retour client après 48h (besoin d'une relance persuasive).</p>
+              <p>• Budget client sous-estimé ou coordonnées incomplètes.</p>
+              <p>• <strong>Solution :</strong> Un clic sur "Réparer" génère la relance immédiate avec l'argument 50% SAP ou injecte le coupon -20%.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -6006,6 +6257,9 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       if (tabKey === 'prospection') {
         renderAdminProspection();
       }
+      if (tabKey === 'config') {
+        renderAdminQualityConfig();
+      }
     };
 
     // Render Admin Leads — Supabase primary, localStorage fallback
@@ -6023,19 +6277,23 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         const result = await PinoDB.fetchLeads(200);
         if (result.ok && Array.isArray(result.data)) {
           const fbLeads = result.data.map(row => ({
-            id:      row.ref_code || row.id,
-            sbId:    row.id,
-            date:    row.created_at ? new Date(row.created_at).toLocaleDateString('fr-FR') : '—',
-            time:    row.created_at ? new Date(row.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '',
-            name:    row.full_name || 'Client Particulier',
-            phone:   row.phone || '',
-            email:   row.email || '',
-            commune: row.commune || '',
-            service: row.service_type || 'Entretien jardin',
-            surface: row.surface_m2 ? row.surface_m2 + ' m²' : (row.surface || 'Non précisée'),
-            budget:  row.budget_eur ? String(row.budget_eur) : (row.budget || '0'),
-            details: row.details || '',
-            status:  row.status === 'new' ? 'Nouveau' : (row.status || 'Nouveau'),
+            id:             row.ref_code || row.id,
+            sbId:           row.id,
+            date:           row.created_at ? new Date(row.created_at).toLocaleDateString('fr-FR') : '—',
+            time:           row.created_at ? new Date(row.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '',
+            name:           row.full_name || 'Client Particulier',
+            phone:          row.phone || '',
+            email:          row.email || '',
+            commune:        row.commune || '',
+            service:        row.service_type || 'Entretien jardin',
+            surface:        row.surface_m2 ? row.surface_m2 + ' m²' : (row.surface || 'Non précisée'),
+            budget:         row.budget_eur ? String(row.budget_eur) : (row.budget || '0'),
+            details:        row.details || '',
+            status:         row.status === 'new' ? 'Nouveau' : (row.status || 'Nouveau'),
+            quality_status: row.quality_status || null,
+            quality_reason: row.quality_reason || null,
+            repaired_at:    row.repaired_at || null,
+            repair_action:  row.repair_action || null
           }));
 
           // Conserver également les leads locaux qui ne sont pas encore sur Firebase
@@ -6054,6 +6312,17 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
       if (badge) badge.textContent = leads.length;
       if (kpi) kpi.textContent = leads.length;
+
+      // Calcul du nombre d'anomalies / leads à réparer pour le badge d'en-tête
+      const badCount = leads.filter(l => {
+        if (l.quality_status === 'mauvaise') return true;
+        if (l.quality_status === 'reparee' || l.quality_status === 'bonne') return false;
+        const b = parseFloat(l.budget) || 0;
+        return (l.status === 'Nouveau' && b <= 0);
+      }).length;
+      const repBadge = document.getElementById('adm-repair-badge');
+      if (repBadge) repBadge.textContent = String(badCount);
+
       if (!tbody) return;
 
       if (leads.length === 0) {
@@ -6076,6 +6345,28 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           statusBadge = `<span class="bg-slate-100 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-full">Facturé</span>`;
         }
 
+        // Diagnostic Qualité
+        const b = parseFloat(l.budget) || 0;
+        let qStatus = l.quality_status;
+        if (!qStatus) {
+          if (l.status === 'Devis accepté' || l.status === 'Facturé' || l.status === 'Gagné' || l.status === 'Validé') {
+            qStatus = 'bonne';
+          } else if (b <= 0 && l.status === 'Nouveau') {
+            qStatus = 'mauvaise';
+          } else {
+            qStatus = 'bonne';
+          }
+        }
+
+        let qualPill = '';
+        if (qStatus === 'reparee') {
+          qualPill = `<button type="button" onclick="openLeadRepairModal('${escapeFn(l.sbId || l.id)}')" class="mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors flex items-center gap-1 cursor-pointer" title="${escapeFn(l.quality_reason || 'Réparé par Andrés')}"><i class="fa-solid fa-screwdriver-wrench"></i> Réparée</button>`;
+        } else if (qStatus === 'bonne') {
+          qualPill = `<button type="button" onclick="toggleLeadQuality('${escapeFn(l.sbId || l.id)}')" class="mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition-colors flex items-center gap-1 cursor-pointer" title="Cliquer pour déclarer à réparer"><i class="fa-solid fa-star text-amber-500"></i> Bonne</button>`;
+        } else {
+          qualPill = `<button type="button" onclick="openLeadRepairModal('${escapeFn(l.sbId || l.id)}')" class="mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors flex items-center gap-1 cursor-pointer animate-pulse" title="Cliquer pour réparer ce devis"><i class="fa-solid fa-triangle-exclamation"></i> À réparer</button>`;
+        }
+
         const phoneClean = (l.phone || '').replace(/\s+/g, '');
         const waLink = phoneClean ? `https://wa.me/33${phoneClean.startsWith('0') ? phoneClean.substring(1) : phoneClean}?text=${encodeURIComponent(`Bonjour ${l.name}, c'est Andrés de Pino Espaces Verts concernant votre demande de devis pour ${l.service}.`)}` : '#';
 
@@ -6096,11 +6387,15 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
               ${l.surface && l.surface !== 'Non précisée' ? `<div class="text-[11px] text-slate-400 mt-1">${escapeFn(l.surface)}</div>` : ''}
             </td>
             <td class="py-3.5 px-4 font-black text-brand-green text-sm">${escapeFn(l.budget)} €</td>
-            <td class="py-3.5 px-4">${statusBadge}</td>
+            <td class="py-3.5 px-4">
+              <div>${statusBadge}</div>
+              ${qualPill}
+            </td>
             <td class="py-3.5 px-4 text-right whitespace-nowrap">
               <div class="flex items-center justify-end gap-1.5">
                 ${phoneClean ? `<a href="${waLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors" title="WhatsApp"><i class="fa-brands fa-whatsapp text-sm"></i></a>` : ''}
                 ${l.phone ? `<a href="tel:${l.phone}" class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors" title="Appeler"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
+                <button onclick="openLeadRepairModal('${escapeFn(l.sbId || l.id)}')" class="inline-flex items-center justify-center w-8 h-8 bg-amber-50 text-amber-800 border border-amber-200 rounded-xl hover:bg-amber-100 transition-colors cursor-pointer shadow-2xs" title="Réparer / Qualifier"><i class="fa-solid fa-screwdriver-wrench text-xs"></i></button>
                 <button onclick="openLeadResponseModal(${idx})" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-700 text-white rounded-xl hover:bg-emerald-800 transition-colors cursor-pointer shadow-xs" title="Établir un Devis & Répondre"><i class="fa-solid fa-file-invoice-dollar text-xs"></i></button>
                 <button onclick="openNewInvoiceModalForLead(${idx})" class="inline-flex items-center justify-center w-8 h-8 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors cursor-pointer shadow-xs" title="Créer Facture à partir de ce devis"><i class="fa-solid fa-receipt text-xs"></i></button>
                 <button onclick="cycleLeadStatus(${idx})" class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors cursor-pointer" title="Changer statut"><i class="fa-solid fa-rotate text-xs"></i></button>
@@ -6462,7 +6757,94 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     };
 
 
-    // Printable PDF / HTML Quote Function
+    // ─────────────────────────────────────────────────────────
+    //  Moteur Universel de Visualisation, Téléchargement PDF & Impression
+    // ─────────────────────────────────────────────────────────
+    window.displayOrDownloadDocument = ({ title, filename, htmlContent, autoPrint = false }) => {
+      window._currentDocumentData = { title, filename, htmlContent };
+      const titleEl = document.getElementById('document-preview-title');
+      const containerEl = document.getElementById('document-preview-container');
+      const modal = document.getElementById('modal-document-preview');
+
+      if (titleEl) titleEl.textContent = title || 'Document Officiel — Pino Espaces Verts';
+      if (containerEl) containerEl.innerHTML = htmlContent;
+      if (modal && typeof modal.showModal === 'function') {
+        if (!modal.open) modal.showModal();
+      }
+
+      if (autoPrint) {
+        setTimeout(() => { triggerCurrentDocPrint(); }, 400);
+      }
+    };
+
+    window.triggerCurrentDocPDFDownload = () => {
+      if (!window._currentDocumentData) return;
+      const element = document.getElementById('document-preview-container');
+      const filename = window._currentDocumentData.filename || 'document_pino.pdf';
+
+      if (typeof html2pdf !== 'undefined') {
+        const opt = {
+          margin:       [8, 8, 8, 8],
+          filename:     filename,
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        showNotificationToast('Génération du fichier PDF en cours...', 'info');
+        html2pdf().set(opt).from(element).save().then(() => {
+          showNotificationToast('✅ PDF téléchargé avec succès !', 'success');
+        }).catch(err => {
+          console.error('[pdf] html2pdf error:', err);
+          showNotificationToast('Utilisation de la boîte d\'impression système pour le PDF.', 'info');
+          triggerCurrentDocPrint();
+        });
+      } else {
+        triggerCurrentDocPrint();
+      }
+    };
+
+    window.triggerCurrentDocPrint = () => {
+      if (!window._currentDocumentData) return;
+      const frame = document.getElementById('pino-silent-print-frame');
+      if (!frame) {
+        window.print();
+        return;
+      }
+      try {
+        const frameDoc = frame.contentWindow || frame.contentDocument;
+        const doc = frame.contentDocument || frameDoc.document;
+        doc.open();
+        doc.write(`
+          <!DOCTYPE html>
+          <html lang="fr">
+          <head>
+            <meta charset="UTF-8">
+            <title>${window._currentDocumentData.title || 'Document Pino Espaces Verts'}</title>
+            <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 20px; color: #0f172a; line-height: 1.5; font-size: 13px; }
+              @media print { body { margin: 10mm; } }
+            </style>
+          </head>
+          <body>
+            ${window._currentDocumentData.htmlContent}
+            <script>
+              window.onload = function() {
+                setTimeout(function() {
+                  window.focus();
+                  window.print();
+                }, 250);
+              };
+            <\/script>
+          </body>
+          </html>
+        `);
+        doc.close();
+      } catch (e) {
+        window.print();
+      }
+    };
+
+    // Printable PDF / HTML Quote Function (Compatible Mobile, iOS, Safari & Desktop)
     window.printLeadQuotePDF = (quote) => {
       if (!quote) return;
       const ref = quote.ref_code || quote.id || 'DEV-2026';
@@ -6470,114 +6852,90 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       const total = parseFloat(resp.price_ttc || quote.budget || 0).toFixed(2);
       const credit = parseFloat(resp.credit_impot || total * 0.5).toFixed(2);
       const net = parseFloat(resp.net_client || total * 0.5).toFixed(2);
+      const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
 
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        showNotificationToast('Veuillez autoriser les pop-ups pour imprimer le devis.', 'error');
-        return;
-      }
-
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html lang="fr">
-        <head>
-          <meta charset="UTF-8">
-          <title>Devis ${ref} — Pino Espaces Verts</title>
-          <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 40px; color: #1e293b; line-height: 1.5; }
-            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #047857; padding-bottom: 20px; }
-            .logo { font-size: 24px; font-weight: 800; color: #047857; }
-            .coop-tag { background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; }
-            .info-grid { display: grid; grid-template-columns: 1fr 1fr; margin-top: 30px; gap: 24px; font-size: 13px; }
-            .table { width: 100%; border-collapse: collapse; margin-top: 30px; }
-            .table th { background: #f8fafc; padding: 10px; text-align: left; font-size: 12px; border-bottom: 1px solid #e2e8f0; }
-            .table td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
-            .totals { margin-top: 25px; margin-left: auto; width: 360px; font-size: 13px; }
-            .totals-row { display: flex; justify-content: space-between; padding: 6px 0; }
-            .highlight { font-size: 16px; font-weight: 900; color: #047857; border-top: 2px solid #047857; padding-top: 10px; margin-top: 6px; }
-            .legal { margin-top: 40px; font-size: 10px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 15px; }
-            @media print { body { margin: 20px; } }
-          </style>
-        </head>
-        <body>
-          <div class="header">
+      const docHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1e293b; line-height: 1.5; font-size: 13px;">
+          <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #047857; padding-bottom: 18px;">
             <div>
-              <div class="logo">🌲 Pino Espaces Verts</div>
+              <div style="font-size: 22px; font-weight: 800; color: #047857;">🌲 Pino Espaces Verts</div>
               <div style="font-size: 12px; color: #475569; margin-top: 4px;">Artisan Paysagiste — Andrés Pino</div>
               <div style="font-size: 12px; color: #475569;">Bordeaux Métropole & Gironde (33)</div>
               <div style="font-size: 12px; color: #475569;">Tél : 06 51 59 40 34 • pino.spacesverts@gmail.com</div>
             </div>
             <div style="text-align: right;">
-              <span class="coop-tag">Membre de la Coopérative Unipros</span>
-              <h2 style="margin: 8px 0 4px 0; color: #0f172a; font-size: 20px;">DEVIS N° ${ref}</h2>
-              <div style="font-size: 12px; color: #64748b;">Date d'émission : ${new Date().toLocaleDateString('fr-FR')}</div>
+              <span style="background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block;">
+                Membre de la Coopérative Unipros (SAP)
+              </span>
+              <h2 style="margin: 8px 0 4px 0; color: #0f172a; font-size: 18px;">DEVIS N° ${escapeFn(ref)}</h2>
+              <div style="font-size: 11px; color: #64748b;">Date d'émission : ${new Date().toLocaleDateString('fr-FR')}</div>
             </div>
           </div>
 
-          <div class="info-grid">
-            <div>
-              <strong style="color: #047857;">CLIENT :</strong><br>
-              <strong>${quote.name || 'Client Particulier'}</strong><br>
-              ${quote.email || ''}<br>
-              ${quote.phone || ''}<br>
-              📍 ${quote.commune || 'Bordeaux'}
+          <div style="display: grid; grid-template-columns: 1fr 1fr; margin-top: 24px; gap: 20px; font-size: 12px;">
+            <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <strong style="color: #047857; font-size: 11px; text-transform: uppercase;">CLIENT BÉNÉFICIAIRE :</strong><br>
+              <strong style="font-size: 13px;">${escapeFn(quote.name || 'Client Particulier')}</strong><br>
+              ${escapeFn(quote.email || '')}<br>
+              ${escapeFn(quote.phone || '')}<br>
+              📍 ${escapeFn(quote.commune || 'Bordeaux')}
             </div>
-            <div>
-              <strong style="color: #047857;">DÉTAILS INTERVENTION :</strong><br>
-              <strong>Prestation :</strong> ${quote.service_type || quote.service || 'Entretien espaces verts'}<br>
-              <strong>Durée estimée :</strong> ${resp.duration || 'Selon chantier'}<br>
+            <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <strong style="color: #047857; font-size: 11px; text-transform: uppercase;">DÉTAILS INTERVENTION :</strong><br>
+              <strong>Prestation :</strong> ${escapeFn(quote.service_type || quote.service || 'Entretien espaces verts')}<br>
+              <strong>Durée estimée :</strong> ${escapeFn(resp.duration || 'Selon chantier')}<br>
               <strong>Date proposée :</strong> ${resp.date_proposed ? new Date(resp.date_proposed).toLocaleDateString('fr-FR') : 'À convenir ensemble'}
             </div>
           </div>
 
-          <table class="table">
+          <table style="width: 100%; border-collapse: collapse; margin-top: 24px; font-size: 12px;">
             <thead>
-              <tr>
-                <th>Désignation des travaux</th>
-                <th>Durée</th>
-                <th style="text-align: right;">Montant TTC</th>
+              <tr style="background: #f1f5f9; border-bottom: 1px solid #cbd5e1;">
+                <th style="padding: 10px; text-align: left; text-transform: uppercase; font-size: 11px;">Désignation des travaux</th>
+                <th style="padding: 10px; text-align: left; text-transform: uppercase; font-size: 11px;">Durée</th>
+                <th style="padding: 10px; text-align: right; text-transform: uppercase; font-size: 11px;">Montant TTC</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <strong>${quote.service_type || quote.service || 'Entretien & Aménagement paysager'}</strong><br>
-                  <span style="font-size: 11px; color: #64748b;">${resp.equipment ? 'Matériel : ' + resp.equipment : 'Évacuation des déchets verts comprise'}</span><br>
-                  ${resp.notes ? '<span style="font-size: 11px; color: #475569; font-style: italic;">Note : ' + resp.notes + '</span>' : ''}
+              <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 12px 10px;">
+                  <strong>${escapeFn(quote.service_type || quote.service || 'Entretien & Aménagement paysager')}</strong><br>
+                  <span style="font-size: 11px; color: #64748b;">${escapeFn(resp.equipment ? 'Matériel : ' + resp.equipment : 'Évacuation des déchets verts comprise')}</span><br>
+                  ${resp.notes ? '<span style="font-size: 11px; color: #475569; font-style: italic;">Note : ' + escapeFn(resp.notes) + '</span>' : ''}
                 </td>
-                <td>${resp.duration || '1 intervention'}</td>
-                <td style="text-align: right; font-weight: bold;">${total} €</td>
+                <td style="padding: 12px 10px;">${escapeFn(resp.duration || '1 intervention')}</td>
+                <td style="padding: 12px 10px; text-align: right; font-weight: bold;">${total} €</td>
               </tr>
             </tbody>
           </table>
 
-          <div class="totals">
-            <div class="totals-row">
+          <div style="margin-top: 20px; margin-left: auto; width: 340px; font-size: 12px;">
+            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
               <span>Montant Total Facturé TTC :</span>
               <strong>${total} €</strong>
             </div>
-            <div class="totals-row" style="color: #047857;">
+            <div style="display: flex; justify-content: space-between; padding: 5px 0; color: #047857;">
               <span>Avance Immédiate 50% (URSSAF / Unipros) :</span>
               <strong>- ${credit} €</strong>
             </div>
-            <div class="totals-row highlight">
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 15px; font-weight: 900; color: #047857; border-top: 2px solid #047857; margin-top: 4px;">
               <span>👉 RESTE RÉEL À VOTRE CHARGE :</span>
               <span>${net} €</span>
             </div>
           </div>
 
-          <div class="legal">
+          <div style="margin-top: 30px; font-size: 10px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 12px; line-height: 1.4;">
             <p><strong>Dispositif Avance Immédiate du Crédit d'Impôt :</strong> En faisant appel à Pino Espaces Verts via la Coopérative Unipros (déclarée SAP sous le n° SAP529241671), vous bénéficiez de 50% de déduction fiscale immédiate sur vos prestations d'entretien de jardin (art. 199 sexdecies du CGI). Aucun fonds à avancer.</p>
-            <p style="margin-top: 15px;">Devis valable 30 jours à compter de son émission. Bon pour accord le : .................... Signature du client :</p>
+            <p style="margin-top: 10px;">Devis valable 30 jours à compter de son émission. Bon pour accord le : .................... Signature du client :</p>
           </div>
+        </div>
+      `;
 
-          <script>
-            window.onload = function() { window.print(); }
-          <\/script>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
+      displayOrDownloadDocument({
+        title: `Devis N° ${ref} — Pino Espaces Verts`,
+        filename: `devis_pino_${String(ref).toLowerCase().replace(/[^a-z0-9]/g, '_')}.pdf`,
+        htmlContent: docHtml
+      });
     };
 
     // Impersonation
@@ -8156,140 +8514,107 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       const serviceType = job.service_type || 'Entretien courant de jardin & espaces verts';
       const dateIntervention = job.date_start ? new Date(job.date_start).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
       const now = new Date().toLocaleDateString('fr-FR');
+      const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
 
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        showNotificationToast('Veuillez autoriser les pop-ups pour afficher l\'attestation fiscale.', 'error');
-        return;
-      }
-
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html lang="fr">
-        <head>
-          <meta charset="UTF-8">
-          <title>Attestation Fiscale SAP 2026 — ${attestNum} — Pino Espaces Verts</title>
-          <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 40px; color: #0f172a; line-height: 1.5; font-size: 13px; }
-            .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #047857; padding-bottom: 20px; }
-            .logo { font-size: 22px; font-weight: 800; color: #047857; }
-            .coop-badge { background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; }
-            .doc-title { text-align: center; margin: 30px 0 20px 0; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
-            .doc-title h1 { font-size: 17px; margin: 0; color: #047857; text-transform: uppercase; letter-spacing: 0.5px; }
-            .doc-title p { margin: 4px 0 0 0; font-size: 11px; color: #475569; }
-            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin: 20px 0; }
-            .card { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; }
-            .card h3 { margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; color: #047857; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px; }
-            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-            th { background: #f1f5f9; text-align: left; padding: 8px 10px; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; }
-            td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
-            .tax-box { background: #ecfdf5; border: 2px solid #047857; border-radius: 8px; padding: 16px; margin: 25px 0; }
-            .tax-box h4 { margin: 0 0 6px 0; font-size: 14px; color: #065f46; display: flex; align-items: center; gap: 8px; }
-            .tax-box .amount { font-size: 20px; font-weight: 900; color: #047857; }
-            .footer-sig { display: flex; justify-content: space-between; margin-top: 35px; padding-top: 15px; border-top: 1px solid #e2e8f0; }
-            .sig-box { width: 220px; text-align: center; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 12px; background: #fafafa; }
-            .legal { margin-top: 30px; font-size: 10px; color: #64748b; line-height: 1.4; }
-            @media print { body { margin: 20px; } button { display: none; } }
-          </style>
-        </head>
-        <body>
-          <div class="header">
+      const docHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; line-height: 1.5; font-size: 13px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #047857; padding-bottom: 18px;">
             <div>
-              <div class="logo">🌲 Pino Espaces Verts</div>
+              <div style="font-size: 22px; font-weight: 800; color: #047857;">🌲 Pino Espaces Verts</div>
               <div style="color: #475569; margin-top: 4px;">Artisan Paysagiste — Andrés Pino</div>
               <div style="color: #475569;">Bordeaux Métropole & Gironde (33) • Tél : 06 51 59 40 34</div>
               <div style="color: #475569;">pino.spacesverts@gmail.com</div>
             </div>
             <div style="text-align: right;">
-              <span class="coop-badge">Coopérative UNIPROS — Déclaration SAP</span>
+              <span style="background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block;">Coopérative UNIPROS — Déclaration SAP</span>
               <div style="font-size: 11px; color: #475569; margin-top: 5px;">N° Déclaration SAP : <strong>SAP529241671</strong></div>
               <div style="font-size: 11px; color: #475569;">SIRET : 529 241 671 00028 • Code NAF : 8129B</div>
               <div style="font-size: 11px; color: #475569;">14 Rue François de Neufchâteau, 88000 Épinal</div>
             </div>
           </div>
 
-          <div class="doc-title">
-            <h1>Attestation Fiscale — Services à la Personne (SAP)</h1>
-            <p>Délivrée en application de l'article 199 sexdecies du Code Général des Impôts (CGI)</p>
-            <div style="font-size: 12px; font-weight: bold; margin-top: 6px; color: #0f172a;">Attestation N° : ${attestNum} • Facture de référence : ${facNum}</div>
+          <div style="text-align: center; margin: 25px 0 18px 0; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <h1 style="font-size: 16px; margin: 0; color: #047857; text-transform: uppercase; letter-spacing: 0.5px;">Attestation Fiscale — Services à la Personne (SAP)</h1>
+            <p style="margin: 4px 0 0 0; font-size: 11px; color: #475569;">Délivrée en application de l'article 199 sexdecies du Code Général des Impôts (CGI)</p>
+            <div style="font-size: 12px; font-weight: bold; margin-top: 5px; color: #0f172a;">Attestation N° : ${escapeFn(attestNum)} • Facture de référence : ${escapeFn(facNum)}</div>
           </div>
 
-          <div class="grid">
-            <div class="card">
-              <h3>Bénéficiaire des Prestations (Client)</h3>
-              <div style="font-size: 14px; font-weight: bold; margin-bottom: 4px;">${clientName}</div>
-              <div>${clientCommune}</div>
-              ${clientEmail ? `<div>Email : ${clientEmail}</div>` : ''}
-              ${job.client_phone ? `<div>Tél : ${job.client_phone}</div>` : ''}
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 18px 0;">
+            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px;">
+              <h3 style="margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase; color: #047857; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">Bénéficiaire des Prestations (Client)</h3>
+              <div style="font-size: 13px; font-weight: bold; margin-bottom: 4px;">${escapeFn(clientName)}</div>
+              <div>${escapeFn(clientCommune)}</div>
+              ${clientEmail ? `<div>Email : ${escapeFn(clientEmail)}</div>` : ''}
+              ${job.client_phone ? `<div>Tél : ${escapeFn(job.client_phone)}</div>` : ''}
             </div>
 
-            <div class="card">
-              <h3>Intervention & Cadre Légal</h3>
-              <div><strong>Prestation :</strong> ${serviceType}</div>
-              <div><strong>Date d'intervention :</strong> ${dateIntervention}</div>
+            <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px;">
+              <h3 style="margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase; color: #047857; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">Intervention & Cadre Légal</h3>
+              <div><strong>Prestation :</strong> ${escapeFn(serviceType)}</div>
+              <div><strong>Date d'intervention :</strong> ${escapeFn(dateIntervention)}</div>
               <div><strong>Organisme agréé :</strong> Coopérative UNIPROS</div>
               <div><strong>Date d'émission :</strong> ${now}</div>
             </div>
           </div>
 
-          <table>
+          <table style="width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 12px;">
             <thead>
-              <tr>
-                <th>Nature des Travaux Réalisés</th>
-                <th>Date</th>
-                <th style="text-align: right;">Montant Payé TTC</th>
-                <th style="text-align: right;">Crédit d'Impôt (50%)</th>
-                <th style="text-align: right;">Reste à Charge Réel</th>
+              <tr style="background: #f1f5f9; text-align: left; border-bottom: 1px solid #cbd5e1;">
+                <th style="padding: 8px 10px; font-size: 11px; text-transform: uppercase;">Nature des Travaux Réalisés</th>
+                <th style="padding: 8px 10px; font-size: 11px; text-transform: uppercase;">Date</th>
+                <th style="padding: 8px 10px; text-align: right; font-size: 11px; text-transform: uppercase;">Montant Payé TTC</th>
+                <th style="padding: 8px 10px; text-align: right; font-size: 11px; text-transform: uppercase;">Crédit d'Impôt (50%)</th>
+                <th style="padding: 8px 10px; text-align: right; font-size: 11px; text-transform: uppercase;">Reste à Charge Réel</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <strong>${serviceType}</strong><br>
-                  <span style="font-size: 11px; color: #64748b;">${job.description || 'Entretien courant du jardin, tonte de pelouse, taille de haies, ramassage et évacuation des déchets végétaux.'}</span>
+              <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 10px;">
+                  <strong>${escapeFn(serviceType)}</strong><br>
+                  <span style="font-size: 11px; color: #64748b;">${escapeFn(job.description || 'Entretien courant du jardin, tonte de pelouse, taille de haies, ramassage et évacuation des déchets végétaux.')}</span>
                 </td>
-                <td>${dateIntervention}</td>
-                <td style="text-align: right; font-weight: bold;">${charged.toFixed(2)} €</td>
-                <td style="text-align: right; font-weight: bold; color: #047857;">- ${credit.toFixed(2)} €</td>
-                <td style="text-align: right; font-weight: 900; color: #065f46;">${net.toFixed(2)} €</td>
+                <td style="padding: 10px;">${escapeFn(dateIntervention)}</td>
+                <td style="padding: 10px; text-align: right; font-weight: bold;">${charged.toFixed(2)} €</td>
+                <td style="padding: 10px; text-align: right; font-weight: bold; color: #047857;">- ${credit.toFixed(2)} €</td>
+                <td style="padding: 10px; text-align: right; font-weight: 900; color: #065f46;">${net.toFixed(2)} €</td>
               </tr>
             </tbody>
           </table>
 
-          <div class="tax-box">
-            <h4>📌 MONTANT À REPORTER SUR VOTRE DÉCLARATION DE REVENUS :</h4>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+          <div style="background: #ecfdf5; border: 2px solid #047857; border-radius: 8px; padding: 14px; margin: 20px 0;">
+            <h4 style="margin: 0 0 6px 0; font-size: 13px; color: #065f46; display: flex; align-items: center; gap: 6px;">📌 MONTANT À REPORTER SUR VOTRE DÉCLARATION DE REVENUS :</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
               <div>
-                <div class="amount">${credit.toFixed(2)} €</div>
-                <div style="font-size: 12px; color: #065f46; font-weight: bold; margin-top: 2px;">Formulaire n° 2042 RICI — Case 7DB (Dépenses pour l'emploi à domicile / SAP)</div>
+                <div style="font-size: 18px; font-weight: 900; color: #047857;">${credit.toFixed(2)} €</div>
+                <div style="font-size: 11px; color: #065f46; font-weight: bold; margin-top: 2px;">Formulaire n° 2042 RICI — Case 7DB (Dépenses pour l'emploi à domicile / SAP)</div>
               </div>
-              <div style="text-align: right; max-width: 320px; font-size: 11px; color: #065f46;">
+              <div style="text-align: right; max-width: 300px; font-size: 11px; color: #065f46;">
                 En cas d'utilisation de l'Avance Immédiate de crédit d'impôt URSSAF, cette somme est pré-remplie automatiquement par la DGFiP.
               </div>
             </div>
           </div>
 
-          <div class="footer-sig">
+          <div style="display: flex; justify-content: space-between; margin-top: 25px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
             <div>
               <p style="margin: 0; font-size: 11px; color: #475569;">Fait pour valoir ce que de droit,<br>Bordeaux, le ${now}</p>
             </div>
-            <div class="sig-box">
+            <div style="width: 200px; text-align: center; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 10px; background: #fafafa;">
               <span style="font-size: 11px; font-weight: bold; color: #047857; display: block;">Coopérative UNIPROS & Andrés Pino</span>
-              <span style="font-size: 10px; color: #64748b; display: block; margin-top: 4px;">Agrément SAP529241671<br>Attestation certifiée conforme</span>
+              <span style="font-size: 10px; color: #64748b; display: block; margin-top: 2px;">Agrément SAP529241671<br>Attestation certifiée conforme</span>
             </div>
           </div>
 
-          <div class="legal">
+          <div style="margin-top: 25px; font-size: 10px; color: #64748b; line-height: 1.4; border-top: 1px solid #e2e8f0; padding-top: 10px;">
             <p><strong>Note d'information légale :</strong> Seules les activités d'entretien courant des jardins et potagers de particuliers définies à l'article D. 7231-1 du Code du travail ouvrent droit au crédit d'impôt de 50% prévu à l'article 199 sexdecies du CGI, dans la limite du plafond légal annuel de 5 000 € de dépenses par an et par foyer fiscal (soit 2 500 € d'avantage fiscal direct maximum). Cette attestation doit être conservée pendant 3 ans par le contribuable pour justification éventuelle auprès de l'Administration fiscale.</p>
           </div>
+        </div>
+      `;
 
-          <script>
-            window.onload = function() { window.print(); }
-          <\/script>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
+      displayOrDownloadDocument({
+        title: `Attestation Fiscale SAP — ${attestNum}`,
+        filename: `attestation_sap_${String(attestNum).toLowerCase().replace(/[^a-z0-9]/g, '_')}.pdf`,
+        htmlContent: docHtml
+      });
     };
 
     window.printFactureClientPDF = (jobId) => {
@@ -8319,124 +8644,524 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       const isPaid = job.payment_status === 'paid';
       const dateIntervention = job.date_start ? new Date(job.date_start).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
       const now = new Date().toLocaleDateString('fr-FR');
+      const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
 
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) {
-        showNotificationToast('Veuillez autoriser les pop-ups pour afficher la facture.', 'error');
-        return;
-      }
-
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html lang="fr">
-        <head>
-          <meta charset="UTF-8">
-          <title>Facture ${facNum} — Pino Espaces Verts</title>
-          <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 40px; color: #0f172a; line-height: 1.5; font-size: 13px; }
-            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #047857; padding-bottom: 18px; }
-            .logo { font-size: 22px; font-weight: 800; color: #047857; }
-            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 25px 0; font-size: 13px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th { background: #f8fafc; padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; }
-            td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; }
-            .totals { margin-top: 25px; margin-left: auto; width: 360px; }
-            .totals-row { display: flex; justify-content: space-between; padding: 6px 0; }
-            .highlight { font-size: 16px; font-weight: 900; color: #047857; border-top: 2px solid #047857; padding-top: 10px; margin-top: 6px; }
-            .badge-paid { background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
-            .badge-pending { background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
-            .legal { margin-top: 40px; font-size: 10px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 15px; }
-            @media print { body { margin: 20px; } }
-          </style>
-        </head>
-        <body>
-          <div class="header">
+      const docHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; line-height: 1.5; font-size: 13px;">
+          <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #047857; padding-bottom: 18px;">
             <div>
-              <div class="logo">🌲 Pino Espaces Verts</div>
+              <div style="font-size: 22px; font-weight: 800; color: #047857;">🌲 Pino Espaces Verts</div>
               <div style="font-size: 12px; color: #475569; margin-top: 4px;">Artisan Paysagiste — Andrés Pino</div>
               <div style="font-size: 12px; color: #475569;">Bordeaux Métropole & Gironde (33)</div>
               <div style="font-size: 12px; color: #475569;">Tél : 06 51 59 40 34 • pino.spacesverts@gmail.com</div>
             </div>
             <div style="text-align: right;">
-              <span style="background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;">
+              <span style="background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block;">
                 ${isUnipros ? 'Adhérent Coopérative Unipros (SAP)' : 'Prestation B2B'}
               </span>
-              <h2 style="margin: 8px 0 2px 0; font-size: 20px; color: #0f172a;">FACTURE ${facNum}</h2>
-              <div style="font-size: 11px; color: #64748b;">Date : ${now} • Échéance : ${dateIntervention}</div>
-              <div style="margin-top: 4px;">Statut : <span class="${isPaid ? 'badge-paid' : 'badge-pending'}">${isPaid ? 'ACQUITTÉE' : 'EN ATTENTE DE RÈGLEMENT'}</span></div>
+              <h2 style="margin: 8px 0 2px 0; font-size: 18px; color: #0f172a;">FACTURE ${escapeFn(facNum)}</h2>
+              <div style="font-size: 11px; color: #64748b;">Date : ${now} • Échéance : ${escapeFn(dateIntervention)}</div>
+              <div style="margin-top: 4px;">Statut : <span style="background: ${isPaid ? '#dcfce7' : '#fef3c7'}; color: ${isPaid ? '#166534' : '#92400e'}; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">${isPaid ? 'ACQUITTÉE' : 'EN ATTENTE DE RÈGLEMENT'}</span></div>
             </div>
           </div>
 
-          <div class="info-grid">
-            <div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; font-size: 12px;">
+            <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
               <strong style="color: #047857; font-size: 11px; text-transform: uppercase;">Facturé à :</strong><br>
-              <strong>${job.client_name || 'Client Particulier'}</strong><br>
-              ${job.client_commune || 'Bordeaux Métropole (33)'}<br>
-              ${job.client_email || ''}<br>
-              ${job.client_phone || ''}
+              <strong style="font-size: 13px;">${escapeFn(job.client_name || 'Client Particulier')}</strong><br>
+              ${escapeFn(job.client_commune || 'Bordeaux Métropole (33)')}<br>
+              ${escapeFn(job.client_email || '')}<br>
+              ${escapeFn(job.client_phone || '')}
             </div>
-            <div>
+            <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
               <strong style="color: #047857; font-size: 11px; text-transform: uppercase;">Détails Chantier :</strong><br>
-              <strong>Prestation :</strong> ${job.service_type || 'Entretien jardin'}<br>
-              <strong>Date d'intervention :</strong> ${dateIntervention}<br>
-              <strong>Règlement :</strong> ${job.notes || (isUnipros ? 'Avance Immédiate URSSAF' : 'Virement')}
+              <strong>Prestation :</strong> ${escapeFn(job.service_type || 'Entretien jardin')}<br>
+              <strong>Date d'intervention :</strong> ${escapeFn(dateIntervention)}<br>
+              <strong>Règlement :</strong> ${escapeFn(job.notes || (isUnipros ? 'Avance Immédiate URSSAF' : 'Virement'))}
             </div>
           </div>
 
-          <table>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12px;">
             <thead>
-              <tr>
-                <th>Désignation des travaux</th>
-                <th>Heures / Qté</th>
-                <th style="text-align: right;">Montant TTC</th>
+              <tr style="background: #f8fafc; border-bottom: 1px solid #cbd5e1;">
+                <th style="padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase;">Désignation des travaux</th>
+                <th style="padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase;">Heures / Qté</th>
+                <th style="padding: 10px; text-align: right; font-size: 11px; text-transform: uppercase;">Montant TTC</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <strong>${job.service_type || 'Entretien et aménagement paysager'}</strong><br>
-                  <span style="font-size: 11px; color: #64748b;">${job.description || 'Prestation d\'entretien courant du jardin et évacuation des déchets verts.'}</span>
+              <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 12px 10px;">
+                  <strong>${escapeFn(job.service_type || 'Entretien et aménagement paysager')}</strong><br>
+                  <span style="font-size: 11px; color: #64748b;">${escapeFn(job.description || 'Prestation d\'entretien courant du jardin et évacuation des déchets verts.')}</span>
                 </td>
-                <td>${job.hours_spent ? job.hours_spent + ' h' : 'Forfait'}</td>
-                <td style="text-align: right; font-weight: bold;">${charged.toFixed(2)} €</td>
+                <td style="padding: 12px 10px;">${job.hours_spent ? escapeFn(job.hours_spent) + ' h' : 'Forfait'}</td>
+                <td style="padding: 12px 10px; text-align: right; font-weight: bold;">${charged.toFixed(2)} €</td>
               </tr>
             </tbody>
           </table>
 
-          <div class="totals">
-            <div class="totals-row">
+          <div style="margin-top: 20px; margin-left: auto; width: 340px; font-size: 12px;">
+            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
               <span>Total Facturé TTC :</span>
               <strong>${charged.toFixed(2)} €</strong>
             </div>
             ${isUnipros ? `
-              <div class="totals-row" style="color: #047857;">
+              <div style="display: flex; justify-content: space-between; padding: 5px 0; color: #047857;">
                 <span>Avance Immédiate 50% (Crédit d'impôt SAP) :</span>
                 <strong>- ${credit.toFixed(2)} €</strong>
               </div>
-              <div class="totals-row highlight">
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 15px; font-weight: 900; color: #047857; border-top: 2px solid #047857; margin-top: 4px;">
                 <span>👉 Reste payé par le client :</span>
                 <span>${net.toFixed(2)} €</span>
               </div>
             ` : `
-              <div class="totals-row highlight">
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 15px; font-weight: 900; color: #047857; border-top: 2px solid #047857; margin-top: 4px;">
                 <span>Total Net à Régler :</span>
                 <span>${charged.toFixed(2)} €</span>
               </div>
             `}
           </div>
 
-          <div class="legal">
+          <div style="margin-top: 30px; font-size: 10px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 12px; line-height: 1.4;">
             <p><strong>Mentions légales & TVA :</strong> ${isUnipros ? 'Prestation de Services à la Personne (SAP) facturée par la Coopérative Unipros (SAP529241671). Éligible à 50% de crédit d\'impôt immédiat selon l\'article 199 sexdecies du Code Général des Impôts (CGI).' : 'TVA non applicable, art. 293 B du CGI ou taux standard 20%.'}</p>
-            <p style="margin-top: 8px;">Paiement par prélèvement URSSAF / virement bancaire. En cas de retard de paiement, une indemnité forfaitaire pour frais de recouvrement de 40 € sera due (art. D. 441-5 du Code de commerce).</p>
+            <p style="margin-top: 6px;">Paiement par prélèvement URSSAF / virement bancaire. En cas de retard de paiement, une indemnité forfaitaire pour frais de recouvrement de 40 € sera due (art. D. 441-5 du Code de commerce).</p>
           </div>
+        </div>
+      `;
 
-          <script>
-            window.onload = function() { window.print(); }
-          <\/script>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
+      displayOrDownloadDocument({
+        title: `Facture ${facNum} — Pino Espaces Verts`,
+        filename: `facture_pino_${String(facNum).toLowerCase().replace(/[^a-z0-9]/g, '_')}.pdf`,
+        htmlContent: docHtml
+      });
+    };
+
+    // ─────────────────────────────────────────────────────────
+    //  EXPORT HANDLERS (CSV & PDF) — Toujours disponibles pour Admin et Client
+    // ─────────────────────────────────────────────────────────
+    window.handleExportLeadsCSV = async () => {
+      let leads = window._cachedAdminLeads || [];
+      if (!leads.length && window.PinoDB) {
+        const res = await PinoDB.fetchLeads(500);
+        if (res.ok && Array.isArray(res.data)) leads = res.data;
+      }
+      if (!leads.length) {
+        showNotificationToast('Aucun lead à exporter.', 'info');
+        return;
+      }
+      if (window.PinoDB && typeof PinoDB.exportLeadsCSV === 'function') {
+        PinoDB.exportLeadsCSV(leads);
+        showNotificationToast('✅ Export CSV des leads généré avec succès !', 'success');
+      }
+    };
+
+    window.handleExportLeadsPDF = async () => {
+      let leads = window._cachedAdminLeads || [];
+      if (!leads.length && window.PinoDB) {
+        const res = await PinoDB.fetchLeads(500);
+        if (res.ok && Array.isArray(res.data)) leads = res.data;
+      }
+      if (!leads.length) {
+        showNotificationToast('Aucun lead pour le rapport PDF.', 'info');
+        return;
+      }
+      if (window.PinoDB && typeof PinoDB.exportLeadsPDF === 'function') {
+        PinoDB.exportLeadsPDF(leads);
+        showNotificationToast('✅ Rapport PDF des prospects préparé !', 'success');
+      }
+    };
+
+    window.handleExportFacturesCSV = async () => {
+      let jobs = window._cachedAdminJobs || [];
+      if (!jobs.length && window.PinoDB) {
+        const res = await PinoDB.fetchJobs();
+        if (res.ok && Array.isArray(res.data)) jobs = res.data;
+      }
+      if (!jobs.length) {
+        showNotificationToast('Aucune facture enregistrée pour le moment.', 'info');
+        return;
+      }
+      if (window.PinoDB && typeof PinoDB.exportFacturesCSV === 'function') {
+        PinoDB.exportFacturesCSV(jobs);
+        showNotificationToast('✅ Export CSV des factures généré avec succès !', 'success');
+      }
+    };
+
+    window.handleExportPlatformLeadsCSV = async () => {
+      let leads = window._cachedPlatformLeads || [];
+      if (!leads.length && window.PinoDB) {
+        const res = await PinoDB.fetchPlatformLeads();
+        if (res.ok && Array.isArray(res.data)) leads = res.data;
+      }
+      if (!leads.length) {
+        showNotificationToast('Aucune opportunité de prospection à exporter.', 'info');
+        return;
+      }
+      if (window.PinoDB && typeof PinoDB.exportPlatformLeadsCSV === 'function') {
+        PinoDB.exportPlatformLeadsCSV(leads);
+        showNotificationToast('✅ Export CSV de prospection généré !', 'success');
+      }
+    };
+
+    window.handleExportClientDataCSV = () => {
+      const user = getCurrentUser();
+      const quotes = window._cachedClientQuotes || [];
+      if (!quotes.length) {
+        showNotificationToast('Aucun devis à exporter dans votre historique.', 'info');
+        return;
+      }
+      if (window.PinoDB && typeof PinoDB.exportClientQuotesCSV === 'function') {
+        PinoDB.exportClientQuotesCSV(quotes, user?.fullName || 'client');
+        showNotificationToast('✅ Vos devis ont été exportés au format CSV !', 'success');
+      }
+    };
+
+    // ─────────────────────────────────────────────────────────
+    //  CONTRÔLE QUALITÉ & RÉPARATION DES RÉPONSES (Andrés Pino)
+    // ─────────────────────────────────────────────────────────
+    let _activeQualityFilter = 'all';
+    let _currentRepairLead = null;
+    let _currentRepairAction = 'relance_sap_50';
+
+    window.filterQualityLeads = (filterType) => {
+      _activeQualityFilter = filterType;
+      document.querySelectorAll('.qual-flt-btn').forEach(b => {
+        b.classList.remove('bg-emerald-700', 'text-white');
+        b.classList.add('bg-slate-100', 'text-slate-700');
+      });
+      const btn = document.getElementById(`qual-flt-${filterType}`);
+      if (btn) {
+        btn.classList.remove('bg-slate-100', 'text-slate-700');
+        btn.classList.add('bg-emerald-700', 'text-white');
+      }
+      renderAdminQualityConfig();
+    };
+
+    window.renderAdminQualityConfig = async () => {
+      let leads = window._cachedAdminLeads || [];
+      if (!leads.length && window.PinoDB) {
+        const res = await PinoDB.fetchLeads(300);
+        if (res.ok && Array.isArray(res.data)) leads = res.data;
+      }
+      if (!leads.length) {
+        try { leads = JSON.parse(localStorage.getItem('pino_leads') || '[]'); } catch(e){}
+      }
+
+      // Calcul des diagnostics de qualité
+      const evaluated = leads.map(l => {
+        const budget = parseFloat(l.budget_eur || l.budget) || 0;
+        let qStatus = l.quality_status;
+        let qReason = l.quality_reason || '';
+        let qScore = l.quality_score || 80;
+
+        if (!qStatus) {
+          if (l.status === 'Devis accepté' || l.status === 'Facturé' || l.status === 'Gagné' || l.status === 'Validé') {
+            qStatus = 'bonne';
+            qReason = 'Devis transformé / Dossier en règle';
+            qScore = 95;
+          } else if (l.status === 'Devis envoyé') {
+            qStatus = 'bonne';
+            qReason = 'Proposition chiffrée transmise';
+            qScore = 85;
+          } else if (budget <= 0 && l.status === 'Nouveau') {
+            qStatus = 'mauvaise';
+            qReason = 'Budget non renseigné (à qualifier)';
+            qScore = 40;
+          } else {
+            qStatus = 'bonne';
+            qReason = 'Prospect qualifié';
+            qScore = 80;
+          }
+        }
+        return { ...l, evaluated_status: qStatus, evaluated_reason: qReason, evaluated_score: qScore };
+      });
+
+      const total = evaluated.length;
+      const bonnes = evaluated.filter(l => l.evaluated_status === 'bonne').length;
+      const mauvaises = evaluated.filter(l => l.evaluated_status === 'mauvaise').length;
+      const reparees = evaluated.filter(l => l.evaluated_status === 'reparee').length;
+
+      const kpiTot = document.getElementById('qual-kpi-total');
+      const kpiBon = document.getElementById('qual-kpi-bonnes');
+      const kpiMau = document.getElementById('qual-kpi-mauvaises');
+      const kpiRep = document.getElementById('qual-kpi-reparees');
+      const repBadge = document.getElementById('adm-repair-badge');
+
+      if (kpiTot) kpiTot.textContent = String(total);
+      if (kpiBon) kpiBon.textContent = String(bonnes);
+      if (kpiMau) kpiMau.textContent = String(mauvaises);
+      if (kpiRep) kpiRep.textContent = String(reparees);
+      if (repBadge) repBadge.textContent = String(mauvaises);
+
+      const tbody = document.getElementById('adm-quality-table-body');
+      if (!tbody) return;
+
+      let filtered = evaluated;
+      if (_activeQualityFilter === 'bonnes') filtered = evaluated.filter(l => l.evaluated_status === 'bonne');
+      else if (_activeQualityFilter === 'mauvaises') filtered = evaluated.filter(l => l.evaluated_status === 'mauvaise');
+      else if (_activeQualityFilter === 'reparees') filtered = evaluated.filter(l => l.evaluated_status === 'reparee');
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">Aucun lead ne correspond à ce filtre de qualité.</td></tr>`;
+        return;
+      }
+
+      const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
+
+      tbody.innerHTML = filtered.map(l => {
+        const ref = l.ref_code || l.id || 'DEV-2026';
+        const budget = parseFloat(l.budget_eur || l.budget) || 0;
+        const net = Math.round(budget * 0.5);
+
+        let diagBadge = '';
+        if (l.evaluated_status === 'bonne') {
+          diagBadge = `<span class="px-2 py-0.5 rounded-full text-xxs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 inline-flex items-center gap-1"><i class="fa-solid fa-star text-amber-500"></i> Bonne Réponse (${l.evaluated_score}/100)</span>`;
+        } else if (l.evaluated_status === 'reparee') {
+          diagBadge = `<span class="px-2 py-0.5 rounded-full text-xxs font-extrabold bg-blue-100 text-blue-800 border border-blue-300 inline-flex items-center gap-1"><i class="fa-solid fa-screwdriver-wrench text-blue-600"></i> Réparée (${l.evaluated_score}/100)</span>`;
+        } else {
+          diagBadge = `<span class="px-2 py-0.5 rounded-full text-xxs font-extrabold bg-amber-100 text-amber-800 border border-amber-300 inline-flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation text-amber-600"></i> À Réparer (${l.evaluated_score}/100)</span>`;
+        }
+
+        const repairDesc = l.repair_action || l.evaluated_reason || 'Aucune action requise';
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">
+            <td class="py-3 px-4 text-slate-700 whitespace-nowrap">
+              <strong class="font-mono text-xs text-slate-900 block">#${escapeFn(ref)}</strong>
+              <span class="text-[11px] text-slate-400">${l.date || 'Récemment'}</span>
+            </td>
+            <td class="py-3 px-4">
+              <div class="font-bold text-slate-900">${escapeFn(l.name || l.full_name || 'Client')}</div>
+              <div class="text-[11px] text-slate-500">📍 ${escapeFn(l.commune || 'Bordeaux')} • ${escapeFn(l.phone || l.email || '—')}</div>
+            </td>
+            <td class="py-3 px-4">
+              <span class="font-semibold text-slate-800">${escapeFn(l.service || l.service_type || 'Entretien jardin')}</span>
+              <div class="text-xxs text-emerald-700 font-bold mt-0.5">Budget : ${budget} € (Reste SAP : ${net} €)</div>
+            </td>
+            <td class="py-3 px-4">
+              ${diagBadge}
+              <div class="text-xxs text-slate-500 mt-1">${escapeFn(l.evaluated_reason || '')}</div>
+            </td>
+            <td class="py-3 px-4 text-xxs text-slate-700 font-medium">
+              <span class="bg-slate-100 px-2 py-1 rounded-md block truncate max-w-[260px]" title="${escapeFn(repairDesc)}">
+                ${escapeFn(repairDesc)}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-right whitespace-nowrap">
+              <div class="flex items-center justify-end gap-1.5">
+                <button type="button" onclick="openLeadRepairModal('${escapeFn(l.sbId || l.id || ref)}')" class="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer">
+                  <i class="fa-solid fa-screwdriver-wrench"></i> Réparer
+                </button>
+                <button type="button" onclick="toggleLeadQuality('${escapeFn(l.sbId || l.id || ref)}')" class="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors cursor-pointer" title="Basculer Bonne / Mauvaise">
+                  <i class="fa-solid fa-repeat text-xs"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    window.openLeadRepairModal = (leadId) => {
+      const leads = window._cachedAdminLeads || [];
+      const lead = leads.find(l => (l.id === leadId || l.sbId === leadId || l.ref_code === leadId)) || null;
+      if (!lead) {
+        showNotificationToast('Lead introuvable.', 'error');
+        return;
+      }
+      _currentRepairLead = lead;
+      _currentRepairAction = 'relance_sap_50';
+
+      const refEl = document.getElementById('rep-lead-ref');
+      const clientEl = document.getElementById('rep-lead-client');
+      const detailsEl = document.getElementById('rep-lead-details');
+      const badgeEl = document.getElementById('rep-lead-badge');
+
+      const ref = lead.ref_code || lead.id || 'DEV-2026';
+      if (refEl) refEl.textContent = `#${ref}`;
+      if (clientEl) clientEl.textContent = `Client: ${lead.name || lead.full_name || 'Particulier'} • 📍 ${lead.commune || 'Gironde'} • Tél: ${lead.phone || 'Non renseigné'}`;
+      if (detailsEl) detailsEl.textContent = `Prestation: ${lead.service || lead.service_type || 'Entretien'} • Budget: ${lead.budget || lead.budget_eur || 0} € TTC`;
+
+      if (badgeEl) {
+        if (lead.quality_status === 'bonne') {
+          badgeEl.className = 'px-2 py-0.5 rounded-full text-xxs font-bold bg-emerald-100 text-emerald-800';
+          badgeEl.textContent = '⭐ Classé Bonne Réponse';
+        } else if (lead.quality_status === 'reparee') {
+          badgeEl.className = 'px-2 py-0.5 rounded-full text-xxs font-bold bg-blue-100 text-blue-800';
+          badgeEl.textContent = '🛠️ Déjà Réparé';
+        } else {
+          badgeEl.className = 'px-2 py-0.5 rounded-full text-xxs font-bold bg-amber-100 text-amber-800';
+          badgeEl.textContent = '⚠️ À Réparer / En Souffrance';
+        }
+      }
+
+      selectRepairAction('relance_sap_50');
+      const modal = document.getElementById('modal-repair-lead');
+      if (modal && typeof modal.showModal === 'function') modal.showModal();
+    };
+
+    window.selectRepairAction = (actionKey) => {
+      _currentRepairAction = actionKey;
+      document.querySelectorAll('.rep-act-btn').forEach(b => {
+        b.classList.remove('border-emerald-600', 'bg-emerald-50/80', 'text-emerald-900');
+        b.classList.add('border-slate-200', 'bg-white', 'text-slate-700');
+      });
+
+      const btnMap = {
+        'relance_sap_50': 'rep-act-sap',
+        'coupon_20': 'rep-act-coupon',
+        'chiffrage_ajuste': 'rep-act-chiffrage',
+        'marquer_bonne': 'rep-act-bonne'
+      };
+      const activeBtn = document.getElementById(btnMap[actionKey]);
+      if (activeBtn) {
+        activeBtn.classList.remove('border-slate-200', 'bg-white', 'text-slate-700');
+        activeBtn.classList.add('border-emerald-600', 'bg-emerald-50/80', 'text-emerald-900');
+      }
+
+      const lead = _currentRepairLead || {};
+      const name = lead.name || lead.full_name || 'Bonjour,';
+      const service = lead.service || lead.service_type || 'l\'entretien de votre jardin';
+      const amount = parseFloat(lead.budget || lead.budget_eur || 200) || 200;
+      const net = Math.round(amount * 0.5);
+
+      let text = '';
+      if (actionKey === 'relance_sap_50') {
+        text = `Bonjour ${name},\n\nJe reviens vers vous concernant votre demande pour ${service}.\n\n👉 N'oubliez pas qu'avec l'AVANCE IMMÉDIATE DU CRÉDIT D'IMPÔT 50% de l'URSSAF (Coopérative Unipros), votre reste à charge réel n'est que de ${net} € au lieu de ${amount} € TTC !\n\nAucune avance de trésorerie nécessaire : vous ne réglez que les 50% après le passage.\n\nPouvons-nous convenir d'un créneau cette semaine ?\n\nAndrés Pino — 06 51 59 40 34`;
+      } else if (actionKey === 'coupon_20') {
+        text = `Bonjour ${name},\n\nPour vous accompagner dans l'entretien de votre jardin (${service}), je vous fais bénéficier de notre coupon de bienvenue exclusif : PELABOLA (-20% immédiats).\n\nEn combinant ce geste avec l'Avance Immédiate 50% URSSAF, vous obtenez le meilleur tarif paysager certifié de Gironde.\n\nSouhaitez-vous que je vienne estimer le travail sur place ?\n\nBien cordialement,\nAndrés Pino — Pino Espaces Verts`;
+      } else if (actionKey === 'chiffrage_ajuste') {
+        text = `Bonjour ${name},\n\nJ'ai réajusté notre proposition pour ${service} afin de respecter au plus près votre budget.\n\nNous pouvons adapter la formule (par exemple : intervention ciblée avec ou sans évacuation des végétaux) pour un tarif net très avantageux.\n\nÀ votre disposition pour en discuter au 06 51 59 40 34,\nAndrés Pino`;
+      } else if (actionKey === 'marquer_bonne') {
+        text = `Lead qualifié et validé conforme par Andrés Pino. Demande active et prioritaire.`;
+      }
+
+      const textarea = document.getElementById('rep-pitch-text');
+      if (textarea) textarea.value = text;
+    };
+
+    window.dispatchRepairViaWhatsApp = () => {
+      const lead = _currentRepairLead;
+      const text = document.getElementById('rep-pitch-text')?.value || '';
+      if (!text) return;
+      const phoneClean = (lead?.phone || '').replace(/\s+/g, '');
+      const phoneFormatted = phoneClean ? `33${phoneClean.startsWith('0') ? phoneClean.substring(1) : phoneClean}` : '';
+      const url = phoneFormatted ? `https://wa.me/${phoneFormatted}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    };
+
+    window.confirmLeadRepairExecution = async () => {
+      const lead = _currentRepairLead;
+      if (!lead) return;
+      const notes = document.getElementById('rep-pitch-text')?.value || '';
+      const targetId = lead.sbId || lead.id || lead.ref_code;
+
+      if (_currentRepairAction === 'marquer_bonne') {
+        if (window.PinoDB && typeof PinoDB.updateLeadQuality === 'function') {
+          await PinoDB.updateLeadQuality(targetId, {
+            status: 'bonne',
+            reason: 'Validé manuellement comme bonne réponse',
+            score: 95
+          });
+        }
+        showNotificationToast('✅ Réponse marquée comme BONNE (⭐)', 'success');
+      } else {
+        if (window.PinoDB && typeof PinoDB.repairLead === 'function') {
+          await PinoDB.repairLead(targetId, _currentRepairAction, notes);
+        }
+        showNotificationToast('🛠️ Réparation appliquée avec succès !', 'success');
+      }
+
+      const modal = document.getElementById('modal-repair-lead');
+      if (modal && modal.open) modal.close();
+
+      await renderAdminLeads();
+      renderAdminQualityConfig();
+    };
+
+    window.toggleLeadQuality = async (leadId) => {
+      const leads = window._cachedAdminLeads || [];
+      const lead = leads.find(l => (l.id === leadId || l.sbId === leadId || l.ref_code === leadId));
+      if (!lead) return;
+
+      const currentStatus = lead.quality_status || 'bonne';
+      const nextStatus = (currentStatus === 'bonne') ? 'mauvaise' : 'bonne';
+      const targetId = lead.sbId || lead.id;
+
+      if (window.PinoDB && typeof PinoDB.updateLeadQuality === 'function') {
+        await PinoDB.updateLeadQuality(targetId, {
+          status: nextStatus,
+          reason: nextStatus === 'mauvaise' ? 'Classé manuellement à réparer' : 'Validé comme bonne réponse',
+          score: nextStatus === 'mauvaise' ? 45 : 90
+        });
+      }
+
+      showNotificationToast(`Statut qualité basculé en : ${nextStatus === 'bonne' ? 'Bonne (⭐)' : 'À réparer (⚠️)'}`, 'info');
+      await renderAdminLeads();
+      renderAdminQualityConfig();
+    };
+
+    window.autoRepairAllLeads = async () => {
+      let leads = window._cachedAdminLeads || [];
+      if (!leads.length && window.PinoDB) {
+        const res = await PinoDB.fetchLeads(300);
+        if (res.ok && Array.isArray(res.data)) leads = res.data;
+      }
+      const toRepair = leads.filter(l => {
+        if (l.quality_status === 'mauvaise') return true;
+        if (l.quality_status === 'bonne' || l.quality_status === 'reparee') return false;
+        const b = parseFloat(l.budget_eur || l.budget) || 0;
+        return (l.status === 'Nouveau' && b <= 0);
+      });
+
+      if (toRepair.length === 0) {
+        showNotificationToast('Toutes les réponses et leads sont déjà conformes et qualifiés !', 'success');
+        return;
+      }
+
+      showNotificationToast(`Auto-réparation de ${toRepair.length} devis/leads en cours...`, 'info');
+      for (const lead of toRepair) {
+        const targetId = lead.sbId || lead.id;
+        if (window.PinoDB && typeof PinoDB.repairLead === 'function') {
+          await PinoDB.repairLead(targetId, 'relance_sap_50', "Auto-réparation Pino : Déduction 50% Avance Immédiate SAP & Coupon -20% activés.");
+        }
+      }
+
+      showNotificationToast(`✅ ${toRepair.length} réponses/leads ont été réparés avec succès !`, 'success');
+      await renderAdminLeads();
+      renderAdminQualityConfig();
+    };
+
+    window.exportQualityAuditCSV = () => {
+      let leads = window._cachedAdminLeads || [];
+      if (!leads.length) {
+        showNotificationToast('Aucune donnée d\'audit à exporter.', 'info');
+        return;
+      }
+      const headers = ['Ref', 'Date', 'Client', 'Commune', 'Prestation', 'Budget_TTC', 'Reste_Net_SAP', 'Statut_CRM', 'Qualite', 'Score', 'Action_Reparation'];
+      const rows = leads.map(l => {
+        const budget = parseFloat(l.budget_eur || l.budget) || 0;
+        const net = Math.round(budget * 0.5);
+        return [
+          l.ref_code || l.id || '',
+          l.date || '',
+          l.name || l.full_name || '',
+          l.commune || '',
+          l.service || l.service_type || '',
+          budget,
+          net,
+          l.status || '',
+          l.quality_status || 'bonne',
+          l.quality_score || 80,
+          l.repair_action || l.quality_reason || ''
+        ];
+      });
+
+      if (window.PinoDB && typeof PinoDB.exportDataToCSV === 'function') {
+        PinoDB.exportDataToCSV(headers, rows, `audit_qualite_reponses_pino_${new Date().toISOString().slice(0,10)}.csv`);
+        showNotificationToast('✅ Export CSV de l\'audit qualité généré avec succès !', 'success');
+      }
     };
 
     // Close on backdrop click for all section windows
