@@ -104,9 +104,12 @@
   
   <!-- Base de Connaissances & Moteur Intelligent Chatbot -->
   <script src="assets/js/chatbot_knowledge_base.js"></script>
-  
+
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- jsPDF — generación de PDF en el cliente (solo panel admin) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 
   <style>
     /* Custom Before/After Slider Styles */
@@ -866,6 +869,9 @@
       <button type="button" onclick="switchAdminTab('impersonate')" id="adm-tab-impersonate" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-user-secret mr-1.5"></i> Voir comme client
       </button>
+      <button type="button" onclick="switchAdminTab('travaux'); renderAdminJobs()" id="adm-tab-travaux" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+        <i class="fa-solid fa-briefcase mr-1.5"></i> Travaux CRM (<span id="adm-jobs-badge">0</span>)
+      </button>
     </div>
 
     <!-- Admin Tab Content Body -->
@@ -1111,6 +1117,233 @@
           </div>
         </div>
       </div>
+
+      <!-- 6. Tab Travaux CRM -->
+      <div id="adm-content-travaux" class="adm-content hidden space-y-5">
+
+        <!-- Barra de acciones -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h4 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-briefcase text-emerald-700"></i> Gestion des Travaux Réalisés
+          </h4>
+          <div class="flex gap-2">
+            <button type="button" id="btn-export-jobs-pdf" onclick="handleExportJobsPDF()"
+              class="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-sm cursor-pointer">
+              <i class="fa-solid fa-file-pdf"></i> PDF
+            </button>
+            <button type="button" id="btn-export-jobs-csv" onclick="handleExportJobsCSV()"
+              class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-sm cursor-pointer">
+              <i class="fa-solid fa-file-excel"></i> Excel / CSV
+            </button>
+            <button type="button" onclick="renderAdminJobs()"
+              class="px-3 py-1.5 bg-white/80 hover:bg-white border border-slate-200 text-slate-600 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer">
+              <i class="fa-solid fa-arrows-rotate"></i> Actualiser
+            </button>
+          </div>
+        </div>
+
+        <!-- Formulario de nuevo trabajo -->
+        <details id="adm-new-job-details" class="group">
+          <summary class="cursor-pointer list-none">
+            <div class="flex items-center gap-2 px-4 py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-2xl transition-all">
+              <i class="fa-solid fa-plus group-open:rotate-45 transition-transform"></i>
+              <span class="font-bold text-sm">Ajouter un nouveau travail</span>
+            </div>
+          </summary>
+
+          <form id="adm-job-form" onsubmit="saveJobForm(event)"
+            class="mt-3 p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+              <!-- Bloc client -->
+              <div class="space-y-3 sm:col-span-2">
+                <h6 class="font-bold text-xs text-emerald-800 uppercase tracking-wider border-b border-emerald-200 pb-1">
+                  <i class="fa-solid fa-user mr-1"></i> Informations Client
+                </h6>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-client-name">Nom du client *</label>
+                    <input id="job-client-name" name="clientName" required type="text" placeholder="Jean Dupont"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                  </div>
+                  <div>
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-client-email">Email</label>
+                    <input id="job-client-email" name="clientEmail" type="email" placeholder="jean@email.com"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
+                  </div>
+                  <div>
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-client-phone">Téléphone</label>
+                    <input id="job-client-phone" name="clientPhone" type="tel" placeholder="06 12 34 56 78"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
+                  </div>
+                  <div>
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-client-commune">Commune</label>
+                    <input id="job-client-commune" name="clientCommune" type="text" placeholder="Bordeaux"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bloc trabajo -->
+              <div class="space-y-3 sm:col-span-2">
+                <h6 class="font-bold text-xs text-emerald-800 uppercase tracking-wider border-b border-emerald-200 pb-1">
+                  <i class="fa-solid fa-shovel mr-1"></i> Détails du Travail
+                </h6>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-service-type">Type de service *</label>
+                    <select id="job-service-type" name="serviceType" required
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
+                      <option value="Entretien jardin">Entretien jardin</option>
+                      <option value="Tonte pelouse">Tonte pelouse</option>
+                      <option value="Taille haies">Taille haies / arbustes</option>
+                      <option value="Élagage">Élagage arbre</option>
+                      <option value="Désherbage">Désherbage</option>
+                      <option value="Plantation">Plantation</option>
+                      <option value="Nettoyage terrain">Nettoyage terrain</option>
+                      <option value="Aménagement">Aménagement paysager</option>
+                      <option value="Arrosage">Installation arrosage</option>
+                      <option value="Autre">Autre</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-date-start">Date début</label>
+                    <input id="job-date-start" name="dateStart" type="date"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
+                  </div>
+                  <div>
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-date-end">Date fin</label>
+                    <input id="job-date-end" name="dateEnd" type="date"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
+                  </div>
+                  <div>
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-hours">Heures travaillées</label>
+                    <input id="job-hours" name="hoursSpent" type="number" step="0.5" min="0" placeholder="3.5"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-description">Description du travail</label>
+                    <textarea id="job-description" name="description" rows="2" placeholder="Tonte de la pelouse, taille des buis, ramassage des feuilles..."
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 resize-none"></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Bloc financiero -->
+              <div class="space-y-3 sm:col-span-2">
+                <h6 class="font-bold text-xs text-emerald-800 uppercase tracking-wider border-b border-emerald-200 pb-1">
+                  <i class="fa-solid fa-euro-sign mr-1"></i> Informations Financières
+                </h6>
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <div>
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-amount">Montant facturé (€)</label>
+                    <input id="job-amount" name="amountCharged" type="number" step="0.01" min="0" placeholder="120.00"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
+                  </div>
+                  <div>
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-paid">Montant reçu (€)</label>
+                    <input id="job-paid" name="amountPaid" type="number" step="0.01" min="0" placeholder="120.00"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
+                  </div>
+                  <div>
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-pay-status">Statut paiement</label>
+                    <select id="job-pay-status" name="paymentStatus"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
+                      <option value="pending">⏳ En attente</option>
+                      <option value="partial">🔶 Partiel</option>
+                      <option value="paid">✅ Payé</option>
+                      <option value="cancelled">❌ Annulé</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-pay-method">Méthode de paiement</label>
+                    <select id="job-pay-method" name="paymentMethod"
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
+                      <option value="">— Choisir —</option>
+                      <option value="unipros">Unipros</option>
+                      <option value="virement">Virement bancaire</option>
+                      <option value="cheque">Chèque</option>
+                      <option value="cesu">CESU</option>
+                      <option value="especes">Espèces</option>
+                      <option value="autre">Autre</option>
+                    </select>
+                  </div>
+                  <div class="sm:col-span-4">
+                    <label class="block text-xxs font-bold text-slate-600 mb-1" for="job-notes">Notes internes</label>
+                    <textarea id="job-notes" name="notes" rows="2" placeholder="Client très satisfait, renouvellement prévu en mars..."
+                      class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 resize-none"></textarea>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /grid -->
+
+            <div class="flex justify-end gap-3 pt-2">
+              <button type="reset" class="px-4 py-2 text-xs font-bold text-slate-600 border border-slate-300 rounded-xl hover:bg-slate-100 cursor-pointer">Annuler</button>
+              <button type="submit" id="job-submit-btn"
+                class="px-5 py-2 bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center gap-2 transition-all cursor-pointer">
+                <i class="fa-solid fa-floppy-disk"></i> Enregistrer le travail
+              </button>
+            </div>
+          </form>
+        </details>
+
+        <!-- Filtros rápidos -->
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="renderAdminJobs()" class="px-3 py-1 text-xxs font-bold bg-slate-100 hover:bg-slate-200 rounded-full cursor-pointer">Tous</button>
+          <button type="button" onclick="renderAdminJobs('pending')" class="px-3 py-1 text-xxs font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-full cursor-pointer">⏳ En attente</button>
+          <button type="button" onclick="renderAdminJobs('partial')" class="px-3 py-1 text-xxs font-bold bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-full cursor-pointer">🔶 Partiel</button>
+          <button type="button" onclick="renderAdminJobs('paid')" class="px-3 py-1 text-xxs font-bold bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-full cursor-pointer">✅ Payés</button>
+        </div>
+
+        <!-- Tabla de trabajos -->
+        <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-xxs">
+                <tr>
+                  <th class="p-3">Client</th>
+                  <th class="p-3">Service</th>
+                  <th class="p-3">Période</th>
+                  <th class="p-3">Heures</th>
+                  <th class="p-3">Facturé</th>
+                  <th class="p-3">Payé</th>
+                  <th class="p-3">Statut</th>
+                  <th class="p-3">Mode</th>
+                  <th class="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adm-jobs-table-body" class="divide-y divide-slate-200 bg-white">
+                <tr><td colspan="9" class="p-8 text-center text-slate-400 text-xxs">
+                  <i class="fa-solid fa-spinner fa-spin mr-2"></i> Chargement...
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Resumen financiero -->
+        <div id="adm-jobs-summary" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
+            <div id="jobs-kpi-total" class="text-lg font-black text-emerald-800">0</div>
+            <div class="text-xxs text-slate-500 font-medium">Travaux</div>
+          </div>
+          <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-center">
+            <div id="jobs-kpi-charged" class="text-lg font-black text-blue-800">0 €</div>
+            <div class="text-xxs text-slate-500 font-medium">Facturé</div>
+          </div>
+          <div class="p-3 bg-teal-50 border border-teal-200 rounded-xl text-center">
+            <div id="jobs-kpi-paid" class="text-lg font-black text-teal-800">0 €</div>
+            <div class="text-xxs text-slate-500 font-medium">Encaissé</div>
+          </div>
+          <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-center">
+            <div id="jobs-kpi-hours" class="text-lg font-black text-amber-800">0 h</div>
+            <div class="text-xxs text-slate-500 font-medium">Heures totales</div>
+          </div>
+        </div>
+
+      </div><!-- /adm-content-travaux -->
 
       <!-- 5. Tab Impersonate -->
       <div id="adm-content-impersonate" class="adm-content hidden space-y-4">
@@ -3809,7 +4042,8 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
     // =========================================================================
     // AUTHENTIFICATION SUPABASE (Google OAuth + email) — Zero Trust cupón
     // =========================================================================
-    const ADMIN_EMAIL = 'pino.spacesverts@gmail.com';
+    const ADMIN_EMAILS = ['pino.spacesverts@gmail.com', 'pino.espacesverts@gmail.com'];
+    const isPinoEmail = (email) => ADMIN_EMAILS.includes((email || '').trim().toLowerCase());
 
     window.requireSupabase = () => {
       if (window.pinoSupabase) return window.pinoSupabase;
@@ -3821,7 +4055,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       if (!sbUser || !sbUser.email) return;
 
       const normEmail = sbUser.email.trim().toLowerCase();
-      const isAdmin = (normEmail === ADMIN_EMAIL.toLowerCase());
+      const isAdmin = isPinoEmail(normEmail) || sbUser.app_metadata?.role === 'admin';
       const meta = sbUser.user_metadata || {};
       const displayName = registrationProfile?.fullName || meta.full_name || meta.name || (isAdmin ? 'Andrés Pino' : 'Client Particulier');
       const phone = registrationProfile?.phone || meta.phone || '';
@@ -4238,6 +4472,9 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       if (tabKey === 'users') {
         renderAdminUsers();
       }
+      if (tabKey === 'travaux') {
+        renderAdminJobs();
+      }
     };
 
     // Render Admin Leads — Supabase primary, localStorage fallback
@@ -4497,7 +4734,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">Aucun utilisateur enregistré.</td></tr>';
         } else {
           tbody.innerHTML = users.map((u) => {
-            const isAdm = u.role === 'admin' || u.isAdmin || (u.email && u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+            const isAdm = u.role === 'admin' || u.isAdmin || isPinoEmail(u.email);
             const roleBadge = isAdm
               ? '<span class="bg-amber-100 text-amber-900 border border-amber-300 font-bold px-2 py-0.5 rounded-full text-xxs">👑 Gérant / Admin</span>'
               : '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-xxs">👤 Client</span>';
@@ -4541,7 +4778,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }
 
       tbody.innerHTML = sessions.map((s, idx) => {
-        const isAdm = s.role === 'admin' || (s.sessionUser && s.sessionUser.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+        const isAdm = s.role === 'admin' || isPinoEmail(s.sessionUser);
         const rolePill = isAdm
           ? '<span class="bg-amber-100 text-amber-900 border border-amber-300 font-bold px-2 py-0.5 rounded-full text-xxs">👑 Admin</span>'
           : '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-xxs">👤 Client</span>';
@@ -4737,12 +4974,386 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           }, 150);
         }
 
-        // Render admin leads and users if opening admin
+        // Render admin leads, users, KPIs and jobs if opening admin
         if (targetId === 'modal-window-admin') {
           renderAdminLeads();
           renderAdminUsers();
           loadAdminKPIs();
+          renderAdminJobs();
         }
+      }
+    };
+
+    // =========================================================================
+    // CRM DES TRAVAUX (Admin Jobs CRM + Export PDF & Excel/CSV)
+    // =========================================================================
+    const escapeHtml = (str) => String(str || '').replace(/[&<>"']/g, m => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[m]);
+
+    let _jobsCache = [];
+
+    window.viewJobNotes = (jobId) => {
+      const job = _jobsCache.find(x => x.id === jobId);
+      if (job && job.notes) {
+        alert('📝 Notes pour ' + (job.client_name || 'Client') + ' :\n\n' + job.notes);
+      }
+    };
+
+    window.renderAdminJobs = async (filterStatus = null) => {
+      const tbody = document.getElementById('adm-jobs-table-body');
+      const badge = document.getElementById('adm-jobs-badge');
+      const summaryDiv = document.getElementById('adm-jobs-summary');
+
+      if (!tbody) return;
+
+      tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 text-xxs">
+        <i class="fa-solid fa-spinner fa-spin mr-2"></i> Chargement des travaux...
+      </td></tr>`;
+
+      let jobs = [];
+      let fromDB = false;
+
+      if (window.PinoDB) {
+        try {
+          const res = await PinoDB.fetchJobs();
+          if (res.ok && Array.isArray(res.data) && res.data.length > 0) {
+            jobs = res.data;
+            fromDB = true;
+          }
+        } catch (err) {
+          console.warn('[pino] Error fetching jobs from Supabase:', err);
+        }
+      }
+
+      // Fallback a localStorage si la base de datos está vacía o aún no conectada
+      if (!fromDB) {
+        try {
+          const local = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+          if (local.length > 0) {
+            jobs = local;
+          }
+        } catch (e) {
+          console.warn('[pino] Error reading local jobs:', e);
+        }
+      }
+
+      // Si aún no hay trabajos, sembramos 2 ejemplos realistas iniciales
+      if (jobs.length === 0) {
+        jobs = [
+          {
+            id: 'demo-1',
+            client_name: 'Mme. Valérie Mercier',
+            client_email: 'valerie.mercier@orange.fr',
+            client_phone: '06 12 45 78 90',
+            client_commune: 'Mérignac',
+            service_type: 'Taille haies',
+            description: 'Taille de haie de lauriers (40m linéaires) + évacuation des déchets verts.',
+            date_start: '2026-09-10',
+            date_end: '2026-09-10',
+            hours_spent: 4.5,
+            amount_charged: 220.00,
+            amount_paid: 220.00,
+            payment_status: 'paid',
+            payment_method: 'unipros',
+            notes: 'Avance immédiate URSSAF 50% appliquée via Unipros. Reste à charge 110€.'
+          },
+          {
+            id: 'demo-2',
+            client_name: 'M. Laurent Dubois',
+            client_email: 'l.dubois@gmail.com',
+            client_phone: '06 78 90 12 34',
+            client_commune: 'Bordeaux Caudéran',
+            service_type: 'Entretien jardin',
+            description: 'Tonte de pelouse 400m², désherbage massif et soufflage terrasse.',
+            date_start: '2026-09-14',
+            date_end: '2026-09-14',
+            hours_spent: 3.0,
+            amount_charged: 150.00,
+            amount_paid: 0.00,
+            payment_status: 'pending',
+            payment_method: 'virement',
+            notes: 'Facture transmise, virement en attente sous 7 jours.'
+          }
+        ];
+        try { localStorage.setItem('pino_admin_jobs', JSON.stringify(jobs)); } catch (e) {}
+      }
+
+      _jobsCache = jobs;
+
+      // Actualizar contadores y badges
+      if (badge) badge.textContent = jobs.length;
+
+      // Calcular sumas financieras
+      const totalCount = jobs.length;
+      const totalCharged = jobs.reduce((s, j) => s + (parseFloat(j.amount_charged) || 0), 0);
+      const totalPaid = jobs.reduce((s, j) => s + (parseFloat(j.amount_paid) || 0), 0);
+      const totalHours = jobs.reduce((s, j) => s + (parseFloat(j.hours_spent) || 0), 0);
+
+      const kpiTotal = document.getElementById('jobs-kpi-total');
+      const kpiCharged = document.getElementById('jobs-kpi-charged');
+      const kpiPaid = document.getElementById('jobs-kpi-paid');
+      const kpiHours = document.getElementById('jobs-kpi-hours');
+
+      if (kpiTotal) kpiTotal.textContent = totalCount;
+      if (kpiCharged) kpiCharged.textContent = `${totalCharged.toFixed(2)} €`;
+      if (kpiPaid) kpiPaid.textContent = `${totalPaid.toFixed(2)} €`;
+      if (kpiHours) kpiHours.textContent = `${totalHours.toFixed(1)} h`;
+      if (summaryDiv) summaryDiv.classList.remove('hidden');
+
+      // Aplicar filtro si existe
+      let displayJobs = jobs;
+      if (filterStatus) {
+        displayJobs = jobs.filter(j => j.payment_status === filterStatus);
+      }
+
+      if (displayJobs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 text-xxs">
+          Aucun travail ne correspond à ce filtre.
+        </td></tr>`;
+        return;
+      }
+
+      const statusMap = {
+        pending: { label: '⏳ En attente', cls: 'bg-amber-100 text-amber-800' },
+        partial: { label: '🔶 Partiel', cls: 'bg-orange-100 text-orange-800' },
+        paid: { label: '✅ Payé', cls: 'bg-emerald-100 text-emerald-800' },
+        cancelled: { label: '❌ Annulé', cls: 'bg-rose-100 text-rose-800' }
+      };
+
+      const methodMap = {
+        unipros: 'Unipros (Crédit 50%)',
+        virement: 'Virement',
+        cheque: 'Chèque',
+        cesu: 'CESU',
+        especes: 'Espèces',
+        autre: 'Autre'
+      };
+
+      tbody.innerHTML = displayJobs.map((j) => {
+        const st = statusMap[j.payment_status] || { label: j.payment_status, cls: 'bg-slate-100 text-slate-700' };
+        const method = methodMap[j.payment_method] || j.payment_method || '—';
+        const charged = (parseFloat(j.amount_charged) || 0).toFixed(2);
+        const paid = (parseFloat(j.amount_paid) || 0).toFixed(2);
+        const period = [j.date_start, j.date_end].filter(Boolean).join(' → ') || '—';
+        const isPaid = j.payment_status === 'paid';
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors">
+            <td class="p-3">
+              <div class="font-bold text-slate-800">${escapeHtml(j.client_name || 'Client')}</div>
+              <div class="text-xxs text-slate-400 flex items-center gap-2 mt-0.5">
+                ${j.client_commune ? `<span>📍 ${escapeHtml(j.client_commune)}</span>` : ''}
+                ${j.client_phone ? `<span>📞 ${escapeHtml(j.client_phone)}</span>` : ''}
+              </div>
+            </td>
+            <td class="p-3">
+              <span class="inline-block px-2 py-0.5 rounded-full text-xxs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                ${escapeHtml(j.service_type || 'Service')}
+              </span>
+              ${j.description ? `<div class="text-xxs text-slate-500 truncate max-w-xs mt-0.5" title="${escapeHtml(j.description)}">${escapeHtml(j.description)}</div>` : ''}
+            </td>
+            <td class="p-3 text-xxs text-slate-600 whitespace-nowrap">${period}</td>
+            <td class="p-3 font-semibold text-slate-700">${j.hours_spent ? `${j.hours_spent} h` : '—'}</td>
+            <td class="p-3 font-bold text-slate-900">${charged} €</td>
+            <td class="p-3 font-semibold text-emerald-700">${paid} €</td>
+            <td class="p-3">
+              <span class="inline-block px-2 py-0.5 rounded-full text-xxs font-bold ${st.cls}">
+                ${st.label}
+              </span>
+            </td>
+            <td class="p-3 text-xxs text-slate-500">${method}</td>
+            <td class="p-3 text-right whitespace-nowrap">
+              ${!isPaid ? `
+                <button type="button" onclick="markJobPaid('${j.id}')"
+                  class="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold text-xxs rounded-lg transition-all cursor-pointer mr-1" title="Marquer comme payé">
+                  <i class="fa-solid fa-check"></i> Payé
+                </button>
+              ` : ''}
+              ${j.notes ? `
+                <button type="button" onclick="window.viewJobNotes('${j.id}')"
+                  class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xxs rounded-lg transition-all cursor-pointer" title="Voir les notes">
+                  <i class="fa-solid fa-note-sticky"></i>
+                </button>
+              ` : ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    window.saveJobForm = async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const submitBtn = document.getElementById('job-submit-btn');
+      const originalText = submitBtn ? submitBtn.innerHTML : 'Enregistrer le travail';
+
+      const clientName = (document.getElementById('job-client-name')?.value || '').trim();
+      if (!clientName) {
+        showNotificationToast('Veuillez renseigner le nom du client.', 'error');
+        return;
+      }
+
+      const clientEmail = (document.getElementById('job-client-email')?.value || '').trim();
+      const clientPhone = (document.getElementById('job-client-phone')?.value || '').trim();
+      const clientCommune = (document.getElementById('job-client-commune')?.value || '').trim();
+      const serviceType = document.getElementById('job-service-type')?.value || 'Entretien jardin';
+      const dateStart = document.getElementById('job-date-start')?.value || null;
+      const dateEnd = document.getElementById('job-date-end')?.value || null;
+      const hoursSpent = document.getElementById('job-hours')?.value || null;
+      const description = (document.getElementById('job-description')?.value || '').trim();
+      const amountCharged = document.getElementById('job-amount')?.value || null;
+      const amountPaid = document.getElementById('job-paid')?.value || 0;
+      const paymentStatus = document.getElementById('job-pay-status')?.value || 'pending';
+      const paymentMethod = document.getElementById('job-pay-method')?.value || null;
+      const notes = (document.getElementById('job-notes')?.value || '').trim();
+
+      const user = getCurrentUser();
+      const createdBy = user?.uid || null;
+
+      const newJob = {
+        id: 'job_' + Date.now(),
+        client_name: clientName,
+        client_email: clientEmail,
+        client_phone: clientPhone,
+        client_commune: clientCommune,
+        service_type: serviceType,
+        description: description,
+        date_start: dateStart,
+        date_end: dateEnd,
+        hours_spent: hoursSpent ? parseFloat(hoursSpent) : null,
+        amount_charged: amountCharged ? parseFloat(amountCharged) : null,
+        amount_paid: amountPaid ? parseFloat(amountPaid) : 0,
+        payment_status: paymentStatus,
+        payment_method: paymentMethod,
+        notes: notes,
+        created_by: createdBy,
+        created_at: new Date().toISOString()
+      };
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Enregistrement...';
+      }
+
+      let savedInDB = false;
+      if (window.PinoDB) {
+        try {
+          const res = await PinoDB.saveJob({
+            clientName, clientEmail, clientPhone, clientCommune,
+            serviceType, description, dateStart, dateEnd,
+            hoursSpent, amountCharged, amountPaid, paymentStatus,
+            paymentMethod, notes, createdBy
+          });
+          if (res.ok) {
+            savedInDB = true;
+            if (res.id) newJob.id = res.id;
+          }
+        } catch (err) {
+          console.warn('[pino] saveJob error in Supabase:', err);
+        }
+      }
+
+      // Persistir siempre en localStorage para disponibilidad inmediata y offline
+      try {
+        let localJobs = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+        localJobs.unshift(newJob);
+        localStorage.setItem('pino_admin_jobs', JSON.stringify(localJobs));
+      } catch (err) {
+        console.warn('[pino] Error storing in localStorage:', err);
+      }
+
+      // Si también se puede agregar a la lista de usuarios/leads locales si no existe
+      try {
+        let localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]');
+        const exists = localUsers.some(u => (u.email && clientEmail && u.email.toLowerCase() === clientEmail.toLowerCase()) || u.fullName === clientName);
+        if (!exists && clientName) {
+          localUsers.push({
+            uid: newJob.id,
+            email: clientEmail || (clientName.toLowerCase().replace(/\s+/g, '.') + '@client.fr'),
+            fullName: clientName,
+            phone: clientPhone,
+            commune: clientCommune || 'Bordeaux Métropole',
+            role: 'client',
+            authProvider: 'crm_admin',
+            createdAt: new Date().toISOString()
+          });
+          localStorage.setItem('pino_users', JSON.stringify(localUsers));
+          renderAdminUsers();
+        }
+      } catch (e) {}
+
+      form.reset();
+      const details = document.getElementById('adm-new-job-details');
+      if (details) details.removeAttribute('open');
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+
+      showNotificationToast(
+        savedInDB
+          ? 'Travail enregistré avec succès dans Supabase !'
+          : 'Travail enregistré avec succès (sauvegarde locale).',
+        'success'
+      );
+
+      renderAdminJobs();
+    };
+
+    window.markJobPaid = async (jobId) => {
+      if (!confirm('Confirmer le paiement intégral de ce travail ?')) return;
+
+      const idx = _jobsCache.findIndex(j => j.id === jobId);
+      if (idx >= 0) {
+        const charged = _jobsCache[idx].amount_charged || 0;
+        _jobsCache[idx].payment_status = 'paid';
+        _jobsCache[idx].amount_paid = charged;
+
+        // Supabase update
+        if (window.PinoDB && !String(jobId).startsWith('demo-') && !String(jobId).startsWith('job_')) {
+          PinoDB.updateJob(jobId, { payment_status: 'paid', amount_paid: charged }).catch(() => {});
+        }
+
+        // LocalStorage update
+        try {
+          let local = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+          const lIdx = local.findIndex(j => j.id === jobId);
+          if (lIdx >= 0) {
+            local[lIdx].payment_status = 'paid';
+            local[lIdx].amount_paid = charged;
+            localStorage.setItem('pino_admin_jobs', JSON.stringify(local));
+          }
+        } catch (e) {}
+
+        showNotificationToast('Statut mis à jour : Payé ✅', 'success');
+        renderAdminJobs();
+      }
+    };
+
+    window.handleExportJobsPDF = () => {
+      if (!_jobsCache || _jobsCache.length === 0) {
+        showNotificationToast('Aucun travail enregistré à exporter.', 'info');
+        return;
+      }
+      if (window.PinoDB && typeof PinoDB.exportJobsPDF === 'function') {
+        PinoDB.exportJobsPDF(_jobsCache);
+        showNotificationToast('Génération du PDF en cours...', 'success');
+      } else {
+        showNotificationToast('Module PDF non disponible, export CSV activé.', 'info');
+        handleExportJobsCSV();
+      }
+    };
+
+    window.handleExportJobsCSV = () => {
+      if (!_jobsCache || _jobsCache.length === 0) {
+        showNotificationToast('Aucun travail enregistré à exporter.', 'info');
+        return;
+      }
+      if (window.PinoDB && typeof PinoDB.exportJobsCSV === 'function') {
+        PinoDB.exportJobsCSV(_jobsCache);
+        showNotificationToast('Export CSV / Excel téléchargé !', 'success');
       }
     };
 

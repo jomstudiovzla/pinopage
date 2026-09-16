@@ -8,7 +8,11 @@ window.PINO_SUPABASE = {
 };
 
 (function computeSiteUrl() {
-  const { origin, pathname } = window.location;
+  const { protocol, origin, pathname } = window.location;
+  if (protocol === "file:") {
+    window.PINO_SITE_URL = "http://127.0.0.1:8080/";
+    return;
+  }
   if (pathname.indexOf("/pinopage") === 0) {
     window.PINO_SITE_URL = origin + "/pinopage/";
   } else {
