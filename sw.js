@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v6-pdf-download-universal';
+const CACHE_NAME = 'pino-ev-v7-pdf-universal-vault';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',

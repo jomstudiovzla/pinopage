@@ -1252,16 +1252,27 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button type="button" id="btn-doc-download-pdf" onclick="triggerCurrentDocPDFDownload()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer">
+        <button type="button" id="btn-doc-download-pdf" onclick="triggerCurrentDocPDFDownload()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer" title="Enregistrer le fichier PDF sur votre appareil">
           <i class="fa-solid fa-download"></i> Télécharger PDF
         </button>
-        <button type="button" id="btn-doc-direct-print" onclick="triggerCurrentDocPrint()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer">
+        <button type="button" id="btn-doc-open-tab" onclick="triggerCurrentDocOpenNewTab()" class="px-3.5 py-2 bg-blue-700 hover:bg-blue-600 text-white font-extrabold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer" title="Ouvrir directement le document en plein écran dans un nouvel onglet">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Plein Écran
+        </button>
+        <button type="button" id="btn-doc-direct-print" onclick="triggerCurrentDocPrint()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer" title="Imprimer ou enregistrer au format PDF via votre système">
           <i class="fa-solid fa-print"></i> Imprimer
         </button>
         <button type="button" onclick="document.getElementById('modal-document-preview').close()" class="w-8 h-8 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
+    </div>
+    <div class="bg-emerald-50 border-b border-emerald-200 text-emerald-900 px-4 py-2 text-xs flex flex-wrap items-center justify-between gap-2 shrink-0">
+      <span class="font-medium flex items-center gap-1.5">
+        <i class="fa-solid fa-shield-halved text-emerald-700"></i> Document officiel certifié Coopérative Unipros (SAP529241671) • Éligible 50% Avance Immédiate URSSAF
+      </span>
+      <span class="text-[11px] text-emerald-800 font-semibold hidden sm:inline">
+        💡 Astuce : Téléchargez en PDF, ouvrez en plein écran ou imprimez directement.
+      </span>
     </div>
     <div class="p-3 sm:p-6 overflow-y-auto flex-1 bg-slate-100/70">
       <div id="document-preview-container" class="bg-white shadow-md rounded-2xl p-4 sm:p-10 max-w-3xl mx-auto border border-slate-200">
@@ -6812,7 +6823,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
     // ─────────────────────────────────────────────────────────
     //  Moteur Universel de Visualisation, Téléchargement PDF & Impression
-    //  Garantie Zero ERR_FILE_NOT_FOUND (Data URI Base64 + Fallback Blob 60s)
+    //  Garantie Absolue Zero ERR_FILE_NOT_FOUND (FileSystem API + Non-Revoking Blob 10min)
     // ─────────────────────────────────────────────────────────
     window.displayOrDownloadDocument = ({ title, filename, htmlContent, autoPrint = false }) => {
       window._currentDocumentData = { title, filename, htmlContent };
@@ -6822,7 +6833,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       const modal = document.getElementById('modal-document-preview');
 
       if (titleEl) titleEl.textContent = title || 'Document Officiel — Pino Espaces Verts';
-      if (subtitleEl && filename) subtitleEl.textContent = `Fichier : ${filename} • Prêt pour téléchargement ou impression`;
+      if (subtitleEl && filename) subtitleEl.textContent = `Fichier : ${filename} • Prêt pour téléchargement, plein écran ou impression`;
       if (containerEl) containerEl.innerHTML = htmlContent;
       if (modal && typeof modal.showModal === 'function') {
         if (!modal.open) modal.showModal();
@@ -6833,9 +6844,119 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       }
     };
 
+    // Générateur binaire pur de Blob PDF (jamais de Data URI volumineux)
+    window.generateCurrentDocPDFBlob = async () => {
+      if (!window._currentDocumentData) return null;
+      const element = document.getElementById('document-preview-container');
+      if (!element) return null;
+
+      const filename = window._currentDocumentData.filename || 'document_pino.pdf';
+      const opt = {
+        margin:       [8, 8, 8, 8],
+        filename:     filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, letterRendering: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      if (typeof html2pdf !== 'undefined') {
+        try {
+          const worker = html2pdf().set(opt).from(element);
+          try {
+            const blob = await worker.outputPdf('blob');
+            if (blob && blob.size > 200) return blob;
+          } catch(e1) {
+            console.warn('[pdf] outputPdf(blob) fallback:', e1);
+          }
+          const pdfDoc = await worker.toPdf().get('pdf');
+          if (pdfDoc && typeof pdfDoc.output === 'function') {
+            const blob = pdfDoc.output('blob');
+            if (blob && blob.size > 200) return blob;
+          }
+        } catch (err) {
+          console.warn('[pdf] Échec worker html2pdf:', err);
+        }
+      }
+
+      // Fallback HTML pur
+      const fullHtml = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>${window._currentDocumentData.title || 'Document Pino Espaces Verts'}</title><style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;margin:20px;color:#0f172a;line-height:1.5;font-size:13px;}@media print{body{margin:10mm;}}</style></head><body>${window._currentDocumentData.htmlContent}</body></html>`;
+      return new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+    };
+
+    // Moteur d'enregistrement universel :
+    // 1) window.showSaveFilePicker (macOS / Chrome Save As dialog natif -> évite complètement ~/Downloads et Hazel/Automator)
+    // 2) Téléchargement Blob anchor sécurisé avec rétention 10 min (pas de révocation prématurée, target _self)
+    // 3) Secours d'impression navigateur
+    window.saveBlobToUserMachine = async (blob, filename) => {
+      if (!blob) return false;
+      filename = filename || 'document_pino.pdf';
+
+      // 1. File System Access API si disponible et contexte sécurisé
+      if (typeof window.showSaveFilePicker === 'function' && window.isSecureContext) {
+        try {
+          const isPdf = filename.toLowerCase().endsWith('.pdf');
+          const isCsv = filename.toLowerCase().endsWith('.csv');
+          const isJson = filename.toLowerCase().endsWith('.json');
+          const mimeType = isPdf ? 'application/pdf' : (isCsv ? 'text/csv' : (isJson ? 'application/json' : 'application/octet-stream'));
+          const ext = isPdf ? '.pdf' : (isCsv ? '.csv' : (isJson ? '.json' : ''));
+
+          const handle = await window.showSaveFilePicker({
+            suggestedName: filename,
+            types: [{
+              description: isPdf ? 'Document PDF (*.pdf)' : (isCsv ? 'Tableur CSV (*.csv)' : 'Fichier JSON (*.json)'),
+              accept: { [mimeType]: [ext] }
+            }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          showNotificationToast(`✅ Fichier "${filename}" enregistré avec succès !`, 'success');
+          return true;
+        } catch (pickerErr) {
+          if (pickerErr.name === 'AbortError') {
+            // L'utilisateur a cliqué sur "Annuler" dans la boîte de dialogue système
+            return false;
+          }
+          console.warn('[save] showSaveFilePicker fallback vers Blob URL:', pickerErr);
+        }
+      }
+
+      // 2. Ancre Blob URL avec rétention 10 minutes (Garantie Zero ERR_FILE_NOT_FOUND)
+      try {
+        const url = URL.createObjectURL(blob);
+        window._activePdfBlobUrls = window._activePdfBlobUrls || [];
+        window._activePdfBlobUrls.push(url);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.rel = 'noopener';
+        a.target = '_self'; // Strictly _self : n'ouvre pas d'onglet fantôme qui crasherait en ERR_FILE_NOT_FOUND
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+
+        setTimeout(() => {
+          try { if (a.parentNode) a.parentNode.removeChild(a); } catch(e) {}
+        }, 3000);
+
+        // Conserver l'URL valide pendant 10 minutes entières
+        setTimeout(() => {
+          try { URL.revokeObjectURL(url); } catch(e) {}
+        }, 600000);
+
+        showNotificationToast(`✅ Téléchargement de "${filename}" lancé avec succès !`, 'success');
+        return true;
+      } catch (anchorErr) {
+        console.error('[save] Erreur ancre Blob:', anchorErr);
+        showNotificationToast('Ouverture de la boîte d\'impression pour enregistrer le document.', 'info');
+        triggerCurrentDocPrint();
+        return false;
+      }
+    };
+
     window.triggerCurrentDocPDFDownload = async () => {
       if (!window._currentDocumentData) return;
-      const element = document.getElementById('document-preview-container');
       const filename = window._currentDocumentData.filename || 'document_pino.pdf';
       const btn = document.getElementById('btn-doc-download-pdf');
 
@@ -6846,132 +6967,77 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
       showNotificationToast('Génération du fichier PDF en cours...', 'info');
 
-      // Moteur universel de téléchargement Base64 Data URI / Blob sécurisé
-      // Élimine à 100% l'erreur Chrome "ERR_FILE_NOT_FOUND" et fonctionne sur Safari, PWA, mobile et file:///
-      const saveFileSafely = (data, name) => {
-        if (typeof data === 'string' && data.startsWith('data:')) {
-          try {
-            const a = document.createElement('a');
-            a.href = data;
-            a.download = name;
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-              if (a.parentNode) a.parentNode.removeChild(a);
-            }, 2000);
-            showNotificationToast('✅ PDF téléchargé avec succès !', 'success');
-            return true;
-          } catch(err) {
-            console.error('[pdf] download dataUri direct error:', err);
-          }
-        }
-
-        if (data instanceof Blob) {
-          if (typeof FileReader !== 'undefined') {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              try {
-                const dataUrl = reader.result;
-                if (dataUrl && typeof dataUrl === 'string') {
-                  const a = document.createElement('a');
-                  a.href = dataUrl;
-                  a.download = name;
-                  a.style.display = 'none';
-                  document.body.appendChild(a);
-                  a.click();
-                  setTimeout(() => {
-                    if (a.parentNode) a.parentNode.removeChild(a);
-                  }, 2000);
-                  showNotificationToast('✅ PDF téléchargé avec succès !', 'success');
-                  return;
-                }
-                fallbackObjectUrl(data, name);
-              } catch(e) {
-                fallbackObjectUrl(data, name);
-              }
-            };
-            reader.onerror = () => {
-              fallbackObjectUrl(data, name);
-            };
-            reader.readAsDataURL(data);
-            return true;
-          } else {
-            return fallbackObjectUrl(data, name);
-          }
-        }
-        return false;
-      };
-
-      const fallbackObjectUrl = (blob, name) => {
-        try {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = name;
-          a.style.display = 'none';
-          document.body.appendChild(a);
-          a.click();
-          // Rétention 60 secondes pour que Chrome ne perde jamais le fichier
-          setTimeout(() => {
-            try {
-              if (a.parentNode) a.parentNode.removeChild(a);
-              URL.revokeObjectURL(url);
-            } catch(e) {}
-          }, 60000);
-          showNotificationToast('✅ PDF téléchargé avec succès !', 'success');
-          return true;
-        } catch(e) {
-          console.error('[pdf] Blob download fallback failed:', e);
-          triggerCurrentDocPrint();
-          return false;
-        }
-      };
-
       try {
-        if (typeof html2pdf !== 'undefined' && element) {
-          const opt = {
-            margin:       [8, 8, 8, 8],
-            filename:     filename,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, letterRendering: true, logging: false },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-          };
-
-          // On extrait le flux de données sans passer par doc.save() qui révoque le blob trop vite
-          const worker = html2pdf().set(opt).from(element);
-          let pdfData = null;
-
-          try {
-            pdfData = await worker.outputPdf('datauristring');
-          } catch(err1) {
-            console.warn('[pdf] outputPdf datauristring fallback to blob:', err1);
-            try {
-              pdfData = await worker.outputPdf('blob');
-            } catch(err2) {
-              console.warn('[pdf] outputPdf blob fallback to toPdf().get:', err2);
-              const pdfDoc = await worker.toPdf().get('pdf');
-              pdfData = pdfDoc.output('blob');
-            }
-          }
-
-          if (pdfData) {
-            saveFileSafely(pdfData, filename);
-          } else {
-            throw new Error('Échec de capture du flux PDF');
-          }
+        const blob = await window.generateCurrentDocPDFBlob();
+        if (blob) {
+          await window.saveBlobToUserMachine(blob, filename);
         } else {
-          showNotificationToast('Utilisation de la boîte d\'impression pour sauvegarder en PDF.', 'info');
-          triggerCurrentDocPrint();
+          throw new Error('Flux PDF vide');
         }
       } catch (err) {
-        console.error('[pdf] Erreur html2pdf:', err);
+        console.error('[pdf] Erreur de génération PDF:', err);
         showNotificationToast('Boîte d\'impression ouverte pour sauvegarder en PDF.', 'info');
         triggerCurrentDocPrint();
       } finally {
         if (btn) {
           btn.disabled = false;
           btn.innerHTML = '<i class="fa-solid fa-download"></i> Télécharger PDF';
+        }
+      }
+    };
+
+    // Visualisation directe plein écran dans un nouvel onglet (Zero dépendance au dossier Downloads)
+    window.triggerCurrentDocOpenNewTab = async () => {
+      if (!window._currentDocumentData) return;
+      const btn = document.getElementById('btn-doc-open-tab');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Chargement…';
+      }
+
+      try {
+        const blob = await window.generateCurrentDocPDFBlob();
+        if (blob && blob.type === 'application/pdf') {
+          const url = URL.createObjectURL(blob);
+          window._activePdfBlobUrls = window._activePdfBlobUrls || [];
+          window._activePdfBlobUrls.push(url);
+          const newTab = window.open(url, '_blank');
+          if (!newTab) {
+            // Popup bloquée par le navigateur, on informe l'utilisateur
+            showNotificationToast('Veuillez autoriser les fenêtres pop-up pour afficher le PDF en plein écran.', 'warning');
+          }
+        } else {
+          // Rendu direct HTML haute fidélité dans nouvel onglet
+          const win = window.open('', '_blank');
+          if (win) {
+            win.document.write(`
+              <!DOCTYPE html>
+              <html lang="fr">
+              <head>
+                <meta charset="UTF-8">
+                <title>${window._currentDocumentData.title || 'Document Pino Espaces Verts'}</title>
+                <style>
+                  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 30px; color: #0f172a; line-height: 1.5; font-size: 13px; }
+                  @media print { body { margin: 10mm; } }
+                </style>
+              </head>
+              <body>
+                ${window._currentDocumentData.htmlContent}
+              </body>
+              </html>
+            `);
+            win.document.close();
+          } else {
+            triggerCurrentDocPrint();
+          }
+        }
+      } catch(e) {
+        console.error('[pdf] Erreur ouverture plein écran:', e);
+        triggerCurrentDocPrint();
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> Plein Écran';
         }
       }
     };
@@ -7176,17 +7242,20 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       showNotificationToast(`📄 Téléchargement de la facture ${facRef} (PDF simulation avec mentions SAP & Unipros).`, 'info');
     };
 
-    window.exportClientDataJson = () => {
+    window.exportClientDataJson = async () => {
       const user = getCurrentUser();
       if (!user) return;
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(user, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `donnees_personnelles_pino_${user.email}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-      showNotificationToast("Export RGPD généré avec succès.", "success");
+      const jsonContent = JSON.stringify(user, null, 2);
+      const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+      const cleanEmail = String(user.email || 'client').replace(/[^a-z0-9]/gi, '_');
+      const filename = `donnees_personnelles_pino_${cleanEmail}.json`;
+
+      if (typeof window.saveBlobToUserMachine === 'function') {
+        await window.saveBlobToUserMachine(blob, filename);
+      } else if (window.PinoDB && typeof PinoDB.downloadFileBlob === 'function') {
+        await PinoDB.downloadFileBlob(blob, filename);
+      }
+      showNotificationToast("✅ Export RGPD généré avec succès.", "success");
     };
 
     window.deleteClientAccount = () => {

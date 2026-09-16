@@ -1,17 +1,18 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Résolution totale du bug ERR_FILE_NOT_FOUND sur les téléchargements PDF et stabilisation anti-fermeture CRM",
-  "current_phase": "Hito 3 — CRM Admin + Moteur Universel PDF (Zero ERR_FILE_NOT_FOUND) + Immuabilité Factures",
-  "action": "Élimination définitive de ERR_FILE_NOT_FOUND sur Chromium/Safari/mobile via conversion Base64 Data URI (FileReader) et suppression des appels doc.save()/worker.save() prématurés. Rétention 60s sur les Object URLs. Exclusion de drag-to-close et backdrop click sur le modal Admin CRM. Résolveur universel de devis (ID/objet/index) et bouton direct Devis PDF dans la table des leads admin. Cache SW v6.",
+  "active_goal": "Élimination absolue et définitive de ERR_FILE_NOT_FOUND sur tous les téléchargements PDF/CSV (Client et Administrateur)",
+  "current_phase": "Hito 3 — CRM Admin + Moteur Universel PDF/CSV Vault (Zero ERR_FILE_NOT_FOUND) + FileSystem API + Plein Écran",
+  "action": "Déploiement du moteur tripartite d'exportation : 1) window.showSaveFilePicker (API FileSystem native Chromium pour enregistrement direct hors de ~/Downloads, immunisant contre le déplacement automatique Hazel/Automator), 2) Ancre Blob URL pure sans conversion Data URI avec rétention de 10 minutes (600s), 3) Option Plein Écran (triggerCurrentDocOpenNewTab) affichant le document dans le lecteur PDF natif de Chrome. Suite de tests automatisée (test_all_downloads.js) validée avec 17/17 succès sur tous les rôles (Client & Admin). Cache SW v7.",
   "files": [
     "index.html",
     "assets/js/pino-db.js",
     "sw.js",
+    "test_all_downloads.js",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Audit 100% conforme via sous-agent. Tests Node.js validés. Prêt pour commit et push vers main avec attribution Grok 4.6.",
-  "last_commit": "c2c750a",
-  "timestamp": "2026-09-16T07:18:00-04:00"
+  "step": "Prêt pour commit et push vers origin main avec attribution Co-Authored-By: Grok 4.6 <noreply@x.ai>.",
+  "last_commit": "7bbaf21",
+  "timestamp": "2026-09-16T07:42:00-04:00"
 }

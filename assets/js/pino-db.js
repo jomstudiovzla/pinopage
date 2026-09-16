@@ -750,81 +750,93 @@
    *  EXPORT UTIL — Descarga segura de Blob / Data URI en el navegador
    *  Totalmente inmune a ERR_FILE_NOT_FOUND (Chrome, Safari, PWA, file:///, localhost)
    * ───────────────────────────────────────────────────────── */
-  function downloadFileBlob(blob, filename) {
-    if (!blob) return false;
+  async function downloadFileBlob(blobOrDataUri, filename) {
+    if (!blobOrDataUri) return false;
     filename = filename || 'document_pino.pdf';
 
-    // 1. Si ya es una Data URI Base64
-    if (typeof blob === 'string' && blob.startsWith('data:')) {
+    let blob = blobOrDataUri;
+
+    // 1. Si se recibe una Data URI Base64, convertirla a Blob binario puro
+    if (typeof blobOrDataUri === 'string' && blobOrDataUri.startsWith('data:')) {
       try {
-        const a = document.createElement('a');
-        a.href = blob;
-        a.download = filename;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-          if (a.parentNode) a.parentNode.removeChild(a);
-        }, 2000);
+        const commaIdx = blobOrDataUri.indexOf(',');
+        const header = blobOrDataUri.slice(0, commaIdx);
+        const base64 = blobOrDataUri.slice(commaIdx + 1);
+        const mime = (header.match(/:(.*?);/) || [])[1] || 'application/octet-stream';
+        const binStr = atob(base64);
+        const len = binStr.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binStr.charCodeAt(i);
+        }
+        blob = new Blob([bytes], { type: mime });
+      } catch (e) {
+        console.warn('[PinoDB] Erreur conversion dataUri vers Blob:', e);
+      }
+    }
+
+    // 2. Si la ventana principal tiene el motor maestro saveBlobToUserMachine, delegar
+    if (typeof window !== 'undefined' && typeof window.saveBlobToUserMachine === 'function' && blob instanceof Blob) {
+      try {
+        return await window.saveBlobToUserMachine(blob, filename);
+      } catch(e) {}
+    }
+
+    // 3. Soporte nativo para File System Access API (Cuadro Guardar como... nativo)
+    if (typeof window !== 'undefined' && typeof window.showSaveFilePicker === 'function' && window.isSecureContext && blob instanceof Blob) {
+      try {
+        const isPdf = filename.toLowerCase().endsWith('.pdf');
+        const isCsv = filename.toLowerCase().endsWith('.csv');
+        const isJson = filename.toLowerCase().endsWith('.json');
+        const mimeType = isPdf ? 'application/pdf' : (isCsv ? 'text/csv' : (isJson ? 'application/json' : 'application/octet-stream'));
+        const ext = isPdf ? '.pdf' : (isCsv ? '.csv' : (isJson ? '.json' : ''));
+
+        const handle = await window.showSaveFilePicker({
+          suggestedName: filename,
+          types: [{
+            description: isPdf ? 'Document PDF (*.pdf)' : (isCsv ? 'Tableur CSV (*.csv)' : 'Fichier JSON (*.json)'),
+            accept: { [mimeType]: [ext] }
+          }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
         return true;
       } catch (err) {
-        console.error('[PinoDB] download dataUri error:', err);
+        if (err.name === 'AbortError') return false;
       }
     }
 
-    // 2. Si es un Blob, convertir a Data URI mediante FileReader para evitar cualquier desincronización de memoria en Chrome
-    if (typeof FileReader !== 'undefined' && blob instanceof Blob) {
-      try {
-        const reader = new FileReader();
-        reader.onloadend = function() {
-          try {
-            const dataUrl = reader.result;
-            if (dataUrl && typeof dataUrl === 'string') {
-              const a = document.createElement('a');
-              a.href = dataUrl;
-              a.download = filename;
-              a.style.display = 'none';
-              document.body.appendChild(a);
-              a.click();
-              setTimeout(() => {
-                if (a.parentNode) a.parentNode.removeChild(a);
-              }, 2000);
-              return;
-            }
-            fallbackObjectUrl(blob, filename);
-          } catch(e) {
-            fallbackObjectUrl(blob, filename);
-          }
-        };
-        reader.onerror = function() {
-          fallbackObjectUrl(blob, filename);
-        };
-        reader.readAsDataURL(blob);
-        return true;
-      } catch (e) {
-        return fallbackObjectUrl(blob, filename);
-      }
-    }
-
+    // 4. Descarga estándar mediante Blob URL con 10 minutos de retención
     return fallbackObjectUrl(blob, filename);
   }
 
   function fallbackObjectUrl(blob, filename) {
     try {
       const url = URL.createObjectURL(blob);
+      if (typeof window !== 'undefined') {
+        window._activePinoBlobUrls = window._activePinoBlobUrls || [];
+        window._activePinoBlobUrls.push(url);
+      }
+
       const a = document.createElement('a');
       a.href = url;
       a.download = filename;
+      a.rel = 'noopener';
+      a.target = '_self'; // Strictly _self : evita pestañas fantasma con ERR_FILE_NOT_FOUND
       a.style.display = 'none';
       document.body.appendChild(a);
       a.click();
-      // Retener durante 60 segundos completos para que el gestor de descargas de Chrome nunca encuentre el objeto revocado
+
       setTimeout(() => {
-        try {
-          if (a.parentNode) a.parentNode.removeChild(a);
-          URL.revokeObjectURL(url);
-        } catch(e) {}
-      }, 60000);
+        try { if (a.parentNode) a.parentNode.removeChild(a); } catch(e) {}
+      }, 3000);
+
+      // Retener durante 10 minutos completos (600,000 ms) para que el gestor de Chrome jamás pierda el archivo
+      setTimeout(() => {
+        try { URL.revokeObjectURL(url); } catch(e) {}
+      }, 600000);
+
       return true;
     } catch (err) {
       console.error('[PinoDB] fallbackObjectUrl error:', err);
