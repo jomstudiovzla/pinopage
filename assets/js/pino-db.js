@@ -55,7 +55,23 @@
     if (db) {
       try {
         const ref = db.ref('leads').push();
-        await ref.set({ ...payload, id: ref.key });
+        const fullLead = { ...payload, id: ref.key };
+        await ref.set(fullLead);
+
+        // Partitionnement dédié par client dans clients_records/{sanitizedEmail}/quotes/{leadId}
+        const rawEmail = data.email || '';
+        const sanitizedEmail = rawEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+        if (sanitizedEmail) {
+          await db.ref(`clients_records/${sanitizedEmail}/quotes/${ref.key}`).set(fullLead).catch(() => {});
+          await db.ref(`clients_records/${sanitizedEmail}/profile`).update({
+            fullName: data.name || data.fullName || '',
+            email: rawEmail,
+            phone: data.phone || '',
+            commune: data.commune || '',
+            updated_at: new Date().toISOString()
+          }).catch(() => {});
+        }
+
         return { ok: true, id: ref.key };
       } catch (err) {
         log('saveLead:rtdb', err);
@@ -176,6 +192,13 @@
         const rawEmail = responseData.client_email || '';
         const sanitizedEmail = rawEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
         if (sanitizedEmail) {
+          // Mettre à jour dans la partition dédiée du client
+          await db.ref(`clients_records/${sanitizedEmail}/quotes/${leadId}`).update({
+            status: 'Devis envoyé',
+            response: payload,
+            updated_at: new Date().toISOString()
+          }).catch(() => {});
+
           const notifId = 'notif_' + Date.now();
           await db.ref('client_notifications/' + sanitizedEmail + '/' + notifId).set({
             id: notifId,
@@ -231,6 +254,18 @@
           acceptance: acceptancePayload,
           updated_at: timestamp
         });
+
+        // 1b. Mettre à jour dans la partition dédiée du client
+        const rawClientEmail = clientDetails.email || '';
+        const sanitizedClientEmail = rawClientEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+        if (sanitizedClientEmail) {
+          await db.ref(`clients_records/${sanitizedClientEmail}/quotes/${leadId}`).update({
+            status: 'Devis accepté',
+            accepted_at: timestamp,
+            acceptance: acceptancePayload,
+            updated_at: timestamp
+          }).catch(() => {});
+        }
 
         // 2. Mettre à jour dans /quotes_responses/{leadId} si existant
         await db.ref('quotes_responses/' + leadId).update({
@@ -363,22 +398,38 @@
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  LEADS — Obtener solicitudes de un cliente específico (con merge y listener)
+   *  LEADS — Obtener solicitudes de un cliente específico (desde partition dédiée clients_records)
    * ───────────────────────────────────────────────────────── */
   async function fetchClientQuotes(clientEmail) {
     if (!clientEmail) return { ok: false, data: [] };
     const normEmail = clientEmail.trim().toLowerCase();
+    const sanitizedEmail = normEmail.replace(/[.#$\[\]]/g, '_');
 
     let fbMatches = [];
     const db = rtdb();
     if (db) {
       try {
-        const snap = await db.ref('leads').once('value');
-        const val = snap.val() || {};
-        fbMatches = Object.keys(val)
-          .map(k => ({ id: k, ...val[k] }))
-          .filter(lead => (lead.email || '').trim().toLowerCase() === normEmail)
+        // 1. Priorité absolue : partition dédiée clients_records
+        const snapPartition = await db.ref(`clients_records/${sanitizedEmail}/quotes`).once('value');
+        const partitionVal = snapPartition.val() || {};
+        fbMatches = Object.keys(partitionVal)
+          .map(k => ({ id: k, ...partitionVal[k] }))
           .reverse();
+
+        // 2. Fallback / Rétrocompatibilité : si partition vide, interroger /leads global et rétro-migrer
+        if (fbMatches.length === 0) {
+          const snapAll = await db.ref('leads').once('value');
+          const valAll = snapAll.val() || {};
+          fbMatches = Object.keys(valAll)
+            .map(k => ({ id: k, ...valAll[k] }))
+            .filter(lead => (lead.email || '').trim().toLowerCase() === normEmail)
+            .reverse();
+
+          // Sauvegarder dans la partition pour les accès futurs
+          for (const quote of fbMatches) {
+            db.ref(`clients_records/${sanitizedEmail}/quotes/${quote.id}`).set(quote).catch(() => {});
+          }
+        }
       } catch (err) {
         log('fetchClientQuotes:rtdb', err);
       }
@@ -400,20 +451,20 @@
   function listenClientQuotes(clientEmail, callback) {
     if (!clientEmail || typeof callback !== 'function') return () => {};
     const normEmail = clientEmail.trim().toLowerCase();
+    const sanitizedEmail = normEmail.replace(/[.#$\[\]]/g, '_');
     const db = rtdb();
     if (!db) return () => {};
 
-    const leadsRef = db.ref('leads');
+    const partitionRef = db.ref(`clients_records/${sanitizedEmail}/quotes`);
     const listener = (snap) => {
       const val = snap.val() || {};
       const matches = Object.keys(val)
         .map(k => ({ id: k, ...val[k] }))
-        .filter(lead => (lead.email || '').trim().toLowerCase() === normEmail)
         .reverse();
       callback(matches);
     };
-    leadsRef.on('value', listener);
-    return () => leadsRef.off('value', listener);
+    partitionRef.on('value', listener);
+    return () => partitionRef.off('value', listener);
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -642,12 +693,22 @@
     if (db) {
       try {
         const ref = db.ref('jobs').push();
-        await ref.set({ ...payload, id: ref.key });
+        const fullJob = { ...payload, id: ref.key };
+        await ref.set(fullJob);
 
-        // Si le client a un email, créer une notification in-app dans son espace
+        // Partitionnement dédié par client dans clients_records/{sanitizedEmail}/invoices/{jobId}
         const rawEmail = data.clientEmail || '';
         const sanitizedEmail = rawEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
         if (sanitizedEmail) {
+          await db.ref(`clients_records/${sanitizedEmail}/invoices/${ref.key}`).set(fullJob).catch(() => {});
+          await db.ref(`clients_records/${sanitizedEmail}/profile`).update({
+            fullName: data.clientName || '',
+            email: rawEmail,
+            phone: data.clientPhone || '',
+            commune: data.clientCommune || '',
+            updated_at: new Date().toISOString()
+          }).catch(() => {});
+
           const notifId = 'notif_fac_' + Date.now();
           const charged = parseFloat(data.amountCharged) || 0;
           const isUnipros = (data.paymentMethod || '').toLowerCase() === 'unipros';
@@ -720,13 +781,31 @@
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  JOBS CRM — Actualizar trabajo
+   *  JOBS CRM — Actualizar trabajo (avec propagation partition client)
    * ───────────────────────────────────────────────────────── */
   async function updateJob(jobId, patch) {
     const db = rtdb();
     if (db) {
       try {
         await db.ref('jobs/' + jobId).update({ ...patch, updated_at: new Date().toISOString() });
+
+        // Propagation automatique dans la partition du client
+        try {
+          let clientEmail = patch.client_email || patch.clientEmail || '';
+          if (!clientEmail) {
+            const snap = await db.ref('jobs/' + jobId).once('value');
+            const curJob = snap.val() || {};
+            clientEmail = curJob.client_email || curJob.clientEmail || '';
+          }
+          const sanitizedEmail = (clientEmail || '').trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+          if (sanitizedEmail) {
+            await db.ref(`clients_records/${sanitizedEmail}/invoices/${jobId}`).update({
+              ...patch,
+              updated_at: new Date().toISOString()
+            }).catch(() => {});
+          }
+        } catch(e) {}
+
         return { ok: true };
       } catch (err) {
         log('updateJob:rtdb', err);
@@ -744,6 +823,129 @@
     }
 
     return { ok: false };
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  JOBS / FACTURES — Obtener factures d'un client spécifique (partition clients_records)
+   * ───────────────────────────────────────────────────────── */
+  async function fetchClientInvoices(clientEmail) {
+    if (!clientEmail) return { ok: false, data: [] };
+    const normEmail = clientEmail.trim().toLowerCase();
+    const sanitizedEmail = normEmail.replace(/[.#$\[\]]/g, '_');
+
+    let fbMatches = [];
+    const db = rtdb();
+    if (db) {
+      try {
+        // 1. Priorité absolue : partition dédiée clients_records
+        const snapPartition = await db.ref(`clients_records/${sanitizedEmail}/invoices`).once('value');
+        const partitionVal = snapPartition.val() || {};
+        fbMatches = Object.keys(partitionVal)
+          .map(k => ({ id: k, ...partitionVal[k] }))
+          .reverse();
+
+        // 2. Fallback / Rétrocompatibilité : si partition vide, interroger /jobs global et rétro-migrer
+        if (fbMatches.length === 0) {
+          const snapAll = await db.ref('jobs').once('value');
+          const valAll = snapAll.val() || {};
+          fbMatches = Object.keys(valAll)
+            .map(k => ({ id: k, ...valAll[k] }))
+            .filter(j => (j.client_email || '').trim().toLowerCase() === normEmail)
+            .reverse();
+
+          for (const job of fbMatches) {
+            db.ref(`clients_records/${sanitizedEmail}/invoices/${job.id}`).set(job).catch(() => {});
+          }
+        }
+      } catch (err) {
+        log('fetchClientInvoices:rtdb', err);
+      }
+    }
+
+    let localMatches = [];
+    try {
+      const local = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+      localMatches = local.filter(j => (j.client_email || '').trim().toLowerCase() === normEmail);
+    } catch(e) {}
+
+    const fbIds = new Set(fbMatches.map(j => j.id));
+    const extraLocal = localMatches.filter(j => !fbIds.has(j.id));
+    const allMatches = [...fbMatches, ...extraLocal];
+
+    return { ok: true, data: allMatches };
+  }
+
+  function listenClientInvoices(clientEmail, callback) {
+    if (!clientEmail || typeof callback !== 'function') return () => {};
+    const normEmail = clientEmail.trim().toLowerCase();
+    const sanitizedEmail = normEmail.replace(/[.#$\[\]]/g, '_');
+    const db = rtdb();
+    if (!db) return () => {};
+
+    const partitionRef = db.ref(`clients_records/${sanitizedEmail}/invoices`);
+    const listener = (snap) => {
+      const val = snap.val() || {};
+      const matches = Object.keys(val)
+        .map(k => ({ id: k, ...val[k] }))
+        .reverse();
+      callback(matches);
+    };
+    partitionRef.on('value', listener);
+    return () => partitionRef.off('value', listener);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  MIGRATION & PARTITIONNEMENT AUTOMATIQUE
+   *  Ventile automatiquement tous les leads et factures existants
+   *  dans clients_records/{sanitizedEmail}/...
+   * ───────────────────────────────────────────────────────── */
+  async function syncExistingRecordsToClientPartitions() {
+    const db = rtdb();
+    if (!db) return { ok: false, synced: 0 };
+    let syncCount = 0;
+    try {
+      // 1. Partitionner les leads existants
+      const leadsSnap = await db.ref('leads').once('value');
+      const leadsVal = leadsSnap.val() || {};
+      for (const [leadId, lead] of Object.entries(leadsVal)) {
+        const rawEmail = lead.email || '';
+        const sanitized = rawEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+        if (sanitized) {
+          await db.ref(`clients_records/${sanitized}/quotes/${leadId}`).set({ ...lead, id: leadId }).catch(() => {});
+          await db.ref(`clients_records/${sanitized}/profile`).update({
+            fullName: lead.full_name || lead.name || '',
+            email: rawEmail,
+            phone: lead.phone || '',
+            commune: lead.commune || '',
+            updated_at: new Date().toISOString()
+          }).catch(() => {});
+          syncCount++;
+        }
+      }
+
+      // 2. Partitionner les factures / jobs existants
+      const jobsSnap = await db.ref('jobs').once('value');
+      const jobsVal = jobsSnap.val() || {};
+      for (const [jobId, job] of Object.entries(jobsVal)) {
+        const rawEmail = job.client_email || job.clientEmail || '';
+        const sanitized = rawEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+        if (sanitized) {
+          await db.ref(`clients_records/${sanitized}/invoices/${jobId}`).set({ ...job, id: jobId }).catch(() => {});
+          await db.ref(`clients_records/${sanitized}/profile`).update({
+            fullName: job.client_name || '',
+            email: rawEmail,
+            phone: job.client_phone || '',
+            commune: job.client_commune || '',
+            updated_at: new Date().toISOString()
+          }).catch(() => {});
+          syncCount++;
+        }
+      }
+      return { ok: true, synced: syncCount };
+    } catch(err) {
+      log('syncExistingRecordsToClientPartitions', err);
+      return { ok: false, error: err.message };
+    }
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -1557,6 +1759,9 @@
     repairLead,
     listenClientNotifications,
     listenClientQuotes,
+    fetchClientInvoices,
+    listenClientInvoices,
+    syncExistingRecordsToClientPartitions,
     fetchClientNotifications,
     markNotificationRead,
     savePlatformLead,

@@ -1,18 +1,20 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Élimination absolue et définitive de ERR_FILE_NOT_FOUND sur tous les téléchargements PDF/CSV (Client et Administrateur)",
-  "current_phase": "Hito 3 — CRM Admin + Moteur Universel PDF/CSV Vault (Zero ERR_FILE_NOT_FOUND) + FileSystem API + Plein Écran",
-  "action": "Déploiement du moteur tripartite d'exportation : 1) window.showSaveFilePicker (API FileSystem native Chromium pour enregistrement direct hors de ~/Downloads, immunisant contre le déplacement automatique Hazel/Automator), 2) Ancre Blob URL pure sans conversion Data URI avec rétention de 10 minutes (600s), 3) Option Plein Écran (triggerCurrentDocOpenNewTab) affichant le document dans le lecteur PDF natif de Chrome. Suite de tests automatisée (test_all_downloads.js) validée avec 17/17 succès sur tous les rôles (Client & Admin). Cache SW v7.",
+  "active_goal": "Ségrégation stricte des données par client (Firebase RTDB clients_records) et dossiers clients unifiés dans le CRM Admin",
+  "current_phase": "Hito 3 — Partitionnement par Client (clients_records) + Ségrégation Espace Client + Sélecteur de Dossier Client CRM Admin",
+  "action": "Implémentation complète du partitionnement par client : 1) Structure dédiée clients_records/{sanitizedEmail}/quotes et invoices avec double écriture et mise à jour de profil, 2) Espace Client strictement isolé interrogeant fetchClientInvoices et fetchClientQuotes sur sa partition, 3) Panneau d'administration doté de sélecteurs de dossier client dans l'onglet Factures (#adm-factures-client-filter) avec bannière d'indicateurs financiers dédiée (#adm-factures-client-dossier-card) et dans l'onglet Devis/Leads (#adm-leads-client-filter), 4) Raccourcis 1-clic [🧾 Factures] et [📋 Devis] par client dans la liste des utilisateurs, 5) Script de migration automatique syncExistingRecordsToClientPartitions. Suite de tests automatisée test_client_partitioning.js (12/12 succès) et test_all_downloads.js (17/17 succès). Cache PWA v8.",
   "files": [
-    "index.html",
+    "database.rules.json",
     "assets/js/pino-db.js",
+    "index.html",
     "sw.js",
+    "test_client_partitioning.js",
     "test_all_downloads.js",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
   "step": "Prêt pour commit et push vers origin main avec attribution Co-Authored-By: Grok 4.6 <noreply@x.ai>.",
-  "last_commit": "7bbaf21",
-  "timestamp": "2026-09-16T07:42:00-04:00"
+  "last_commit": "04b4551",
+  "timestamp": "2026-09-16T08:00:00-04:00"
 }

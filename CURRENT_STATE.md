@@ -179,5 +179,38 @@
     3. **Suite de Tests Automatisée (`test_all_downloads.js`)** :
        - Exécution automatisée sous Node.js 26 : **17 tests passés avec succès sur 17 (100% de réussite)**.
        - Validation du comportement FileSystem, du repli Anchor Blob `_self`, de la persistance mémoire et de la conversion automatique des Data URIs résiduelles.
-    4. **Mise à Jour du Cache PWA** :
-       - Service Worker mis à jour vers le cache `pino-ev-v7-pdf-universal-vault` dans [`sw.js`](file:///Users/macbook/Documents/Antigravity/PINO/new/sw.js).
+     4. **Mise à Jour du Cache PWA** :
+        - Service Worker mis à jour vers le cache `pino-ev-v7-pdf-universal-vault` dans [`sw.js`](file:///Users/macbook/Documents/Antigravity/PINO/new/sw.js).
+
+- [x] **Ségrégation Stricte des Données par Client (`clients_records`) & Dossiers Clients dans le CRM Admin (100% OPÉRATIONNEL & AUDITÉ)** :
+    1. **Partitionnement Dédié dans Firebase Realtime Database** :
+       - Création de la branche racine `/clients_records/{sanitizedEmail}/` partitionnée de manière étanche :
+         - `quotes/{leadId}` : Devis, chiffrage et acceptation du client.
+         - `invoices/{jobId}` : Factures émises, numéros correlatifs, montants TTC, restant dû et acomptes.
+         - `profile` : Nom, prénom, téléphone, commune et date de mise à jour.
+       - Double écriture automatique (*Dual-Write*) dans `assets/js/pino-db.js` :
+         - `saveLead` : écrit dans `/leads` (vue consolidée) ET `/clients_records/{sanitizedEmail}/quotes`.
+         - `saveJob` : écrit dans `/jobs` ET `/clients_records/{sanitizedEmail}/invoices`.
+         - `updateJob` : propage les mises à jour (ex: paiement, annulation) dans `/clients_records/{sanitizedEmail}/invoices`.
+         - `saveLeadResponse` : met à jour le devis chiffré dans `/clients_records/{sanitizedEmail}/quotes`.
+         - `acceptQuote` : enregistre l'accord 1-clic du client dans `/clients_records/{sanitizedEmail}/quotes`.
+       - Rétro-compatibilité & Auto-Migration (`syncExistingRecordsToClientPartitions`) :
+         - Ventile automatiquement tous les enregistrements existants de `/leads` et `/jobs` dans leurs partitions clients respectives en tâche de fond dès l'ouverture du CRM.
+    2. **Isolation Hermétique de l'Espace Client** :
+       - `renderClientInvoices(email)` interroge exclusivement `PinoDB.fetchClientInvoices(email)` sur sa partition `/clients_records/{sanitizedEmail}/invoices`.
+       - `renderClientQuotes(email)` interroge exclusivement `PinoDB.fetchClientQuotes(email)` sur sa partition `/clients_records/{sanitizedEmail}/quotes`.
+       - Sécurité fiscale : Aucun bouton d'annulation ou modification n'existe dans le portail client (conforme au Code de commerce L. 123-22 & CGI art. 199 sexdecies).
+    3. **Gestion par Dossier Client dans le CRM Administratif (Andrés Pino)** :
+       - **Onglet Factures (`#adm-content-factures`)** :
+         - Sélecteur dynamique `#adm-factures-client-filter` permettant de basculer entre *"Tous les clients réunis (Vue globale consolidée)"* et chaque dossier client individuel.
+         - Fiche synthétique *"Dossier Client Actif"* (`#adm-factures-client-dossier-card`) affichant instantanément les coordonnées, le total facturé TTC, le montant réglé et le solde restant dû du client sélectionné.
+       - **Onglet Devis & Prospects (`#adm-content-leads`)** :
+         - Sélecteur dynamique `#adm-leads-client-filter` pour filtrer instantanément les devis par prospect ou client.
+       - **Onglet Clients & Utilisateurs (`renderAdminUsers`)** :
+         - Ajout de raccourcis directs par ligne : `[ 🧾 Factures ]` (ouvre directement l'onglet factures pré-filtré sur ce client) et `[ 📋 Devis ]` (ouvre l'onglet devis pré-filtré sur ce client).
+    4. **Sécurité Firebase (`database.rules.json`)** :
+       - Règle `clients_records` configurée : accès complet root pour Andrés Pino (`pino.spacesverts@gmail.com` et `pino.espacesverts@gmail.com`), et accès isolé pour chaque client authentifié.
+    5. **Tests & Validation Automatisée** :
+       - Suite dédiée `test_client_partitioning.js` : **12 tests passés sur 12 (100% de réussite)**.
+       - Suite de téléchargements `test_all_downloads.js` : **17 tests passés sur 17 (100% de réussite)**.
+       - Cache Service Worker incrémenté à `pino-ev-v8-clients-partition-crm`.
