@@ -616,125 +616,27 @@
       </div>
     </div>
 
-    <!-- Tabs: Connexion vs Inscription -->
-    <div class="flex border-b border-slate-200 bg-slate-50 text-xs font-bold">
-      <button type="button" id="tab-auth-login" onclick="switchAuthTab('login')" class="flex-1 py-3 px-4 text-center border-b-2 border-emerald-700 text-emerald-800 bg-white transition-all">
-        <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Connexion
+    <div class="p-6 sm:p-8 space-y-5">
+      <p class="text-sm text-slate-600 text-center leading-relaxed">
+        Un seul bouton. Google vous demandera si vous souhaitez continuer avec
+        <strong>Pino Espaces Verts</strong>. Aucun e-mail n'est saisi ici.
+      </p>
+      <button type="button" onclick="handleGoogleSignIn()" class="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-white hover:bg-slate-50 text-slate-800 font-bold rounded-2xl border border-slate-300 shadow-sm hover:shadow text-sm cursor-pointer">
+        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <span id="google-auth-btn-label">Continuer avec Google</span>
       </button>
-      <button type="button" id="tab-auth-register" onclick="switchAuthTab('register')" class="flex-1 py-3 px-4 text-center text-slate-500 hover:text-slate-800 transition-all">
-        <i class="fa-solid fa-user-plus mr-1.5"></i> Nouveau Client (Créer compte)
-      </button>
-    </div>
-
-    <div class="p-6">
-      <!-- Bouton Google Universel -->
-      <div class="mb-4">
-        <button type="button" onclick="handleGoogleSignIn()" class="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-slate-50 text-slate-800 font-bold rounded-xl border border-slate-300 shadow-xs hover:shadow transition-all text-xs sm:text-sm cursor-pointer group">
-          <svg class="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          <span id="google-auth-btn-label">Continuer avec Google</span>
-        </button>
-        <p class="mt-2 text-[10px] text-slate-500 leading-relaxed text-center">
-          En continuant avec Google, vous acceptez les
-          <button type="button" onclick="document.getElementById('cgv-modal').showModal()" class="underline font-bold text-emerald-800">CGV</button>
-          et la
-          <button type="button" onclick="document.getElementById('privacy-modal').showModal()" class="underline font-bold text-emerald-800">Politique de Confidentialité (RGPD)</button>.
-        </p>
-
-        <div class="relative flex py-2 items-center">
-          <div class="flex-grow border-t border-slate-200"></div>
-          <span class="flex-shrink mx-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">ou par e-mail</span>
-          <div class="flex-grow border-t border-slate-200"></div>
-        </div>
-
-
-      </div>
-
-      <!-- Connexion Form -->
-      <form id="auth-login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1" for="login-email">Adresse e-mail</label>
-          <div class="relative">
-            <i class="fa-solid fa-envelope absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
-            <input type="email" id="login-email" required placeholder="nom@exemple.fr ou gérant" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1" for="login-password">Mot de passe</label>
-          <div class="relative">
-            <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
-            <input type="password" id="login-password" required placeholder="••••••••" class="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
-            <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 text-xs">
-              <i class="fa-regular fa-eye"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Feedback error message -->
-        <div id="login-error-msg" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-medium flex items-center gap-2">
-          <i class="fa-solid fa-triangle-exclamation text-sm"></i>
-          <span id="login-error-text">Identifiants incorrects. Veuillez vérifier votre adresse e-mail et mot de passe.</span>
-        </div>
-
-        <div class="flex items-center justify-between text-xs text-slate-600">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" id="remember-me" checked class="rounded text-emerald-700 focus:ring-emerald-600" />
-            <span>Se souvenir de moi</span>
-          </label>
-          <span class="text-[11px] text-slate-400">Accès sécurisé SSL</span>
-        </div>
-
-        <button type="submit" id="btn-login-submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer">
-          <span>Se connecter</span> <i class="fa-solid fa-arrow-right"></i>
-        </button>
-
-
-      </form>
-
-      <!-- Inscription Form -->
-      <form id="auth-register-form" onsubmit="handleRegisterSubmit(event)" class="space-y-3.5 hidden">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-fullname">Nom et Prénom</label>
-          <input type="text" id="reg-fullname" required placeholder="Ex: Jean Martin" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-email">Adresse e-mail</label>
-          <input type="email" id="reg-email" required placeholder="votre@email.fr" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-phone">Téléphone</label>
-            <input type="tel" id="reg-phone" placeholder="06 12 34 56 78" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-commune">Commune / CP</label>
-            <input type="text" id="reg-commune" placeholder="33000 Bordeaux" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
-          </div>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-password">Mot de passe</label>
-          <input type="password" id="reg-password" required minlength="6" placeholder="Au moins 6 caractères" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium" />
-        </div>
-
-        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 flex items-start gap-2">
-          <i class="fa-solid fa-gift text-amber-600 text-sm mt-0.5"></i>
-          <span><strong>Bonus Inscription :</strong> Votre code personnel de bienvenue de <strong>-20%</strong> sera généré automatiquement et disponible immédiatement dans votre espace client.</span>
-        </div>
-
-        <label class="flex items-start gap-2 text-xxs text-slate-600 cursor-pointer">
-          <input type="checkbox" required class="mt-0.5 rounded text-emerald-700 focus:ring-emerald-600" />
-          <span>J'accepte les conditions générales et la politique de confidentialité (RGPD).</span>
-        </label>
-
-        <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer">
-          <i class="fa-solid fa-user-check"></i> Créer mon Espace Client
-        </button>
-      </form>
+      <p class="text-[11px] text-slate-500 leading-relaxed text-center">
+        En continuant, vous acceptez les
+        <button type="button" onclick="document.getElementById('cgv-modal').showModal()" class="underline font-bold text-emerald-800">CGV</button>
+        et la
+        <button type="button" onclick="document.getElementById('privacy-modal').showModal()" class="underline font-bold text-emerald-800">Politique de Confidentialité (RGPD)</button>.
+        Votre code −20&nbsp;% est créé uniquement après une session Google validée.
+      </p>
     </div>
   </dialog>
 
@@ -758,10 +660,10 @@
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="font-serif text-2xl font-bold" id="client-display-name">Sophie Dupont</h3>
-              <span class="bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">Particulier SAP</span>
+              <h3 class="font-serif text-2xl font-bold" id="client-display-name">Client</h3>
+              <span class="bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">Compte Google</span>
             </div>
-            <p class="text-xs text-white/75" id="client-display-email">sophie.dupont@bordeaux.fr • <span id="client-display-commune">Bordeaux (33000)</span></p>
+            <p class="text-xs text-white/75" id="client-display-email">— • <span id="client-display-commune">—</span></p>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -785,10 +687,10 @@
             <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs"><i class="fa-solid fa-file-invoice"></i></span>
           </div>
           <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-3xl font-extrabold text-brand-green" id="client-factures-count">2</span>
-            <span class="text-xxs text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">50% déduit via Unipros</span>
+            <span class="text-3xl font-extrabold text-brand-green" id="client-factures-count">0</span>
+            <span class="text-xxs text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">Unipros</span>
           </div>
-          <p class="text-[11px] text-slate-500 mt-1">2 factures acquittées avec attestation</p>
+          <p class="text-[11px] text-slate-500 mt-1">Aucune facture pour le moment</p>
         </div>
 
         <!-- Card 2: Dossiers -->
@@ -798,10 +700,10 @@
             <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs"><i class="fa-solid fa-folder-open"></i></span>
           </div>
           <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-3xl font-extrabold text-brand-green" id="client-dossiers-count">2</span>
-            <span class="text-xxs text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-full">1 actif</span>
+            <span class="text-3xl font-extrabold text-brand-green" id="client-dossiers-count">0</span>
+            <span class="text-xxs text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-full">—</span>
           </div>
-          <p class="text-[11px] text-slate-500 mt-1">Historique des travaux et suivi du jardin</p>
+          <p class="text-[11px] text-slate-500 mt-1">Aucun dossier pour le moment</p>
         </div>
 
         <!-- Card 3: Avantage 20% -->
@@ -811,10 +713,10 @@
             <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-xs"><i class="fa-solid fa-tag"></i></span>
           </div>
           <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-xl font-mono font-extrabold text-brand-vivid" id="client-promo-code">PINO-2026</span>
-            <span class="text-xxs text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full">-20% disponible</span>
+            <span class="text-xl font-mono font-extrabold text-brand-vivid" id="client-promo-code">—</span>
+            <span class="text-xxs text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full">après connexion</span>
           </div>
-          <p class="text-[11px] text-slate-500 mt-1">Utilisable sur votre prochaine réservation</p>
+          <p class="text-[11px] text-slate-500 mt-1">Code unique créé par Google, un par compte</p>
         </div>
       </div>
     </div>
@@ -3966,8 +3868,9 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         const { error } = await sb.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: window.PINO_SITE_URL || (window.location.origin + window.location.pathname),
-            queryParams: { prompt: 'select_account' }
+            redirectTo: window.PINO_SITE_URL || (window.location.origin + '/'),
+            skipBrowserRedirect: false,
+            queryParams: { prompt: 'select_account', access_type: 'online' }
           }
         });
         if (error) throw error;

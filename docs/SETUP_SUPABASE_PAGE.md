@@ -2,7 +2,7 @@
 
 URL ya cableada en `assets/js/supabase-config.js`:
 
-`https://ziccgwonregaatuijyzb.supabase.co`
+`https://ziccgwonregaatujyyzb.supabase.co`
 
 Región actual del proyecto: **West EU (Ireland) `eu-west-1`**. No es París; no se cambia a menos que se cree otro proyecto.
 
@@ -26,8 +26,12 @@ Authentication → URL Configuration:
   - `http://127.0.0.1:8080/`
   - `http://localhost:8080/`
 
-Authentication → Providers → Google: Client ID + Secret de Google Cloud.  
-Google Cloud → Authorized JavaScript origins: `https://jomstudiovzla.github.io`
+Authentication → Providers → Google: ON, pegar Client ID + Secret.
+
+En Google Cloud → APIs y servicios → Credenciales → ID de cliente OAuth:
+
+- Orígenes JavaScript: `https://jomstudiovzla.github.io` y `http://127.0.0.1:8080`
+- URI de redirección: `https://ziccgwonregaatujyyzb.supabase.co/auth/v1/callback`
 
 ## 3. SQL
 

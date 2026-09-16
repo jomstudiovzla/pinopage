@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v2-header';
+const CACHE_NAME = 'pino-ev-v2-google-only';
 const ASSETS = [
   './',
   './index.html',

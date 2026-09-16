@@ -369,10 +369,10 @@ begin
 end;
 $$;
 
--- Nota: el trigger sobre auth.users se crea en el dashboard / CLI:
---   create trigger on_auth_user_created
---     after insert on auth.users
---     for each row execute function private.handle_new_user();
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function private.handle_new_user();
 
 -- Semilla campaña PELABOLA (idempotente)
 insert into public.promotions (code, label, percent_off, kind, max_redemptions, active)

@@ -3,7 +3,7 @@
  * Pegar url + anonKey del proyecto eu-west-3. Nunca service_role.
  */
 window.PINO_SUPABASE = {
-  url: "https://ziccgwonregaatuijyzb.supabase.co",
+  url: "https://ziccgwonregaatujyyzb.supabase.co",
   anonKey: ""
 };
 
