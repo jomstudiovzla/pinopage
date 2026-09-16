@@ -1,15 +1,15 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Mejoras y utilidades pedagógicas para facilitar la solicitud de presupuesto y comprensión de propuestas",
+  "active_goal": "Seguridad de autenticación, cierre de sesión estricto y blindaje de notificaciones",
   "current_phase": "Hito 3 — CRM + Facturación Fiscal SAP + Espace Client",
-  "action": "Implementación de Stepper pedagógico 3 etapas, asistente express de superficie/jardín, modal de ejemplo de devis explicado, frise chronologique 4 étapes y decodificador fiscal FAQ en Espace Client",
+  "action": "Corrección de cierre de sesión completo con Firebase y Supabase signOut, detención atómica de listeners en tiempo real, eliminación de insignias cuando no hay sesión, y blindaje de rutas modales admin y cliente",
   "files": [
     "index.html",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Completado y validado con pruebas de sintaxis JavaScript. Listo para commit y sincronización con GitHub.",
+  "step": "Validado con suite de pruebas de seguridad y sintaxis JS. Listo para commit y sincronización.",
   "last_commit": "45af85c",
-  "timestamp": "2026-09-16T01:09:00-04:00"
+  "timestamp": "2026-09-16T01:23:00-04:00"
 }

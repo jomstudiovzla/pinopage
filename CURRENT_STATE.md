@@ -43,19 +43,29 @@
   4. **Despliegue de Reglas RTDB**: Desplegadas a `crm-jom` vía Firebase CLI con validación de sintaxis aprobada.
 - [x] **Mejoras y Utilidades Pedagógicas de Devis & Respuestas (100% COMPLETADAS Y VERIFICADAS)**:
   1. **Stepper Visual de 3 Pasos en Demande de Devis**:
-     - Guía interactiva *"Comment ça se passe ? • 3 Étapes Simples"* al inicio de la sección de devis:
-       - *Étape 1 : Expression du besoin (1 min)* — 100% gratuit, 0€ à avancer, aucune carte bancaire requise.
-       - *Étape 2 : Chiffrage sous 24h par Andrés* — Application directe de l'Avance Immédiate 50% URSSAF (Coopérative Unipros).
-       - *Étape 3 : Validation & Travaux* — Validation libre en 1 clic sans acompte requis.
+     - Guía interactiva *"Comment ça se passe ? • 3 Étapes Simples"* al inicio de la sección de devis.
   2. **Guide de Sélection Rapide selon le Jardin & Simulateur en Direct**:
      - 4 chips interactivos por tamaño de exterior (`< 150 m²`, `150–400 m²`, `400–800 m²`, `> 800 m²`) con pre-llenado automático de superficie y presupuesto recomendado.
-     - Tarjeta educativa en 3 columnas en tiempo real: Total facturé TTC vs Avance Immédiate 50% URSSAF vs Reste à charge réel payé par le client.
-     - Tip de envío de fotos por WhatsApp para agilizar chiffrage sin visita previa.
   3. **Modal Pédagogique "Exemple de Devis Expliqué" (`#modal-exemple-devis`)**:
-     - Demostración visual accesible desde el Hero, la sección de devis y el Espace Client (`openWindowModal('exemple-devis')`).
-     - Desglose con membrete oficial Unipros (SAP529241671), 4 callouts educativos sobre la ausencia de anticipos, deducción directa URSSAF y disponibilidad de la Attestation Fiscale Case 7DB.
+     - Demostración visual accesible desde el Hero, la sección de devis y el Espace Client.
   4. **Décryptage Pédagogique & Frise Chronologique dans l'Espace Client**:
      - Frise chronologique de 4 étapes sur chaque devis (*1. Demande transmise ➔ 2. Proposition chiffrée reçue ➔ 3. Accord client ➔ 4. Chantier & Facture 7DB*).
      - Accordéon interactif FAQ (Acompte, règlement sécurisé Unipros, attestation DGFiP).
      - Micro-copy rassurante sur les boutons : *"Accepter cette proposition (0€ à payer maintenant)"*.
      - Carte d'accueil pédagogique dynamique quand il y a 0 devis.
+- [x] **Blindaje de Seguridad, Cierre de Sesión y Notificaciones (100% COMPLETADO Y VERIFICADO)**:
+  1. **Cierre de Sesión Atómico e Irrevocable (`handleLogout`)**:
+     - Invocación de `await firebase.auth().signOut()` y `await window.pinoSupabase.auth.signOut()`.
+     - Limpieza rigurosa de `localStorage` (`pino_current_user`, `pino_last_client_email`) y `sessionStorage` (`pino_impersonating`).
+     - Activación del flag `pino_explicit_logout` en `sessionStorage` que impide cualquier reactivación automática de credenciales residuales.
+     - Cierre de modales (`modal-window-admin`, `modal-window-client`, `modal-window-auth`) y limpieza de URL hash (`history.replaceState`).
+  2. **Supresión Absoluta de Notificaciones Sin Sesión**:
+     - Eliminación del listener offline que leía correos residuales en `updateAuthUI`.
+     - `initClientNotificationListener` y `updateClientNotificationUI` blindados: si `!getCurrentUser()`, desconectan todos los listeners y destruyen cualquier badge (`#nav-auth-notif-badge`) del DOM.
+     - El botón *"Connexion"* en el navbar jamás muestra conteos o insignias cuando no hay sesión.
+     - Insignia roja del chatbot (`#chatbot-badge`) configurada oculta por defecto (`hidden`) y reseteada al cerrar sesión.
+  3. **Control de Acceso Estricto a Modales (`openWindowModal`)**:
+     - Bloqueo de acceso a `#modal-window-admin`: verifica credenciales de admin (`isPinoEmail` / `isAdmin`), redirigiendo a `connexion` con toast de advertencia si no está autenticado.
+     - Bloqueo de acceso a `#modal-window-client`: verifica sesión activa, redirigiendo a `connexion` si es anónimo.
+  4. **Restauración Silenciosa al Recargar**:
+     - `onAuthStateChanged` restaura la barra de navegación de forma silenciosa (`openModal: false`) sin interrumpir al usuario con popups indeseados en caso de sesiones legítimas no cerradas.

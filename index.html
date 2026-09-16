@@ -520,7 +520,7 @@
   <!-- Floating Chatbot Toggle Button (burbujas 24/7 — no el logo pino) -->
   <button id="chatbot-toggle" class="fixed bottom-20 right-6 sm:bottom-6 z-50 bg-[#234e38] hover:bg-brand-green text-white w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 border-2 border-white/40" aria-label="Ouvrir l'assistant de support 24/7">
     <i class="fa-solid fa-comments text-xl sm:text-2xl" aria-hidden="true"></i>
-    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-bounce shadow">1</span>
+    <span id="chatbot-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full animate-bounce shadow">1</span>
   </button>
 
   <!-- Chatbot Modal/Window (Assistant IA Pino & Partenaire Unipros) -->
@@ -3932,6 +3932,8 @@
       chatbotWindow.classList.toggle('hidden');
       chatbotWindow.classList.toggle('flex');
       chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+      const chatBadge = document.getElementById('chatbot-badge');
+      if (chatBadge) chatBadge.classList.add('hidden');
     });
 
     chatbotClose.addEventListener('click', () => {
@@ -4432,8 +4434,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         const currentLeads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
         currentLeads.unshift(newLeadObj);
         localStorage.setItem('pino_leads', JSON.stringify(currentLeads));
-        if (emailVal) {
-          localStorage.setItem('pino_last_client_email', emailVal.trim().toLowerCase());
+        if (emailVal && typeof getCurrentUser === 'function' && getCurrentUser()) {
           if (typeof initClientNotificationListener === 'function') {
             initClientNotificationListener(emailVal);
           }
@@ -4654,8 +4655,10 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       return null;
     };
 
-    window.processAuthenticatedUser = async (user, method = 'google', registrationProfile = null) => {
+    window.processAuthenticatedUser = async (user, method = 'google', registrationProfile = null, options = { openModal: true }) => {
       if (!user || !user.email) return;
+
+      sessionStorage.removeItem('pino_explicit_logout');
 
       const normEmail = user.email.trim().toLowerCase();
       const isAdmin = isPinoEmail(normEmail) || user.app_metadata?.role === 'admin';
@@ -4713,17 +4716,23 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       updateAuthUI();
       if (typeof refreshCouponSection === 'function') refreshCouponSection();
 
+      const shouldOpen = !options || options.openModal !== false;
+
       if (isAdmin) {
         renderAdminLeads();
         renderAdminUsers();
         loadAdminKPIs();
         renderAdminJobs();
-        document.getElementById('modal-window-admin').showModal();
-        showNotificationToast('Bienvenue Andrés. Accès administrateur.', 'success');
+        if (shouldOpen) {
+          document.getElementById('modal-window-admin').showModal();
+          showNotificationToast('Bienvenue Andrés. Accès administrateur.', 'success');
+        }
       } else {
         populateClientPortal(userProfile);
-        document.getElementById('modal-window-client').showModal();
-        showNotificationToast('Bienvenue dans votre Espace Client, ' + userProfile.fullName + '.', 'success');
+        if (shouldOpen) {
+          document.getElementById('modal-window-client').showModal();
+          showNotificationToast('Bienvenue dans votre Espace Client, ' + userProfile.fullName + '.', 'success');
+        }
       }
     };
 
@@ -4738,9 +4747,11 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           provider.setCustomParameters({ prompt: 'select_account' });
           const result = await firebase.auth().signInWithPopup(provider);
           if (result && result.user) {
-            await processAuthenticatedUser(result.user, 'google');
+            sessionStorage.removeItem('pino_explicit_logout');
+            await processAuthenticatedUser(result.user, 'google', null, { openModal: true });
           }
         } else if (window.pinoSupabase) {
+          sessionStorage.removeItem('pino_explicit_logout');
           const { error } = await window.pinoSupabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
@@ -4790,11 +4801,13 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       try {
         if (typeof firebase !== 'undefined' && firebase.auth) {
           const cred = await firebase.auth().signInWithEmailAndPassword(email, pass);
-          await processAuthenticatedUser(cred.user, 'password');
+          sessionStorage.removeItem('pino_explicit_logout');
+          await processAuthenticatedUser(cred.user, 'password', null, { openModal: true });
         } else if (window.pinoSupabase) {
           const { data, error } = await window.pinoSupabase.auth.signInWithPassword({ email, password: pass });
           if (error) throw error;
-          await processAuthenticatedUser(data.user, 'password');
+          sessionStorage.removeItem('pino_explicit_logout');
+          await processAuthenticatedUser(data.user, 'password', null, { openModal: true });
         } else {
           throw new Error('Service d\'authentification non disponible.');
         }
@@ -4830,7 +4843,8 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           if (cred.user.updateProfile) {
             await cred.user.updateProfile({ displayName: fullName });
           }
-          await processAuthenticatedUser(cred.user, 'password', { fullName, phone, commune });
+          sessionStorage.removeItem('pino_explicit_logout');
+          await processAuthenticatedUser(cred.user, 'password', { fullName, phone, commune }, { openModal: true });
         } else if (window.pinoSupabase) {
           const { data, error } = await window.pinoSupabase.auth.signUp({
             email, password: pass,
@@ -4838,7 +4852,8 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           });
           if (error) throw error;
           if (data.user && data.session) {
-            await processAuthenticatedUser(data.user, 'password', { fullName, phone, commune });
+            sessionStorage.removeItem('pino_explicit_logout');
+            await processAuthenticatedUser(data.user, 'password', { fullName, phone, commune }, { openModal: true });
           } else {
             showNotificationToast('Compte créé avec succès.', 'success');
           }
@@ -4861,7 +4876,8 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           if (firebase.auth().getRedirectResult) {
             firebase.auth().getRedirectResult().then((res) => {
               if (res && res.user) {
-                processAuthenticatedUser(res.user, 'google');
+                sessionStorage.removeItem('pino_explicit_logout');
+                processAuthenticatedUser(res.user, 'google', null, { openModal: true });
               }
             }).catch((err) => {
               console.warn('[pino-auth] Redirect result:', err.message);
@@ -4870,12 +4886,33 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
           firebase.auth().onAuthStateChanged(async (user) => {
             if (user) {
+              // Sécurité: Si l'utilisateur s'est explicitement déconnecté, maintenir la session fermée
+              if (sessionStorage.getItem('pino_explicit_logout') === 'true') {
+                try { await firebase.auth().signOut(); } catch(e) {}
+                localStorage.removeItem('pino_current_user');
+                localStorage.removeItem('pino_last_client_email');
+                sessionStorage.removeItem('pino_impersonating');
+                if (typeof window.stopClientNotificationListeners === 'function') {
+                  window.stopClientNotificationListeners();
+                }
+                updateAuthUI();
+                return;
+              }
+
               const cur = getCurrentUser();
               if (!cur || cur.uid !== user.uid) {
-                await processAuthenticatedUser(user, user.providerData?.[0]?.providerId || 'google');
+                // Restauration silencieuse en arrière-plan sans ouvrir de pop-up intrusive
+                await processAuthenticatedUser(user, user.providerData?.[0]?.providerId || 'google', null, { openModal: false });
+              } else {
+                updateAuthUI();
               }
             } else {
               localStorage.removeItem('pino_current_user');
+              localStorage.removeItem('pino_last_client_email');
+              sessionStorage.removeItem('pino_impersonating');
+              if (typeof window.stopClientNotificationListeners === 'function') {
+                window.stopClientNotificationListeners();
+              }
               updateAuthUI();
               if (typeof refreshCouponSection === 'function') refreshCouponSection();
             }
@@ -4890,7 +4927,12 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       if (window.pinoSupabase) {
         window.pinoSupabase.auth.getSession().then(({ data }) => {
           if (data && data.session && data.session.user) {
-            processAuthenticatedUser(data.session.user, 'google');
+            if (sessionStorage.getItem('pino_explicit_logout') === 'true') {
+              try { window.pinoSupabase.auth.signOut(); } catch(e) {}
+              localStorage.removeItem('pino_current_user');
+              return;
+            }
+            processAuthenticatedUser(data.session.user, 'google', null, { openModal: false });
           }
         });
       }
@@ -5432,17 +5474,63 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
     // Logout
     window.handleLogout = async () => {
-      if (window.pinoSupabase) { try { await window.pinoSupabase.auth.signOut(); } catch(e) {} }
+      // 1. Marquer la déconnexion explicite pour empêcher toute réouverture automatique
+      sessionStorage.setItem('pino_explicit_logout', 'true');
+
+      // 2. Déconnexion complète de Firebase Auth
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        try {
+          await firebase.auth().signOut();
+        } catch (e) {
+          console.warn('[auth] Firebase signOut error:', e);
+        }
+      }
+
+      // 3. Déconnexion complète de Supabase si configuré
+      if (window.pinoSupabase) {
+        try {
+          await window.pinoSupabase.auth.signOut();
+        } catch (e) {
+          console.warn('[auth] Supabase signOut error:', e);
+        }
+      }
+
+      // 4. Nettoyer le stockage local et de session
       localStorage.removeItem('pino_current_user');
+      localStorage.removeItem('pino_last_client_email');
       sessionStorage.removeItem('pino_impersonating');
+
+      // 5. Arrêter et détacher tous les écouteurs de notifications temps réel
+      if (typeof window.stopClientNotificationListeners === 'function') {
+        window.stopClientNotificationListeners();
+      }
+
+      // 6. Supprimer immédiatement tous les badges de notification dans l'interface
+      const badge = document.getElementById('nav-auth-notif-badge');
+      if (badge) badge.remove();
+
+      const chatBadge = document.getElementById('chatbot-badge');
+      if (chatBadge) chatBadge.classList.add('hidden');
+
       const banner = document.getElementById('client-impersonation-banner');
       if (banner) banner.classList.add('hidden');
 
+      // 7. Nettoyer l'URL hash si elle pointe vers une zone privée
+      if (window.location.hash && ['#connexion', '#auth', '#admin', '#espace', '#client'].includes(window.location.hash.toLowerCase())) {
+        try {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        } catch (e) {}
+      }
+
+      // 8. Fermer tous les modaux ouverts
       const adminModal = document.getElementById('modal-window-admin');
       if (adminModal && adminModal.open) adminModal.close();
       const clientModal = document.getElementById('modal-window-client');
       if (clientModal && clientModal.open) clientModal.close();
+      const authModal = document.getElementById('modal-window-auth');
+      if (authModal && authModal.open) authModal.close();
 
+      // 9. Mettre à jour la barre de navigation vers l'état déconnecté
       updateAuthUI();
       if (typeof refreshCouponSection === 'function') refreshCouponSection();
       showNotificationToast('Vous avez été déconnecté avec succès.', 'info');
@@ -5481,6 +5569,13 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         if (mobileNavText) {
           mobileNavText.innerHTML = `<i class="fa-solid fa-user-circle text-emerald-700 mr-2"></i> Connexion / Mon Espace`;
         }
+        // Sécurité stricte: AUCUN badge ni écouteur de notification lorsque la session est fermée
+        const badge = document.getElementById('nav-auth-notif-badge');
+        if (badge) badge.remove();
+        if (typeof window.stopClientNotificationListeners === 'function') {
+          window.stopClientNotificationListeners();
+        }
+        return;
       } else if (user.role === 'admin' || user.isAdmin) {
         navText.textContent = "👑 Andrés (Admin)";
         if (navIcon) navIcon.className = "fa-solid fa-crown text-sm text-amber-500";
@@ -5490,6 +5585,8 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         if (mobileNavText) {
           mobileNavText.innerHTML = `👑 <strong>Andrés (Espace Admin)</strong>`;
         }
+        const badge = document.getElementById('nav-auth-notif-badge');
+        if (badge) badge.remove();
       } else {
         const shortName = (user.fullName || 'Client').split(' ')[0];
         navText.textContent = `👤 Mon Espace (${shortName})`;
@@ -5503,16 +5600,6 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         if (user.email && typeof initClientNotificationListener === 'function') {
           initClientNotificationListener(user.email);
         }
-      }
-
-      // Check offline client email if not logged in
-      if (!user) {
-        try {
-          const lastEmail = localStorage.getItem('pino_last_client_email') || '';
-          if (lastEmail && typeof initClientNotificationListener === 'function') {
-            initClientNotificationListener(lastEmail);
-          }
-        } catch(e) {}
       }
     };
 
@@ -5918,11 +6005,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     let _activeClientNotifEmail = null;
     let _seenNotifIds = new Set();
 
-    window.initClientNotificationListener = (clientEmail) => {
-      if (!clientEmail) return;
-      const normEmail = clientEmail.trim().toLowerCase();
-      if (_activeClientNotifEmail === normEmail && _activeClientNotifListener) return;
-
+    window.stopClientNotificationListeners = () => {
       if (_activeClientNotifListener) {
         try { _activeClientNotifListener(); } catch(e) {}
         _activeClientNotifListener = null;
@@ -5931,11 +6014,31 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         try { _activeClientQuotesListener(); } catch(e) {}
         _activeClientQuotesListener = null;
       }
+      _activeClientNotifEmail = null;
+      const badge = document.getElementById('nav-auth-notif-badge');
+      if (badge) badge.remove();
+    };
+
+    window.initClientNotificationListener = (clientEmail) => {
+      const user = getCurrentUser();
+      // RÈGLE ABSOLUE : Aucune écoute ni badge de notification si aucune session n'est ouverte
+      if (!user || !user.email) {
+        window.stopClientNotificationListeners();
+        return;
+      }
+      const normEmail = user.email.trim().toLowerCase();
+      if (_activeClientNotifEmail === normEmail && _activeClientNotifListener) return;
+
+      window.stopClientNotificationListeners();
       _activeClientNotifEmail = normEmail;
 
       // 1. Écouter les notifications directes en temps réel
       if (window.PinoDB && typeof PinoDB.listenClientNotifications === 'function') {
         _activeClientNotifListener = PinoDB.listenClientNotifications(normEmail, (notifs) => {
+          if (!getCurrentUser()) {
+            window.stopClientNotificationListeners();
+            return;
+          }
           const unread = (notifs || []).filter(n => !n.read);
           updateClientNotificationUI(unread);
           renderClientQuotes(normEmail);
@@ -5946,6 +6049,10 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       // 2. Écouter les mises à jour de devis en temps réel
       if (window.PinoDB && typeof PinoDB.listenClientQuotes === 'function') {
         _activeClientQuotesListener = PinoDB.listenClientQuotes(normEmail, (quotes) => {
+          if (!getCurrentUser()) {
+            window.stopClientNotificationListeners();
+            return;
+          }
           renderClientQuotes(normEmail);
           renderClientInvoices(normEmail);
         });
@@ -5955,8 +6062,10 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     window.updateClientNotificationUI = (unreadList) => {
       const navBtn = document.getElementById('nav-auth-btn');
       let badge = document.getElementById('nav-auth-notif-badge');
+      const user = getCurrentUser();
 
-      if (!unreadList || unreadList.length === 0) {
+      // Sécurité : Ne jamais afficher de badge de notification si l'utilisateur est déconnecté
+      if (!user || !unreadList || unreadList.length === 0) {
         if (badge) badge.remove();
         return;
       }
@@ -6466,6 +6575,33 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
       const targetId = map[sectionKey] || ('modal-window-' + sectionKey);
       const targetModal = document.getElementById(targetId);
+
+      // Sécurité : Contrôle d'accès strict pour l'Espace Admin
+      if (targetId === 'modal-window-admin') {
+        const u = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+        if (!u || (!u.isAdmin && u.role !== 'admin')) {
+          if (typeof showNotificationToast === 'function') {
+            showNotificationToast('Accès restreint. Veuillez vous connecter avec le compte administrateur Andrés.', 'warning');
+          }
+          openWindowModal('connexion');
+          return;
+        }
+      }
+
+      // Sécurité : Contrôle d'accès strict pour l'Espace Client
+      if (targetId === 'modal-window-client') {
+        const u = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+        if (!u) {
+          if (typeof showNotificationToast === 'function') {
+            showNotificationToast('Veuillez vous connecter pour accéder à votre Espace Client.', 'info');
+          }
+          openWindowModal('connexion');
+          return;
+        }
+        if (typeof populateClientPortal === 'function') {
+          populateClientPortal(u);
+        }
+      }
 
       // Close other open section windows first
       document.querySelectorAll('.section-window').forEach(d => {
