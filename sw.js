@@ -1,7 +1,5 @@
-const CACHE_NAME = 'pino-ev-v2-supabase-key';
+const CACHE_NAME = 'pino-ev-v3-crm-jobs';
 const ASSETS = [
-  './',
-  './index.html',
   './manifest.json',
   './assets/logo/Logo pino.png',
   './assets/logo/Logo completo.png',
@@ -19,17 +17,41 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (e) => {
+  self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+  );
+});
+
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      );
+    }).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (e) => {
+  // Network-first para navegación / index.html para ver actualizaciones inmediatamente
+  if (e.request.mode === 'navigate' || e.request.url.includes('index.html')) {
+    e.respondWith(
+      fetch(e.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Cache-first con fallback a red para assets estáticos
   e.respondWith(
-    caches.match(e.request).then((response) => {
-      return response || fetch(e.request);
+    caches.match(e.request).then((cachedResponse) => {
+      return cachedResponse || fetch(e.request);
     })
   );
 });
