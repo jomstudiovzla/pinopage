@@ -1,0 +1,32 @@
+{
+  "rules": {
+    "leads": {
+      ".read": "auth != null",
+      ".write": true
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')",
+        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
+      },
+      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')",
+      ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
+    },
+    "jobs": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
+    },
+    "coupons": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')",
+        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
+      },
+      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')",
+      ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
+    },
+    "audit_logs": {
+      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')",
+      ".write": "auth != null"
+    }
+  }
+}
