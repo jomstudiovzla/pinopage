@@ -1231,52 +1231,45 @@
     </div>
   </dialog>
 
-  <!-- Header / Navigation -->
-  <header class="sticky top-0 z-30 bg-[#fafaf6]/90 backdrop-blur-md border-b border-brand-accent/20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between">
-      <a href="#" class="flex items-center gap-3.5 group min-w-0">
-        <img src="assets/logo/Logo pino.png" alt="Logo Pino Espaces Verts" class="h-14 sm:h-20 w-auto object-contain transition-transform group-hover:scale-105" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%220.9em%22 font-size=%2290%22>🌲</text></svg>'" />
-        <span class="font-serif text-xl sm:text-3xl font-bold tracking-tight text-brand-green truncate">Pino Espaces Verts</span>
-      </a>
-
-      <a href="https://unipros.coop" target="_blank" rel="noopener noreferrer" title="Coopérative Unipros — Services à la Personne" class="hidden sm:flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-[#00D2D3]/40 bg-white hover:border-[#D926B8] hover:shadow-md transition-all shrink-0">
-        <img src="assets/logo/unipros.png" alt="Unipros" class="h-9 sm:h-11 w-auto object-contain" />
-      </a>
+  <!-- Header / Navigation — marca 2 líneas + sello Unipros, nav limpio (lg+) -->
+  <header class="sticky top-0 z-30 bg-[#fafaf6]/95 backdrop-blur-md border-b border-brand-accent/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[4.5rem] lg:h-20 flex items-center justify-between gap-6">
+      <div class="flex items-center gap-3 lg:gap-4 min-w-0 shrink-0">
+        <a href="#" class="flex items-center gap-2.5 group">
+          <img src="assets/logo/Logo pino.png" alt="" class="h-11 lg:h-12 w-auto object-contain transition-transform group-hover:scale-105" />
+          <span class="font-serif font-bold text-brand-green leading-[1.1] text-[1.15rem] lg:text-[1.35rem]">
+            <span class="block">Pino Espaces</span>
+            <span class="block">Verts</span>
+          </span>
+        </a>
+        <a href="https://unipros.coop" target="_blank" rel="noopener noreferrer" title="Coopérative Unipros — crédit d'impôt 50 %" class="hidden sm:flex items-center pl-3 ml-1 border-l border-brand-accent/30 hover:opacity-80 transition-opacity">
+          <img src="assets/logo/unipros.png" alt="Unipros, partenaire SAP" class="h-7 lg:h-8 w-auto object-contain" />
+        </a>
+      </div>
       
-      <nav class="hidden md:flex items-center gap-5 font-medium text-sm text-brand-charcoal/80">
-        <button type="button" onclick="openWindowModal('services')" class="hover:text-brand-vivid transition-colors flex items-center gap-1.5 cursor-pointer py-1">
-          <span>Services</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-40"></i>
-        </button>
-        <button type="button" onclick="openWindowModal('realisations')" class="hover:text-brand-vivid transition-colors flex items-center gap-1.5 cursor-pointer py-1">
-          <span>Réalisations</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-40"></i>
-        </button>
-        <button type="button" onclick="openWindowModal('unipros')" class="hover:text-brand-vivid transition-colors flex items-center gap-1.5 cursor-pointer py-1">
-          <span>Avantage Fiscal (Unipros)</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-40"></i>
-        </button>
-        <button type="button" onclick="openWindowModal('b2b')" class="hover:text-brand-vivid transition-colors flex items-center gap-1.5 cursor-pointer py-1">
-          <span>Entreprises</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px] opacity-40"></i>
-        </button>
-        <button type="button" onclick="openWindowModal('devis')" class="bg-brand-vivid hover:bg-brand-green text-white px-5 py-2.5 rounded-full transition-all duration-200 shadow-md hover:shadow-lg font-bold flex items-center gap-2 cursor-pointer">
+      <nav class="hidden lg:flex items-center gap-6 font-medium text-sm text-brand-charcoal/80">
+        <button type="button" onclick="openWindowModal('services')" class="hover:text-brand-vivid transition-colors cursor-pointer py-1">Services</button>
+        <button type="button" onclick="openWindowModal('realisations')" class="hover:text-brand-vivid transition-colors cursor-pointer py-1">Réalisations</button>
+        <button type="button" onclick="openWindowModal('unipros')" class="hover:text-brand-vivid transition-colors cursor-pointer py-1">Crédit d'impôt</button>
+        <button type="button" onclick="openWindowModal('b2b')" class="hover:text-brand-vivid transition-colors cursor-pointer py-1">Entreprises</button>
+        <button type="button" onclick="openWindowModal('devis')" class="bg-brand-vivid hover:bg-brand-green text-white px-4 py-2 rounded-full transition-colors shadow-md font-bold flex items-center gap-2 cursor-pointer">
           <i class="fa-solid fa-file-invoice"></i> Devis Gratuit
         </button>
-
-        <!-- Auth / Portal Navigation Button (Client & Admin) -->
-        <div id="desktop-auth-container" class="flex items-center gap-2 pl-2 border-l border-brand-accent/20">
-          <button type="button" id="nav-auth-btn" onclick="handleAuthNavClick()" class="border border-emerald-700/30 hover:border-emerald-700 bg-white hover:bg-emerald-50 text-emerald-900 px-4 py-2 rounded-full transition-all duration-200 shadow-xs hover:shadow text-xs font-bold flex items-center gap-2 cursor-pointer">
+        <div id="desktop-auth-container" class="pl-2 border-l border-brand-accent/20">
+          <button type="button" id="nav-auth-btn" onclick="handleAuthNavClick()" class="border border-emerald-700/30 hover:border-emerald-700 bg-white hover:bg-emerald-50 text-emerald-900 px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 cursor-pointer">
             <i class="fa-solid fa-user-circle text-sm text-emerald-700" id="nav-auth-icon"></i>
-            <span id="nav-auth-text">Espace Membres / Connexion</span>
+            <span id="nav-auth-text">Connexion</span>
           </button>
         </div>
       </nav>
       
-      <!-- Mobile menu button -->
-      <button id="mobile-menu-btn" class="md:hidden text-brand-green focus:outline-none" aria-label="Menu principal">
+      <button id="mobile-menu-btn" class="lg:hidden text-brand-green focus:outline-none p-2" aria-label="Menu principal">
         <i class="fa-solid fa-bars text-2xl"></i>
       </button>
     </div>
     
-    <!-- Mobile Navigation Drawer -->
-    <div id="mobile-menu" class="hidden md:hidden bg-[#f8f9f5] border-b border-brand-accent/20 px-4 pt-2 pb-6 space-y-2.5 shadow-inner">
+    <!-- Mobile / tablet drawer -->
+    <div id="mobile-menu" class="hidden lg:hidden bg-[#f8f9f5] border-b border-brand-accent/20 px-4 pt-2 pb-6 space-y-2.5 shadow-inner">
       <button type="button" onclick="openWindowModal('services'); document.getElementById('mobile-menu').classList.add('hidden');" class="w-full text-left py-2.5 px-3 rounded-lg font-medium text-brand-charcoal hover:bg-brand-light flex items-center justify-between">
         <span>🌿 Services & Forfaits</span> <i class="fa-solid fa-chevron-right text-xs text-brand-accent"></i>
       </button>
@@ -1300,7 +1293,7 @@
       <!-- Mobile Auth Button -->
       <div id="mobile-auth-container" class="pt-2 border-t border-brand-accent/20">
         <button type="button" id="mobile-nav-auth-btn" onclick="handleAuthNavClick(); document.getElementById('mobile-menu').classList.add('hidden');" class="w-full text-left py-2.5 px-3 rounded-xl font-bold text-emerald-950 bg-emerald-50/80 border border-emerald-200 flex items-center justify-between">
-          <span id="mobile-nav-auth-text"><i class="fa-solid fa-user-circle text-emerald-700 mr-2"></i> Espace Membres / Connexion</span>
+          <span id="mobile-nav-auth-text"><i class="fa-solid fa-user-circle text-emerald-700 mr-2"></i> Connexion</span>
           <i class="fa-solid fa-arrow-right-to-bracket text-xs text-emerald-700"></i>
         </button>
       </div>
@@ -4441,7 +4434,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       const toast = document.createElement('div');
       toast.id = 'app-notification-toast';
       const bgColor = type === 'success' ? 'bg-emerald-800' : (type === 'error' ? 'bg-red-800' : 'bg-slate-900');
-      toast.className = `fixed top-6 right-6 z-50 ${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-white/20 text-xs sm:text-sm font-semibold flex items-center gap-3 transition-all duration-300 animate-bounce`;
+      toast.className = `fixed bottom-24 right-4 sm:right-6 z-[60] max-w-sm ${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-white/20 text-xs sm:text-sm font-semibold flex items-center gap-3`;
       toast.innerHTML = `<span>${message}</span> <button onclick="this.parentElement.remove()" class="text-white/60 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button>`;
       document.body.appendChild(toast);
       setTimeout(() => {

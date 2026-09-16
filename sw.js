@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v2-remediation';
+const CACHE_NAME = 'pino-ev-v2-header';
 const ASSETS = [
   './',
   './index.html',
