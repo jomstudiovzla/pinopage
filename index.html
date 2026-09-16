@@ -98,6 +98,9 @@
   <!-- Supabase Auth (EU) — Firebase retiré (auth/unauthorized-domain) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase-config.js"></script>
+
+  <!-- Capa de datos Supabase centralizada -->
+  <script src="assets/js/pino-db.js"></script>
   
   <!-- Base de Connaissances & Moteur Intelligent Chatbot -->
   <script src="assets/js/chatbot_knowledge_base.js"></script>
@@ -3564,28 +3567,52 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         waBtn.href = `https://wa.me/33651594034?text=${encodeURIComponent(waText)}`;
       }
 
-      // Save lead locally to pino_leads for Admin CRM
+      // ── Guardar lead en Supabase + localStorage (fallback) ──
+      const newLeadObj = {
+        id: refCode,
+        date: new Date().toLocaleDateString('fr-FR'),
+        time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        name: nameVal || 'Client Particulier',
+        phone: phoneVal,
+        email: emailVal,
+        commune: postalVal,
+        service: serviceVal,
+        surface: surfaceVal ? surfaceVal + ' m²' : 'Non précisée',
+        budget: budgetVal,
+        details: detailsVal || 'Aucun',
+        status: 'Nouveau'
+      };
+
+      // 1. Guardar en Supabase (no bloquea UI)
+      if (window.PinoDB) {
+        PinoDB.saveLead({
+          name:     nameVal,
+          email:    emailVal,
+          phone:    phoneVal,
+          commune:  postalVal,
+          service:  serviceVal,
+          surface:  surfaceVal,
+          budget:   budgetVal,
+          frequency: frequencyVal,
+          details:  detailsVal,
+          refCode:  refCode,
+          source:   'landing_v1',
+          userId:   (getCurrentUser() || {}).uid || null,
+          isB2B:    (serviceVal || '').toLowerCase().includes('b2b') || (serviceVal || '').toLowerCase().includes('copro'),
+        }).then(res => {
+          if (res.ok) console.info('[pino] Lead guardado en Supabase:', res.id);
+          else console.warn('[pino] Lead fallback localStorage:', res.error);
+        }).catch(() => {});
+      }
+
+      // 2. Guardar en localStorage (siempre, como caché offline)
       try {
-        const newLeadObj = {
-          id: refCode,
-          date: new Date().toLocaleDateString('fr-FR'),
-          time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-          name: nameVal || 'Client Particulier',
-          phone: phoneVal,
-          email: emailVal,
-          commune: postalVal,
-          service: serviceVal,
-          surface: surfaceVal ? surfaceVal + ' m²' : 'Non précisée',
-          budget: budgetVal,
-          details: detailsVal || 'Aucun',
-          status: 'Nouveau'
-        };
         const currentLeads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
         currentLeads.unshift(newLeadObj);
         localStorage.setItem('pino_leads', JSON.stringify(currentLeads));
         if (typeof renderAdminLeads === 'function') renderAdminLeads();
       } catch (errLeads) {
-        console.log('Error saving lead locally:', errLeads);
+        console.log('[pino] Error guardando lead local:', errLeads);
       }
 
       // Show Corroboration and track
@@ -3814,26 +3841,30 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         lastLogin: new Date().toISOString()
       };
 
-      const sb = window.pinoSupabase;
-      if (sb) {
+      // ── Supabase: upsert perfil + leer cupón 1:1 ──
+      if (window.PinoDB) {
+        // 1. Guardar/actualizar perfil en Supabase
+        PinoDB.upsertProfile(sbUser, {
+          fullName: displayName, phone, commune, provider: method
+        }).catch(() => {});
+
+        // 2. Leer cupón asignado (tabla cupones o profiles.welcome_promo_code)
         try {
-          const { data: couponRow } = await sb
-            .from('cupones')
-            .select('codigo_cupon, estado')
-            .eq('cliente_id', sbUser.id)
-            .maybeSingle();
+          const couponRow = await PinoDB.fetchUserCoupon(sbUser.id);
           if (couponRow && couponRow.codigo_cupon) {
             userProfile.promoCode = couponRow.codigo_cupon;
             userProfile.promoStatus = couponRow.estado;
           }
         } catch (err) {
-          console.warn('Lecture cupones:', err);
+          console.warn('[pino] fetchUserCoupon:', err);
         }
       }
 
+      // ── Registro de sesión (local + Supabase audit) ──
       recordSessionAudit(userProfile);
       localStorage.setItem('pino_current_user', JSON.stringify(userProfile));
 
+      // ── Caché local de usuarios ──
       let localUsers = [];
       try { localUsers = JSON.parse(localStorage.getItem('pino_users')) || []; } catch (e) { localUsers = []; }
       const uIdx = localUsers.findIndex(u => u.email && u.email.toLowerCase() === normEmail);
@@ -3849,6 +3880,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       if (isAdmin) {
         renderAdminLeads();
         renderAdminUsers();
+        loadAdminKPIs();
         document.getElementById('modal-window-admin').showModal();
         showNotificationToast('Bienvenue Andrés. Accès administrateur Supabase.', 'success');
       } else {
@@ -4208,12 +4240,46 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }
     };
 
-    // Render Admin Leads in table
-    window.renderAdminLeads = () => {
-      const leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+    // Render Admin Leads — Supabase primary, localStorage fallback
+    window.renderAdminLeads = async () => {
       const tbody = document.getElementById('adm-leads-table-body');
       const badge = document.getElementById('adm-leads-badge');
       const kpi = document.getElementById('adm-kpi-leads');
+
+      if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Chargement…</td></tr>`;
+
+      let leads = [];
+
+      // 1. Intentar cargar desde Supabase (fuente de verdad)
+      if (window.PinoDB) {
+        const result = await PinoDB.fetchLeads({ limit: 200 });
+        if (result.ok && result.data.length > 0) {
+          // Mapear formato Supabase → formato UI
+          leads = result.data.map(row => ({
+            id:      row.ref_code || row.id,
+            sbId:    row.id,
+            date:    row.created_at ? new Date(row.created_at).toLocaleDateString('fr-FR') : '—',
+            time:    row.created_at ? new Date(row.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '',
+            name:    row.full_name || 'Client',
+            phone:   row.phone || '',
+            email:   row.email || '',
+            commune: row.commune || '',
+            service: row.service_type || 'Entretien',
+            surface: row.surface_m2 ? row.surface_m2 + ' m²' : 'Non précisée',
+            budget:  row.budget_eur ? String(row.budget_eur) : '0',
+            details: row.details || '',
+            status:  row.status || 'Nouveau',
+          }));
+
+          // Sincronizar con localStorage
+          localStorage.setItem('pino_leads', JSON.stringify(leads));
+        } else {
+          // Fallback: localStorage
+          try { leads = JSON.parse(localStorage.getItem('pino_leads') || '[]'); } catch (e) { leads = []; }
+        }
+      } else {
+        try { leads = JSON.parse(localStorage.getItem('pino_leads') || '[]'); } catch (e) { leads = []; }
+      }
 
       if (badge) badge.textContent = leads.length;
       if (kpi) kpi.textContent = leads.length;
@@ -4259,14 +4325,21 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }).join('');
     };
 
-    // Cycle lead status
-    window.cycleLeadStatus = (index) => {
+    // Cycle lead status — actualiza en Supabase + localStorage
+    window.cycleLeadStatus = async (index) => {
       const leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
       if (!leads[index]) return;
       const flow = ['Nouveau', 'Contacté', 'Devis envoyé', 'Gagné', 'Perdu'];
       const curIdx = flow.indexOf(leads[index].status);
-      leads[index].status = flow[(curIdx + 1) % flow.length];
+      const newStatus = flow[(curIdx + 1) % flow.length];
+      leads[index].status = newStatus;
       localStorage.setItem('pino_leads', JSON.stringify(leads));
+
+      // Actualizar en Supabase si tenemos el ID real de la fila
+      if (window.PinoDB && leads[index].sbId) {
+        PinoDB.updateLeadStatus(leads[index].sbId, newStatus).catch(() => {});
+      }
+
       renderAdminLeads();
     };
 
@@ -4354,47 +4427,58 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }, 4000);
     };
 
-    // Record session into Firestore pino_sessions
+    // Record session — localStorage + Supabase audit_logs
     window.recordSessionAudit = (user) => {
       if (!user || !user.email) return;
-      const sessId = 'sess_' + Date.now();
+
       const sessData = {
-        sessionUser: user.email,
-        userName: user.fullName || 'Utilisateur',
-        role: user.role || 'client',
+        id:           'sess_' + Date.now(),
+        sessionUser:  user.email,
+        userName:     user.fullName || 'Utilisateur',
+        role:         user.role || 'client',
         authProvider: user.authProvider || 'password',
-        loginTime: new Date().toLocaleString('fr-FR'),
-        ipCity: user.commune || 'Bordeaux Métropole',
-        device: navigator.userAgent.includes('Mobile') ? 'Smartphone (Mobile)' : 'Ordinateur (Desktop)',
-        status: 'Actif'
+        loginTime:    new Date().toLocaleString('fr-FR'),
+        ipCity:       user.commune || 'Bordeaux Métropole',
+        device:       navigator.userAgent.includes('Mobile') ? 'Smartphone (Mobile)' : 'Ordinateur (Desktop)',
+        status:       'Actif'
       };
 
+      // 1. LocalStorage (siempre)
       let sessions = [];
-      try {
-        sessions = JSON.parse(localStorage.getItem('pino_sessions')) || [];
-      } catch(e) { sessions = []; }
+      try { sessions = JSON.parse(localStorage.getItem('pino_sessions')) || []; } catch(e) { sessions = []; }
       sessions.unshift(sessData);
       if (sessions.length > 20) sessions = sessions.slice(0, 20);
       localStorage.setItem('pino_sessions', JSON.stringify(sessions));
+
+      // 2. Supabase audit_logs (asíncrono, no bloquea)
+      if (window.PinoDB) {
+        PinoDB.recordAuditSession(user).catch(() => {});
+      }
     };
 
-    // Render Admin Users table in God Mode with Firestore live sync
+    // Render Admin Users — Supabase primary, localStorage fallback
     window.renderAdminUsers = async () => {
       let users = JSON.parse(localStorage.getItem('pino_users') || '[]');
       const tbody = document.getElementById('adm-users-table-body');
       const badge = document.getElementById('adm-users-badge');
 
-      if (window.pinoSupabase) {
+      if (window.PinoDB) {
         try {
-          const { data: cloudUsers } = await window.pinoSupabase.from('profiles').select('id, email, full_name, role, welcome_promo_code');
-          if (cloudUsers && cloudUsers.length) {
+          const result = await PinoDB.fetchProfiles({ limit: 200 });
+          if (result.ok && result.data.length > 0) {
+            const cloudUsers = result.data;
             cloudUsers.forEach((row) => {
               const mapped = {
-                uid: row.id,
-                email: row.email,
-                fullName: row.full_name,
-                role: row.role,
-                promoCode: row.welcome_promo_code
+                uid:          row.id,
+                email:        row.email,
+                fullName:     row.full_name,
+                role:         row.role,
+                phone:        row.phone,
+                commune:      row.commune,
+                promoCode:    row.welcome_promo_code,
+                authProvider: row.auth_provider,
+                photoURL:     row.avatar_url,
+                createdDate:  row.created_at ? new Date(row.created_at).toLocaleDateString('fr-FR') : '—',
               };
               const existingIdx = users.findIndex(u => u.email && u.email.toLowerCase() === (row.email || '').toLowerCase());
               if (existingIdx >= 0) users[existingIdx] = { ...users[existingIdx], ...mapped };
@@ -4403,7 +4487,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
             localStorage.setItem('pino_users', JSON.stringify(users));
           }
         } catch (e) {
-          console.warn('Supabase profiles fetch:', e);
+          console.warn('[pino] fetchProfiles:', e);
         }
       }
 
@@ -4483,42 +4567,19 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }).join('');
     };
 
-    window.unusedOldRender = () => {
-      const users = JSON.parse(localStorage.getItem('pino_users') || '[]');
-      const tbody = document.getElementById('adm-users-table-body');
-      const badge = document.getElementById('adm-users-badge');
-      if (badge) badge.textContent = users.length;
-      if (!tbody) return;
-
-      if (users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">Aucun utilisateur enregistré.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = users.map((u) => {
-        const isAdm = u.role === 'admin' || u.isAdmin || (u.email && u.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
-        const roleBadge = isAdm
-          ? '<span class="bg-amber-100 text-amber-900 border border-amber-300 font-bold px-2 py-0.5 rounded-full text-xxs">👑 Gérant / Admin</span>'
-          : '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-xxs">👤 Client</span>';
-
-        const methodBadge = (u.authProvider === 'google')
-          ? '<span class="inline-flex items-center gap-1 bg-white border border-slate-300 text-slate-700 font-bold px-2 py-0.5 rounded text-xxs shadow-2xs"><svg class="w-3 h-3 inline" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg> Google</span>'
-          : '<span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded text-xxs"><i class="fa-solid fa-envelope text-[10px]"></i> E-mail</span>';
-
-        return `
-          <tr class="hover:bg-slate-50 transition-colors">
-            <td class="p-3 font-bold text-slate-900">${u.fullName || 'Utilisateur'}</td>
-            <td class="p-3 text-slate-600 font-mono text-xxs">${u.email}</td>
-            <td class="p-3">${methodBadge}</td>
-            <td class="p-3">${roleBadge}</td>
-            <td class="p-3 font-mono font-bold text-emerald-700">${u.promoCode || '—'}</td>
-            <td class="p-3 text-slate-500 text-xxs">${u.createdDate || '15/09/2026'}</td>
-            <td class="p-3 text-right">
-              ${!isAdm ? `<button onclick="admInspectClient('${u.email}')" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-lg text-xxs font-bold transition-colors cursor-pointer"><i class="fa-solid fa-eye mr-1"></i>Voir espace</button>` : '<span class="text-xxs text-amber-700 font-bold">Admin Principal</span>'}
-            </td>
-          </tr>
-        `;
-      }).join('');
+    // ── KPIs reales desde Supabase ──
+    window.loadAdminKPIs = async () => {
+      if (!window.PinoDB) return;
+      try {
+        const kpis = await PinoDB.fetchAdminKPIs();
+        if (!kpis) return;
+        const kpiLeads = document.getElementById('adm-kpi-leads');
+        const kpiNew   = document.getElementById('adm-kpi-new');
+        const kpiClients = document.getElementById('adm-kpi-clients');
+        if (kpiLeads)   kpiLeads.textContent   = kpis.totalLeads;
+        if (kpiNew)     kpiNew.textContent     = kpis.newLeads;
+        if (kpiClients) kpiClients.textContent = kpis.totalClients;
+      } catch (e) { /* silencioso */ }
     };
 
     window.admInspectClient = (email) => {
@@ -4680,6 +4741,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         if (targetId === 'modal-window-admin') {
           renderAdminLeads();
           renderAdminUsers();
+          loadAdminKPIs();
         }
       }
     };
