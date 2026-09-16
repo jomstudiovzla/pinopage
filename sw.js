@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v5-invoice-stability';
+const CACHE_NAME = 'pino-ev-v6-pdf-download-universal';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',

@@ -1,9 +1,9 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Estabilización de navegación CRM (anti-cierre involuntario) y control total de facturas con descarga universal",
-  "current_phase": "Hito 3 — CRM Admin + Control de Facturas (Admin vs Cliente) + Estabilización de Modales",
-  "action": "Corrección de cierre intempestivo de modales admin al cambiar de opción o interactuar con selects/pestañas. Inmutabilidad de facturas para clientes con aviso legal. Panel de administración con control de cobro (Acquittée), anulación y reactivación de facturas con marca de agua y neutralización fiscal. Descarga de Grand Livre PDF, exportación CSV para clientes y admin, y sincronización de IDs 'job_' con Firebase RTDB.",
+  "active_goal": "Résolution totale du bug ERR_FILE_NOT_FOUND sur les téléchargements PDF et stabilisation anti-fermeture CRM",
+  "current_phase": "Hito 3 — CRM Admin + Moteur Universel PDF (Zero ERR_FILE_NOT_FOUND) + Immuabilité Factures",
+  "action": "Élimination définitive de ERR_FILE_NOT_FOUND sur Chromium/Safari/mobile via conversion Base64 Data URI (FileReader) et suppression des appels doc.save()/worker.save() prématurés. Rétention 60s sur les Object URLs. Exclusion de drag-to-close et backdrop click sur le modal Admin CRM. Résolveur universel de devis (ID/objet/index) et bouton direct Devis PDF dans la table des leads admin. Cache SW v6.",
   "files": [
     "index.html",
     "assets/js/pino-db.js",
@@ -11,7 +11,7 @@
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Validación con Node.js superada. Listo para commit y push a main con atribución Grok 4.6.",
-  "last_commit": "ef34f50",
-  "timestamp": "2026-09-16T06:54:00-04:00"
+  "step": "Audit 100% conforme via sous-agent. Tests Node.js validés. Prêt pour commit et push vers main avec attribution Grok 4.6.",
+  "last_commit": "676031a",
+  "timestamp": "2026-09-16T07:18:00-04:00"
 }

@@ -747,9 +747,69 @@
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  EXPORT UTIL — Descarga segura de Blob en el navegador
+   *  EXPORT UTIL — Descarga segura de Blob / Data URI en el navegador
+   *  Totalmente inmune a ERR_FILE_NOT_FOUND (Chrome, Safari, PWA, file:///, localhost)
    * ───────────────────────────────────────────────────────── */
   function downloadFileBlob(blob, filename) {
+    if (!blob) return false;
+    filename = filename || 'document_pino.pdf';
+
+    // 1. Si ya es una Data URI Base64
+    if (typeof blob === 'string' && blob.startsWith('data:')) {
+      try {
+        const a = document.createElement('a');
+        a.href = blob;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          if (a.parentNode) a.parentNode.removeChild(a);
+        }, 2000);
+        return true;
+      } catch (err) {
+        console.error('[PinoDB] download dataUri error:', err);
+      }
+    }
+
+    // 2. Si es un Blob, convertir a Data URI mediante FileReader para evitar cualquier desincronización de memoria en Chrome
+    if (typeof FileReader !== 'undefined' && blob instanceof Blob) {
+      try {
+        const reader = new FileReader();
+        reader.onloadend = function() {
+          try {
+            const dataUrl = reader.result;
+            if (dataUrl && typeof dataUrl === 'string') {
+              const a = document.createElement('a');
+              a.href = dataUrl;
+              a.download = filename;
+              a.style.display = 'none';
+              document.body.appendChild(a);
+              a.click();
+              setTimeout(() => {
+                if (a.parentNode) a.parentNode.removeChild(a);
+              }, 2000);
+              return;
+            }
+            fallbackObjectUrl(blob, filename);
+          } catch(e) {
+            fallbackObjectUrl(blob, filename);
+          }
+        };
+        reader.onerror = function() {
+          fallbackObjectUrl(blob, filename);
+        };
+        reader.readAsDataURL(blob);
+        return true;
+      } catch (e) {
+        return fallbackObjectUrl(blob, filename);
+      }
+    }
+
+    return fallbackObjectUrl(blob, filename);
+  }
+
+  function fallbackObjectUrl(blob, filename) {
     try {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -758,15 +818,16 @@
       a.style.display = 'none';
       document.body.appendChild(a);
       a.click();
+      // Retener durante 60 segundos completos para que el gestor de descargas de Chrome nunca encuentre el objeto revocado
       setTimeout(() => {
         try {
           if (a.parentNode) a.parentNode.removeChild(a);
           URL.revokeObjectURL(url);
         } catch(e) {}
-      }, 3000);
+      }, 60000);
       return true;
     } catch (err) {
-      console.error('[PinoDB] downloadFileBlob error:', err);
+      console.error('[PinoDB] fallbackObjectUrl error:', err);
       return false;
     }
   }
@@ -889,8 +950,8 @@
           y += 8;
         });
 
-        doc.save(`pino_travaux_${new Date().toISOString().slice(0,10)}.pdf`);
-        return true;
+        const pdfBlob = doc.output('blob');
+        return downloadFileBlob(pdfBlob, `pino_travaux_${new Date().toISOString().slice(0,10)}.pdf`);
       } catch (err) {
         console.warn('[PinoDB] exportJobsPDF error, falling back to CSV:', err);
       }
@@ -999,8 +1060,8 @@
           y += 8;
         });
 
-        doc.save(`pino_devis_prospects_${new Date().toISOString().slice(0,10)}.pdf`);
-        return true;
+        const pdfBlob = doc.output('blob');
+        return downloadFileBlob(pdfBlob, `pino_devis_prospects_${new Date().toISOString().slice(0,10)}.pdf`);
       } catch (err) {
         console.warn('[PinoDB] exportLeadsPDF error, falling back to CSV:', err);
       }

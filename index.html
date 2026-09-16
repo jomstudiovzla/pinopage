@@ -1356,7 +1356,7 @@
   </dialog>
 
   <!-- Iframe silencieux pour impression sans blocage de popup -->
-  <iframe id="pino-silent-print-frame" style="position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;"></iframe>
+  <iframe id="pino-silent-print-frame" src="about:blank" style="position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;"></iframe>
 
   <!-- Modal: Ajouter un Prospect Multi-Plateforme (LeBonCoin, Facebook, etc.) -->
   <dialog id="modal-add-platform-lead" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-700 max-w-lg w-[96%] max-h-[90vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
@@ -1431,9 +1431,8 @@
 
   <!-- Modal 3: Espace Administration — God Mode (Andrés Pino) -->
   <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-[96%] max-h-[92vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
-    <!-- Admin Header (Draggable) -->
-    <div class="modal-drag-header bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 sm:px-8 pt-3 pb-6 sm:pb-8 text-white select-none cursor-grab active:cursor-grabbing shrink-0">
-      <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-3 cursor-grab active:cursor-grabbing transition-colors modal-drag-pill" title="Glisser vers le bas pour fermer"></div>
+    <!-- Admin Header (Stable CRM Panel - Non-draggable to prevent accidental closure) -->
+    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 sm:px-8 pt-5 pb-6 sm:pb-8 text-white select-none shrink-0">
       <div class="flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center gap-4">
           <div class="w-14 h-14 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-2xl shadow-lg">
@@ -5945,7 +5944,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
                     </div>
                   </div>
                   <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <button type="button" onclick="printLeadQuotePDF(window._cachedClientQuotes ? window._cachedClientQuotes[${quotes.indexOf(q)}] : quotes[${quotes.indexOf(q)}])"
+                    <button type="button" onclick="printLeadQuotePDF('${escapeFn(q.sbId || q.id || ref)}')"
                       class="py-2.5 px-3.5 bg-white hover:bg-emerald-50 text-emerald-900 border border-emerald-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 shadow-2xs">
                       <i class="fa-solid fa-file-pdf text-red-600"></i> Devis PDF
                     </button>
@@ -5971,7 +5970,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
                     class="py-3 px-4 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs rounded-xl text-center flex items-center justify-center gap-2 transition-colors">
                     <i class="fa-solid fa-phone text-emerald-700"></i> Appeler
                   </a>
-                  <button type="button" onclick="printLeadQuotePDF(window._cachedClientQuotes ? window._cachedClientQuotes[${quotes.indexOf(q)}] : quotes[${quotes.indexOf(q)}])"
+                  <button type="button" onclick="printLeadQuotePDF('${escapeFn(q.sbId || q.id || ref)}')"
                     class="py-3 px-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold text-xs rounded-xl text-center flex items-center justify-center gap-2 transition-colors cursor-pointer" title="Télécharger ou imprimer le devis officiel">
                     <i class="fa-solid fa-file-pdf text-red-600"></i> PDF
                   </button>
@@ -6286,6 +6285,28 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         if (tabKey === 'factures' && typeof renderAdminFactures === 'function') renderAdminFactures();
         if (tabKey === 'prospection' && typeof renderAdminProspection === 'function') renderAdminProspection();
         if (tabKey === 'config' && typeof renderAdminQualityConfig === 'function') renderAdminQualityConfig();
+        if (tabKey === 'promos') {
+          try {
+            const users = JSON.parse(localStorage.getItem('pino_users') || '[]');
+            const withPromo = users.filter(u => u.promoCode);
+            const countEl = document.getElementById('adm-unique-codes-count');
+            if (countEl) countEl.textContent = `Codes créés : ${withPromo.length}`;
+          } catch(e) {}
+        }
+        if (tabKey === 'impersonate') {
+          try {
+            const select = document.getElementById('adm-impersonate-select');
+            if (select) {
+              const users = JSON.parse(localStorage.getItem('pino_users') || '[]');
+              const clients = users.filter(u => u.role !== 'admin');
+              if (clients.length > 0) {
+                select.innerHTML = clients.map(c => `
+                  <option value="${String(c.email).replace(/"/g, '&quot;')}">${String(c.fullName || c.name || 'Client').replace(/[&<>"']/g, '')} (${String(c.commune || 'Bordeaux').replace(/[&<>"']/g, '')} - ${String(c.email).replace(/[&<>"']/g, '')})</option>
+                `).join('');
+              }
+            }
+          } catch(e) {}
+        }
       } catch (err) {
         console.warn('[Admin] switchAdminTab error for tab:', tabKey, err);
       }
@@ -6427,6 +6448,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
                 ${phoneDigits ? `<a href="${waLink}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors" title="WhatsApp"><i class="fa-brands fa-whatsapp text-sm"></i></a>` : ''}
                 ${phoneClean ? `<a href="tel:${escapeFn(phoneClean)}" class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors" title="Appeler"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
                 <button onclick="openLeadRepairModal('${escapeFn(l.sbId || l.id)}')" class="inline-flex items-center justify-center w-8 h-8 bg-amber-50 text-amber-800 border border-amber-200 rounded-xl hover:bg-amber-100 transition-colors cursor-pointer shadow-2xs" title="Réparer / Qualifier"><i class="fa-solid fa-screwdriver-wrench text-xs"></i></button>
+                <button onclick="printLeadQuotePDF('${escapeFn(l.sbId || l.id || l.ref_code || '')}')" class="inline-flex items-center justify-center w-8 h-8 bg-purple-50 text-purple-700 border border-purple-200 rounded-xl hover:bg-purple-100 transition-colors cursor-pointer shadow-2xs" title="Visualiser & Télécharger Devis PDF"><i class="fa-solid fa-file-pdf text-xs"></i></button>
                 <button onclick="openLeadResponseModal(${idx})" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-700 text-white rounded-xl hover:bg-emerald-800 transition-colors cursor-pointer shadow-xs" title="Établir un Devis & Répondre"><i class="fa-solid fa-file-invoice-dollar text-xs"></i></button>
                 <button onclick="openNewInvoiceModalForLead(${idx})" class="inline-flex items-center justify-center w-8 h-8 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors cursor-pointer shadow-xs" title="Créer Facture à partir de ce devis"><i class="fa-solid fa-receipt text-xs"></i></button>
                 <button onclick="cycleLeadStatus(${idx})" class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors cursor-pointer" title="Changer statut"><i class="fa-solid fa-rotate text-xs"></i></button>
@@ -6790,14 +6812,17 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
     // ─────────────────────────────────────────────────────────
     //  Moteur Universel de Visualisation, Téléchargement PDF & Impression
+    //  Garantie Zero ERR_FILE_NOT_FOUND (Data URI Base64 + Fallback Blob 60s)
     // ─────────────────────────────────────────────────────────
     window.displayOrDownloadDocument = ({ title, filename, htmlContent, autoPrint = false }) => {
       window._currentDocumentData = { title, filename, htmlContent };
-      const titleEl = document.getElementById('document-preview-title');
+      const titleEl = document.getElementById('doc-preview-title') || document.getElementById('document-preview-title');
+      const subtitleEl = document.getElementById('doc-preview-subtitle');
       const containerEl = document.getElementById('document-preview-container');
       const modal = document.getElementById('modal-document-preview');
 
       if (titleEl) titleEl.textContent = title || 'Document Officiel — Pino Espaces Verts';
+      if (subtitleEl && filename) subtitleEl.textContent = `Fichier : ${filename} • Prêt pour téléchargement ou impression`;
       if (containerEl) containerEl.innerHTML = htmlContent;
       if (modal && typeof modal.showModal === 'function') {
         if (!modal.open) modal.showModal();
@@ -6808,29 +6833,146 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       }
     };
 
-    window.triggerCurrentDocPDFDownload = () => {
+    window.triggerCurrentDocPDFDownload = async () => {
       if (!window._currentDocumentData) return;
       const element = document.getElementById('document-preview-container');
       const filename = window._currentDocumentData.filename || 'document_pino.pdf';
+      const btn = document.getElementById('btn-doc-download-pdf');
 
-      if (typeof html2pdf !== 'undefined') {
-        const opt = {
-          margin:       [8, 8, 8, 8],
-          filename:     filename,
-          image:        { type: 'jpeg', quality: 0.98 },
-          html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
-          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        showNotificationToast('Génération du fichier PDF en cours...', 'info');
-        html2pdf().set(opt).from(element).save().then(() => {
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Préparation PDF…';
+      }
+
+      showNotificationToast('Génération du fichier PDF en cours...', 'info');
+
+      // Moteur universel de téléchargement Base64 Data URI / Blob sécurisé
+      // Élimine à 100% l'erreur Chrome "ERR_FILE_NOT_FOUND" et fonctionne sur Safari, PWA, mobile et file:///
+      const saveFileSafely = (data, name) => {
+        if (typeof data === 'string' && data.startsWith('data:')) {
+          try {
+            const a = document.createElement('a');
+            a.href = data;
+            a.download = name;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+              if (a.parentNode) a.parentNode.removeChild(a);
+            }, 2000);
+            showNotificationToast('✅ PDF téléchargé avec succès !', 'success');
+            return true;
+          } catch(err) {
+            console.error('[pdf] download dataUri direct error:', err);
+          }
+        }
+
+        if (data instanceof Blob) {
+          if (typeof FileReader !== 'undefined') {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              try {
+                const dataUrl = reader.result;
+                if (dataUrl && typeof dataUrl === 'string') {
+                  const a = document.createElement('a');
+                  a.href = dataUrl;
+                  a.download = name;
+                  a.style.display = 'none';
+                  document.body.appendChild(a);
+                  a.click();
+                  setTimeout(() => {
+                    if (a.parentNode) a.parentNode.removeChild(a);
+                  }, 2000);
+                  showNotificationToast('✅ PDF téléchargé avec succès !', 'success');
+                  return;
+                }
+                fallbackObjectUrl(data, name);
+              } catch(e) {
+                fallbackObjectUrl(data, name);
+              }
+            };
+            reader.onerror = () => {
+              fallbackObjectUrl(data, name);
+            };
+            reader.readAsDataURL(data);
+            return true;
+          } else {
+            return fallbackObjectUrl(data, name);
+          }
+        }
+        return false;
+      };
+
+      const fallbackObjectUrl = (blob, name) => {
+        try {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = name;
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          // Rétention 60 secondes pour que Chrome ne perde jamais le fichier
+          setTimeout(() => {
+            try {
+              if (a.parentNode) a.parentNode.removeChild(a);
+              URL.revokeObjectURL(url);
+            } catch(e) {}
+          }, 60000);
           showNotificationToast('✅ PDF téléchargé avec succès !', 'success');
-        }).catch(err => {
-          console.error('[pdf] html2pdf error:', err);
-          showNotificationToast('Utilisation de la boîte d\'impression système pour le PDF.', 'info');
+          return true;
+        } catch(e) {
+          console.error('[pdf] Blob download fallback failed:', e);
           triggerCurrentDocPrint();
-        });
-      } else {
+          return false;
+        }
+      };
+
+      try {
+        if (typeof html2pdf !== 'undefined' && element) {
+          const opt = {
+            margin:       [8, 8, 8, 8],
+            filename:     filename,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, letterRendering: true, logging: false },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          };
+
+          // On extrait le flux de données sans passer par doc.save() qui révoque le blob trop vite
+          const worker = html2pdf().set(opt).from(element);
+          let pdfData = null;
+
+          try {
+            pdfData = await worker.outputPdf('datauristring');
+          } catch(err1) {
+            console.warn('[pdf] outputPdf datauristring fallback to blob:', err1);
+            try {
+              pdfData = await worker.outputPdf('blob');
+            } catch(err2) {
+              console.warn('[pdf] outputPdf blob fallback to toPdf().get:', err2);
+              const pdfDoc = await worker.toPdf().get('pdf');
+              pdfData = pdfDoc.output('blob');
+            }
+          }
+
+          if (pdfData) {
+            saveFileSafely(pdfData, filename);
+          } else {
+            throw new Error('Échec de capture du flux PDF');
+          }
+        } else {
+          showNotificationToast('Utilisation de la boîte d\'impression pour sauvegarder en PDF.', 'info');
+          triggerCurrentDocPrint();
+        }
+      } catch (err) {
+        console.error('[pdf] Erreur html2pdf:', err);
+        showNotificationToast('Boîte d\'impression ouverte pour sauvegarder en PDF.', 'info');
         triggerCurrentDocPrint();
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-download"></i> Télécharger PDF';
+        }
       }
     };
 
@@ -6858,26 +7000,47 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           </head>
           <body>
             ${window._currentDocumentData.htmlContent}
-            <script>
-              window.onload = function() {
-                setTimeout(function() {
-                  window.focus();
-                  window.print();
-                }, 250);
-              };
-            <\/script>
           </body>
           </html>
         `);
         doc.close();
+        setTimeout(() => {
+          try {
+            frameDoc.focus();
+            frameDoc.print();
+          } catch(e) {
+            window.print();
+          }
+        }, 350);
       } catch (e) {
         window.print();
       }
     };
 
     // Printable PDF / HTML Quote Function (Compatible Mobile, iOS, Safari & Desktop)
-    window.printLeadQuotePDF = (quote) => {
-      if (!quote) return;
+    window.printLeadQuotePDF = (quoteOrId) => {
+      let quote = quoteOrId;
+      if (typeof quoteOrId === 'string') {
+        const id = quoteOrId;
+        const list = window._cachedClientQuotes || [];
+        quote = list.find(q => (q.sbId === id || q.id === id || q.ref_code === id)) || null;
+        if (!quote && window._cachedAdminLeads) {
+          quote = window._cachedAdminLeads.find(l => (l.sbId === id || l.id === id || l.ref_code === id)) || null;
+        }
+        if (!quote) {
+          try {
+            const local = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+            quote = local.find(l => (l.sbId === id || l.id === id || l.ref_code === id)) || null;
+          } catch(e) {}
+        }
+      } else if (typeof quoteOrId === 'number') {
+        const list = window._cachedClientQuotes || window._cachedAdminLeads || [];
+        quote = list[quoteOrId] || null;
+      }
+      if (!quote) {
+        showNotificationToast('Devis introuvable pour l\'impression PDF.', 'error');
+        return;
+      }
       const ref = quote.ref_code || quote.id || 'DEV-2026';
       const resp = quote.response || {};
       const total = parseFloat(resp.price_ttc || quote.budget || 0).toFixed(2);
@@ -7225,7 +7388,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       const headers = document.querySelectorAll('.modal-drag-header');
       headers.forEach(header => {
         const dialog = header.closest('dialog');
-        if (!dialog) return;
+        if (!dialog || dialog.id === 'modal-window-admin' || dialog.id === 'modal-window-client') return;
 
         let startY = 0;
         let currentY = 0;
