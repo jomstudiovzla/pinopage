@@ -5446,6 +5446,12 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
   </aside>
 
   <style>
+    /* ── FIX CRITIQUE: Tailwind .flex override le display:none natif des <dialog> ── */
+    /* Sans cette règle, tous les <dialog class="flex ..."> sont visibles même fermés */
+    dialog:not([open]) {
+      display: none !important;
+    }
+
     /* Section Windows Modal Styling */
     dialog.section-window {
       border: none;
