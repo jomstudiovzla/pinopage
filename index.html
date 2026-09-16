@@ -1071,7 +1071,7 @@
         <div class="flex justify-between items-center">
           <div>
             <h4 class="font-bold text-base text-slate-900">Historique des Factures & Dossiers Fiscaux</h4>
-            <p class="text-xs text-slate-500 mt-0.5">Factures Unipros SAP (Crédit d'impôt 50%) et factures directes B2B</p>
+            <p class="text-xs text-slate-500 mt-0.5">Factures Unipros SAP (Crédit d'impôt 50%) et factures directes B2B — données temps réel Firebase</p>
           </div>
           <button onclick="alert('Module de création de facture Unipros prêt pour Hito 2.')" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 transition-colors shadow-xs">
             <i class="fa-solid fa-plus"></i> Nouvelle Facture
@@ -1090,36 +1090,14 @@
                 <th class="py-3.5 px-4">Statut</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr class="hover:bg-slate-50/80 transition-colors">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">#FAC-2026-081</td>
-                <td class="py-3.5 px-4 font-bold text-slate-800">Sophie Dupont</td>
-                <td class="py-3.5 px-4"><span class="bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-2.5 py-1 rounded-full text-xs">Unipros SAP</span></td>
-                <td class="py-3.5 px-4 text-slate-600 font-medium">14/08/2026</td>
-                <td class="py-3.5 px-4 font-black text-slate-900">240,00 €</td>
-                <td class="py-3.5 px-4 text-emerald-700 font-black">120,00 €</td>
-                <td class="py-3.5 px-4"><span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">Acquittée</span></td>
-              </tr>
-              <tr class="hover:bg-slate-50/80 transition-colors">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">#FAC-2026-080</td>
-                <td class="py-3.5 px-4 font-bold text-slate-800">Résidence Les Cèdres (Syndic)</td>
-                <td class="py-3.5 px-4"><span class="bg-slate-100 text-slate-800 border border-slate-200 font-bold px-2.5 py-1 rounded-full text-xs">Direct B2B</span></td>
-                <td class="py-3.5 px-4 text-slate-600 font-medium">10/08/2026</td>
-                <td class="py-3.5 px-4 font-black text-slate-900">1 250,00 €</td>
-                <td class="py-3.5 px-4 text-slate-900 font-black">1 250,00 €</td>
-                <td class="py-3.5 px-4"><span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">Acquittée</span></td>
-              </tr>
-              <tr class="hover:bg-slate-50/80 transition-colors">
-                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">#FAC-2026-079</td>
-                <td class="py-3.5 px-4 font-bold text-slate-800">Marc Dubois</td>
-                <td class="py-3.5 px-4"><span class="bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-2.5 py-1 rounded-full text-xs">Unipros SAP</span></td>
-                <td class="py-3.5 px-4 text-slate-600 font-medium">02/08/2026</td>
-                <td class="py-3.5 px-4 font-black text-slate-900">380,00 €</td>
-                <td class="py-3.5 px-4 text-emerald-700 font-black">190,00 €</td>
-                <td class="py-3.5 px-4"><span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">Acquittée</span></td>
-              </tr>
+            <tbody id="adm-factures-table-body" class="divide-y divide-slate-100">
+              <!-- Populated dynamically by JS from Firebase -->
             </tbody>
           </table>
+        </div>
+        <div id="adm-factures-empty" class="hidden p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+          <i class="fa-solid fa-file-invoice text-emerald-600 text-lg mb-2 block"></i>
+          Aucune facture enregistrée. Les factures seront créées automatiquement à partir des travaux CRM validés.
         </div>
       </div>
 
@@ -4599,6 +4577,21 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         });
       } catch (e) {}
 
+      // Update the counter card in the header
+      const countEl = document.getElementById('client-quotes-count');
+      const statusEl = document.getElementById('client-quotes-status-text');
+      if (countEl) countEl.textContent = String(quotes.length);
+      if (statusEl) {
+        const answered = quotes.filter(q => q.response || q.status === 'Devis envoyé').length;
+        if (answered > 0) {
+          statusEl.textContent = `${answered} proposition(s) chiffrée(s) reçue(s)`;
+          statusEl.className = 'text-[11px] text-emerald-700 font-bold mt-1';
+        } else {
+          statusEl.textContent = 'Estimation sous 24h par Andrés';
+          statusEl.className = 'text-[11px] text-slate-500 mt-1';
+        }
+      }
+
       if (quotes.length === 0) {
         listEl.innerHTML = `
           <div class="p-6 text-center text-slate-500 text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-3">
@@ -4765,6 +4758,10 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         } catch (e) {}
       }
 
+      // Update the factures counter card
+      const factCountEl = document.getElementById('client-factures-count');
+      if (factCountEl) factCountEl.textContent = String(clientJobs.length);
+
       if (clientJobs.length === 0) {
         listEl.innerHTML = `
           <div class="p-5 text-center text-slate-500 text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-1.5">
@@ -4925,6 +4922,9 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }
       if (tabKey === 'travaux') {
         renderAdminJobs();
+      }
+      if (tabKey === 'factures') {
+        renderAdminFactures();
       }
     };
 
@@ -5296,6 +5296,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     // ─────────────────────────────────────────────────────────
 
     let _activeClientNotifListener = null;
+    let _activeClientQuotesListener = null;
     let _activeClientNotifEmail = null;
     let _seenNotifIds = new Set();
 
@@ -5308,12 +5309,27 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         try { _activeClientNotifListener(); } catch(e) {}
         _activeClientNotifListener = null;
       }
+      if (_activeClientQuotesListener) {
+        try { _activeClientQuotesListener(); } catch(e) {}
+        _activeClientQuotesListener = null;
+      }
       _activeClientNotifEmail = normEmail;
 
+      // 1. Écouter les notifications directes en temps réel
       if (window.PinoDB && typeof PinoDB.listenClientNotifications === 'function') {
         _activeClientNotifListener = PinoDB.listenClientNotifications(normEmail, (notifs) => {
           const unread = (notifs || []).filter(n => !n.read);
           updateClientNotificationUI(unread);
+          renderClientQuotes(normEmail);
+          renderClientInvoices(normEmail);
+        });
+      }
+
+      // 2. Écouter les mises à jour de devis en temps réel
+      if (window.PinoDB && typeof PinoDB.listenClientQuotes === 'function') {
+        _activeClientQuotesListener = PinoDB.listenClientQuotes(normEmail, (quotes) => {
+          renderClientQuotes(normEmail);
+          renderClientInvoices(normEmail);
         });
       }
     };
@@ -6050,6 +6066,73 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
                   <i class="fa-solid fa-note-sticky"></i>
                 </button>
               ` : ''}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    // Render Admin Factures (Dynamique depuis Firebase / Supabase)
+    window.renderAdminFactures = async () => {
+      const tbody = document.getElementById('adm-factures-table-body');
+      const emptyEl = document.getElementById('adm-factures-empty');
+      if (!tbody) return;
+
+      tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 text-xs">
+        <i class="fa-solid fa-spinner fa-spin mr-2"></i> Chargement des factures...
+      </td></tr>`;
+
+      let jobs = [];
+      if (window.PinoDB) {
+        try {
+          const res = await PinoDB.fetchJobs();
+          if (res.ok && Array.isArray(res.data) && res.data.length > 0) {
+            jobs = res.data;
+          }
+        } catch(e) {}
+      }
+
+      if (jobs.length === 0) {
+        try {
+          const local = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+          if (local.length > 0) jobs = local;
+        } catch(e) {}
+      }
+
+      if (jobs.length === 0) {
+        tbody.innerHTML = '';
+        if (emptyEl) emptyEl.classList.remove('hidden');
+        return;
+      }
+
+      if (emptyEl) emptyEl.classList.add('hidden');
+
+      const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (s => String(s || ''));
+
+      tbody.innerHTML = jobs.map((j, idx) => {
+        const charged = parseFloat(j.amount_charged) || 0;
+        const isUnipros = (j.payment_method || '').toLowerCase() === 'unipros';
+        const clientPart = isUnipros ? (charged * 0.5) : charged;
+        const isPaid = j.payment_status === 'paid';
+        const dateStr = j.date_start ? new Date(j.date_start).toLocaleDateString('fr-FR') : (j.created_at ? new Date(j.created_at).toLocaleDateString('fr-FR') : '—');
+        const facNumber = `#FAC-2026-${String(idx + 1).padStart(3, '0')}`;
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors">
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-900">${facNumber}</td>
+            <td class="py-3.5 px-4 font-bold text-slate-800">${escapeFn(j.client_name || 'Client')}</td>
+            <td class="py-3.5 px-4">
+              <span class="${isUnipros ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-slate-100 text-slate-800 border-slate-200'} border font-bold px-2.5 py-1 rounded-full text-xs">
+                ${isUnipros ? 'Unipros SAP' : 'Direct B2B'}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-slate-600 font-medium">${dateStr}</td>
+            <td class="py-3.5 px-4 font-black text-slate-900">${charged.toFixed(2)} €</td>
+            <td class="py-3.5 px-4 ${isUnipros ? 'text-emerald-700' : 'text-slate-900'} font-black">${clientPart.toFixed(2)} €</td>
+            <td class="py-3.5 px-4">
+              <span class="text-xs font-bold px-2.5 py-1 rounded-full ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                ${isPaid ? 'Acquittée' : 'En attente'}
+              </span>
             </td>
           </tr>
         `;

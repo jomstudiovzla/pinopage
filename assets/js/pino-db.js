@@ -263,34 +263,57 @@
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  LEADS — Obtener solicitudes de un cliente específico
+   *  LEADS — Obtener solicitudes de un cliente específico (con merge y listener)
    * ───────────────────────────────────────────────────────── */
   async function fetchClientQuotes(clientEmail) {
     if (!clientEmail) return { ok: false, data: [] };
     const normEmail = clientEmail.trim().toLowerCase();
 
+    let fbMatches = [];
     const db = rtdb();
     if (db) {
       try {
         const snap = await db.ref('leads').once('value');
         const val = snap.val() || {};
-        const matches = Object.keys(val)
+        fbMatches = Object.keys(val)
           .map(k => ({ id: k, ...val[k] }))
           .filter(lead => (lead.email || '').trim().toLowerCase() === normEmail)
           .reverse();
-        if (matches.length > 0) return { ok: true, data: matches };
       } catch (err) {
         log('fetchClientQuotes:rtdb', err);
       }
     }
 
+    let localMatches = [];
     try {
       const local = JSON.parse(localStorage.getItem('pino_leads') || '[]');
-      const matches = local.filter(l => (l.email || '').trim().toLowerCase() === normEmail);
-      return { ok: true, data: matches };
-    } catch(e) {
-      return { ok: false, data: [] };
-    }
+      localMatches = local.filter(l => (l.email || '').trim().toLowerCase() === normEmail);
+    } catch(e) {}
+
+    const fbIds = new Set(fbMatches.map(l => l.id || l.ref_code));
+    const extraLocal = localMatches.filter(l => !fbIds.has(l.id) && !fbIds.has(l.ref_code));
+    const allMatches = [...fbMatches, ...extraLocal];
+
+    return { ok: true, data: allMatches };
+  }
+
+  function listenClientQuotes(clientEmail, callback) {
+    if (!clientEmail || typeof callback !== 'function') return () => {};
+    const normEmail = clientEmail.trim().toLowerCase();
+    const db = rtdb();
+    if (!db) return () => {};
+
+    const leadsRef = db.ref('leads');
+    const listener = (snap) => {
+      const val = snap.val() || {};
+      const matches = Object.keys(val)
+        .map(k => ({ id: k, ...val[k] }))
+        .filter(lead => (lead.email || '').trim().toLowerCase() === normEmail)
+        .reverse();
+      callback(matches);
+    };
+    leadsRef.on('value', listener);
+    return () => leadsRef.off('value', listener);
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -740,6 +763,7 @@
     exportJobsCSV,
     exportJobsPDF,
     listenClientNotifications,
+    listenClientQuotes,
     fetchClientNotifications,
     markNotificationRead,
   };
