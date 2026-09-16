@@ -192,6 +192,47 @@ select
 from public.jobs j
 order by j.date_start desc;
 
+-- ---------------------------------------------------------------------------
+-- 7. STORAGE BUCKETS Y POLÍTICAS RLS (portfolio, invoices, dossiers)
+-- ---------------------------------------------------------------------------
+insert into storage.buckets (id, name, public)
+values
+  ('portfolio', 'portfolio', true),
+  ('invoices', 'invoices', false),
+  ('dossiers', 'dossiers', false)
+on conflict (id) do update set public = excluded.public;
+
+-- Política portfolio: lectura pública para todos
+do $$
+begin
+  if not exists (select 1 from pg_policies where policyname = 'portfolio_public_read' and tablename = 'objects') then
+    create policy "portfolio_public_read" on storage.objects for select using (bucket_id = 'portfolio');
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'portfolio_admin_all' and tablename = 'objects') then
+    create policy "portfolio_admin_all" on storage.objects for all to authenticated
+      using (bucket_id = 'portfolio' and (select raw_app_meta_data->>'role' from auth.users where id = (select auth.uid())) = 'admin')
+      with check (bucket_id = 'portfolio' and (select raw_app_meta_data->>'role' from auth.users where id = (select auth.uid())) = 'admin');
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'invoices_admin_all' and tablename = 'objects') then
+    create policy "invoices_admin_all" on storage.objects for all to authenticated
+      using (bucket_id = 'invoices' and (select raw_app_meta_data->>'role' from auth.users where id = (select auth.uid())) = 'admin')
+      with check (bucket_id = 'invoices' and (select raw_app_meta_data->>'role' from auth.users where id = (select auth.uid())) = 'admin');
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'invoices_client_read' and tablename = 'objects') then
+    create policy "invoices_client_read" on storage.objects for select to authenticated
+      using (bucket_id = 'invoices' and (storage.foldername(name))[1] = (select auth.uid())::text);
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'dossiers_admin_all' and tablename = 'objects') then
+    create policy "dossiers_admin_all" on storage.objects for all to authenticated
+      using (bucket_id = 'dossiers' and (select raw_app_meta_data->>'role' from auth.users where id = (select auth.uid())) = 'admin')
+      with check (bucket_id = 'dossiers' and (select raw_app_meta_data->>'role' from auth.users where id = (select auth.uid())) = 'admin');
+  end if;
+  if not exists (select 1 from pg_policies where policyname = 'dossiers_client_read' and tablename = 'objects') then
+    create policy "dossiers_client_read" on storage.objects for select to authenticated
+      using (bucket_id = 'dossiers' and (storage.foldername(name))[1] = (select auth.uid())::text);
+  end if;
+end $$;
+
 -- ============================================================================
 -- FIN — Para aplicar: SQL Editor → pegar → Run
 -- ============================================================================
