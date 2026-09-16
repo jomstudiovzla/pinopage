@@ -1,24 +1,20 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "CRM de Trabajos + Roles Google OAuth + Exportes PDF/CSV + Script Maestro SQL",
-  "current_phase": "Hito 1 — Completado y Listo para Ejecutar SQL",
-  "action": "Implementado sistema de Trabajos (Jobs CRM) en pino-db.js e index.html: registro de trabajos por cliente, horas, montos facturados/pagados, métodos de pago y notas. Soporte de roles automáticos Google OAuth (pino.spacesverts@gmail.com como admin, demás como client). Generador de PDF con jsPDF y CSV/Excel. Generado docs/sql/FULL_MIGRATION_MASTER.sql y copiado automáticamente al portapapeles.",
+  "active_goal": "Sincronización Total GitHub + PWA Service Worker v3",
+  "current_phase": "Hito 1 — Código y Repositorio 100% al Día",
+  "action": "Verificados y confirmados los commits en GitHub (a104e66 y 43ce25d). Actualizado sw.js a v3 con estrategia network-first para navegación y purga automática de cachés antiguas, resolviendo problemas de caché en navegadores.",
   "files": [
+    "sw.js",
+    "index.html",
     "assets/js/pino-db.js",
     "assets/js/supabase-config.js",
-    "index.html",
     "docs/sql/004_admin_roles_and_jobs.sql",
     "docs/sql/FULL_MIGRATION_MASTER.sql",
     "CURRENT_STATE.md"
   ],
   "repo_url": "https://github.com/jomstudiovzla/pinopage.git",
   "live_url": "https://jomstudiovzla.github.io/pinopage/",
-  "pending_manual_steps": [
-    "1. Supabase → Authentication → Providers → Google → ON (Pegar Client ID y Secret ya creados)",
-    "2. Supabase → Authentication → URL Configuration (Asegurar http://127.0.0.1:8080/ y https://jomstudiovzla.github.io/pinopage/)",
-    "3. Supabase → SQL Editor → Pegar (Cmd+V, ya copiado al portapapeles) y hacer clic en Run"
-  ],
-  "next_step": "Ejecutar el SQL en Supabase y probar el botón de inicio de sesión con Google.",
-  "timestamp": "2026-09-15T21:46:40-04:00"
+  "latest_commit": "43ce25d",
+  "timestamp": "2026-09-15T21:50:55-04:00"
 }
