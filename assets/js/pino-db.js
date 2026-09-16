@@ -88,13 +88,21 @@
   /* ─────────────────────────────────────────────────────────
    *  LEADS — Cargar leads (solo admin)
    * ───────────────────────────────────────────────────────── */
-  async function fetchLeads(limit = 100) {
+  async function fetchLeads(opts = 100) {
+    const limit = Math.max(1, parseInt(typeof opts === 'object' && opts ? opts.limit : opts, 10) || 100);
     const db = rtdb();
     if (db) {
       try {
         const snap = await db.ref('leads').limitToLast(limit).once('value');
         const val = snap.val() || {};
-        const list = Object.keys(val).map(k => ({ id: k, ...val[k] })).reverse();
+        const list = Object.keys(val).map(k => {
+          const item = val[k];
+          return {
+            id: k,
+            ...item,
+            status: item.status === 'new' ? 'Nouveau' : (item.status || 'Nouveau')
+          };
+        }).reverse();
         return { ok: true, data: list };
       } catch (err) {
         log('fetchLeads:rtdb', err);
@@ -253,7 +261,8 @@
   /* ─────────────────────────────────────────────────────────
    *  PROFILES — Cargar lista de usuarios (solo admin)
    * ───────────────────────────────────────────────────────── */
-  async function fetchProfiles(limit = 100) {
+  async function fetchProfiles(opts = 100) {
+    const limit = Math.max(1, parseInt(typeof opts === 'object' && opts ? opts.limit : opts, 10) || 100);
     const db = rtdb();
     if (db) {
       try {
@@ -449,7 +458,9 @@
   /* ─────────────────────────────────────────────────────────
    *  JOBS CRM — Cargar lista de trabajos
    * ───────────────────────────────────────────────────────── */
-  async function fetchJobs({ limit = 200, status = null } = {}) {
+  async function fetchJobs(opts = {}) {
+    const limit = Math.max(1, parseInt(typeof opts === 'number' ? opts : (opts && opts.limit ? opts.limit : 200), 10) || 200);
+    const status = (typeof opts === 'object' && opts) ? (opts.status || null) : null;
     const db = rtdb();
     if (db) {
       try {

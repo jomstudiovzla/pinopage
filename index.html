@@ -931,7 +931,7 @@
   </dialog>
 
   <!-- Modal 3: Espace Administration — God Mode (Andrés Pino) -->
-  <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-5xl w-full p-0 overflow-hidden text-brand-charcoal">
+  <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-full p-0 overflow-hidden text-brand-charcoal">
     <!-- Admin Header (Draggable) -->
     <div class="modal-drag-header bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 sm:px-8 pt-3 pb-6 sm:pb-8 text-white select-none cursor-grab active:cursor-grabbing">
       <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-3 cursor-grab active:cursor-grabbing transition-colors modal-drag-pill" title="Glisser vers le bas pour fermer"></div>
@@ -965,7 +965,7 @@
         <i class="fa-solid fa-chart-pie mr-1.5"></i> Tableau de bord & KPIs
       </button>
       <button type="button" onclick="switchAdminTab('leads')" id="adm-tab-leads" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
-        <i class="fa-solid fa-address-book mr-1.5"></i> Leads & Devis (<span id="adm-leads-badge">4</span>)
+        <i class="fa-solid fa-address-book mr-1.5"></i> Leads & Devis (<span id="adm-leads-badge">0</span>)
       </button>
       <button type="button" onclick="switchAdminTab('factures')" id="adm-tab-factures" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> Factures & Unipros
@@ -985,7 +985,7 @@
     </div>
 
     <!-- Admin Tab Content Body -->
-    <div class="p-6 sm:p-8 max-h-[60vh] overflow-y-auto space-y-6">
+    <div class="p-6 sm:p-8 max-h-[80vh] overflow-y-auto space-y-6">
       <!-- 1. Tab KPIs -->
       <div id="adm-content-kpis" class="adm-content space-y-6">
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -996,8 +996,8 @@
           </div>
           <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
             <span class="text-[11px] font-bold uppercase text-slate-500">Total Leads reçus</span>
-            <span class="block text-2xl font-extrabold text-blue-700 mt-1" id="adm-kpi-leads">24</span>
-            <span class="text-xxs text-blue-700 font-bold">18 Particuliers • 6 B2B</span>
+            <span class="block text-2xl font-extrabold text-blue-700 mt-1" id="adm-kpi-leads">0</span>
+            <span class="text-xxs text-blue-700 font-bold">Particuliers & B2B</span>
           </div>
           <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
             <span class="text-[11px] font-bold uppercase text-slate-500">Économies Unipros générées</span>
@@ -1036,22 +1036,27 @@
       <!-- 2. Tab Leads & Devis CRM -->
       <div id="adm-content-leads" class="adm-content hidden space-y-4">
         <div class="flex justify-between items-center">
-          <h4 class="font-bold text-sm text-slate-800">Gestion des Prospects & Demandes de Devis (CRM)</h4>
-          <span class="text-xs text-slate-500">Mise à jour en temps réel</span>
+          <div>
+            <h4 class="font-bold text-base text-slate-900">Gestion des Prospects & Demandes de Devis</h4>
+            <p class="text-xs text-slate-500 mt-0.5">Demandes clients reçues en temps réel via Firebase Realtime Database</p>
+          </div>
+          <button type="button" onclick="renderAdminLeads()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer">
+            <i class="fa-solid fa-arrows-rotate"></i> Actualiser
+          </button>
         </div>
 
-        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 text-slate-600 border-b border-slate-200 font-bold uppercase text-[10px]">
+        <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-xs">
+          <table class="min-w-[920px] w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-50 text-slate-700 border-b border-slate-200 font-bold uppercase text-xs">
               <tr>
-                <th class="p-3">Date</th>
-                <th class="p-3">Client</th>
-                <th class="p-3">Contact</th>
-                <th class="p-3">Commune</th>
-                <th class="p-3">Prestation</th>
-                <th class="p-3">Budget estimé</th>
-                <th class="p-3">Statut</th>
-                <th class="p-3 text-right">Actions rapides</th>
+                <th class="py-3.5 px-4 min-w-[130px]">Date</th>
+                <th class="py-3.5 px-4 min-w-[180px]">Client</th>
+                <th class="py-3.5 px-4 min-w-[210px]">Contact</th>
+                <th class="py-3.5 px-4 min-w-[140px]">Commune</th>
+                <th class="py-3.5 px-4 min-w-[160px]">Prestation</th>
+                <th class="py-3.5 px-4 min-w-[120px]">Budget estimé</th>
+                <th class="py-3.5 px-4 min-w-[120px]">Statut</th>
+                <th class="py-3.5 px-4 text-right min-w-[160px]">Actions rapides</th>
               </tr>
             </thead>
             <tbody id="adm-leads-table-body" class="divide-y divide-slate-100">
@@ -1064,51 +1069,54 @@
       <!-- 3. Tab Factures -->
       <div id="adm-content-factures" class="adm-content hidden space-y-4">
         <div class="flex justify-between items-center">
-          <h4 class="font-bold text-sm text-slate-800">Historique des Factures & Dossiers Fiscaux</h4>
-          <button onclick="alert('Simulation: Module de création de facture Unipros prêt pour Hito 2.')" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3 py-1.5 rounded-lg cursor-pointer">
-            + Nouvelle Facture
+          <div>
+            <h4 class="font-bold text-base text-slate-900">Historique des Factures & Dossiers Fiscaux</h4>
+            <p class="text-xs text-slate-500 mt-0.5">Factures Unipros SAP (Crédit d'impôt 50%) et factures directes B2B</p>
+          </div>
+          <button onclick="alert('Module de création de facture Unipros prêt pour Hito 2.')" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 transition-colors shadow-xs">
+            <i class="fa-solid fa-plus"></i> Nouvelle Facture
           </button>
         </div>
-        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 text-slate-600 border-b border-slate-200 font-bold uppercase text-[10px]">
+        <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-xs">
+          <table class="min-w-[800px] w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-50 text-slate-700 border-b border-slate-200 font-bold uppercase text-xs">
               <tr>
-                <th class="p-3">N° Facture</th>
-                <th class="p-3">Client</th>
-                <th class="p-3">Type</th>
-                <th class="p-3">Date</th>
-                <th class="p-3">Montant TTC</th>
-                <th class="p-3">Reste Client</th>
-                <th class="p-3">Statut</th>
+                <th class="py-3.5 px-4">N° Facture</th>
+                <th class="py-3.5 px-4">Client</th>
+                <th class="py-3.5 px-4">Type</th>
+                <th class="py-3.5 px-4">Date</th>
+                <th class="py-3.5 px-4">Montant TTC</th>
+                <th class="py-3.5 px-4">Reste Client</th>
+                <th class="py-3.5 px-4">Statut</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              <tr>
-                <td class="p-3 font-mono font-bold">#FAC-2026-081</td>
-                <td class="p-3 font-semibold">Sophie Dupont</td>
-                <td class="p-3"><span class="bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded text-xxs">Unipros SAP</span></td>
-                <td class="p-3 text-slate-500">14/08/2026</td>
-                <td class="p-3 font-bold">240,00 €</td>
-                <td class="p-3 text-emerald-700 font-bold">120,00 €</td>
-                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 text-xxs font-bold px-2 py-0.5 rounded-full">Acquittée</span></td>
+              <tr class="hover:bg-slate-50/80 transition-colors">
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">#FAC-2026-081</td>
+                <td class="py-3.5 px-4 font-bold text-slate-800">Sophie Dupont</td>
+                <td class="py-3.5 px-4"><span class="bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-2.5 py-1 rounded-full text-xs">Unipros SAP</span></td>
+                <td class="py-3.5 px-4 text-slate-600 font-medium">14/08/2026</td>
+                <td class="py-3.5 px-4 font-black text-slate-900">240,00 €</td>
+                <td class="py-3.5 px-4 text-emerald-700 font-black">120,00 €</td>
+                <td class="py-3.5 px-4"><span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">Acquittée</span></td>
               </tr>
-              <tr>
-                <td class="p-3 font-mono font-bold">#FAC-2026-080</td>
-                <td class="p-3 font-semibold">Résidence Les Cèdres (Syndic)</td>
-                <td class="p-3"><span class="bg-slate-100 text-slate-800 font-bold px-2 py-0.5 rounded text-xxs">Direct B2B</span></td>
-                <td class="p-3 text-slate-500">10/08/2026</td>
-                <td class="p-3 font-bold">1 250,00 €</td>
-                <td class="p-3 text-slate-900 font-bold">1 250,00 €</td>
-                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 text-xxs font-bold px-2 py-0.5 rounded-full">Acquittée</span></td>
+              <tr class="hover:bg-slate-50/80 transition-colors">
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">#FAC-2026-080</td>
+                <td class="py-3.5 px-4 font-bold text-slate-800">Résidence Les Cèdres (Syndic)</td>
+                <td class="py-3.5 px-4"><span class="bg-slate-100 text-slate-800 border border-slate-200 font-bold px-2.5 py-1 rounded-full text-xs">Direct B2B</span></td>
+                <td class="py-3.5 px-4 text-slate-600 font-medium">10/08/2026</td>
+                <td class="py-3.5 px-4 font-black text-slate-900">1 250,00 €</td>
+                <td class="py-3.5 px-4 text-slate-900 font-black">1 250,00 €</td>
+                <td class="py-3.5 px-4"><span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">Acquittée</span></td>
               </tr>
-              <tr>
-                <td class="p-3 font-mono font-bold">#FAC-2026-079</td>
-                <td class="p-3 font-semibold">Marc Dubois</td>
-                <td class="p-3"><span class="bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded text-xxs">Unipros SAP</span></td>
-                <td class="p-3 text-slate-500">02/08/2026</td>
-                <td class="p-3 font-bold">380,00 €</td>
-                <td class="p-3 text-emerald-700 font-bold">190,00 €</td>
-                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 text-xxs font-bold px-2 py-0.5 rounded-full">Acquittée</span></td>
+              <tr class="hover:bg-slate-50/80 transition-colors">
+                <td class="py-3.5 px-4 font-mono font-bold text-slate-900">#FAC-2026-079</td>
+                <td class="py-3.5 px-4 font-bold text-slate-800">Marc Dubois</td>
+                <td class="py-3.5 px-4"><span class="bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-2.5 py-1 rounded-full text-xs">Unipros SAP</span></td>
+                <td class="py-3.5 px-4 text-slate-600 font-medium">02/08/2026</td>
+                <td class="py-3.5 px-4 font-black text-slate-900">380,00 €</td>
+                <td class="py-3.5 px-4 text-emerald-700 font-black">190,00 €</td>
+                <td class="py-3.5 px-4"><span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">Acquittée</span></td>
               </tr>
             </tbody>
           </table>
@@ -1410,23 +1418,23 @@
         <!-- Tabla de trabajos -->
         <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
           <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
-              <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-xxs">
+            <table class="min-w-[880px] w-full text-left border-collapse text-xs sm:text-sm">
+              <thead class="bg-slate-50 text-slate-700 font-bold uppercase text-xs border-b border-slate-200">
                 <tr>
-                  <th class="p-3">Client</th>
-                  <th class="p-3">Service</th>
-                  <th class="p-3">Période</th>
-                  <th class="p-3">Heures</th>
-                  <th class="p-3">Facturé</th>
-                  <th class="p-3">Payé</th>
-                  <th class="p-3">Statut</th>
-                  <th class="p-3">Mode</th>
-                  <th class="p-3 text-right">Actions</th>
+                  <th class="py-3.5 px-4 min-w-[190px]">Client</th>
+                  <th class="py-3.5 px-4 min-w-[170px]">Service</th>
+                  <th class="py-3.5 px-4 min-w-[140px]">Période</th>
+                  <th class="py-3.5 px-4 min-w-[90px]">Heures</th>
+                  <th class="py-3.5 px-4 min-w-[110px]">Facturé</th>
+                  <th class="py-3.5 px-4 min-w-[110px]">Payé</th>
+                  <th class="py-3.5 px-4 min-w-[120px]">Statut</th>
+                  <th class="py-3.5 px-4 min-w-[130px]">Mode</th>
+                  <th class="py-3.5 px-4 text-right min-w-[120px]">Actions</th>
                 </tr>
               </thead>
-              <tbody id="adm-jobs-table-body" class="divide-y divide-slate-200 bg-white">
-                <tr><td colspan="9" class="p-8 text-center text-slate-400 text-xxs">
-                  <i class="fa-solid fa-spinner fa-spin mr-2"></i> Chargement...
+              <tbody id="adm-jobs-table-body" class="divide-y divide-slate-100 bg-white">
+                <tr><td colspan="9" class="p-8 text-center text-slate-400 text-xs">
+                  <i class="fa-solid fa-spinner fa-spin mr-2"></i> Chargement des travaux...
                 </td></tr>
               </tbody>
             </table>
@@ -1434,22 +1442,22 @@
         </div>
 
         <!-- Resumen financiero -->
-        <div id="adm-jobs-summary" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
-            <div id="jobs-kpi-total" class="text-lg font-black text-emerald-800">0</div>
-            <div class="text-xxs text-slate-500 font-medium">Travaux</div>
+        <div id="adm-jobs-summary" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+          <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-center">
+            <div id="jobs-kpi-total" class="text-2xl font-black text-emerald-800">0</div>
+            <div class="text-xs text-slate-600 font-bold uppercase tracking-wider mt-1">Travaux Réalisés</div>
           </div>
-          <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-center">
-            <div id="jobs-kpi-charged" class="text-lg font-black text-blue-800">0 €</div>
-            <div class="text-xxs text-slate-500 font-medium">Facturé</div>
+          <div class="p-4 bg-blue-50 border border-blue-200 rounded-2xl text-center">
+            <div id="jobs-kpi-charged" class="text-2xl font-black text-blue-800">0 €</div>
+            <div class="text-xs text-slate-600 font-bold uppercase tracking-wider mt-1">Total Facturé</div>
           </div>
-          <div class="p-3 bg-teal-50 border border-teal-200 rounded-xl text-center">
-            <div id="jobs-kpi-paid" class="text-lg font-black text-teal-800">0 €</div>
-            <div class="text-xxs text-slate-500 font-medium">Encaissé</div>
+          <div class="p-4 bg-teal-50 border border-teal-200 rounded-2xl text-center">
+            <div id="jobs-kpi-paid" class="text-2xl font-black text-teal-800">0 €</div>
+            <div class="text-xs text-slate-600 font-bold uppercase tracking-wider mt-1">Total Encaissé</div>
           </div>
-          <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-center">
-            <div id="jobs-kpi-hours" class="text-lg font-black text-amber-800">0 h</div>
-            <div class="text-xxs text-slate-500 font-medium">Heures totales</div>
+          <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-center">
+            <div id="jobs-kpi-hours" class="text-2xl font-black text-amber-800">0 h</div>
+            <div class="text-xs text-slate-600 font-bold uppercase tracking-wider mt-1">Heures Travaillées</div>
           </div>
         </div>
 
@@ -3818,9 +3826,19 @@
         if (emailInput) emailInput.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
       }
 
+      const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (!emailVal && currentUser && currentUser.email) {
+        emailVal = currentUser.email;
+      }
+
       const postalVal = postalInput ? postalInput.value.trim() : '33000 Bordeaux';
       const budgetVal = budgetInput ? budgetInput.value.trim() : '300';
-      const nameVal = document.getElementById('name') ? document.getElementById('name').value.trim() : 'Client';
+      let nameVal = document.getElementById('name') ? document.getElementById('name').value.trim() : '';
+      if ((!nameVal || nameVal === 'Client') && currentUser && currentUser.fullName) {
+        nameVal = currentUser.fullName;
+      }
+      if (!nameVal) nameVal = 'Client Particulier';
+
       const serviceVal = document.getElementById('service-type') ? document.getElementById('service-type').value : 'Entretien';
       const surfaceVal = document.getElementById('surface') ? document.getElementById('surface').value.trim() : '';
       const frequencyVal = document.getElementById('frequency') ? document.getElementById('frequency').value : '';
@@ -3926,7 +3944,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         status: 'Nouveau'
       };
 
-      // 1. Guardar en Supabase (no bloquea UI)
+      // 1. Guardar en Firebase Realtime Database (no bloquea UI)
       if (window.PinoDB) {
         PinoDB.saveLead({
           name:     nameVal,
@@ -3940,20 +3958,26 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           details:  detailsVal,
           refCode:  refCode,
           source:   'landing_v1',
-          userId:   (getCurrentUser() || {}).uid || null,
+          userId:   (currentUser || {}).uid || null,
           isB2B:    (serviceVal || '').toLowerCase().includes('b2b') || (serviceVal || '').toLowerCase().includes('copro'),
         }).then(res => {
-          if (res.ok) console.info('[pino] Lead guardado en Supabase:', res.id);
-          else console.warn('[pino] Lead fallback localStorage:', res.error);
+          if (res.ok) {
+            console.info('[pino] Lead guardado en Firebase:', res.id);
+            if (typeof renderAdminLeads === 'function') renderAdminLeads();
+            if (emailVal && typeof renderClientQuotes === 'function') renderClientQuotes(emailVal);
+          } else {
+            console.warn('[pino] Lead fallback localStorage:', res.error);
+          }
         }).catch(() => {});
       }
 
-      // 2. Guardar en localStorage (siempre, como caché offline)
+      // 2. Guardar en localStorage (siempre, como caché offline inmediata)
       try {
         const currentLeads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
         currentLeads.unshift(newLeadObj);
         localStorage.setItem('pino_leads', JSON.stringify(currentLeads));
         if (typeof renderAdminLeads === 'function') renderAdminLeads();
+        if (emailVal && typeof renderClientQuotes === 'function') renderClientQuotes(emailVal);
       } catch (errLeads) {
         console.log('[pino] Error guardando lead local:', errLeads);
       }
@@ -4154,6 +4178,13 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
     // =========================================================================
     const ADMIN_EMAILS = ['pino.spacesverts@gmail.com', 'pino.espacesverts@gmail.com'];
     const isPinoEmail = (email) => ADMIN_EMAILS.includes((email || '').trim().toLowerCase());
+
+    window.escapeHtml = function(str) {
+      return String(str || '').replace(/[&<>"']/g, function(m) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+      });
+    };
+    const escapeHtml = window.escapeHtml;
 
     window.requireSupabase = () => {
       if (window.pinoSupabase) return window.pinoSupabase;
@@ -4522,6 +4553,246 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
 
 
+    // ─────────────────────────────────────────────────────────
+    //  Client Portal — Demandes de devis & Propositions chiffrées
+    // ─────────────────────────────────────────────────────────
+    window.renderClientQuotes = async (email) => {
+      const listEl = document.getElementById('client-quotes-list');
+      if (!listEl) return;
+      if (!email) {
+        listEl.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200">Connectez-vous pour voir vos devis.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+        <i class="fa-solid fa-circle-notch fa-spin mr-2 text-emerald-700"></i> Chargement de vos demandes de devis...
+      </div>`;
+
+      let quotes = [];
+      if (window.PinoDB) {
+        try {
+          const res = await PinoDB.fetchClientQuotes(email);
+          if (res.ok && Array.isArray(res.data)) {
+            quotes = res.data;
+          }
+        } catch (e) {
+          console.warn('[pino] fetchClientQuotes error:', e);
+        }
+      }
+
+      // Also check local storage for any leads matching this email
+      try {
+        const local = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+        const normEmail = email.trim().toLowerCase();
+        const localMatches = local.filter(l => (l.email || '').trim().toLowerCase() === normEmail);
+        const existingIds = new Set(quotes.map(q => q.id || q.ref_code));
+        localMatches.forEach(l => {
+          if (!existingIds.has(l.id) && !existingIds.has(l.ref_code)) {
+            quotes.push(l);
+          }
+        });
+      } catch (e) {}
+
+      if (quotes.length === 0) {
+        listEl.innerHTML = `
+          <div class="p-6 text-center text-slate-500 text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto text-xl">
+              <i class="fa-solid fa-file-circle-plus"></i>
+            </div>
+            <div>
+              <p class="font-bold text-slate-800 text-sm">Aucune demande de devis en cours</p>
+              <p class="text-slate-500 text-xs mt-1">Vous n'avez pas encore envoyé de demande. Cliquez ci-dessous pour obtenir une estimation gratuite sous 24h avec 50% de crédit d'impôt immédiat.</p>
+            </div>
+            <button type="button" onclick="bookClientIntervention()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer">
+              <i class="fa-solid fa-plus"></i> Demander un devis pré-rempli (-20%)
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
+
+      listEl.innerHTML = quotes.map(q => {
+        const ref = q.ref_code || q.id || 'Demande';
+        const service = q.service_type || q.service || 'Entretien jardin';
+        const budget = parseFloat(q.budget_eur || q.budget) || 0;
+        const netBudget = Math.round(budget * 0.5);
+        const createdDate = q.created_at ? new Date(q.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : (q.date || '—');
+        const st = q.status || 'Nouveau';
+
+        let statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">⏳ En cours d'évaluation</span>`;
+        if (st === 'Devis envoyé') {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">📄 Proposition chiffrée reçue</span>`;
+        } else if (st === 'Gagné' || st === 'Validé') {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">✅ Chantier validé</span>`;
+        } else if (st === 'Contacté') {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">📞 Prise de contact</span>`;
+        }
+
+        const resp = q.response || null;
+
+        return `
+          <div class="p-5 bg-white rounded-2xl border-2 ${resp ? 'border-emerald-400 shadow-md' : 'border-slate-200'} space-y-3 transition-all">
+            <div class="flex flex-wrap justify-between items-start gap-2">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-mono font-black text-slate-800 text-sm">${escapeFn(ref)}</span>
+                  ${statusBadge}
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5">Envoyée le ${createdDate}</div>
+              </div>
+              <div class="text-right">
+                <span class="inline-block bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg text-xs font-semibold">${escapeFn(service)}</span>
+                ${q.commune ? `<div class="text-xs text-slate-500 mt-1">📍 ${escapeFn(q.commune)}</div>` : ''}
+              </div>
+            </div>
+
+            <!-- Details de la demande client -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 bg-slate-50 rounded-xl text-xs text-slate-700">
+              <div>
+                <span class="text-slate-400 block text-[10px] uppercase font-bold">Budget estimé client</span>
+                <span class="font-bold text-slate-900">${budget > 0 ? budget + ' €' : 'Non précisé'}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[10px] uppercase font-bold">Crédit Unipros 50%</span>
+                <span class="font-extrabold text-emerald-800">${budget > 0 ? '~' + netBudget + ' € net' : '—'}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[10px] uppercase font-bold">Surface</span>
+                <span class="font-bold text-slate-900">${escapeFn(q.surface_m2 ? q.surface_m2 + ' m²' : (q.surface || 'Standard'))}</span>
+              </div>
+            </div>
+
+            ${q.details ? `
+              <p class="text-xs text-slate-600 bg-white p-2.5 rounded-lg border border-slate-100 italic">
+                <i class="fa-solid fa-quote-left text-emerald-600 text-[10px] mr-1"></i> ${escapeFn(q.details)}
+              </p>
+            ` : ''}
+
+            <!-- Devis formel d'Andrés Pino si déjà répondu -->
+            ${resp ? `
+              <div class="p-4 bg-gradient-to-br from-emerald-50 to-teal-50/60 rounded-xl border-2 border-emerald-300 space-y-3 mt-2">
+                <div class="flex items-center justify-between border-b border-emerald-200 pb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-lg bg-emerald-700 text-white flex items-center justify-center text-xs shadow-xs">
+                      <i class="fa-solid fa-file-invoice"></i>
+                    </span>
+                    <strong class="text-xs text-emerald-950 font-bold">Proposition d'Andrés Pino</strong>
+                  </div>
+                  <span class="text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">Crédit d'impôt Unipros 50%</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 text-center py-1">
+                  <div class="p-2.5 bg-white rounded-xl border border-emerald-200">
+                    <span class="text-[10px] text-slate-500 uppercase font-bold block">Montant Facturé TTC</span>
+                    <strong class="text-sm font-black text-slate-900">${parseFloat(resp.price_ttc || 0).toFixed(2)} €</strong>
+                  </div>
+                  <div class="p-2.5 bg-white rounded-xl border border-emerald-200">
+                    <span class="text-[10px] text-emerald-700 uppercase font-bold block">Avance Immédiate</span>
+                    <strong class="text-sm font-black text-emerald-700">- ${parseFloat(resp.credit_impot || 0).toFixed(2)} €</strong>
+                  </div>
+                  <div class="p-2.5 bg-emerald-700 text-white rounded-xl shadow-sm">
+                    <span class="text-[10px] text-emerald-200 uppercase font-bold block">Reste Réel Client</span>
+                    <strong class="text-sm font-black">${parseFloat(resp.net_client || 0).toFixed(2)} €</strong>
+                  </div>
+                </div>
+
+                <div class="text-xs text-slate-700 space-y-1 pt-1">
+                  ${resp.duration ? `<div><strong>⏱️ Durée estimée :</strong> ${escapeFn(resp.duration)}</div>` : ''}
+                  ${resp.date_proposed ? `<div><strong>📅 Date proposée :</strong> ${new Date(resp.date_proposed).toLocaleDateString('fr-FR')}</div>` : ''}
+                  ${resp.equipment ? `<div><strong>🛠️ Matériel & évacuation :</strong> ${escapeFn(resp.equipment)}</div>` : ''}
+                  ${resp.notes ? `<div class="italic text-slate-600 pt-1 border-t border-emerald-200/60">💬 "${escapeFn(resp.notes)}"</div>` : ''}
+                </div>
+
+                <div class="flex flex-wrap gap-2 pt-1">
+                  <a href="https://wa.me/33651594034?text=${encodeURIComponent(`Bonjour Andrés, j'ai bien reçu votre devis pour la demande ${ref} d'un montant net de ${parseFloat(resp.net_client || 0).toFixed(2)}€. Je souhaite valider la date proposée.`)}"
+                    target="_blank" rel="noopener"
+                    class="flex-1 py-2.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl text-center flex items-center justify-center gap-1.5 transition-colors shadow-xs">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Valider sur WhatsApp
+                  </a>
+                  <a href="tel:0651594034"
+                    class="py-2.5 px-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold rounded-xl text-center flex items-center justify-center gap-1.5 transition-colors">
+                    <i class="fa-solid fa-phone text-emerald-700"></i> Appeler Andrés
+                  </a>
+                </div>
+              </div>
+            ` : `
+              <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                <span class="text-slate-500">Andrés prépare votre chiffrage détaillé.</span>
+                <a href="https://wa.me/33651594034?text=${encodeURIComponent(`Bonjour Andrés, je vous ai transmis la demande de devis ${ref}. Pouvez-vous m'indiquer vos disponibilités ?`)}"
+                  target="_blank" rel="noopener"
+                  class="text-emerald-700 font-bold hover:underline flex items-center gap-1">
+                  <i class="fa-brands fa-whatsapp"></i> Contacter Andrés
+                </a>
+              </div>
+            `}
+          </div>
+        `;
+      }).join('');
+    };
+
+    // ─────────────────────────────────────────────────────────
+    //  Client Portal — Factures & Attestations Fiscales
+    // ─────────────────────────────────────────────────────────
+    window.renderClientInvoices = async (email) => {
+      const listEl = document.getElementById('client-invoices-list');
+      if (!listEl) return;
+
+      let clientJobs = [];
+      if (window.PinoDB) {
+        try {
+          const res = await PinoDB.fetchJobs();
+          if (res.ok && Array.isArray(res.data)) {
+            const normEmail = (email || '').trim().toLowerCase();
+            clientJobs = res.data.filter(j => (j.client_email || '').trim().toLowerCase() === normEmail);
+          }
+        } catch (e) {}
+      }
+
+      if (clientJobs.length === 0) {
+        listEl.innerHTML = `
+          <div class="p-5 text-center text-slate-500 text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-1.5">
+            <p class="font-bold text-slate-700"><i class="fa-solid fa-receipt text-emerald-700 mr-1.5"></i> Aucune facture émise pour le moment</p>
+            <p class="text-slate-500 text-[11px]">Dès qu'une prestation sera validée et réalisée, vous retrouverez ici vos factures acquittées et attestations fiscales Unipros (ouvrant droit à 50% de crédit d'impôt immédiat — Case 7DB).</p>
+          </div>
+        `;
+        return;
+      }
+
+      const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
+
+      listEl.innerHTML = clientJobs.map(j => {
+        const charged = parseFloat(j.amount_charged) || 0;
+        const credit = charged * 0.5;
+        const net = charged - credit;
+        const isPaid = j.payment_status === 'paid';
+
+        return `
+          <div class="p-4 bg-white rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-bold text-xs text-slate-900">#FAC-${(j.id || '').slice(-6).toUpperCase() || '2026'}</span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                  ${isPaid ? 'Acquittée' : 'En attente'}
+                </span>
+              </div>
+              <div class="text-xs text-slate-700 font-bold mt-1">${escapeFn(j.service_type || 'Entretien jardin')}</div>
+              <div class="text-xs text-slate-400 mt-0.5">${j.date_start || 'Récemment'}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-black text-slate-900">${charged.toFixed(2)} € TTC</div>
+              <div class="text-xs text-emerald-700 font-bold">Reste payé : ${net.toFixed(2)} € (50% SAP)</div>
+              <button onclick="showNotificationToast('Attestation fiscale Unipros disponible sur votre compte.', 'info')"
+                class="mt-1 text-xs text-slate-500 hover:text-emerald-700 underline font-bold cursor-pointer block">
+                Télécharger attestation
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+
     // Populate Client Portal with current user data
     window.populateClientPortal = (client) => {
       if (!client) return;
@@ -4529,6 +4800,8 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       document.getElementById('client-display-email').innerHTML = `${client.email} • <span>${client.commune || 'Bordeaux (33)'}</span>`;
       document.getElementById('client-promo-code').textContent = client.promoCode || '—';
       if (typeof refreshCouponSection === 'function') refreshCouponSection();
+      renderClientQuotes(client.email);
+      renderClientInvoices(client.email);
     };
 
     // Logout
@@ -4637,31 +4910,34 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
       let leads = [];
 
-      // 1. Intentar cargar desde Supabase (fuente de verdad)
+      // 1. Charger depuis Firebase Realtime Database (source de vérité)
       if (window.PinoDB) {
-        const result = await PinoDB.fetchLeads({ limit: 200 });
-        if (result.ok && result.data.length > 0) {
-          // Mapear formato Supabase → formato UI
-          leads = result.data.map(row => ({
+        const result = await PinoDB.fetchLeads(200);
+        if (result.ok && Array.isArray(result.data)) {
+          const fbLeads = result.data.map(row => ({
             id:      row.ref_code || row.id,
             sbId:    row.id,
             date:    row.created_at ? new Date(row.created_at).toLocaleDateString('fr-FR') : '—',
             time:    row.created_at ? new Date(row.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '',
-            name:    row.full_name || 'Client',
+            name:    row.full_name || 'Client Particulier',
             phone:   row.phone || '',
             email:   row.email || '',
             commune: row.commune || '',
-            service: row.service_type || 'Entretien',
-            surface: row.surface_m2 ? row.surface_m2 + ' m²' : 'Non précisée',
-            budget:  row.budget_eur ? String(row.budget_eur) : '0',
+            service: row.service_type || 'Entretien jardin',
+            surface: row.surface_m2 ? row.surface_m2 + ' m²' : (row.surface || 'Non précisée'),
+            budget:  row.budget_eur ? String(row.budget_eur) : (row.budget || '0'),
             details: row.details || '',
-            status:  row.status || 'Nouveau',
+            status:  row.status === 'new' ? 'Nouveau' : (row.status || 'Nouveau'),
           }));
 
-          // Sincronizar con localStorage
+          // Conserver également les leads locaux qui ne sont pas encore sur Firebase
+          let localLeads = [];
+          try { localLeads = JSON.parse(localStorage.getItem('pino_leads') || '[]'); } catch (e) { localLeads = []; }
+          const fbIds = new Set(fbLeads.map(l => l.id));
+          const extraLocal = localLeads.filter(l => !fbIds.has(l.id));
+          leads = [...fbLeads, ...extraLocal];
           localStorage.setItem('pino_leads', JSON.stringify(leads));
         } else {
-          // Fallback: localStorage
           try { leads = JSON.parse(localStorage.getItem('pino_leads') || '[]'); } catch (e) { leads = []; }
         }
       } else {
@@ -4673,40 +4949,50 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       if (!tbody) return;
 
       if (leads.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">Aucun lead enregistré pour le moment.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 text-sm">Aucun lead enregistré pour le moment.</td></tr>`;
         return;
       }
 
+      const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
+
       tbody.innerHTML = leads.map((l, idx) => {
-        let statusBadge = `<span class="bg-blue-100 text-blue-800 text-xxs font-bold px-2 py-0.5 rounded-full">${l.status}</span>`;
+        let statusBadge = `<span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-full">${l.status}</span>`;
         if (l.status === 'Gagné') {
-          statusBadge = `<span class="bg-emerald-100 text-emerald-800 text-xxs font-bold px-2 py-0.5 rounded-full">Gagné</span>`;
+          statusBadge = `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">Gagné</span>`;
         } else if (l.status === 'Contacté') {
-          statusBadge = `<span class="bg-amber-100 text-amber-800 text-xxs font-bold px-2 py-0.5 rounded-full">Contacté</span>`;
+          statusBadge = `<span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full">Contacté</span>`;
         } else if (l.status === 'Devis envoyé') {
-          statusBadge = `<span class="bg-purple-100 text-purple-800 text-xxs font-bold px-2 py-0.5 rounded-full">Devis envoyé</span>`;
+          statusBadge = `<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2.5 py-1 rounded-full">Devis envoyé</span>`;
         }
 
         const phoneClean = (l.phone || '').replace(/\s+/g, '');
         const waLink = phoneClean ? `https://wa.me/33${phoneClean.startsWith('0') ? phoneClean.substring(1) : phoneClean}?text=${encodeURIComponent(`Bonjour ${l.name}, c'est Andrés de Pino Espaces Verts concernant votre demande de devis pour ${l.service}.`)}` : '#';
 
         return `
-          <tr class="hover:bg-slate-50/80">
-            <td class="p-3 text-slate-500 whitespace-nowrap">${l.date} <span class="text-xxs text-slate-400">${l.time || ''}</span></td>
-            <td class="p-3 font-bold text-slate-900">${l.name}</td>
-            <td class="p-3 text-slate-600">
-              ${l.phone ? `<a href="tel:${l.phone}" class="text-emerald-700 hover:underline block"><i class="fa-solid fa-phone text-[10px] mr-1"></i>${l.phone}</a>` : ''}
-              ${l.email ? `<a href="mailto:${l.email}" class="text-slate-400 hover:underline text-xxs block">${l.email}</a>` : ''}
+          <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100 text-xs sm:text-sm">
+            <td class="py-3.5 px-4 text-slate-600 whitespace-nowrap">
+              <div class="font-bold text-slate-900">${l.date}</div>
+              <div class="text-xs text-slate-400 mt-0.5">${l.time ? 'à ' + l.time : ''}</div>
             </td>
-            <td class="p-3 text-slate-600">${l.commune}</td>
-            <td class="p-3"><span class="bg-slate-100 px-2 py-0.5 rounded text-xxs font-semibold">${l.service}</span></td>
-            <td class="p-3 font-bold text-brand-green">${l.budget} €</td>
-            <td class="p-3">${statusBadge}</td>
-            <td class="p-3 text-right whitespace-nowrap">
-              ${phoneClean ? `<a href="${waLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center w-7 h-7 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 mr-1" title="WhatsApp"><i class="fa-brands fa-whatsapp text-xs"></i></a>` : ''}
-              ${l.phone ? `<a href="tel:${l.phone}" class="inline-flex items-center justify-center w-7 h-7 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 mr-1" title="Appeler"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
-              <button onclick="openLeadResponseModal(${idx})" class="inline-flex items-center justify-center w-7 h-7 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 mr-1 cursor-pointer" title="Répondre / Devis"><i class="fa-solid fa-file-invoice-dollar text-xs"></i></button>
-              <button onclick="cycleLeadStatus(${idx})" class="inline-flex items-center justify-center w-7 h-7 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 cursor-pointer" title="Changer statut"><i class="fa-solid fa-rotate text-xs"></i></button>
+            <td class="py-3.5 px-4 font-bold text-slate-900">${escapeFn(l.name)}</td>
+            <td class="py-3.5 px-4">
+              ${l.phone ? `<a href="tel:${l.phone}" class="text-emerald-700 font-semibold hover:underline flex items-center gap-1.5"><i class="fa-solid fa-phone text-xs text-emerald-600"></i> ${escapeFn(l.phone)}</a>` : '<span class="text-slate-400 text-xs">—</span>'}
+              ${l.email ? `<a href="mailto:${l.email}" class="text-slate-500 hover:underline text-xs flex items-center gap-1.5 mt-1"><i class="fa-solid fa-envelope text-xs text-slate-400"></i> ${escapeFn(l.email)}</a>` : ''}
+            </td>
+            <td class="py-3.5 px-4 font-medium text-slate-700">${escapeFn(l.commune)}</td>
+            <td class="py-3.5 px-4">
+              <span class="inline-block bg-slate-100 text-slate-800 px-2.5 py-1 rounded-lg text-xs font-semibold">${escapeFn(l.service)}</span>
+              ${l.surface && l.surface !== 'Non précisée' ? `<div class="text-[11px] text-slate-400 mt-1">${escapeFn(l.surface)}</div>` : ''}
+            </td>
+            <td class="py-3.5 px-4 font-black text-brand-green text-sm">${escapeFn(l.budget)} €</td>
+            <td class="py-3.5 px-4">${statusBadge}</td>
+            <td class="py-3.5 px-4 text-right whitespace-nowrap">
+              <div class="flex items-center justify-end gap-1.5">
+                ${phoneClean ? `<a href="${waLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors" title="WhatsApp"><i class="fa-brands fa-whatsapp text-sm"></i></a>` : ''}
+                ${l.phone ? `<a href="tel:${l.phone}" class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors" title="Appeler"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
+                <button onclick="openLeadResponseModal(${idx})" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-700 text-white rounded-xl hover:bg-emerald-800 transition-colors cursor-pointer shadow-xs" title="Établir un Devis & Répondre"><i class="fa-solid fa-file-invoice-dollar text-xs"></i></button>
+                <button onclick="cycleLeadStatus(${idx})" class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors cursor-pointer" title="Changer statut"><i class="fa-solid fa-rotate text-xs"></i></button>
+              </div>
             </td>
           </tr>
         `;
@@ -5289,10 +5575,6 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
     // =========================================================================
     // CRM DES TRAVAUX (Admin Jobs CRM + Export PDF & Excel/CSV)
     // =========================================================================
-    const escapeHtml = (str) => String(str || '').replace(/[&<>"']/g, m => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-    })[m]);
-
     let _jobsCache = [];
 
     window.viewJobNotes = (jobId) => {
@@ -5410,7 +5692,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }
 
       if (displayJobs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 text-xxs">
+        tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 text-sm">
           Aucun travail ne correspond à ce filtre.
         </td></tr>`;
         return;
@@ -5425,7 +5707,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
       const methodMap = {
         unipros: 'Unipros (Crédit 50%)',
-        virement: 'Virement',
+        virement: 'Virement bancaire',
         cheque: 'Chèque',
         cesu: 'CESU',
         especes: 'Espèces',
@@ -5441,40 +5723,40 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         const isPaid = j.payment_status === 'paid';
 
         return `
-          <tr class="hover:bg-slate-50/80 transition-colors">
-            <td class="p-3">
-              <div class="font-bold text-slate-800">${escapeHtml(j.client_name || 'Client')}</div>
-              <div class="text-xxs text-slate-400 flex items-center gap-2 mt-0.5">
+          <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100 text-xs sm:text-sm">
+            <td class="py-3.5 px-4">
+              <div class="font-bold text-slate-900 text-sm">${escapeHtml(j.client_name || 'Client')}</div>
+              <div class="text-xs text-slate-500 flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-1">
                 ${j.client_commune ? `<span>📍 ${escapeHtml(j.client_commune)}</span>` : ''}
-                ${j.client_phone ? `<span>📞 ${escapeHtml(j.client_phone)}</span>` : ''}
+                ${j.client_phone ? `<a href="tel:${escapeHtml(j.client_phone)}" class="text-emerald-700 font-semibold hover:underline">📞 ${escapeHtml(j.client_phone)}</a>` : ''}
               </div>
             </td>
-            <td class="p-3">
-              <span class="inline-block px-2 py-0.5 rounded-full text-xxs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+            <td class="py-3.5 px-4">
+              <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
                 ${escapeHtml(j.service_type || 'Service')}
               </span>
-              ${j.description ? `<div class="text-xxs text-slate-500 truncate max-w-xs mt-0.5" title="${escapeHtml(j.description)}">${escapeHtml(j.description)}</div>` : ''}
+              ${j.description ? `<div class="text-xs text-slate-600 mt-1 max-w-xs leading-relaxed" title="${escapeHtml(j.description)}">${escapeHtml(j.description)}</div>` : ''}
             </td>
-            <td class="p-3 text-xxs text-slate-600 whitespace-nowrap">${period}</td>
-            <td class="p-3 font-semibold text-slate-700">${j.hours_spent ? `${j.hours_spent} h` : '—'}</td>
-            <td class="p-3 font-bold text-slate-900">${charged} €</td>
-            <td class="p-3 font-semibold text-emerald-700">${paid} €</td>
-            <td class="p-3">
-              <span class="inline-block px-2 py-0.5 rounded-full text-xxs font-bold ${st.cls}">
+            <td class="py-3.5 px-4 text-xs font-medium text-slate-700 whitespace-nowrap">${period}</td>
+            <td class="py-3.5 px-4 font-bold text-slate-800">${j.hours_spent ? `${j.hours_spent} h` : '—'}</td>
+            <td class="py-3.5 px-4 font-black text-slate-900 text-sm">${charged} €</td>
+            <td class="py-3.5 px-4 font-black text-emerald-700 text-sm">${paid} €</td>
+            <td class="py-3.5 px-4">
+              <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold ${st.cls}">
                 ${st.label}
               </span>
             </td>
-            <td class="p-3 text-xxs text-slate-500">${method}</td>
-            <td class="p-3 text-right whitespace-nowrap">
+            <td class="py-3.5 px-4 text-xs font-medium text-slate-600">${method}</td>
+            <td class="py-3.5 px-4 text-right whitespace-nowrap">
               ${!isPaid ? `
                 <button type="button" onclick="markJobPaid('${j.id}')"
-                  class="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold text-xxs rounded-lg transition-all cursor-pointer mr-1" title="Marquer comme payé">
-                  <i class="fa-solid fa-check"></i> Payé
+                  class="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold text-xs rounded-xl transition-all cursor-pointer mr-1" title="Marquer comme payé">
+                  <i class="fa-solid fa-check mr-1"></i> Payé
                 </button>
               ` : ''}
               ${j.notes ? `
                 <button type="button" onclick="window.viewJobNotes('${j.id}')"
-                  class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xxs rounded-lg transition-all cursor-pointer" title="Voir les notes">
+                  class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer" title="Voir les notes">
                   <i class="fa-solid fa-note-sticky"></i>
                 </button>
               ` : ''}

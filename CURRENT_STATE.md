@@ -19,14 +19,11 @@
   - `/jobs`: Módulo CRM de trabajos, horas, montos cobrados y pendientes.
   - `/coupons`: Cupones 1:1 (`PELABOLA`).
   - `/audit_logs`: Registro de sesiones y actividad.
-- [x] Panel Travaux CRM con descargas operativas de **PDF profesional** (`jsPDF`) y **Excel/CSV**.
-- [x] Soporte de `signInWithPopup` y fallback a `signInWithRedirect` con `getRedirectResult()`.
-- [x] Reglas de seguridad preparadas en `database.rules.json` y `firebase.json` listo para hosting y database.
-- [x] Comprobación de conectividad REST a la base de datos (200 OK verificado).
-
-## 🌐 Dominios Autorizados y Pasos Siguientes
-1. **Dominios en Firebase Console**:
-   - `localhost` y `127.0.0.1` para pruebas locales.
-   - `jomstudiovzla.github.io` para la versión web pública de GitHub Pages.
-2. **Reglas de Realtime Database**:
-   - En Firebase Console → Realtime Database → pestaña **Reglas**, pegar las reglas de `database.rules.json` y pulsar **Publicar**.
+- [x] Corrección de `fetchLeads`, `fetchProfiles`, y `fetchJobs` en `pino-db.js`: normalización de parámetros numéricos/objeto para prevenir errores en `Query.limitToLast`.
+- [x] Sincronización bidireccional de Leads en Firebase Realtime Database: los presupuestos enviados por clientes se guardan en `/leads` y se reflejan inmediatamente tanto en el panel admin como en el portal del cliente.
+- [x] Portal del Cliente operativo (`renderClientQuotes` y `renderClientInvoices`): visualización de presupuestos enviados, propuestas formales de Andrés Pino con desglose del 50% de crédito Unipros y facturas fiscales.
+- [x] Rediseño y espaciado generoso del CRM y panel de administración:
+  - Eliminación de textos microscópicos (`text-xxs`), reemplazados por tipografía legible (`text-xs sm:text-sm font-bold`).
+  - Columnas con anchos mínimos definidos (`min-w-[880px]`), evitando el apiñamiento de teléfonos y direcciones.
+  - Mayor altura y anchura del modal (`max-w-6xl w-full max-h-[80vh]`).
+  - Tarjetas de resumen financiero proporcionadas y armonizadas con el diseño general.
