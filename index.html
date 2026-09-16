@@ -930,102 +930,6 @@
     </form>
   </dialog>
 
-  <!-- Modal: Devis Envoyé & Notification E-mail Client (Corroboration 1-Clic) -->
-  <dialog id="modal-devis-sent-success" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-lg w-full p-0 overflow-hidden text-brand-charcoal">
-    <div class="modal-drag-header bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-800 px-6 py-5 text-white flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <span class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-xl shadow-inner">
-          <i class="fa-solid fa-paper-plane"></i>
-        </span>
-        <div>
-          <h3 class="font-serif text-lg font-bold">Devis Transmis au Client !</h3>
-          <p class="text-xs text-emerald-100" id="sent-success-ref">Réf: —</p>
-        </div>
-      </div>
-      <button type="button" onclick="document.getElementById('modal-devis-sent-success').close()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center cursor-pointer">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-    </div>
-
-    <div class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-      <!-- Status Badges -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-        <div class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center gap-2.5 text-emerald-950 font-bold">
-          <span class="w-7 h-7 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs shadow-xs">
-            <i class="fa-solid fa-bell"></i>
-          </span>
-          <div>
-            <div class="text-[10px] text-emerald-700 font-semibold uppercase">Notification en Ligne</div>
-            <div class="text-xs">Active dans l'Espace Client</div>
-          </div>
-        </div>
-        <div class="p-3 bg-blue-50 rounded-2xl border border-blue-200 flex items-center gap-2.5 text-blue-950 font-bold">
-          <span class="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xs shadow-xs">
-            <i class="fa-solid fa-envelope"></i>
-          </span>
-          <div>
-            <div class="text-[10px] text-blue-700 font-semibold uppercase">E-mail du Client</div>
-            <div id="sent-success-email-dest" class="truncate max-w-[140px] text-xs">—</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Financial Recap Card -->
-      <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-2">
-        <div class="flex justify-between items-center pb-2 border-b border-slate-200 font-bold text-slate-800">
-          <span id="sent-success-client-name">Client : —</span>
-          <span id="sent-success-service" class="bg-slate-200 text-slate-700 px-2 py-0.5 rounded-lg text-[10px]">—</span>
-        </div>
-        <div class="grid grid-cols-3 gap-2 text-center pt-1">
-          <div class="p-2 bg-white rounded-xl border border-slate-200">
-            <span class="text-[10px] text-slate-400 block uppercase font-bold">Total TTC</span>
-            <strong class="text-sm font-black text-slate-900" id="sent-success-total">0,00 €</strong>
-          </div>
-          <div class="p-2 bg-white rounded-xl border border-slate-200">
-            <span class="text-[10px] text-emerald-700 block uppercase font-bold">Crédit 50%</span>
-            <strong class="text-sm font-black text-emerald-700" id="sent-success-credit">- 0,00 €</strong>
-          </div>
-          <div class="p-2 bg-emerald-700 text-white rounded-xl shadow-xs">
-            <span class="text-[10px] text-emerald-200 block uppercase font-bold">Net Client</span>
-            <strong class="text-sm font-black" id="sent-success-net">0,00 €</strong>
-          </div>
-        </div>
-      </div>
-
-      <!-- Dispatch Call To Actions -->
-      <div class="space-y-2.5 pt-1">
-        <p class="text-xs text-slate-600 font-bold flex items-center gap-1.5">
-          <i class="fa-solid fa-paper-plane text-emerald-700"></i> Expédier l'e-mail officiel au client :
-        </p>
-
-        <!-- 1-Click Gmail Action -->
-        <a id="sent-success-gmail-btn" href="#" target="_blank" rel="noopener noreferrer"
-          class="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white font-extrabold text-xs rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
-          <i class="fa-brands fa-google text-base"></i> Envoyer l'E-mail Officiel au Client via Gmail (1-clic)
-        </a>
-
-        <!-- Mailto Action -->
-        <a id="sent-success-mailto-btn" href="#"
-          class="w-full py-2.5 px-4 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer">
-          <i class="fa-solid fa-envelope text-slate-500"></i> Envoyer via l'application Mail (Outlook, Apple Mail)
-        </a>
-
-        <!-- WhatsApp Action -->
-        <a id="sent-success-wa-btn" href="#" target="_blank" rel="noopener noreferrer"
-          class="w-full py-2.5 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs rounded-2xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer">
-          <i class="fa-brands fa-whatsapp text-base"></i> Transmettre le récapitulatif par WhatsApp au client
-        </a>
-      </div>
-
-      <div class="pt-2 flex justify-end">
-        <button type="button" onclick="document.getElementById('modal-devis-sent-success').close()"
-          class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer">
-          Terminer
-        </button>
-      </div>
-    </div>
-  </dialog>
-
   <!-- Modal 3: Espace Administration — God Mode (Andrés Pino) -->
   <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-full p-0 overflow-hidden text-brand-charcoal">
     <!-- Admin Header (Draggable) -->
@@ -4725,7 +4629,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
         let statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">⏳ En cours d'évaluation</span>`;
         if (st === 'Devis envoyé') {
-          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">📄 Proposition chiffrée reçue</span>`;
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">📄 Proposition chiffrée reçue</span>`;
         } else if (st === 'Gagné' || st === 'Validé') {
           statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">✅ Chantier validé</span>`;
         } else if (st === 'Contacté') {
@@ -4735,97 +4639,102 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         const resp = q.response || null;
 
         return `
-          <div class="p-5 bg-white rounded-2xl border-2 ${resp ? 'border-emerald-400 shadow-md' : 'border-slate-200'} space-y-3 transition-all">
-            <div class="flex flex-wrap justify-between items-start gap-2">
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="font-mono font-black text-slate-800 text-sm">${escapeFn(ref)}</span>
-                  ${statusBadge}
-                </div>
-                <div class="text-xs text-slate-400 mt-0.5">Envoyée le ${createdDate}</div>
+          <div class="p-5 bg-white rounded-2xl border-2 ${resp ? 'border-emerald-600 shadow-sm' : 'border-slate-200'} space-y-4">
+            <!-- En-tête -->
+            <div class="flex flex-wrap justify-between items-center gap-2 pb-3 border-b border-slate-100">
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-black text-slate-900 text-sm">Devis #${escapeFn(ref)}</span>
+                ${statusBadge}
               </div>
               <div class="text-right">
-                <span class="inline-block bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg text-xs font-semibold">${escapeFn(service)}</span>
-                ${q.commune ? `<div class="text-xs text-slate-500 mt-1">📍 ${escapeFn(q.commune)}</div>` : ''}
+                <span class="inline-block bg-slate-100 text-slate-800 px-3 py-1 rounded-lg text-xs font-bold">🌿 ${escapeFn(service)}</span>
+                ${q.commune ? `<span class="text-xs text-slate-500 ml-1.5">📍 ${escapeFn(q.commune)}</span>` : ''}
               </div>
             </div>
 
-            <!-- Details de la demande client -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 bg-slate-50 rounded-xl text-xs text-slate-700">
-              <div>
-                <span class="text-slate-400 block text-[10px] uppercase font-bold">Budget estimé client</span>
-                <span class="font-bold text-slate-900">${budget > 0 ? budget + ' €' : 'Non précisé'}</span>
-              </div>
-              <div>
-                <span class="text-slate-400 block text-[10px] uppercase font-bold">Crédit Unipros 50%</span>
-                <span class="font-extrabold text-emerald-800">${budget > 0 ? '~' + netBudget + ' € net' : '—'}</span>
-              </div>
-              <div>
-                <span class="text-slate-400 block text-[10px] uppercase font-bold">Surface</span>
-                <span class="font-bold text-slate-900">${escapeFn(q.surface_m2 ? q.surface_m2 + ' m²' : (q.surface || 'Standard'))}</span>
-              </div>
-            </div>
-
-            ${q.details ? `
-              <p class="text-xs text-slate-600 bg-white p-2.5 rounded-lg border border-slate-100 italic">
-                <i class="fa-solid fa-quote-left text-emerald-600 text-[10px] mr-1"></i> ${escapeFn(q.details)}
-              </p>
-            ` : ''}
-
-            <!-- Devis formel d'Andrés Pino si déjà répondu -->
+            <!-- Si Andrés a déjà chiffré le devis : Présentation simple et limpide -->
             ${resp ? `
-              <div class="p-4 bg-gradient-to-br from-emerald-50 to-teal-50/60 rounded-xl border-2 border-emerald-300 space-y-3 mt-2">
-                <div class="flex items-center justify-between border-b border-emerald-200 pb-2">
-                  <div class="flex items-center gap-2">
-                    <span class="w-7 h-7 rounded-lg bg-emerald-700 text-white flex items-center justify-center text-xs shadow-xs">
-                      <i class="fa-solid fa-file-invoice"></i>
-                    </span>
-                    <strong class="text-xs text-emerald-950 font-bold">Proposition d'Andrés Pino</strong>
-                  </div>
-                  <span class="text-[10px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">Crédit d'impôt Unipros 50%</span>
+              <!-- Bloc Prix Clair (Ce que vous payez) -->
+              <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-200">
+                <div class="text-xs font-extrabold text-emerald-900 uppercase tracking-wider mb-2">
+                  💰 Tarif officiel avec Avance Immédiate de 50%
                 </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                  <div class="p-3 bg-white rounded-xl border border-slate-200 text-center sm:text-left">
+                    <span class="text-[11px] text-slate-500 block">Total facturé</span>
+                    <strong class="text-base font-bold text-slate-900">${parseFloat(resp.price_ttc || 0).toFixed(2)} € TTC</strong>
+                  </div>
+                  <div class="p-3 bg-white rounded-xl border border-emerald-200 text-center sm:text-left">
+                    <span class="text-[11px] text-emerald-700 block font-bold">Avance 50% déduite</span>
+                    <strong class="text-base font-bold text-emerald-700">- ${parseFloat(resp.credit_impot || 0).toFixed(2)} €</strong>
+                    <span class="text-[10px] text-emerald-600 block">Coopérative Unipros</span>
+                  </div>
+                  <div class="p-3 bg-emerald-700 text-white rounded-xl shadow-xs text-center sm:text-left">
+                    <span class="text-[11px] text-emerald-100 block font-bold">👉 Ce que vous payez réellement</span>
+                    <strong class="text-xl font-black">${parseFloat(resp.net_client || 0).toFixed(2)} €</strong>
+                  </div>
+                </div>
+              </div>
 
-                <div class="grid grid-cols-3 gap-2 text-center py-1">
-                  <div class="p-2.5 bg-white rounded-xl border border-emerald-200">
-                    <span class="text-[10px] text-slate-500 uppercase font-bold block">Montant Facturé TTC</span>
-                    <strong class="text-sm font-black text-slate-900">${parseFloat(resp.price_ttc || 0).toFixed(2)} €</strong>
-                  </div>
-                  <div class="p-2.5 bg-white rounded-xl border border-emerald-200">
-                    <span class="text-[10px] text-emerald-700 uppercase font-bold block">Avance Immédiate</span>
-                    <strong class="text-sm font-black text-emerald-700">- ${parseFloat(resp.credit_impot || 0).toFixed(2)} €</strong>
-                  </div>
-                  <div class="p-2.5 bg-emerald-700 text-white rounded-xl shadow-sm">
-                    <span class="text-[10px] text-emerald-200 uppercase font-bold block">Reste Réel Client</span>
-                    <strong class="text-sm font-black">${parseFloat(resp.net_client || 0).toFixed(2)} €</strong>
-                  </div>
+              <!-- Ce qui est prévu dans votre jardin -->
+              <div class="space-y-2 text-xs sm:text-sm text-slate-800 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div class="font-bold text-slate-900 text-xs uppercase tracking-wide">
+                  📋 Détails de l'intervention :
                 </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+                  <div><strong>🌿 Prestation :</strong> ${escapeFn(service)}</div>
+                  ${resp.date_proposed ? `<div><strong>📅 Date proposée :</strong> ${new Date(resp.date_proposed).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</div>` : ''}
+                  ${resp.duration ? `<div><strong>⏱️ Durée prévue :</strong> ${escapeFn(resp.duration)}</div>` : ''}
+                  <div><strong>🛠️ Matériel :</strong> ${escapeFn(resp.equipment || 'Matériel pro & évacuation des déchets verts comprise')}</div>
+                </div>
+                ${resp.notes ? `
+                  <div class="pt-2 border-t border-slate-200 text-xs text-slate-600 italic">
+                    <strong>Note d'Andrés :</strong> "${escapeFn(resp.notes)}"
+                  </div>
+                ` : ''}
+              </div>
 
-                <div class="text-xs text-slate-700 space-y-1 pt-1">
-                  ${resp.duration ? `<div><strong>⏱️ Durée estimée :</strong> ${escapeFn(resp.duration)}</div>` : ''}
-                  ${resp.date_proposed ? `<div><strong>📅 Date proposée :</strong> ${new Date(resp.date_proposed).toLocaleDateString('fr-FR')}</div>` : ''}
-                  ${resp.equipment ? `<div><strong>🛠️ Matériel & évacuation :</strong> ${escapeFn(resp.equipment)}</div>` : ''}
-                  ${resp.notes ? `<div class="italic text-slate-600 pt-1 border-t border-emerald-200/60">💬 "${escapeFn(resp.notes)}"</div>` : ''}
-                </div>
-
-                <div class="flex flex-wrap gap-2 pt-1">
-                  <a href="https://wa.me/33651594034?text=${encodeURIComponent(`Bonjour Andrés, j'ai bien reçu votre devis pour la demande ${ref} d'un montant net de ${parseFloat(resp.net_client || 0).toFixed(2)}€. Je souhaite valider la date proposée.`)}"
-                    target="_blank" rel="noopener"
-                    class="flex-1 py-2.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl text-center flex items-center justify-center gap-1.5 transition-colors shadow-xs">
-                    <i class="fa-brands fa-whatsapp text-sm"></i> Valider sur WhatsApp
-                  </a>
-                  <button type="button" onclick="printLeadQuotePDF(quotes[${quotes.indexOf(q)}])"
-                    class="py-2.5 px-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-bold rounded-xl text-center flex items-center justify-center gap-1.5 transition-colors cursor-pointer" title="Télécharger ou imprimer le devis officiel">
-                    <i class="fa-solid fa-file-pdf text-red-600"></i> Devis PDF
-                  </button>
-                  <a href="tel:0651594034"
-                    class="py-2.5 px-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-bold rounded-xl text-center flex items-center justify-center gap-1.5 transition-colors">
-                    <i class="fa-solid fa-phone text-emerald-700"></i> Appeler Andrés
-                  </a>
-                </div>
+              <!-- Boutons d'action : 1 bouton principal WhatsApp + Appeler + PDF -->
+              <div class="pt-1 flex flex-col sm:flex-row gap-2.5">
+                <a href="https://wa.me/33651594034?text=${encodeURIComponent(`Bonjour Andrés, je valide votre devis #${ref} pour un montant net de ${parseFloat(resp.net_client || 0).toFixed(2)}€. Pouvez-vous me confirmer le rendez-vous ?`)}"
+                  target="_blank" rel="noopener"
+                  class="flex-1 py-3 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold text-xs sm:text-sm rounded-xl text-center flex items-center justify-center gap-2 shadow-xs transition-colors">
+                  <i class="fa-brands fa-whatsapp text-base"></i> Valider ce Devis par WhatsApp
+                </a>
+                <a href="tel:0651594034"
+                  class="py-3 px-4 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs rounded-xl text-center flex items-center justify-center gap-2 transition-colors">
+                  <i class="fa-solid fa-phone text-emerald-700"></i> Appeler Andrés (06 51 59 40 34)
+                </a>
+                <button type="button" onclick="printLeadQuotePDF(quotes[${quotes.indexOf(q)}])"
+                  class="py-3 px-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold text-xs rounded-xl text-center flex items-center justify-center gap-2 transition-colors cursor-pointer" title="Télécharger ou imprimer le devis officiel">
+                  <i class="fa-solid fa-file-pdf text-red-600"></i> Devis PDF
+                </button>
               </div>
             ` : `
+              <!-- Demande en cours de traitement par Andrés -->
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 bg-slate-50 rounded-xl text-xs text-slate-700">
+                <div>
+                  <span class="text-slate-400 block text-[10px] uppercase font-bold">Budget estimé</span>
+                  <span class="font-bold text-slate-900">${budget > 0 ? budget + ' € TTC' : 'Non précisé'}</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[10px] uppercase font-bold">Après crédit 50%</span>
+                  <span class="font-extrabold text-emerald-800">${budget > 0 ? '~' + netBudget + ' € net' : '—'}</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[10px] uppercase font-bold">Surface</span>
+                  <span class="font-bold text-slate-900">${escapeFn(q.surface_m2 ? q.surface_m2 + ' m²' : (q.surface || 'Standard'))}</span>
+                </div>
+              </div>
+
+              ${q.details ? `
+                <p class="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100 italic">
+                  <i class="fa-solid fa-quote-left text-emerald-600 text-[10px] mr-1"></i> ${escapeFn(q.details)}
+                </p>
+              ` : ''}
+
               <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                <span class="text-slate-500">Andrés prépare votre chiffrage détaillé.</span>
+                <span class="text-slate-500">Andrés prépare votre chiffrage détaillé sous 24h.</span>
                 <a href="https://wa.me/33651594034?text=${encodeURIComponent(`Bonjour Andrés, je vous ai transmis la demande de devis ${ref}. Pouvez-vous m'indiquer vos disponibilités ?`)}"
                   target="_blank" rel="noopener"
                   class="text-emerald-700 font-bold hover:underline flex items-center gap-1">
@@ -5327,63 +5236,49 @@ Téléphone : 06 51 59 40 34 | Email : pino.spacesverts@gmail.com
 Bordeaux Métropole & Gironde (33)
 Site web : https://jomstudiovzla.github.io/pinopage/`;
 
-        // Compose links
-        const gmailUrl  = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(clientEmail)}&su=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
-        const mailtoUrl = `mailto:${encodeURIComponent(clientEmail)}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
-
-        const cleanPhone = (clientPhone || '').replace(/[^0-9]/g, '');
-        const intlPhone  = cleanPhone.startsWith('0') ? '33' + cleanPhone.slice(1) : cleanPhone;
-        const waText     = `Bonjour ${clientName}, c'est Andrés Pino. Je viens de préparer votre devis #${shortRef} pour votre jardin (${price.toFixed(2)}€ TTC, soit seulement ${netClient.toFixed(2)}€ net après 50% d'avance immédiate Unipros). Vous pouvez le consulter sur votre espace client : https://jomstudiovzla.github.io/pinopage/?espace_client=1`;
-        const waUrl      = intlPhone ? `https://wa.me/${intlPhone}?text=${encodeURIComponent(waText)}` : `https://wa.me/33651594034?text=${encodeURIComponent(waText)}`;
-
-        // 4. Background dispatch via Web3Forms (audit)
+        // 4. Background silent dispatch — Web3Forms (copie audit pour Andrés)
         try {
           fetch('https://api.web3forms.com/submit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({
               access_key: '646876c1-a20d-48d6-953e-8c3b7a5a4c9b',
-              subject: `[Devis Transmis #${shortRef}] Pour ${clientName} (${clientEmail})`,
+              subject: mailSubject,
+              from_name: 'Pino Espaces Verts — CRM',
+              replyto: clientEmail,
               message: mailBody,
               client_email: clientEmail,
-              price: price + ' € TTC'
+              client_name: clientName,
+              price: price.toFixed(2) + ' € TTC',
+              net_client: netClient.toFixed(2) + ' €'
             })
-          }).catch(() => {});
+          }).then(r => r.json()).then(d => {
+            console.log('[pino] Web3Forms audit dispatch:', d.success ? 'OK' : 'FAIL');
+          }).catch(() => console.warn('[pino] Web3Forms audit dispatch failed (network).'));
         } catch(e) {}
 
-        // 5. Populate and open Corroboration Confirmation Modal
-        document.getElementById('modal-lead-response').close();
-
-        const successModal = document.getElementById('modal-devis-sent-success');
-        if (successModal) {
-          document.getElementById('sent-success-ref').textContent        = `Réf: #${shortRef}`;
-          document.getElementById('sent-success-client-name').textContent = `Client : ${clientName}`;
-          document.getElementById('sent-success-email-dest').textContent  = clientEmail || 'Non renseigné';
-          document.getElementById('sent-success-service').textContent     = `${service} (${commune})`;
-          document.getElementById('sent-success-total').textContent       = `${price.toFixed(2)} €`;
-          document.getElementById('sent-success-credit').textContent      = `- ${creditImpot.toFixed(2)} €`;
-          document.getElementById('sent-success-net').textContent         = `${netClient.toFixed(2)} €`;
-
-          const gmailBtn  = document.getElementById('sent-success-gmail-btn');
-          const mailtoBtn = document.getElementById('sent-success-mailto-btn');
-          const waBtn     = document.getElementById('sent-success-wa-btn');
-
-          if (gmailBtn)  gmailBtn.href  = gmailUrl;
-          if (mailtoBtn) mailtoBtn.href = mailtoUrl;
-          if (waBtn) {
-            waBtn.href = waUrl;
-            waBtn.style.display = clientPhone ? 'flex' : 'none';
-          }
-
-          successModal.showModal();
-
-          // Also attempt to open Gmail compose automatically
+        // 5. Background silent dispatch — FormSubmit (e-mail direct au client)
+        if (clientEmail) {
           try {
-            window.open(gmailUrl, '_blank');
-          } catch(popErr) {}
+            fetch(`https://formsubmit.co/ajax/${clientEmail}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify({
+                _subject: mailSubject,
+                _replyto: 'pino.spacesverts@gmail.com',
+                _template: 'box',
+                name: 'Andrés Pino — Pino Espaces Verts',
+                message: mailBody
+              })
+            }).then(r => r.json()).then(d => {
+              console.log('[pino] FormSubmit client dispatch:', d.success ? 'OK' : 'FAIL');
+            }).catch(() => console.warn('[pino] FormSubmit client dispatch failed (network).'));
+          } catch(e) {}
         }
 
-        showNotificationToast(`✅ Devis #${shortRef} enregistré et notifié ! Fenêtre Gmail ouverte pour validation de l'envoi.`, 'success');
+        // 6. Fermer le modal et confirmer silencieusement
+        document.getElementById('modal-lead-response').close();
+        showNotificationToast(`✅ Devis #${shortRef} envoyé au client avec succès. Enregistré dans l'Espace Client.`, 'success');
         renderAdminLeads();
         if (typeof renderAdminJobs === 'function') renderAdminJobs();
 
@@ -5397,43 +5292,8 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     };
 
     // ─────────────────────────────────────────────────────────
-    //  Client Notifications — Audio Chime & In-App Real-time
+    //  Client Notifications — In-App Real-time (badge only)
     // ─────────────────────────────────────────────────────────
-    window.playNotificationChime = () => {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-        if (ctx.state === 'suspended') ctx.resume();
-        const now = ctx.currentTime;
-
-        // Tone 1: E5 (659.25 Hz)
-        const osc1 = ctx.createOscillator();
-        const gain1 = ctx.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(659.25, now);
-        gain1.gain.setValueAtTime(0, now);
-        gain1.gain.linearRampToValueAtTime(0.20, now + 0.04);
-        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-        osc1.connect(gain1);
-        gain1.connect(ctx.destination);
-        osc1.start(now);
-        osc1.stop(now + 0.45);
-
-        // Tone 2: A5 (880 Hz)
-        const osc2 = ctx.createOscillator();
-        const gain2 = ctx.createGain();
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(880, now + 0.15);
-        gain2.gain.setValueAtTime(0, now + 0.15);
-        gain2.gain.linearRampToValueAtTime(0.25, now + 0.18);
-        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
-        osc2.connect(gain2);
-        gain2.connect(ctx.destination);
-        osc2.start(now + 0.15);
-        osc2.stop(now + 0.75);
-      } catch (e) {}
-    };
 
     let _activeClientNotifListener = null;
     let _activeClientNotifEmail = null;
@@ -5459,13 +5319,11 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     };
 
     window.updateClientNotificationUI = (unreadList) => {
-      const toast = document.getElementById('client-devis-floating-toast');
       const navBtn = document.getElementById('nav-auth-btn');
       let badge = document.getElementById('nav-auth-notif-badge');
 
       if (!unreadList || unreadList.length === 0) {
         if (badge) badge.remove();
-        if (toast) toast.classList.add('hidden');
         return;
       }
 
@@ -5474,73 +5332,13 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         if (!badge) {
           badge = document.createElement('span');
           badge.id = 'nav-auth-notif-badge';
-          badge.className = 'ml-1.5 px-1.5 py-0.5 bg-red-500 text-white font-black text-[10px] rounded-full animate-pulse shadow-xs';
+          badge.className = 'ml-1.5 px-1.5 py-0.5 bg-red-500 text-white font-black text-[10px] rounded-full shadow-xs';
           navBtn.appendChild(badge);
         }
         badge.textContent = String(unreadList.length);
       }
-
-      // Show floating toast for the latest unread notification
-      const latest = unreadList[0];
-      if (latest && !_seenNotifIds.has(latest.id)) {
-        _seenNotifIds.add(latest.id);
-        playNotificationChime();
-        showFloatingDevisNotification(latest);
-      }
     };
 
-    window.showFloatingDevisNotification = (notif) => {
-      const toast = document.getElementById('client-devis-floating-toast');
-      if (!toast || !notif) return;
-
-      const sub = document.getElementById('client-toast-subtitle');
-      const tot = document.getElementById('client-toast-total');
-      const net = document.getElementById('client-toast-net');
-      const meta= document.getElementById('client-toast-meta');
-
-      if (sub) sub.textContent = `Devis #${(notif.lead_id || notif.id || '').slice(-6).toUpperCase()} chiffré par Andrés Pino`;
-      if (tot) tot.textContent = `${parseFloat(notif.price_ttc || 0).toFixed(2)} € TTC`;
-      if (net) net.textContent = `${parseFloat(notif.net_client || (notif.price_ttc * 0.5) || 0).toFixed(2)} €`;
-      if (meta) {
-        const parts = [];
-        if (notif.date_proposed) parts.push(`📅 ${new Date(notif.date_proposed).toLocaleDateString('fr-FR')}`);
-        if (notif.duration) parts.push(`⏱️ ${notif.duration}`);
-        if (notif.service) parts.push(`🌿 ${notif.service}`);
-        meta.textContent = parts.join(' • ') || 'Crédit d\'impôt Unipros 50% déduit';
-      }
-
-      toast.dataset.notifId = notif.id;
-      toast.dataset.clientEmail = notif.client_email || _activeClientNotifEmail || '';
-      toast.classList.remove('hidden');
-    };
-
-    window.dismissClientToast = async (specificId) => {
-      const toast = document.getElementById('client-devis-floating-toast');
-      if (!toast) return;
-      const notifId = specificId || toast.dataset.notifId;
-      const email   = toast.dataset.clientEmail || _activeClientNotifEmail;
-
-      toast.classList.add('hidden');
-      if (notifId && email && window.PinoDB && typeof PinoDB.markNotificationRead === 'function') {
-        await PinoDB.markNotificationRead(email, notifId);
-      }
-    };
-
-    window.openClientPortalFromToast = async () => {
-      const toast = document.getElementById('client-devis-floating-toast');
-      const notifId = toast ? toast.dataset.notifId : null;
-      await dismissClientToast(notifId);
-
-      const user = getCurrentUser();
-      if (user) {
-        populateClientPortal(user);
-        document.getElementById('modal-window-client').showModal();
-        switchClientTab('quotes');
-      } else {
-        openWindowModal('connexion');
-        showNotificationToast('Connectez-vous pour consulter et valider votre devis officiel.', 'info');
-      }
-    };
 
     // Printable PDF / HTML Quote Function
     window.printLeadQuotePDF = (quote) => {
@@ -6467,46 +6265,6 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       }
     });
   </script>
-
-  <!-- Floating Client Quote Notification Toast (In-App Real-time) -->
-  <div id="client-devis-floating-toast" class="hidden fixed bottom-5 right-5 z-[9999] max-w-md w-[calc(100vw-2.5rem)] sm:w-96 bg-white border-2 border-emerald-500 rounded-3xl shadow-2xl p-4 space-y-3">
-    <div class="flex items-start justify-between gap-3">
-      <div class="flex items-center gap-2.5">
-        <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-lg shadow-xs flex-shrink-0">
-          🔔
-        </div>
-        <div>
-          <h4 class="font-black text-slate-900 text-sm leading-tight">Nouveau Devis Chiffré !</h4>
-          <p class="text-[11px] text-slate-500" id="client-toast-subtitle">Andrés Pino a répondu à votre demande</p>
-        </div>
-      </div>
-      <button type="button" onclick="dismissClientToast()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-xs cursor-pointer" title="Fermer">
-        ✕
-      </button>
-    </div>
-
-    <div class="p-3 bg-gradient-to-br from-emerald-50 to-teal-50/50 rounded-2xl border border-emerald-200 text-xs text-slate-700 space-y-1">
-      <div class="flex justify-between font-medium">
-        <span>Montant Total Facturé :</span>
-        <strong id="client-toast-total" class="text-slate-900">0,00 € TTC</strong>
-      </div>
-      <div class="flex justify-between text-emerald-800 font-extrabold text-sm pt-1 border-t border-emerald-200/60">
-        <span>👉 Net client (Avance 50%) :</span>
-        <strong id="client-toast-net" class="text-emerald-800">0,00 €</strong>
-      </div>
-      <div id="client-toast-meta" class="text-[10px] text-slate-500 pt-0.5"></div>
-    </div>
-
-    <div class="flex gap-2 pt-0.5">
-      <button type="button" onclick="openClientPortalFromToast()" class="flex-1 py-2.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-        <i class="fa-solid fa-file-invoice"></i> Consulter l'Offre & Valider
-      </button>
-      <button type="button" onclick="dismissClientToast()" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-xl transition-all cursor-pointer">
-        Plus tard
-      </button>
-    </div>
-  </div>
-
 </body>
 </html>
 
