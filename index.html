@@ -4251,6 +4251,16 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       // 1. Firebase Auth listener
       if (typeof firebase !== 'undefined' && firebase.auth) {
         try {
+          if (firebase.auth().getRedirectResult) {
+            firebase.auth().getRedirectResult().then((res) => {
+              if (res && res.user) {
+                processAuthenticatedUser(res.user, 'google');
+              }
+            }).catch((err) => {
+              console.warn('[pino-auth] Redirect result:', err.message);
+            });
+          }
+
           firebase.auth().onAuthStateChanged(async (user) => {
             if (user) {
               const cur = getCurrentUser();

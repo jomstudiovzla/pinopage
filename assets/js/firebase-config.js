@@ -5,34 +5,31 @@
  */
 
 window.PINO_FIREBASE_CONFIG = {
-  apiKey: window.PINO_FIREBASE_API_KEY || "", // Se completa con la Web API Key de la consola Firebase
+  apiKey: "AIzaSyCOrSsb3dMl-tYr9y23zCPaDu63cRn7l-k",
   authDomain: "pagepino-e8e97.firebaseapp.com",
   databaseURL: "https://pagepino-e8e97-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "pagepino-e8e97",
   storageBucket: "pagepino-e8e97.firebasestorage.app",
-  messagingSenderId: "1032428929981",
-  appId: window.PINO_FIREBASE_APP_ID || ""
+  messagingSenderId: "102396108475",
+  appId: "1:102396108475:web:070dcbdf881bd2b10c139e"
 };
 
-// Función para inicializar Firebase de forma segura
+// Initialisation globale de Firebase
 window.initPinoFirebase = () => {
   if (typeof firebase === 'undefined') {
-    console.warn('[pino-firebase] Firebase SDK no cargado aún.');
+    console.warn('[pino-firebase] Firebase SDK non chargé.');
     return false;
   }
   try {
     if (!firebase.apps.length) {
-      if (!window.PINO_FIREBASE_CONFIG.apiKey) {
-        console.warn('[pino-firebase] apiKey pendiente en PINO_FIREBASE_CONFIG.');
-      }
       firebase.initializeApp(window.PINO_FIREBASE_CONFIG);
-      console.log('[pino-firebase] Inicializado con proyecto pagepino-e8e97.');
+      console.log('[pino-firebase] Connecté avec succès à pagepino-e8e97 (europe-west1).');
     }
     window.pinoAuth = firebase.auth();
     window.pinoRtdb = firebase.database();
     return true;
   } catch (err) {
-    console.warn('[pino-firebase] Error al inicializar:', err);
+    console.error('[pino-firebase] Erreur d\'initialisation:', err);
     return false;
   }
 };
