@@ -130,3 +130,23 @@
      - Escapado HTML riguroso en el encabezado del portal cliente (`escapeHtml`).
   6. **Caché y PWA**:
      - Actualización de versión en `sw.js` a `pino-ev-v4-security-audit` para renovación instantánea de caché en navegadores de clientes.
+
+- [x] **Estabilización de Navegación CRM Admin y Control Total de Facturación (100% COMPLETADO Y VERIFICADO)**:
+  1. **Corrección de Cierre Intempestivo de Ventanas al Cambiar de Opción**:
+     - Diagnóstico: Al hacer clic en pestañas, botones o selectores dentro de los modales, el evento burbujeaba al listener de `<dialog>`. Si el tamaño del modal cambiaba dinámicamente o se interactuaba con un `<select>` nativo, la verificación de coordenadas `isInDialog` evaluaba falsamente negativo y cerraba la ventana completa.
+     - Solución Definitiva: Se blindó el listener verificando que si el evento no proviene directamente del `<dialog>` (`e.target !== dialog`), jamás se cierra. Además, `#modal-window-admin`, `#modal-window-client` y los formularios de trabajo (`modal-nouvelle-facture`, `modal-lead-response`, `modal-repair-lead`, `modal-add-platform-lead`) quedaron permanentemente inmunes a clics exteriores accidentales, cerrándose exclusivamente mediante sus botones dedicados de cierre o gesto superior.
+     - Sincronización continua de pestañas: `switchAdminTab` ahora refresca de forma reactiva y protegida con `try/catch` todas las vistas (`kpis`, `leads`, `users`, `travaux`, `factures`, `prospection`, `config`).
+  2. **Bloqueo Absoluto de Cancelación de Facturas por Clientes**:
+     - Las facturas y deducciones SAP son documentos tributarios inmutables para los clientes conforme a las normativas francesas (Code de commerce L. 123-22 & CGI art. 199 sexdecies).
+     - El portal del cliente carece por completo de opciones para anular, alterar o marcar facturas como pagadas; se incluyó una nota legal explícita de inmutabilidad fiscal.
+     - Reglas de Firebase RTDB (`database.rules.json`) bloquean estrictamente cualquier escritura en `/jobs/$jobId` proveniente de usuarios no administradores.
+  3. **Gestión Exclusiva de Cobros y Anulación de Facturas para Andrés Pino**:
+     - En el panel Admin Factures (`#adm-content-factures`), Andrés dispone de controles dedicados por factura: *Marcar como pagada / acquittée*, *Annuler la facture* (con confirmación y registro de auditoría en fecha/hora) y *Réactiver la facture*.
+     - Las facturas anuladas se visualizan con insignia roja `❌ Annulée`, cancelan el monto adeudado a 0.00 €, neutralizan la emisión de la attestation fiscale (evitando deducciones fraudulentas) y estampan una marca de agua legal de anulación en el PDF.
+     - Corrección en `markJobPaid` para sincronizar con Firebase RTDB trabajos generados con identificadores correlativos `job_`.
+  4. **Descarga Universal de Facturas para Clientes y Administrador**:
+     - Portal Cliente: Cada cliente puede descargar libremente en PDF sus facturas oficiales (`Facture PDF`) y sus certificados de deducción del 50% (`Attestation Fiscale Case 7DB`), además de exportar su historial completo con el nuevo botón *Exporter mes factures (CSV)*.
+     - Admin Factures: Incorporación del botón *Grand Livre PDF* (`handleExportFacturesPDF`) que genera el libro oficial de facturación con desglose financiero de totales TTC, anticipo 50% URSSAF, montos cobrados y pendientes, junto al botón preexistente de *Export CSV*.
+     - Búsqueda asíncrona en la nube: `printFactureClientPDF` y `printAttestationFiscaleSAP` ahora consultan directamente Firebase RTDB (`PinoDB.fetchJobs`) si la factura no está precargada en memoria local.
+  5. **Caché PWA Actualizada**:
+     - `sw.js` actualizado a `pino-ev-v5-invoice-stability`.

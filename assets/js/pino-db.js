@@ -1026,6 +1026,7 @@
       const net = charged - credit;
       const facNum = j.fac_number || `#FAC-${String(j.id || '').slice(-6).toUpperCase()}`;
       const dateStr = j.date_start ? new Date(j.date_start).toLocaleDateString('fr-FR') : (j.created_at ? new Date(j.created_at).toLocaleDateString('fr-FR') : '—');
+      const statusStr = j.payment_status === 'cancelled' ? 'Annulée' : (j.payment_status === 'paid' ? 'Acquittée' : 'En attente');
 
       return [
         facNum,
@@ -1039,12 +1040,44 @@
         credit.toFixed(2),
         net.toFixed(2),
         j.payment_method || 'unipros',
-        j.payment_status === 'paid' ? 'Payé' : 'En attente',
+        statusStr,
         j.notes || ''
       ];
     });
 
     const filename = `pino_factures_${new Date().toISOString().slice(0,10)}.csv`;
+    return exportDataToCSV(headers, rows, filename);
+  }
+
+  function exportClientFacturesCSV(jobs = [], clientEmail = '') {
+    const filtered = (jobs || []).filter(j => !clientEmail || (j.client_email || '').trim().toLowerCase() === clientEmail.trim().toLowerCase());
+    const headers = [
+      'N° Facture', 'Date intervention', 'Prestation', 'Montant TTC (€)',
+      'Avance SAP 50% (€)', 'Reste Net Payé (€)', 'Mode de règlement', 'Statut Facture'
+    ];
+
+    const rows = filtered.map(j => {
+      const charged = parseFloat(j.amount_charged) || 0;
+      const isUnipros = (j.payment_method || 'unipros') === 'unipros';
+      const credit = isUnipros ? charged * 0.5 : 0;
+      const net = charged - credit;
+      const facNum = j.fac_number || `#FAC-${String(j.id || '').slice(-6).toUpperCase()}`;
+      const dateStr = j.date_start ? new Date(j.date_start).toLocaleDateString('fr-FR') : (j.created_at ? new Date(j.created_at).toLocaleDateString('fr-FR') : '—');
+      const st = j.payment_status === 'cancelled' ? 'Annulée' : (j.payment_status === 'paid' ? 'Acquittée' : 'En attente');
+
+      return [
+        facNum,
+        dateStr,
+        j.service_type || 'Entretien jardin',
+        charged.toFixed(2),
+        credit.toFixed(2),
+        net.toFixed(2),
+        isUnipros ? 'Unipros SAP' : (j.payment_method || 'Direct B2B'),
+        st
+      ];
+    });
+
+    const filename = `mes_factures_pino_${new Date().toISOString().slice(0,10)}.csv`;
     return exportDataToCSV(headers, rows, filename);
   }
 
@@ -1444,6 +1477,7 @@
     exportLeadsCSV,
     exportLeadsPDF,
     exportFacturesCSV,
+    exportClientFacturesCSV,
     exportPlatformLeadsCSV,
     exportClientQuotesCSV,
     updateLeadQuality,

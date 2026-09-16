@@ -1,19 +1,17 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Auditoría integral de ciberseguridad, limpieza de repositorio y adaptabilidad 100% responsiva",
-  "current_phase": "Hito 3 — Ciberseguridad Firebase + Zero-Trust Cupones + Limpieza & Responsividad Móvil",
-  "action": "Blindaje de database.rules.json y firestore.rules, eliminación de archivos huérfanos/muertos, adaptación responsiva universal de los 16 modales con flex-col y scroll fluido, prevención de XSS y sanitización de enlaces externos, entrega de cupones con autenticación verificada Google y renovación de caché Service Worker v4.",
+  "active_goal": "Estabilización de navegación CRM (anti-cierre involuntario) y control total de facturas con descarga universal",
+  "current_phase": "Hito 3 — CRM Admin + Control de Facturas (Admin vs Cliente) + Estabilización de Modales",
+  "action": "Corrección de cierre intempestivo de modales admin al cambiar de opción o interactuar con selects/pestañas. Inmutabilidad de facturas para clientes con aviso legal. Panel de administración con control de cobro (Acquittée), anulación y reactivación de facturas con marca de agua y neutralización fiscal. Descarga de Grand Livre PDF, exportación CSV para clientes y admin, y sincronización de IDs 'job_' con Firebase RTDB.",
   "files": [
     "index.html",
-    "database.rules.json",
-    "firestore.rules",
-    "assets/js/chatbot_knowledge_base.js",
+    "assets/js/pino-db.js",
     "sw.js",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Commit y push a origin main con atribución Grok 4.6. Despliegue completado.",
-  "last_commit": "23fa607",
-  "timestamp": "2026-09-16T06:39:00-04:00"
+  "step": "Validación con Node.js superada. Listo para commit y push a main con atribución Grok 4.6.",
+  "last_commit": "ef34f50",
+  "timestamp": "2026-09-16T06:54:00-04:00"
 }

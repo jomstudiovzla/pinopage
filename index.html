@@ -1891,9 +1891,12 @@
             <h4 class="font-bold text-base text-slate-900">Historique des Factures & Dossiers Fiscaux</h4>
             <p class="text-xs text-slate-500 mt-0.5">Factures Unipros SAP (Crédit d'impôt 50%) et factures directes B2B — données temps réel Firebase</p>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
             <button type="button" onclick="handleExportFacturesCSV()" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer">
-              <i class="fa-solid fa-file-csv"></i> Export Factures CSV
+              <i class="fa-solid fa-file-csv"></i> Export CSV
+            </button>
+            <button type="button" onclick="handleExportFacturesPDF()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer" title="Télécharger le Grand Livre / Rapport PDF de toutes les factures">
+              <i class="fa-solid fa-file-pdf text-red-600"></i> Grand Livre PDF
             </button>
             <button type="button" onclick="openNewInvoiceModal()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 transition-colors shadow-xs">
               <i class="fa-solid fa-plus"></i> Nouvelle Facture
@@ -6045,45 +6048,76 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
       const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
       window._cachedClientJobs = clientJobs;
-      listEl.innerHTML = clientJobs.map(j => {
+
+      const exportBar = clientJobs.length > 0 ? `
+        <div class="flex flex-wrap justify-between items-center gap-2 mb-3 pb-2 border-b border-slate-100">
+          <span class="text-xs text-slate-500 font-semibold">${clientJobs.length} document(s) fiscal(aux) disponible(s)</span>
+          <button type="button" onclick="handleExportClientInvoicesCSV('${escapeFn(email)}')"
+            class="text-xs text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs">
+            <i class="fa-solid fa-file-csv text-emerald-700"></i> Exporter mes factures (CSV)
+          </button>
+        </div>
+      ` : '';
+
+      const itemsHtml = clientJobs.map(j => {
         const charged = parseFloat(j.amount_charged) || 0;
         const credit = charged * 0.5;
         const net = charged - credit;
         const isPaid = j.payment_status === 'paid';
+        const isCancelled = j.payment_status === 'cancelled';
         const facNumber = j.fac_number || `#FAC-${(j.id || '').slice(-6).toUpperCase() || '2026'}`;
 
+        const statusPill = isCancelled
+          ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">❌ Annulée</span>`
+          : (isPaid
+            ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">✅ Acquittée</span>`
+            : `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">⏳ En attente</span>`);
+
         return `
-          <div class="p-4 bg-white rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+          <div class="p-4 bg-white rounded-2xl border ${isCancelled ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200'} flex flex-wrap items-center justify-between gap-3 shadow-xs">
             <div>
               <div class="flex items-center gap-2">
                 <span class="font-mono font-bold text-xs text-slate-900">${facNumber}</span>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                  ${isPaid ? 'Acquittée' : 'En attente'}
-                </span>
+                ${statusPill}
                 <span class="text-[10px] bg-emerald-50 text-emerald-700 font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
                   50% Déduction SAP
                 </span>
               </div>
               <div class="text-xs text-slate-700 font-bold mt-1">${escapeFn(j.service_type || 'Entretien jardin')}</div>
               <div class="text-xs text-slate-400 mt-0.5">${j.date_start ? new Date(j.date_start).toLocaleDateString('fr-FR') : 'Récemment'}</div>
+              ${isCancelled ? '<div class="text-[11px] text-rose-700 font-semibold mt-1"><i class="fa-solid fa-circle-info mr-1"></i>Facture annulée par la gérance — Aucune somme n\'est due.</div>' : ''}
             </div>
             <div class="text-right">
-              <div class="text-sm font-black text-slate-900">${charged.toFixed(2)} € TTC</div>
-              <div class="text-xs text-emerald-700 font-bold">Reste payé : ${net.toFixed(2)} € (50% SAP)</div>
+              <div class="text-sm font-black ${isCancelled ? 'text-slate-400 line-through' : 'text-slate-900'}">${charged.toFixed(2)} € TTC</div>
+              <div class="text-xs ${isCancelled ? 'text-slate-400' : 'text-emerald-700'} font-bold">${isCancelled ? '0.00 € dû' : `Reste payé : ${net.toFixed(2)} € (50% SAP)`}</div>
               <div class="flex items-center justify-end gap-2 mt-2">
-                <button type="button" onclick="printAttestationFiscaleSAP('${escapeFn(j.id)}')"
-                  class="text-xs text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-lg font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs" title="Télécharger ou imprimer l'attestation fiscale officielle pour déclaration d'impôt (Case 7DB)">
-                  <i class="fa-solid fa-file-shield text-emerald-700"></i> Attestation Fiscale (Case 7DB)
-                </button>
+                ${!isCancelled ? `
+                  <button type="button" onclick="printAttestationFiscaleSAP('${escapeFn(j.id)}')"
+                    class="text-xs text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-lg font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs" title="Télécharger ou imprimer l'attestation fiscale officielle pour déclaration d'impôt (Case 7DB)">
+                    <i class="fa-solid fa-file-shield text-emerald-700"></i> Attestation Fiscale (Case 7DB)
+                  </button>
+                ` : ''}
                 <button type="button" onclick="printFactureClientPDF('${escapeFn(j.id)}')"
                   class="text-xs text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-300 px-2.5 py-1.5 rounded-lg font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs" title="Télécharger la facture officielle">
-                  <i class="fa-solid fa-file-pdf text-red-600"></i> Facture
+                  <i class="fa-solid fa-file-pdf text-red-600"></i> Facture PDF
                 </button>
               </div>
             </div>
           </div>
         `;
       }).join('');
+
+      const securityNotice = `
+        <div class="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 flex items-start gap-2.5">
+          <i class="fa-solid fa-lock text-emerald-700 text-sm mt-0.5 shrink-0"></i>
+          <div>
+            <span class="font-bold text-slate-800">Conformité Fiscale & Immutabilité des Factures</span>
+            <p class="text-[11px] text-slate-500 mt-0.5">Conformément à la réglementation légale (Code de commerce L. 123-22 & CGI art. 199 sexdecies), les factures et attestations fiscales émises sont définitives et ne peuvent pas être modifiées ou annulées par le client. Seul l'administrateur Andrés Pino peut émettre un avoir ou régulariser une écriture comptable.</p>
+          </div>
+        </div>
+      `;
+
+      listEl.innerHTML = exportBar + itemsHtml + securityNotice;
     };
 
     // Populate Client Portal with current user data
@@ -6243,20 +6277,17 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         targetTab.classList.add('border-b-2', 'border-emerald-700', 'text-emerald-800', 'bg-white');
         targetTab.classList.remove('text-slate-500');
       }
-      if (tabKey === 'users') {
-        renderAdminUsers();
-      }
-      if (tabKey === 'travaux') {
-        renderAdminJobs();
-      }
-      if (tabKey === 'factures') {
-        renderAdminFactures();
-      }
-      if (tabKey === 'prospection') {
-        renderAdminProspection();
-      }
-      if (tabKey === 'config') {
-        renderAdminQualityConfig();
+
+      try {
+        if (tabKey === 'kpis' && typeof loadAdminKPIs === 'function') loadAdminKPIs();
+        if (tabKey === 'leads' && typeof renderAdminLeads === 'function') renderAdminLeads();
+        if (tabKey === 'users' && typeof renderAdminUsers === 'function') renderAdminUsers();
+        if (tabKey === 'travaux' && typeof renderAdminJobs === 'function') renderAdminJobs();
+        if (tabKey === 'factures' && typeof renderAdminFactures === 'function') renderAdminFactures();
+        if (tabKey === 'prospection' && typeof renderAdminProspection === 'function') renderAdminProspection();
+        if (tabKey === 'config' && typeof renderAdminQualityConfig === 'function') renderAdminQualityConfig();
+      } catch (err) {
+        console.warn('[Admin] switchAdminTab error for tab:', tabKey, err);
       }
     };
 
@@ -7613,11 +7644,18 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         const isUnipros = (j.payment_method || '').toLowerCase() === 'unipros';
         const clientPart = isUnipros ? (charged * 0.5) : charged;
         const isPaid = j.payment_status === 'paid';
+        const isCancelled = j.payment_status === 'cancelled';
         const dateStr = j.date_start ? new Date(j.date_start).toLocaleDateString('fr-FR') : (j.created_at ? new Date(j.created_at).toLocaleDateString('fr-FR') : '—');
         const facNumber = j.fac_number || `#FAC-2026-${String(idx + 1).padStart(3, '0')}`;
 
+        const statusPill = isCancelled
+          ? `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-200">❌ Annulée</span>`
+          : (isPaid
+            ? `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">✅ Acquittée</span>`
+            : `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200">⏳ En attente</span>`);
+
         return `
-          <tr class="hover:bg-slate-50/80 transition-colors">
+          <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100 ${isCancelled ? 'opacity-70 bg-rose-50/20' : ''}">
             <td class="py-3.5 px-4 font-mono font-bold text-slate-900">${facNumber}</td>
             <td class="py-3.5 px-4 font-bold text-slate-800">${escapeFn(j.client_name || 'Client')}</td>
             <td class="py-3.5 px-4">
@@ -7626,17 +7664,35 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
               </span>
             </td>
             <td class="py-3.5 px-4 text-slate-600 font-medium">${dateStr}</td>
-            <td class="py-3.5 px-4 font-black text-slate-900">${charged.toFixed(2)} €</td>
-            <td class="py-3.5 px-4 ${isUnipros ? 'text-emerald-700' : 'text-slate-900'} font-black">${clientPart.toFixed(2)} €</td>
+            <td class="py-3.5 px-4 font-black ${isCancelled ? 'text-slate-400 line-through' : 'text-slate-900'}">${charged.toFixed(2)} €</td>
+            <td class="py-3.5 px-4 ${isCancelled ? 'text-slate-400' : (isUnipros ? 'text-emerald-700' : 'text-slate-900')} font-black">${isCancelled ? '0.00 €' : clientPart.toFixed(2) + ' €'}</td>
             <td class="py-3.5 px-4">
-              <span class="text-xs font-bold px-2.5 py-1 rounded-full ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                ${isPaid ? 'Acquittée' : 'En attente'}
-              </span>
+              ${statusPill}
             </td>
             <td class="py-3.5 px-4 text-right whitespace-nowrap">
               <div class="flex items-center justify-end gap-1.5">
-                <button type="button" onclick="printAttestationFiscaleSAP('${escapeFn(j.id)}')" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-xl hover:bg-emerald-100 transition-colors cursor-pointer shadow-2xs" title="Attestation Fiscale SAP (Case 7DB)"><i class="fa-solid fa-file-shield text-xs"></i></button>
-                <button type="button" onclick="printFactureClientPDF('${escapeFn(j.id)}')" class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-200 transition-colors cursor-pointer shadow-2xs" title="Facture PDF"><i class="fa-solid fa-file-pdf text-xs text-red-600"></i></button>
+                ${!isCancelled ? `
+                  <button type="button" onclick="printAttestationFiscaleSAP('${escapeFn(j.id)}')"
+                    class="inline-flex items-center justify-center w-8 h-8 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-xl hover:bg-emerald-100 transition-colors cursor-pointer shadow-2xs"
+                    title="Attestation Fiscale SAP (Case 7DB)"><i class="fa-solid fa-file-shield text-xs"></i></button>
+                ` : ''}
+                <button type="button" onclick="printFactureClientPDF('${escapeFn(j.id)}')"
+                  class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-200 transition-colors cursor-pointer shadow-2xs"
+                  title="Facture PDF"><i class="fa-solid fa-file-pdf text-xs text-red-600"></i></button>
+                ${!isCancelled ? `
+                  ${!isPaid ? `
+                    <button type="button" onclick="markJobPaid('${escapeFn(j.id)}')"
+                      class="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 rounded-xl transition-colors cursor-pointer shadow-2xs"
+                      title="Marquer comme payée / acquittée"><i class="fa-solid fa-check text-xs"></i></button>
+                  ` : ''}
+                  <button type="button" onclick="cancelAdminFacture('${escapeFn(j.id)}')"
+                    class="inline-flex items-center justify-center w-8 h-8 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl transition-colors cursor-pointer shadow-2xs"
+                    title="Annuler cette facture"><i class="fa-solid fa-ban text-xs"></i></button>
+                ` : `
+                  <button type="button" onclick="reactivateAdminFacture('${escapeFn(j.id)}')"
+                    class="inline-flex items-center justify-center w-8 h-8 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl transition-colors cursor-pointer shadow-2xs"
+                    title="Réactiver cette facture"><i class="fa-solid fa-rotate-left text-xs"></i></button>
+                `}
               </div>
             </td>
           </tr>
@@ -7765,33 +7821,111 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     };
 
     window.markJobPaid = async (jobId) => {
-      if (!confirm('Confirmer le paiement intégral de ce travail ?')) return;
+      if (!confirm('Confirmer le règlement intégral de cette facture / travail ?')) return;
 
-      const idx = _jobsCache.findIndex(j => j.id === jobId);
+      const idx = (_jobsCache || []).findIndex(j => j.id === jobId);
+      let charged = 0;
       if (idx >= 0) {
-        const charged = _jobsCache[idx].amount_charged || 0;
+        charged = _jobsCache[idx].amount_charged || 0;
         _jobsCache[idx].payment_status = 'paid';
         _jobsCache[idx].amount_paid = charged;
-
-        // Supabase update
-        if (window.PinoDB && !String(jobId).startsWith('demo-') && !String(jobId).startsWith('job_')) {
-          PinoDB.updateJob(jobId, { payment_status: 'paid', amount_paid: charged }).catch(() => {});
-        }
-
-        // LocalStorage update
-        try {
-          let local = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
-          const lIdx = local.findIndex(j => j.id === jobId);
-          if (lIdx >= 0) {
-            local[lIdx].payment_status = 'paid';
-            local[lIdx].amount_paid = charged;
-            localStorage.setItem('pino_admin_jobs', JSON.stringify(local));
-          }
-        } catch (e) {}
-
-        showNotificationToast('Statut mis à jour : Payé ✅', 'success');
-        renderAdminJobs();
       }
+
+      // Mise à jour Cloud (Firebase RTDB + Supabase)
+      if (window.PinoDB && !String(jobId).startsWith('demo-')) {
+        await PinoDB.updateJob(jobId, { payment_status: 'paid', amount_paid: charged }).catch(() => {});
+      }
+
+      // Mise à jour LocalStorage
+      try {
+        let local = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+        const lIdx = local.findIndex(j => j.id === jobId);
+        if (lIdx >= 0) {
+          local[lIdx].payment_status = 'paid';
+          local[lIdx].amount_paid = charged;
+          localStorage.setItem('pino_admin_jobs', JSON.stringify(local));
+        }
+      } catch (e) {}
+
+      showNotificationToast('Statut mis à jour : Facture Acquittée ✅', 'success');
+      renderAdminJobs();
+      if (typeof renderAdminFactures === 'function') renderAdminFactures();
+    };
+
+    window.cancelAdminFacture = async (jobId) => {
+      const user = getCurrentUser();
+      const isAdmin = user && (user.email === 'pino.spacesverts@gmail.com' || user.email === 'pino.espacesverts@gmail.com' || user.isAdmin);
+      if (!isAdmin) {
+        showNotificationToast('Action réservée à l\'administrateur Andrés Pino.', 'error');
+        return;
+      }
+
+      let job = (_jobsCache || []).find(j => j.id === jobId);
+      if (!job) {
+        try {
+          const local = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+          job = local.find(j => j.id === jobId);
+        } catch(e) {}
+      }
+      const facNum = job ? (job.fac_number || `#FAC-${String(job.id || '').slice(-6).toUpperCase()}`) : 'cette facture';
+
+      if (!confirm(`Confirmer l'annulation de la facture ${facNum} ?\n\nConformément aux règles fiscales, cette facture sera marquée "Annulée", aucune somme ne sera due par le client et les attestations fiscales seront neutralisées.`)) {
+        return;
+      }
+
+      const patch = {
+        payment_status: 'cancelled',
+        notes: ((job?.notes || '') + ` [Facture annulée le ${new Date().toLocaleDateString('fr-FR')} par la gérance]`).trim()
+      };
+
+      if (window.PinoDB && !String(jobId).startsWith('demo-')) {
+        await PinoDB.updateJob(jobId, patch).catch(() => {});
+      }
+
+      if (Array.isArray(_jobsCache)) {
+        const idx = _jobsCache.findIndex(j => j.id === jobId);
+        if (idx >= 0) Object.assign(_jobsCache[idx], patch);
+      }
+
+      try {
+        let local = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+        const lIdx = local.findIndex(j => j.id === jobId);
+        if (lIdx >= 0) {
+          Object.assign(local[lIdx], patch);
+          localStorage.setItem('pino_admin_jobs', JSON.stringify(local));
+        }
+      } catch(e) {}
+
+      showNotificationToast(`Facture ${facNum} annulée avec succès.`, 'success');
+      renderAdminJobs();
+      if (typeof renderAdminFactures === 'function') renderAdminFactures();
+    };
+
+    window.reactivateAdminFacture = async (jobId) => {
+      if (!confirm('Souhaitez-vous réactiver cette facture et la remettre "En attente de règlement" ?')) return;
+      const patch = { payment_status: 'pending' };
+
+      if (window.PinoDB && !String(jobId).startsWith('demo-')) {
+        await PinoDB.updateJob(jobId, patch).catch(() => {});
+      }
+
+      if (Array.isArray(_jobsCache)) {
+        const idx = _jobsCache.findIndex(j => j.id === jobId);
+        if (idx >= 0) Object.assign(_jobsCache[idx], patch);
+      }
+
+      try {
+        let local = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+        const lIdx = local.findIndex(j => j.id === jobId);
+        if (lIdx >= 0) {
+          Object.assign(local[lIdx], patch);
+          localStorage.setItem('pino_admin_jobs', JSON.stringify(local));
+        }
+      } catch(e) {}
+
+      showNotificationToast('Facture réactivée (Statut : En attente).', 'success');
+      renderAdminJobs();
+      if (typeof renderAdminFactures === 'function') renderAdminFactures();
     };
 
     window.handleExportJobsPDF = () => {
@@ -8488,7 +8622,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     // ─────────────────────────────────────────────────────────
     //  ATTESTATION FISCALE SAP (Case 7DB) & FACTURE OFFICIELLE PDF
     // ─────────────────────────────────────────────────────────
-    window.printAttestationFiscaleSAP = (jobId) => {
+    window.printAttestationFiscaleSAP = async (jobId) => {
       let job = null;
       if (window._cachedAdminJobs) {
         job = window._cachedAdminJobs.find(j => j.id === jobId);
@@ -8502,8 +8636,21 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           job = local.find(j => j.id === jobId);
         } catch(e) {}
       }
+      if (!job && window.PinoDB) {
+        try {
+          const res = await PinoDB.fetchJobs();
+          if (res.ok && Array.isArray(res.data)) {
+            job = res.data.find(j => j.id === jobId);
+          }
+        } catch(e) {}
+      }
       if (!job) {
         showNotificationToast('Facture introuvable pour générer l\'attestation fiscale.', 'error');
+        return;
+      }
+
+      if (job.payment_status === 'cancelled') {
+        showNotificationToast('Impossible d\'éditer une attestation fiscale pour une facture annulée.', 'warning');
         return;
       }
 
@@ -8621,7 +8768,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       });
     };
 
-    window.printFactureClientPDF = (jobId) => {
+    window.printFactureClientPDF = async (jobId) => {
       let job = null;
       if (window._cachedAdminJobs) {
         job = window._cachedAdminJobs.find(j => j.id === jobId);
@@ -8635,6 +8782,14 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           job = local.find(j => j.id === jobId);
         } catch(e) {}
       }
+      if (!job && window.PinoDB) {
+        try {
+          const res = await PinoDB.fetchJobs();
+          if (res.ok && Array.isArray(res.data)) {
+            job = res.data.find(j => j.id === jobId);
+          }
+        } catch(e) {}
+      }
       if (!job) {
         showNotificationToast('Facture introuvable.', 'error');
         return;
@@ -8646,9 +8801,22 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       const credit = isUnipros ? (charged * 0.5) : 0;
       const net = charged - credit;
       const isPaid = job.payment_status === 'paid';
+      const isCancelled = job.payment_status === 'cancelled';
       const dateIntervention = job.date_start ? new Date(job.date_start).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
       const now = new Date().toLocaleDateString('fr-FR');
       const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
+
+      const statusBadge = isCancelled
+        ? '<span style="background: #ffe4e6; color: #9f1239; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">FACTURE ANNULÉE</span>'
+        : (isPaid
+          ? '<span style="background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">ACQUITTÉE</span>'
+          : '<span style="background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">EN ATTENTE DE RÈGLEMENT</span>');
+
+      const cancelledBanner = isCancelled ? `
+        <div style="background: #fff1f2; border: 1px solid #fecdd3; color: #9f1239; padding: 10px 14px; border-radius: 8px; margin: 14px 0; font-size: 11px; font-weight: bold;">
+          ⚠️ NOTE LÉGALE : Cette facture a fait l'objet d'une annulation officielle par l'artisan paysagiste Andrés Pino. Aucune créance n'est exigible. Document archivé pour conformité comptable (art. L. 123-22 du Code de commerce).
+        </div>
+      ` : '';
 
       const docHtml = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; line-height: 1.5; font-size: 13px;">
@@ -8665,9 +8833,10 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
               </span>
               <h2 style="margin: 8px 0 2px 0; font-size: 18px; color: #0f172a;">FACTURE ${escapeFn(facNum)}</h2>
               <div style="font-size: 11px; color: #64748b;">Date : ${now} • Échéance : ${escapeFn(dateIntervention)}</div>
-              <div style="margin-top: 4px;">Statut : <span style="background: ${isPaid ? '#dcfce7' : '#fef3c7'}; color: ${isPaid ? '#166534' : '#92400e'}; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">${isPaid ? 'ACQUITTÉE' : 'EN ATTENTE DE RÈGLEMENT'}</span></div>
+              <div style="margin-top: 4px;">Statut : ${statusBadge}</div>
             </div>
           </div>
+          ${cancelledBanner}
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; font-size: 12px;">
             <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
@@ -8710,7 +8879,12 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
               <span>Total Facturé TTC :</span>
               <strong>${charged.toFixed(2)} €</strong>
             </div>
-            ${isUnipros ? `
+            ${isCancelled ? `
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 15px; font-weight: 900; color: #e11d48; border-top: 2px solid #e11d48; margin-top: 4px;">
+                <span>Montant exigible (Facture Annulée) :</span>
+                <span>0,00 €</span>
+              </div>
+            ` : (isUnipros ? `
               <div style="display: flex; justify-content: space-between; padding: 5px 0; color: #047857;">
                 <span>Avance Immédiate 50% (Crédit d'impôt SAP) :</span>
                 <strong>- ${credit.toFixed(2)} €</strong>
@@ -8724,7 +8898,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
                 <span>Total Net à Régler :</span>
                 <span>${charged.toFixed(2)} €</span>
               </div>
-            `}
+            `)}
           </div>
 
           <div style="margin-top: 30px; font-size: 10px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 12px; line-height: 1.4;">
@@ -8789,6 +8963,138 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       if (window.PinoDB && typeof PinoDB.exportFacturesCSV === 'function') {
         PinoDB.exportFacturesCSV(jobs);
         showNotificationToast('✅ Export CSV des factures généré avec succès !', 'success');
+      }
+    };
+
+    window.handleExportFacturesPDF = async () => {
+      let jobs = window._cachedAdminJobs || [];
+      if (!jobs.length && window.PinoDB) {
+        const res = await PinoDB.fetchJobs();
+        if (res.ok && Array.isArray(res.data)) jobs = res.data;
+      }
+      if (!jobs.length) {
+        try {
+          const local = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+          if (local.length > 0) jobs = local;
+        } catch(e) {}
+      }
+      if (!jobs.length) {
+        showNotificationToast('Aucune facture enregistrée pour le moment.', 'info');
+        return;
+      }
+
+      const totalCharged = jobs.reduce((s, j) => s + (parseFloat(j.amount_charged) || 0), 0);
+      const totalPaid = jobs.filter(j => j.payment_status === 'paid').reduce((s, j) => s + (parseFloat(j.amount_charged) || 0), 0);
+      const totalCredit50 = jobs.filter(j => (j.payment_method || '').toLowerCase() === 'unipros').reduce((s, j) => s + ((parseFloat(j.amount_charged) || 0) * 0.5), 0);
+      const totalPending = totalCharged - totalPaid;
+      const now = new Date().toLocaleDateString('fr-FR');
+      const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
+
+      const docHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; line-height: 1.5; font-size: 12px;">
+          <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #047857; padding-bottom: 14px; margin-bottom: 16px;">
+            <div>
+              <div style="font-size: 20px; font-weight: 800; color: #047857;">🌲 Pino Espaces Verts — Grand Livre des Factures</div>
+              <div style="font-size: 11px; color: #475569; margin-top: 3px;">Artisan Paysagiste — Andrés Pino • Gironde (33)</div>
+              <div style="font-size: 11px; color: #475569;">Coopérative UNIPROS — Déclaration SAP529241671 • Siret : 529 241 671 00028</div>
+            </div>
+            <div style="text-align: right;">
+              <span style="background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;">Grand Livre Fiscal</span>
+              <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Édité le : ${now}</div>
+              <div style="font-size: 11px; color: #0f172a; font-weight: bold;">Total factures : ${jobs.length}</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
+            <div style="background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center;">
+              <span style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">Total Facturé TTC</span>
+              <div style="font-size: 16px; font-weight: 900; color: #0f172a; margin-top: 2px;">${totalCharged.toFixed(2)} €</div>
+            </div>
+            <div style="background: #ecfdf5; padding: 10px; border-radius: 8px; border: 1px solid #a7f3d0; text-align: center;">
+              <span style="font-size: 10px; color: #065f46; font-weight: bold; text-transform: uppercase;">Avance 50% SAP Urssaf</span>
+              <div style="font-size: 16px; font-weight: 900; color: #047857; margin-top: 2px;">- ${totalCredit50.toFixed(2)} €</div>
+            </div>
+            <div style="background: #f0fdf4; padding: 10px; border-radius: 8px; border: 1px solid #bbf7d0; text-align: center;">
+              <span style="font-size: 10px; color: #15803d; font-weight: bold; text-transform: uppercase;">Montant Acquitté</span>
+              <div style="font-size: 16px; font-weight: 900; color: #166534; margin-top: 2px;">${totalPaid.toFixed(2)} €</div>
+            </div>
+            <div style="background: #fffbeb; padding: 10px; border-radius: 8px; border: 1px solid #fde68a; text-align: center;">
+              <span style="font-size: 10px; color: #92400e; font-weight: bold; text-transform: uppercase;">En Attente</span>
+              <div style="font-size: 16px; font-weight: 900; color: #b45309; margin-top: 2px;">${totalPending.toFixed(2)} €</div>
+            </div>
+          </div>
+
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+            <thead>
+              <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-transform: uppercase; color: #334155; font-size: 10px;">
+                <th style="padding: 8px; text-align: left;">N° Facture</th>
+                <th style="padding: 8px; text-align: left;">Client & Commune</th>
+                <th style="padding: 8px; text-align: left;">Type</th>
+                <th style="padding: 8px; text-align: left;">Date</th>
+                <th style="padding: 8px; text-align: right;">Total TTC</th>
+                <th style="padding: 8px; text-align: right;">Part Client</th>
+                <th style="padding: 8px; text-align: center;">Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${jobs.map((j, idx) => {
+                const charged = parseFloat(j.amount_charged) || 0;
+                const isUnipros = (j.payment_method || '').toLowerCase() === 'unipros';
+                const clientPart = isUnipros ? (charged * 0.5) : charged;
+                const isPaid = j.payment_status === 'paid';
+                const isCancelled = j.payment_status === 'cancelled';
+                const facNum = j.fac_number || `#FAC-2026-${String(idx + 1).padStart(3, '0')}`;
+                const dateStr = j.date_start ? new Date(j.date_start).toLocaleDateString('fr-FR') : (j.created_at ? new Date(j.created_at).toLocaleDateString('fr-FR') : '—');
+                const statusBadge = isCancelled ? '<span style="color:#e11d48;font-weight:bold;">Annulée</span>' : (isPaid ? '<span style="color:#16a34a;font-weight:bold;">Acquittée</span>' : '<span style="color:#d97706;font-weight:bold;">En attente</span>');
+
+                return `
+                  <tr style="border-bottom: 1px solid #e2e8f0; ${isCancelled ? 'opacity:0.6;background:#fff1f2;' : ''}">
+                    <td style="padding: 8px; font-weight: bold; font-family: monospace;">${escapeFn(facNum)}</td>
+                    <td style="padding: 8px;"><strong>${escapeFn(j.client_name || 'Client')}</strong><br><span style="color:#64748b;font-size:10px;">${escapeFn(j.client_commune || '')}</span></td>
+                    <td style="padding: 8px;">${isUnipros ? 'Unipros SAP' : 'Direct B2B'}</td>
+                    <td style="padding: 8px;">${dateStr}</td>
+                    <td style="padding: 8px; text-align: right; font-weight: bold; ${isCancelled ? 'text-decoration:line-through;' : ''}">${charged.toFixed(2)} €</td>
+                    <td style="padding: 8px; text-align: right; color: #047857; font-weight: bold;">${isCancelled ? '0.00 €' : clientPart.toFixed(2) + ' €'}</td>
+                    <td style="padding: 8px; text-align: center;">${statusBadge}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+
+          <div style="margin-top: 24px; padding-top: 12px; border-top: 1px solid #e2e8f0; font-size: 10px; color: #64748b; display: flex; justify-content: space-between;">
+            <div>Conservé 10 ans selon les obligations comptables et fiscales (art. L. 123-22 du Code de commerce).</div>
+            <div>Pino Espaces Verts • Gestion d\'entreprise</div>
+          </div>
+        </div>
+      `;
+
+      displayOrDownloadDocument({
+        title: `Grand Livre Factures ${now.replace(/\//g, '-')} — Pino Espaces Verts`,
+        filename: `grand_livre_factures_pino_${now.replace(/\//g, '_')}.pdf`,
+        htmlContent: docHtml
+      });
+    };
+
+    window.handleExportClientInvoicesCSV = async (email) => {
+      let clientJobs = window._cachedClientJobs || [];
+      if (!clientJobs.length && window.PinoDB) {
+        const res = await PinoDB.fetchJobs();
+        if (res.ok && Array.isArray(res.data)) {
+          const normEmail = (email || '').trim().toLowerCase();
+          clientJobs = res.data.filter(j => (j.client_email || '').trim().toLowerCase() === normEmail);
+        }
+      }
+      if (!clientJobs.length) {
+        showNotificationToast('Aucune facture à exporter.', 'info');
+        return;
+      }
+      if (window.PinoDB && typeof PinoDB.exportClientFacturesCSV === 'function') {
+        PinoDB.exportClientFacturesCSV(clientJobs, email);
+        showNotificationToast('Export CSV de vos factures téléchargé !', 'success');
+      } else if (window.PinoDB && typeof PinoDB.exportFacturesCSV === 'function') {
+        PinoDB.exportFacturesCSV(clientJobs);
+        showNotificationToast('Export CSV de vos factures téléchargé !', 'success');
       }
     };
 
@@ -9178,6 +9484,16 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
       document.querySelectorAll('dialog').forEach(dialog => {
         dialog.addEventListener('click', (e) => {
+          // 1. Si le clic provient d'un élément interne au dialogue (bouton, onglet, menu select, etc.), ne JAMAIS fermer !
+          if (e.target !== dialog) return;
+
+          // 2. Ne jamais fermer l'Espace Admin CRM au clic extérieur (évite la fermeture intempestive lors du saut d'options)
+          if (dialog.id === 'modal-window-admin') return;
+
+          // 3. Ne jamais fermer les formulaires de travail ou l'espace client au clic extérieur pour ne pas perdre les données saisies
+          if (['modal-window-client', 'modal-nouvelle-facture', 'modal-lead-response', 'modal-repair-lead', 'modal-add-platform-lead'].includes(dialog.id)) return;
+
+          // 4. Pour les dialogues légaux et informatifs, vérifier si le clic est sur le fond extérieur
           const rect = dialog.getBoundingClientRect();
           const isInDialog = (
             rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
