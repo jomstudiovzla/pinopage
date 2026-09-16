@@ -4156,6 +4156,12 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         if (error.code === 'auth/popup-blocked') {
           const provider = new firebase.auth.GoogleAuthProvider();
           await firebase.auth().signInWithRedirect(provider);
+        } else if (error.code === 'auth/unauthorized-domain') {
+          if (window.location.hostname === '127.0.0.1') {
+            window.location.href = window.location.href.replace('127.0.0.1', 'localhost');
+            return;
+          }
+          showNotificationToast("Domaine non autorisé dans Firebase. Ajoutez " + window.location.hostname + " dans Firebase Console → Authentication → Paramètres → Domaines autorisés.", 'error');
         } else if (error.code === 'auth/configuration-not-found' || error.code === 'auth/invalid-api-key') {
           showNotificationToast("Veuillez renseigner l'apiKey Firebase dans assets/js/firebase-config.js.", 'error');
         } else {
