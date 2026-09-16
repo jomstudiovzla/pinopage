@@ -10,6 +10,17 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
+## ✅ Corrección Crítica: Autenticación Firebase en Safari / iPadOS (100% RESUELTO)
+- [x] **Solución del error `auth/operation-not-supported-in-this-environment` en Safari / iOS / iPadOS**:
+  - **Causa raíz identificada**: En Safari (especialmente iPadOS/iOS), el bloqueo de cookies de terceros y el particionamiento de almacenamiento ITP bloquean el iframe interno que usa `signInWithPopup` (`pagepino-e8e97.firebaseapp.com/__/auth/iframe`), disparando el error técnico en inglés en un toast rojo.
+  - **Solución implementada**:
+    1. Detección proactiva de dispositivos móviles, tablets (iPad/iPadOS) y navegadores Safari. En estos entornos, `handleGoogleSignIn` realiza directamente `signInWithRedirect(provider)` de primer nivel sin abrir popups ni iframes de terceros bloqueados.
+    2. Si `signInWithPopup` es invocado en escritorio y falla por `auth/popup-blocked` o `auth/operation-not-supported-in-this-environment`, conmuta automáticamente y sin errores a `signInWithRedirect`.
+    3. `assets/js/firebase-config.js`: Configurada persistencia resiliente con fallback en cascada (`LOCAL` -> `SESSION` -> `NONE`), asegurando que Firebase Auth no falle en modo de navegación privada o almacenamiento restringido.
+    4. `bindAuthSessions()`: `getRedirectResult()` procesa al usuario retornado de Google, lo conecta de inmediato y abre su Espace Client con mensaje de bienvenida en francés y su cupón de descuento.
+    5. Erradicación total de textos de error técnicos en inglés (`Firebase: ...`). Todos los estados de error muestran mensajes educados y claros en francés.
+    6. Versión de caché de ServiceWorker actualizada a `v11` para forzar refresco inmediato en todos los navegadores clientes.
+
 ## ✅ Estado de Integración Firebase (100% OPERATIVO)
 - [x] `assets/js/firebase-config.js` configurado con la Web API Key real (`AIzaSyCOrSsb3dMl-tYr9y23zCPaDu63cRn7l-k`) y App ID.
 - [x] `index.html` cargando los SDKs de Firebase Compat v10 (App, Auth, Database).

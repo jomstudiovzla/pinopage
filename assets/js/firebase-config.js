@@ -14,7 +14,6 @@ window.PINO_FIREBASE_CONFIG = {
   appId: "1:102396108475:web:070dcbdf881bd2b10c139e"
 };
 
-// Initialisation globale de Firebase
 window.initPinoFirebase = () => {
   if (typeof firebase === 'undefined') {
     console.warn('[pino-firebase] Firebase SDK non chargé.');
@@ -27,6 +26,21 @@ window.initPinoFirebase = () => {
     }
     window.pinoAuth = firebase.auth();
     window.pinoRtdb = firebase.database();
+
+    // Persistance adaptée aux navigateurs avec ITP / Safari / Navigation privée
+    if (window.pinoAuth && typeof window.pinoAuth.setPersistence === 'function') {
+      window.pinoAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch(() => {
+          return window.pinoAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+        })
+        .catch(() => {
+          return window.pinoAuth.setPersistence(firebase.auth.Auth.Persistence.NONE);
+        })
+        .catch((e) => {
+          console.warn('[pino-firebase] Note persistance:', e);
+        });
+    }
+
     return true;
   } catch (err) {
     console.error('[pino-firebase] Erreur d\'initialisation:', err);

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v9-bidirectional-notifications';
+const CACHE_NAME = 'pino-ev-v11-auth-safari-fix';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',
@@ -13,7 +13,10 @@ const ASSETS = [
   './assets/images/garden_reference_2.jpg',
   './assets/images/garden_reference_3.jpg',
   './assets/flyer/flyer_pino_oferta_muy_centrado.jpg',
-  './assets/images/quiero_que_me_hagas_una_202605171317.jpeg'
+  './assets/images/quiero_que_me_hagas_una_202605171317.jpeg',
+  './assets/js/pino-db.js',
+  './assets/js/firebase-config.js',
+  './assets/js/chatbot_knowledge_base.js'
 ];
 
 self.addEventListener('install', (e) => {

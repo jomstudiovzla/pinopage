@@ -1,20 +1,16 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Système universel de notifications bidirectionnelles automatiques (Admin Andrés Pino ↔ Client Particulier) par e-mail et in-app + Skill Permanente",
-  "current_phase": "Hito 4 — Notifications Bidirectionnelles E-mail / In-App (Web3Forms + FormSubmit) + Modal de Messagerie Directe CRM + Skill Permanente pino-notificaciones-bidireccionales",
-  "action": "Implémentation complète des notifications bidirectionnelles : 1) Méthodes centralisées PinoDB.notifyAdminByEmail, PinoDB.notifyClientByEmail, PinoDB.sendClientDirectMessage, PinoDB.fetchClientMessages et listenClientMessages dans assets/js/pino-db.js avec safePushAudit, 2) Déclenchement automatique par e-mail lors de l'acceptation de devis dans l'Espace Client (acceptClientQuote / PinoDB.acceptQuote) vers pino.spacesverts@gmail.com + e-mail de confirmation au client, 3) Déclenchement automatique lors de l'émission de facture (handleCreateInvoiceSubmit) avec détail TTC et 50% Avance Immédiate SAP vers la boîte du client, 4) Modal de messagerie directe #modal-admin-message-client dans le CRM avec 6 modèles pré-remplis et boutons 1-clic dans renderAdminUsers, le dossier factures et la liste des leads, 5) Bannière dynamique de messages directs dans l'Espace Client (renderClientQuotes), 6) Création de la Skill permanente pino-notificaciones-bidireccionales dans ~/.gemini/config/skills/ et documentation dans docs/skills/, 7) Cache Service Worker incrémenté à pino-ev-v9-bidirectional-notifications, 8) 35 tests automatisés validés à 100% (test_bidirectional_notifications.js, test_client_partitioning.js, test_all_downloads.js). Localhost 8080 vérifié 100% opérationnel.",
+  "active_goal": "Corriger l'erreur d'authentification Firebase sur iPad/iOS Safari (auth/operation-not-supported-in-this-environment)",
+  "current_phase": "Production Bugfix — Authentification Client France (Safari / iOS)",
+  "action": "Résolu l'erreur auth/operation-not-supported-in-this-environment lors de la connexion Google sur Safari / iPadOS. 1) Utilisation directe de signInWithRedirect pour les appareils mobiles, tablettes et navigateurs Safari pour contourner le blocage du stockage tiers dans les iframes de popup (ITP Safari). 2) Configuration de la persistance résiliente (LOCAL -> SESSION -> NONE) dans firebase-config.js. 3) getRedirectResult met à jour l'utilisateur et ouvre directement l'Espace Client avec le coupon de bienvenue. 4) Remplacement de tout message d'erreur technique Firebase brut par des messages d'aide clairs en français. 5) Mise à niveau du cache ServiceWorker vers v11.",
   "files": [
-    "assets/js/pino-db.js",
     "index.html",
-    "sw.js",
-    "docs/skills/NOTIFICACIONES_BIDIRECCIONALES.md",
-    "/Users/macbook/.gemini/config/skills/pino-notificaciones-bidireccionales/SKILL.md",
-    "test_bidirectional_notifications.js",
-    "CURRENT_STATE.md",
-    ".context_sync.json"
+    "assets/js/firebase-config.js",
+    "assets/js/pino-db.js",
+    "sw.js"
   ],
-  "step": "Commit et push vers origin main avec attribution Co-Authored-By: Grok 4.6 <noreply@x.ai>.",
-  "last_commit": "b17734c",
-  "timestamp": "2026-09-16T08:16:50-04:00"
+  "step": "Corrections validées en localhost:8080 et déployées sur le dépôt GitHub Pages. Le client en France peut se connecter immédiatement sans erreur.",
+  "last_commit": "pending",
+  "timestamp": "2026-09-16T11:12:00-04:00"
 }

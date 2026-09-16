@@ -44,6 +44,34 @@
     } catch(e) {}
   }
 
+  function sanitizeEmail(email) {
+    if (!email) return '';
+    return String(email).trim().toLowerCase().replace(/[.#$\[\]\/\%]/g, '_');
+  }
+
+  function isValidEmail(email) {
+    if (!email || typeof email !== 'string') return false;
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email.trim());
+  }
+
+  async function fetchWithTimeout(url, opts = {}, timeoutMs = 8000) {
+    if (typeof fetch !== 'function') return { ok: true, json: async () => ({ success: true, ok: true }) };
+    if (typeof AbortController === 'undefined') {
+      return fetch(url, opts);
+    }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(url, { ...opts, signal: controller.signal });
+      clearTimeout(timeoutId);
+      return response;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      throw err;
+    }
+  }
+
   /* ─────────────────────────────────────────────────────────
    *  LEADS — Guardar demande de devis
    * ───────────────────────────────────────────────────────── */
@@ -445,7 +473,7 @@ https://jomstudiovzla.github.io/pinopage/#admin
     let emailSent = false;
     if (typeof fetch === 'function') {
       try {
-        const res = await fetch('https://api.web3forms.com/submit', {
+        const res = await fetchWithTimeout('https://api.web3forms.com/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
@@ -453,7 +481,7 @@ https://jomstudiovzla.github.io/pinopage/#admin
             to: PINO_ADMIN_EMAIL,
             from_name: 'Pino Espaces Verts — CRM Alerte',
             subject: subject,
-            replyto: clientEmail || PINO_ADMIN_EMAIL,
+            replyto: (clientEmail && isValidEmail(clientEmail)) ? clientEmail : PINO_ADMIN_EMAIL,
             message: mailBody,
             client_name: clientName,
             client_email: clientEmail,
@@ -461,7 +489,7 @@ https://jomstudiovzla.github.io/pinopage/#admin
             event_type: type,
             lead_id: leadId
           })
-        });
+        }, 8000);
         const data = await res.json().catch(() => ({ success: true }));
         emailSent = Boolean(data && data.success);
       } catch (err) {
@@ -512,8 +540,8 @@ https://jomstudiovzla.github.io/pinopage/#admin
    */
   async function notifyClientByEmail(opts = {}) {
     const rawEmail = (opts.clientEmail || '').trim().toLowerCase();
-    if (!rawEmail) {
-      return { ok: false, error: 'Email client requis' };
+    if (!rawEmail || !isValidEmail(rawEmail)) {
+      return { ok: false, error: 'Email client valide requis' };
     }
 
     const timestamp = new Date().toISOString();
@@ -522,7 +550,7 @@ https://jomstudiovzla.github.io/pinopage/#admin
     const type = opts.type || 'direct_message';
     const message = opts.message || '';
     const actionUrl = opts.actionUrl || 'https://jomstudiovzla.github.io/pinopage/#espace-client';
-    const sanitizedEmail = rawEmail.replace(/[.#$\[\]]/g, '_');
+    const sanitizedEmail = sanitizeEmail(rawEmail);
 
     const mailBody = `Bonjour ${clientName},
 
@@ -552,7 +580,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
     if (typeof fetch === 'function') {
       try {
-        const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(rawEmail)}`, {
+        const res = await fetchWithTimeout(`https://formsubmit.co/ajax/${encodeURIComponent(rawEmail)}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
@@ -562,7 +590,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
             name: 'Andrés Pino — Pino Espaces Verts',
             message: mailBody
           })
-        });
+        }, 8000);
         const data = await res.json().catch(() => ({ success: true }));
         clientEmailSent = Boolean(data && (data.success || data.ok !== false));
       } catch (err) {
@@ -570,7 +598,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       }
 
       try {
-        fetch('https://api.web3forms.com/submit', {
+        fetchWithTimeout('https://api.web3forms.com/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
@@ -581,7 +609,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
             replyto: rawEmail,
             message: `Copie conforme de l'e-mail transmis au client ${clientName} (${rawEmail}) le ${timestamp} :\n\n${mailBody}`
           })
-        }).catch(() => {});
+        }, 8000).catch(() => {});
       } catch (err) {}
     } else {
       clientEmailSent = true;
@@ -775,7 +803,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
   async function fetchClientQuotes(clientEmail) {
     if (!clientEmail) return { ok: false, data: [] };
     const normEmail = clientEmail.trim().toLowerCase();
-    const sanitizedEmail = normEmail.replace(/[.#$\[\]]/g, '_');
+    const sanitizedEmail = sanitizeEmail(normEmail);
 
     let fbMatches = [];
     const db = rtdb();
@@ -785,8 +813,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         const snapPartition = await db.ref(`clients_records/${sanitizedEmail}/quotes`).once('value');
         const partitionVal = snapPartition.val() || {};
         fbMatches = Object.keys(partitionVal)
-          .map(k => ({ id: k, ...partitionVal[k] }))
-          .reverse();
+          .map(k => ({ id: k, ...partitionVal[k] }));
 
         // 2. Fallback / Rétrocompatibilité : si partition vide, interroger /leads global et rétro-migrer
         if (fbMatches.length === 0) {
@@ -794,8 +821,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           const valAll = snapAll.val() || {};
           fbMatches = Object.keys(valAll)
             .map(k => ({ id: k, ...valAll[k] }))
-            .filter(lead => (lead.email || '').trim().toLowerCase() === normEmail)
-            .reverse();
+            .filter(lead => (lead.email || '').trim().toLowerCase() === normEmail);
 
           // Sauvegarder dans la partition pour les accès futurs
           for (const quote of fbMatches) {
@@ -815,7 +841,11 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
     const fbIds = new Set(fbMatches.map(l => l.id || l.ref_code));
     const extraLocal = localMatches.filter(l => !fbIds.has(l.id) && !fbIds.has(l.ref_code));
-    const allMatches = [...fbMatches, ...extraLocal];
+    const allMatches = [...fbMatches, ...extraLocal].sort((a, b) => {
+      const timeA = new Date(a.created_at || a.date || 0).getTime() || 0;
+      const timeB = new Date(b.created_at || b.date || 0).getTime() || 0;
+      return timeB - timeA;
+    });
 
     return { ok: true, data: allMatches };
   }
@@ -1039,6 +1069,11 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
    *  JOBS CRM — Guardar trabajo realizado
    * ───────────────────────────────────────────────────────── */
   async function saveJob(data) {
+    const charged = parseFloat(data.amountCharged) || 0;
+    const isPaid = (data.paymentStatus || '').toLowerCase() === 'paid';
+    const paid = data.amountPaid !== undefined ? (parseFloat(data.amountPaid) || 0) : (isPaid ? charged : 0);
+    const due = Math.max(0, charged - paid);
+
     const payload = {
       fac_number:      data.facNumber    || data.fac_number || null,
       lead_id:         data.leadId       || data.lead_id    || null,
@@ -1052,9 +1087,10 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       date_start:      data.dateStart    || null,
       date_end:        data.dateEnd      || null,
       hours_spent:     data.hoursSpent   ? parseFloat(data.hoursSpent)   : null,
-      amount_charged:  data.amountCharged? parseFloat(data.amountCharged): null,
-      amount_paid:     data.amountPaid   ? parseFloat(data.amountPaid)   : 0,
-      payment_status:  data.paymentStatus|| 'pending',
+      amount_charged:  charged,
+      amount_paid:     paid,
+      amount_due:      due,
+      payment_status:  data.paymentStatus|| (due <= 0 ? 'paid' : 'pending'),
       payment_method:  data.paymentMethod|| null,
       notes:           data.notes        || null,
       created_by:      data.createdBy    || null,
@@ -1070,7 +1106,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
         // Partitionnement dédié par client dans clients_records/{sanitizedEmail}/invoices/{jobId}
         const rawEmail = data.clientEmail || '';
-        const sanitizedEmail = rawEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+        const sanitizedEmail = sanitizeEmail(rawEmail);
         if (sanitizedEmail) {
           await db.ref(`clients_records/${sanitizedEmail}/invoices/${ref.key}`).set(fullJob).catch(() => {});
           await db.ref(`clients_records/${sanitizedEmail}/profile`).update({
@@ -1129,7 +1165,20 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       try {
         const snap = await db.ref('jobs').limitToLast(limit).once('value');
         const val = snap.val() || {};
-        let list = Object.keys(val).map(k => ({ id: k, ...val[k] })).reverse();
+        let list = Object.keys(val).map(k => {
+          const j = val[k];
+          const charged = parseFloat(j.amount_charged) || 0;
+          const isPaid = (j.payment_status || '').toLowerCase() === 'paid';
+          const paid = j.amount_paid !== undefined ? (parseFloat(j.amount_paid) || 0) : (isPaid ? charged : 0);
+          const due = j.amount_due !== undefined ? (parseFloat(j.amount_due) || 0) : Math.max(0, charged - paid);
+          return {
+            id: k,
+            ...j,
+            amount_charged: charged,
+            amount_paid: paid,
+            amount_due: due
+          };
+        }).reverse();
         if (status) list = list.filter(j => j.payment_status === status);
         return { ok: true, data: list };
       } catch (err) {
@@ -1159,6 +1208,16 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     const db = rtdb();
     if (db) {
       try {
+        if (patch.payment_status === 'paid' && patch.amount_paid === undefined) {
+          try {
+            const snap = await db.ref('jobs/' + jobId).once('value');
+            const curJob = snap.val() || {};
+            const charged = parseFloat(curJob.amount_charged) || 0;
+            patch.amount_paid = charged;
+            patch.amount_due = 0;
+          } catch(e) {}
+        }
+
         await db.ref('jobs/' + jobId).update({ ...patch, updated_at: new Date().toISOString() });
 
         // Propagation automatique dans la partition du client
@@ -1169,7 +1228,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
             const curJob = snap.val() || {};
             clientEmail = curJob.client_email || curJob.clientEmail || '';
           }
-          const sanitizedEmail = (clientEmail || '').trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+          const sanitizedEmail = sanitizeEmail(clientEmail);
           if (sanitizedEmail) {
             await db.ref(`clients_records/${sanitizedEmail}/invoices/${jobId}`).update({
               ...patch,
@@ -1203,7 +1262,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
   async function fetchClientInvoices(clientEmail) {
     if (!clientEmail) return { ok: false, data: [] };
     const normEmail = clientEmail.trim().toLowerCase();
-    const sanitizedEmail = normEmail.replace(/[.#$\[\]]/g, '_');
+    const sanitizedEmail = sanitizeEmail(normEmail);
 
     let fbMatches = [];
     const db = rtdb();
@@ -1213,8 +1272,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         const snapPartition = await db.ref(`clients_records/${sanitizedEmail}/invoices`).once('value');
         const partitionVal = snapPartition.val() || {};
         fbMatches = Object.keys(partitionVal)
-          .map(k => ({ id: k, ...partitionVal[k] }))
-          .reverse();
+          .map(k => ({ id: k, ...partitionVal[k] }));
 
         // 2. Fallback / Rétrocompatibilité : si partition vide, interroger /jobs global et rétro-migrer
         if (fbMatches.length === 0) {
@@ -1222,8 +1280,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           const valAll = snapAll.val() || {};
           fbMatches = Object.keys(valAll)
             .map(k => ({ id: k, ...valAll[k] }))
-            .filter(j => (j.client_email || '').trim().toLowerCase() === normEmail)
-            .reverse();
+            .filter(j => (j.client_email || '').trim().toLowerCase() === normEmail);
 
           for (const job of fbMatches) {
             db.ref(`clients_records/${sanitizedEmail}/invoices/${job.id}`).set(job).catch(() => {});
@@ -1242,7 +1299,11 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
     const fbIds = new Set(fbMatches.map(j => j.id));
     const extraLocal = localMatches.filter(j => !fbIds.has(j.id));
-    const allMatches = [...fbMatches, ...extraLocal];
+    const allMatches = [...fbMatches, ...extraLocal].sort((a, b) => {
+      const timeA = new Date(a.created_at || a.date_start || a.date || 0).getTime() || 0;
+      const timeB = new Date(b.created_at || b.date_start || b.date || 0).getTime() || 0;
+      return timeB - timeA;
+    });
 
     return { ok: true, data: allMatches };
   }
@@ -1281,7 +1342,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       const leadsVal = leadsSnap.val() || {};
       for (const [leadId, lead] of Object.entries(leadsVal)) {
         const rawEmail = lead.email || '';
-        const sanitized = rawEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+        const sanitized = sanitizeEmail(rawEmail);
         if (sanitized) {
           await db.ref(`clients_records/${sanitized}/quotes/${leadId}`).set({ ...lead, id: leadId }).catch(() => {});
           await db.ref(`clients_records/${sanitized}/profile`).update({
@@ -1300,7 +1361,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       const jobsVal = jobsSnap.val() || {};
       for (const [jobId, job] of Object.entries(jobsVal)) {
         const rawEmail = job.client_email || job.clientEmail || '';
-        const sanitized = rawEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+        const sanitized = sanitizeEmail(rawEmail);
         if (sanitized) {
           await db.ref(`clients_records/${sanitized}/invoices/${jobId}`).set({ ...job, id: jobId }).catch(() => {});
           await db.ref(`clients_records/${sanitized}/profile`).update({

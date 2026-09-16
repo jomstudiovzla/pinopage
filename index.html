@@ -5590,17 +5590,54 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       const originalText = label ? label.textContent : 'Continuer avec Google';
       if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Connexion Google...';
 
+      // Détection des appareils tactiles/mobiles et Safari (où les popups et le stockage iframe tiers sont bloqués par ITP)
+      const isTouchOrMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 1024);
+      const isIOSorSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+        (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) ||
+        /Android/i.test(navigator.userAgent);
+      const shouldUseRedirect = isTouchOrMobile || isIOSorSafari;
+
       try {
         if (typeof firebase !== 'undefined' && firebase.auth) {
           const provider = new firebase.auth.GoogleAuthProvider();
           provider.setCustomParameters({ prompt: 'select_account' });
-          const result = await firebase.auth().signInWithPopup(provider);
-          if (result && result.user) {
-            sessionStorage.removeItem('pino_explicit_logout');
-            await processAuthenticatedUser(result.user, 'google', null, { openModal: true });
+
+          // Sur Safari, iPadOS, iOS ou mobile : redirection directe sans passer par les popups bloquées
+          if (shouldUseRedirect) {
+            try { sessionStorage.setItem('pino_auth_redirect_pending', 'true'); } catch(e){}
+            try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
+            if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Redirection vers Google...';
+            await firebase.auth().signInWithRedirect(provider);
+            return;
+          }
+
+          // Sur PC/Desktop Chrome : tentative popup en premier pour fluidité
+          try {
+            const result = await firebase.auth().signInWithPopup(provider);
+            if (result && result.user) {
+              try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
+              await processAuthenticatedUser(result.user, 'google', null, { openModal: true });
+            }
+          } catch (popupErr) {
+            console.warn('[pino-auth] Popup non supportée ou bloquée, bascule en redirection:', popupErr.code, popupErr.message);
+            // Si la popup est bloquée ou non supportée dans l'environnement (Safari / ITP / mode privé)
+            if (popupErr.code === 'auth/popup-blocked' || 
+                popupErr.code === 'auth/operation-not-supported-in-this-environment' ||
+                (popupErr.message && popupErr.message.includes('operation-not-supported-in-this-environment'))) {
+              try { sessionStorage.setItem('pino_auth_redirect_pending', 'true'); } catch(e){}
+              try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
+              if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Redirection vers Google...';
+              await firebase.auth().signInWithRedirect(provider);
+              return;
+            } else if (popupErr.code === 'auth/popup-closed-by-user') {
+              return;
+            } else {
+              throw popupErr;
+            }
           }
         } else if (window.pinoSupabase) {
-          sessionStorage.removeItem('pino_explicit_logout');
+          try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
           const { error } = await window.pinoSupabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
@@ -5614,20 +5651,31 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         }
       } catch (error) {
         console.error('Google Sign-In Error:', error);
-        if (error.code === 'auth/popup-blocked') {
-          const provider = new firebase.auth.GoogleAuthProvider();
-          sessionStorage.setItem('pino_auth_redirect_pending', 'true');
-          await firebase.auth().signInWithRedirect(provider);
-        } else if (error.code === 'auth/unauthorized-domain') {
+        if (error.code === 'auth/unauthorized-domain') {
           if (window.location.hostname === '127.0.0.1') {
             window.location.href = window.location.href.replace('127.0.0.1', 'localhost');
             return;
           }
-          showNotificationToast("Domaine non autorisé dans Firebase. Ajoutez " + window.location.hostname + " dans Firebase Console → Authentication → Paramètres → Domaines autorisés.", 'error');
+          showNotificationToast("Domaine non autorisé dans Firebase (" + window.location.hostname + ").", 'error');
         } else if (error.code === 'auth/configuration-not-found' || error.code === 'auth/invalid-api-key') {
-          showNotificationToast("Veuillez renseigner l'apiKey Firebase dans assets/js/firebase-config.js.", 'error');
+          showNotificationToast("Configuration d'authentification en maintenance.", 'error');
+        } else if (error.code === 'auth/popup-closed-by-user') {
+          // Fermeture volontaire de la fenêtre
+        } else if (error.code === 'auth/operation-not-supported-in-this-environment' ||
+                   (error.message && error.message.includes('operation-not-supported-in-this-environment'))) {
+          // Tentative ultime de redirection
+          try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            try { sessionStorage.setItem('pino_auth_redirect_pending', 'true'); } catch(e){}
+            if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Redirection vers Google...';
+            await firebase.auth().signInWithRedirect(provider);
+            return;
+          } catch(e) {
+            showNotificationToast("Votre navigateur restreint le stockage. Veuillez autoriser les cookies dans vos réglages Safari ou ouvrir le site dans Chrome.", 'warning');
+          }
         } else {
-          showNotificationToast(error.message || 'Échec de connexion avec Google.', 'error');
+          showNotificationToast("Connexion temporairement indisponible. Veuillez réessayer.", 'warning');
         }
       } finally {
         if (label) label.textContent = originalText;
@@ -5651,12 +5699,12 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       try {
         if (typeof firebase !== 'undefined' && firebase.auth) {
           const cred = await firebase.auth().signInWithEmailAndPassword(email, pass);
-          sessionStorage.removeItem('pino_explicit_logout');
+          try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
           await processAuthenticatedUser(cred.user, 'password', null, { openModal: true });
         } else if (window.pinoSupabase) {
           const { data, error } = await window.pinoSupabase.auth.signInWithPassword({ email, password: pass });
           if (error) throw error;
-          sessionStorage.removeItem('pino_explicit_logout');
+          try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
           await processAuthenticatedUser(data.user, 'password', null, { openModal: true });
         } else {
           throw new Error('Service d\'authentification non disponible.');
@@ -5665,7 +5713,17 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         console.error('Login Error:', err);
         if (errorMsg) {
           errorMsg.classList.remove('hidden');
-          if (errorText) errorText.textContent = err.message || 'Identifiants non reconnus.';
+          let msg = 'Identifiants non reconnus.';
+          if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+            msg = 'Adresse e-mail ou mot de passe incorrect.';
+          } else if (err.code === 'auth/too-many-requests') {
+            msg = 'Trop de tentatives infructueuses. Veuillez patienter un instant.';
+          } else if (err.code === 'auth/invalid-email') {
+            msg = 'Format d\'adresse e-mail invalide.';
+          } else if (err.code === 'auth/operation-not-supported-in-this-environment') {
+            msg = 'Veuillez activer le stockage web ou les cookies dans les réglages de votre navigateur.';
+          }
+          if (errorText) errorText.textContent = msg;
         }
       } finally {
         if (submitBtn) {
@@ -5693,7 +5751,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           if (cred.user.updateProfile) {
             await cred.user.updateProfile({ displayName: fullName });
           }
-          sessionStorage.removeItem('pino_explicit_logout');
+          try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
           await processAuthenticatedUser(cred.user, 'password', { fullName, phone, commune }, { openModal: true });
         } else if (window.pinoSupabase) {
           const { data, error } = await window.pinoSupabase.auth.signUp({
@@ -5702,15 +5760,25 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           });
           if (error) throw error;
           if (data.user && data.session) {
-            sessionStorage.removeItem('pino_explicit_logout');
+            try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
             await processAuthenticatedUser(data.user, 'password', { fullName, phone, commune }, { openModal: true });
           } else {
-            showNotificationToast('Compte créé avec succès.', 'success');
+            showNotificationToast('Compte créé avec succès. Vérifiez vos e-mails pour confirmer.', 'success');
           }
         }
       } catch (err) {
         console.error('Register Error:', err);
-        alert(err.message || 'Erreur lors de la création du compte.');
+        let msg = 'Erreur lors de la création du compte.';
+        if (err.code === 'auth/email-already-in-use') {
+          msg = 'Cette adresse e-mail est déjà associée à un compte. Veuillez vous connecter.';
+        } else if (err.code === 'auth/weak-password') {
+          msg = 'Le mot de passe doit comporter au moins 6 caractères.';
+        } else if (err.code === 'auth/invalid-email') {
+          msg = 'Format d\'adresse e-mail invalide.';
+        } else if (err.code === 'auth/operation-not-supported-in-this-environment') {
+          msg = 'Veuillez autoriser le stockage web ou les cookies dans les réglages de votre navigateur.';
+        }
+        showNotificationToast(msg, 'error');
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -5726,26 +5794,28 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           if (firebase.auth().getRedirectResult) {
             firebase.auth().getRedirectResult().then((res) => {
               if (res && res.user) {
-                // Only auto-open modal if user came from an actual Google redirect
-                const wasRedirect = sessionStorage.getItem('pino_auth_redirect_pending') === 'true';
-                sessionStorage.removeItem('pino_auth_redirect_pending');
-                sessionStorage.removeItem('pino_explicit_logout');
-                processAuthenticatedUser(res.user, 'google', null, { openModal: wasRedirect });
+                try { sessionStorage.removeItem('pino_auth_redirect_pending'); } catch(e){}
+                try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
+                processAuthenticatedUser(res.user, 'google', null, { openModal: true });
               }
             }).catch((err) => {
-              sessionStorage.removeItem('pino_auth_redirect_pending');
-              console.warn('[pino-auth] Redirect result:', err.message);
+              try { sessionStorage.removeItem('pino_auth_redirect_pending'); } catch(e){}
+              console.warn('[pino-auth] Redirect result warning:', err ? err.message : err);
             });
           }
 
           firebase.auth().onAuthStateChanged(async (user) => {
             if (user) {
               // Sécurité: Si l'utilisateur s'est explicitement déconnecté, maintenir la session fermée
-              if (sessionStorage.getItem('pino_explicit_logout') === 'true') {
+              let isExplicitLogout = false;
+              try { isExplicitLogout = sessionStorage.getItem('pino_explicit_logout') === 'true'; } catch(e){}
+              if (isExplicitLogout) {
                 try { await firebase.auth().signOut(); } catch(e) {}
-                localStorage.removeItem('pino_current_user');
-                localStorage.removeItem('pino_last_client_email');
-                sessionStorage.removeItem('pino_impersonating');
+                try {
+                  localStorage.removeItem('pino_current_user');
+                  localStorage.removeItem('pino_last_client_email');
+                  sessionStorage.removeItem('pino_impersonating');
+                } catch(e){}
                 if (typeof window.stopClientNotificationListeners === 'function') {
                   window.stopClientNotificationListeners();
                 }
@@ -5761,9 +5831,11 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
                 updateAuthUI();
               }
             } else {
-              localStorage.removeItem('pino_current_user');
-              localStorage.removeItem('pino_last_client_email');
-              sessionStorage.removeItem('pino_impersonating');
+              try {
+                localStorage.removeItem('pino_current_user');
+                localStorage.removeItem('pino_last_client_email');
+                sessionStorage.removeItem('pino_impersonating');
+              } catch(e){}
               if (typeof window.stopClientNotificationListeners === 'function') {
                 window.stopClientNotificationListeners();
               }
