@@ -984,6 +984,7 @@
           Objet du message / Titre de la notification <span class="text-red-500">*</span>
         </label>
         <input type="text" id="adm-msg-subject" required placeholder="Ex: Confirmation de notre intervention de jeudi matin"
+          oninput="updateAdminMessagePreview()"
           class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-none font-medium" />
       </div>
 
@@ -993,7 +994,26 @@
           Message personnalisé <span class="text-red-500">*</span>
         </label>
         <textarea id="adm-msg-body" rows="5" required placeholder="Saisissez votre message pour le client..."
+          oninput="updateAdminMessagePreview()"
           class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-none font-normal leading-relaxed"></textarea>
+      </div>
+
+      <!-- Aperçu E-mail Transmis (Live Interactive Preview) -->
+      <div id="adm-msg-preview-container" class="border border-emerald-200 bg-emerald-50/40 rounded-2xl p-3.5 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
+            <i class="fa-solid fa-eye text-emerald-600"></i> Aperçu du message transmis au client
+          </span>
+          <span class="text-[10px] text-emerald-600 font-semibold bg-emerald-100/80 px-2 py-0.5 rounded-full">Temps réel</span>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs text-xs space-y-1.5">
+          <div class="border-b border-slate-100 pb-1 text-slate-500 font-mono text-[11px] flex items-center gap-1.5">
+            <span class="font-bold text-slate-700">Objet :</span> <span id="adm-msg-preview-subject" class="text-slate-800 font-semibold">—</span>
+          </div>
+          <div id="adm-msg-preview-body" class="text-slate-700 whitespace-pre-line leading-relaxed font-sans py-1 min-h-[40px]">
+            —
+          </div>
+        </div>
       </div>
 
       <!-- Options d'envoi -->
@@ -1663,15 +1683,20 @@
           </div>
         </div>
 
-        <!-- Filtre Prospects / Devis par Client -->
+        <!-- Filtre Prospects / Devis par Client & Recherche Live -->
         <div class="flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
-          <div class="flex items-center gap-2 flex-1 min-w-[280px]">
+          <div class="flex items-center gap-2 flex-1 min-w-[260px]">
             <label for="adm-leads-client-filter" class="text-xs font-bold text-slate-700 whitespace-nowrap">
               <i class="fa-solid fa-user-tag text-emerald-700 mr-1"></i> Filtrer par Client :
             </label>
             <select id="adm-leads-client-filter" onchange="handleAdminLeadsClientFilterChange(this.value)" class="w-full text-xs font-semibold bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
               <option value="ALL">📋 Tous les prospects & clients (Vue globale)</option>
             </select>
+          </div>
+          <div class="relative flex-1 min-w-[220px]">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="adm-leads-search-input" placeholder="Filtrer prospects (nom, email, ville, service...)" oninput="handleAdminLeadsSearch(this.value)" class="w-full text-xs bg-white border border-slate-300 rounded-xl pl-8 pr-8 py-2 text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none shadow-2xs">
+            <button type="button" onclick="document.getElementById('adm-leads-search-input').value=''; handleAdminLeadsSearch('');" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer" title="Effacer"><i class="fa-solid fa-circle-xmark"></i></button>
           </div>
           <div id="adm-leads-filter-stats" class="text-xs font-semibold text-slate-600 flex items-center gap-2"></div>
         </div>
@@ -2022,15 +2047,20 @@
           </div>
         </div>
 
-        <!-- Filtre par Dossier Client Partitionné -->
+        <!-- Filtre par Dossier Client Partitionné & Recherche Live -->
         <div class="flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
-          <div class="flex items-center gap-2 flex-1 min-w-[280px]">
+          <div class="flex items-center gap-2 flex-1 min-w-[260px]">
             <label for="adm-factures-client-filter" class="text-xs font-bold text-slate-700 whitespace-nowrap">
               <i class="fa-solid fa-folder-tree text-emerald-700 mr-1"></i> Dossier Client :
             </label>
             <select id="adm-factures-client-filter" onchange="handleAdminFacturesClientFilterChange(this.value)" class="w-full text-xs font-semibold bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
               <option value="ALL">📋 Tous les clients réunis (Vue globale consolidée)</option>
             </select>
+          </div>
+          <div class="relative flex-1 min-w-[220px]">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="adm-factures-search-input" placeholder="Filtrer factures (nom, n°, statut...)" oninput="handleAdminFacturesSearch(this.value)" class="w-full text-xs bg-white border border-slate-300 rounded-xl pl-8 pr-8 py-2 text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none shadow-2xs">
+            <button type="button" onclick="document.getElementById('adm-factures-search-input').value=''; handleAdminFacturesSearch('');" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs cursor-pointer" title="Effacer"><i class="fa-solid fa-circle-xmark"></i></button>
           </div>
           <div id="adm-factures-filter-stats" class="text-xs font-semibold text-slate-600 flex items-center gap-2"></div>
         </div>
@@ -4754,6 +4784,22 @@
         replyHtml = `<p>Pour toute question, Andrés Pino vous répond directement par téléphone au <strong>+33 6 51 59 40 34</strong> ou par e-mail à <strong>pino.spacesverts@gmail.com</strong>.</p>`;
       }
 
+      // Détection automatique de coordonnées pour alerte immédiate Andrés Pino
+      try {
+        const emailMatch = questionText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+        const phoneMatch = questionText.match(/(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}/);
+        if ((emailMatch || phoneMatch) && window.PinoDB && typeof PinoDB.notifyAdminByEmail === 'function') {
+          PinoDB.notifyAdminByEmail({
+            type: 'chatbot_lead',
+            clientName: 'Prospect Chatbot',
+            clientEmail: emailMatch ? emailMatch[0] : '',
+            clientPhone: phoneMatch ? phoneMatch[0] : '',
+            service: 'Prise de contact via Assistant Chatbot',
+            notes: questionText
+          }).catch(() => {});
+        }
+      } catch(e) {}
+
       setTimeout(() => {
         typingDiv.remove();
         const replyDiv = document.createElement('div');
@@ -5564,6 +5610,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         console.error('Google Sign-In Error:', error);
         if (error.code === 'auth/popup-blocked') {
           const provider = new firebase.auth.GoogleAuthProvider();
+          sessionStorage.setItem('pino_auth_redirect_pending', 'true');
           await firebase.auth().signInWithRedirect(provider);
         } else if (error.code === 'auth/unauthorized-domain') {
           if (window.location.hostname === '127.0.0.1') {
@@ -5673,10 +5720,14 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           if (firebase.auth().getRedirectResult) {
             firebase.auth().getRedirectResult().then((res) => {
               if (res && res.user) {
+                // Only auto-open modal if user came from an actual Google redirect
+                const wasRedirect = sessionStorage.getItem('pino_auth_redirect_pending') === 'true';
+                sessionStorage.removeItem('pino_auth_redirect_pending');
                 sessionStorage.removeItem('pino_explicit_logout');
-                processAuthenticatedUser(res.user, 'google', null, { openModal: true });
+                processAuthenticatedUser(res.user, 'google', null, { openModal: wasRedirect });
               }
             }).catch((err) => {
+              sessionStorage.removeItem('pino_auth_redirect_pending');
               console.warn('[pino-auth] Redirect result:', err.message);
             });
           }
@@ -6511,11 +6562,17 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }
     };
 
-    // Gestion du filtre Client dans les Leads / Devis Admin
+    // Gestion du filtre Client et Recherche dans les Leads / Devis Admin
     window._activeLeadsClientFilter = 'ALL';
+    window._activeLeadsSearchQuery = '';
 
     window.handleAdminLeadsClientFilterChange = (clientEmail) => {
       window._activeLeadsClientFilter = clientEmail || 'ALL';
+      renderAdminLeads();
+    };
+
+    window.handleAdminLeadsSearch = (query) => {
+      window._activeLeadsSearchQuery = query || '';
       renderAdminLeads();
     };
 
@@ -6644,6 +6701,32 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       } else {
         if (statsEl) {
           statsEl.innerHTML = `<span class="text-slate-500 font-bold">${leads.length} demandes au total • ${leadClientsMap.size} contacts</span>`;
+        }
+      }
+
+      // Recherche live multi-critères
+      const searchLeadsQuery = (window._activeLeadsSearchQuery || '').trim().toLowerCase();
+      if (searchLeadsQuery) {
+        displayedLeads = displayedLeads.filter(l => {
+          const name = (l.name || '').toLowerCase();
+          const email = (l.email || '').toLowerCase();
+          const phone = (l.phone || '').toLowerCase();
+          const commune = (l.commune || '').toLowerCase();
+          const service = (l.service || '').toLowerCase();
+          const details = (l.details || '').toLowerCase();
+          const status = (l.status || '').toLowerCase();
+          const refCode = (l.id || '').toLowerCase();
+          return name.includes(searchLeadsQuery) ||
+                 email.includes(searchLeadsQuery) ||
+                 phone.includes(searchLeadsQuery) ||
+                 commune.includes(searchLeadsQuery) ||
+                 service.includes(searchLeadsQuery) ||
+                 details.includes(searchLeadsQuery) ||
+                 status.includes(searchLeadsQuery) ||
+                 refCode.includes(searchLeadsQuery);
+        });
+        if (statsEl) {
+          statsEl.innerHTML += ` <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-xs font-semibold shadow-2xs">🔍 ${displayedLeads.length} trouvé(s)</span>`;
         }
       }
 
@@ -8120,11 +8203,17 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       }).join('');
     };
 
-    // Gestion du filtre Client dans les Factures Admin
+    // Gestion du filtre Client et Recherche dans les Factures Admin
     window._activeFacturesClientFilter = 'ALL';
+    window._activeFacturesSearchQuery = '';
 
     window.handleAdminFacturesClientFilterChange = (clientEmail) => {
       window._activeFacturesClientFilter = clientEmail || 'ALL';
+      renderAdminFactures();
+    };
+
+    window.handleAdminFacturesSearch = (query) => {
+      window._activeFacturesSearchQuery = query || '';
       renderAdminFactures();
     };
 
@@ -8271,6 +8360,28 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         if (dossierCard) dossierCard.classList.add('hidden');
         if (statsEl) {
           statsEl.innerHTML = `<span class="text-slate-500 font-bold">${jobs.length} factures au total • ${clientMap.size} clients</span>`;
+        }
+      }
+
+      // Recherche live multi-critères
+      const searchFacturesQuery = (window._activeFacturesSearchQuery || '').trim().toLowerCase();
+      if (searchFacturesQuery) {
+        displayedJobs = displayedJobs.filter(j => {
+          const facNum = (j.fac_number || '').toLowerCase();
+          const name = (j.client_name || '').toLowerCase();
+          const email = (j.client_email || '').toLowerCase();
+          const method = (j.payment_method || '').toLowerCase();
+          const status = (j.payment_status || '').toLowerCase();
+          const notes = (j.notes || '').toLowerCase();
+          return facNum.includes(searchFacturesQuery) ||
+                 name.includes(searchFacturesQuery) ||
+                 email.includes(searchFacturesQuery) ||
+                 method.includes(searchFacturesQuery) ||
+                 status.includes(searchFacturesQuery) ||
+                 notes.includes(searchFacturesQuery);
+        });
+        if (statsEl) {
+          statsEl.innerHTML += ` <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-xs font-semibold shadow-2xs">🔍 ${displayedJobs.length} trouvée(s)</span>`;
         }
       }
 
@@ -9020,6 +9131,8 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
       if (defaultTemplate !== 'custom') {
         handleAdminMessageTemplateChange();
+      } else {
+        updateAdminMessagePreview();
       }
 
       modal.showModal();
@@ -9035,6 +9148,15 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       const clientEmail = activeFilter;
       const clientPhone = document.getElementById('adm-dossier-client-phone')?.textContent?.replace(/[^0-9+]/g, '') || '';
       openAdminMessageClientModal(clientEmail, clientName, clientPhone);
+    };
+
+    window.updateAdminMessagePreview = () => {
+      const subj = document.getElementById('adm-msg-subject')?.value || '';
+      const body = document.getElementById('adm-msg-body')?.value || '';
+      const previewSubj = document.getElementById('adm-msg-preview-subject');
+      const previewBody = document.getElementById('adm-msg-preview-body');
+      if (previewSubj) previewSubj.textContent = subj || '—';
+      if (previewBody) previewBody.textContent = body || '—';
     };
 
     window.handleAdminMessageTemplateChange = () => {
@@ -9068,6 +9190,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         default:
           break;
       }
+      updateAdminMessagePreview();
     };
 
     window.handleSendAdminDirectMessage = async (e) => {
@@ -10318,11 +10441,14 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
     // Close on backdrop click for all section windows
     document.addEventListener('DOMContentLoaded', () => {
+      // ── Sécurité: Fermer TOUT dialogue/modale ouvert au chargement initial ──
+      // Aucun dialogue ne doit être visible au premier affichage de la page.
+      document.querySelectorAll('dialog[open]').forEach(d => d.close());
+
       initDefaultUsers();
       initDefaultLeads();
       updateAuthUI();
       initModalDragToClose();
-      renderAdminUsers();
 
       document.querySelectorAll('dialog').forEach(dialog => {
         dialog.addEventListener('click', (e) => {
