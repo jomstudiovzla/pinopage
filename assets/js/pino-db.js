@@ -868,6 +868,234 @@
   }
 
   /* ─────────────────────────────────────────────────────────
+   *  PLATFORM LEADS — Prospection multi-plateformes
+   *  (LeBonCoin, Facebook, Nextdoor, Yoojo, NeedHelp, AlloVoisins)
+   * ───────────────────────────────────────────────────────── */
+  async function savePlatformLead(data) {
+    const payload = {
+      platform:    data.platform || 'leboncoin', // leboncoin, facebook, nextdoor, yoojo, needhelp, allovoisins
+      name:        data.name     || 'Prospect Anonyme',
+      commune:     data.commune  || 'Bordeaux',
+      service:     data.service  || 'Entretien jardin',
+      phone:       data.phone    || '',
+      email:       data.email    || '',
+      url:         data.url      || '',
+      budget:      data.budget   ? parseFloat(data.budget) : 0,
+      notes:       data.notes    || '',
+      status:      data.status   || 'a_contacter', // a_contacter, message_envoye, en_discussion, rdv_pris, converti, archive
+      created_at:  new Date().toISOString(),
+      updated_at:  new Date().toISOString(),
+    };
+
+    const db = rtdb();
+    if (db) {
+      try {
+        const ref = db.ref('platform_leads').push();
+        await ref.set({ ...payload, id: ref.key });
+        return { ok: true, id: ref.key };
+      } catch (err) {
+        log('savePlatformLead:rtdb', err);
+      }
+    }
+
+    // Fallback localStorage
+    try {
+      const list = JSON.parse(localStorage.getItem('pino_platform_leads') || '[]');
+      const id = 'plt_' + Date.now();
+      list.unshift({ ...payload, id });
+      localStorage.setItem('pino_platform_leads', JSON.stringify(list));
+      return { ok: true, id };
+    } catch(e) {
+      return { ok: false };
+    }
+  }
+
+  async function fetchPlatformLeads() {
+    const db = rtdb();
+    let fbLeads = [];
+    if (db) {
+      try {
+        const snap = await db.ref('platform_leads').once('value');
+        const val = snap.val() || {};
+        fbLeads = Object.keys(val).map(k => ({ id: k, ...val[k] })).reverse();
+      } catch (err) {
+        log('fetchPlatformLeads:rtdb', err);
+      }
+    }
+
+    let localLeads = [];
+    try {
+      localLeads = JSON.parse(localStorage.getItem('pino_platform_leads') || '[]');
+    } catch(e) {}
+
+    const fbIds = new Set(fbLeads.map(l => l.id));
+    const extraLocal = localLeads.filter(l => !fbIds.has(l.id));
+    const all = [...fbLeads, ...extraLocal];
+
+    if (all.length === 0) {
+      const seed = [
+        {
+          id: 'plt_seed_1',
+          platform: 'leboncoin',
+          name: 'Marc Delmas',
+          commune: '33700 Mérignac',
+          service: 'Taille de haie de lauriers (40m)',
+          phone: '06 12 45 78 90',
+          email: 'marc.delmas33@gmail.com',
+          url: 'https://www.leboncoin.fr',
+          budget: 350,
+          notes: 'Recherche artisan déclaré SAP pour déduction 50% immédiate.',
+          status: 'a_contacter',
+          created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+        },
+        {
+          id: 'plt_seed_2',
+          platform: 'allovoisins',
+          name: 'Sophie V.',
+          commune: '33000 Bordeaux Caudéran',
+          service: 'Tonte pelouse 300m² + désherbage',
+          phone: '06 98 76 54 32',
+          email: '',
+          url: 'https://www.allovoisins.com',
+          budget: 180,
+          notes: 'Demande urgente avant le weekend, évacuation des déchets nécessaire.',
+          status: 'message_envoye',
+          created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
+        },
+        {
+          id: 'plt_seed_3',
+          platform: 'nextdoor',
+          name: 'Laurent B.',
+          commune: '33600 Pessac',
+          service: 'Débroussaillage grand terrain en friche',
+          phone: '',
+          email: '',
+          url: 'https://nextdoor.fr',
+          budget: 500,
+          notes: 'Posté sur le groupe de quartier Alouette Pessac.',
+          status: 'en_discussion',
+          created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
+        },
+        {
+          id: 'plt_seed_4',
+          platform: 'yoojo',
+          name: 'Claire M.',
+          commune: '33400 Talence',
+          service: 'Entretien régulier pelouse & massifs',
+          phone: '07 65 43 21 09',
+          email: 'claire.talence@laposte.net',
+          url: 'https://yoojo.fr',
+          budget: 240,
+          notes: 'Cherche jardinier mensuel avec avance immédiate Unipros.',
+          status: 'a_contacter',
+          created_at: new Date(Date.now() - 3600000 * 30).toISOString(),
+        },
+        {
+          id: 'plt_seed_5',
+          platform: 'facebook',
+          name: 'Julien Morel',
+          commune: '33130 Bègles',
+          service: 'Remise en état jardin de printemps',
+          phone: '06 44 33 22 11',
+          email: '',
+          url: 'https://www.facebook.com/marketplace',
+          budget: 300,
+          notes: 'Vu sur le groupe Entraide Bègles / Villenave.',
+          status: 'rdv_pris',
+          created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
+        },
+        {
+          id: 'plt_seed_6',
+          platform: 'needhelp',
+          name: 'David R.',
+          commune: '33200 Bordeaux',
+          service: 'Élagage branches basses chêne',
+          phone: '',
+          email: '',
+          url: 'https://www.needhelp.com',
+          budget: 420,
+          notes: 'Demande NeedHelp liée à un achat chez Castorama Mérignac.',
+          status: 'a_contacter',
+          created_at: new Date(Date.now() - 3600000 * 50).toISOString(),
+        }
+      ];
+      try {
+        localStorage.setItem('pino_platform_leads', JSON.stringify(seed));
+      } catch(e) {}
+      return { ok: true, data: seed };
+    }
+
+    return { ok: true, data: all };
+  }
+
+  async function updatePlatformLead(id, updates) {
+    if (!id) return { ok: false };
+    const payload = { ...updates, updated_at: new Date().toISOString() };
+    const db = rtdb();
+    if (db) {
+      try {
+        await db.ref(`platform_leads/${id}`).update(payload);
+      } catch (err) {
+        log('updatePlatformLead:rtdb', err);
+      }
+    }
+    try {
+      const list = JSON.parse(localStorage.getItem('pino_platform_leads') || '[]');
+      const idx = list.findIndex(l => l.id === id);
+      if (idx >= 0) {
+        list[idx] = { ...list[idx], ...payload };
+        localStorage.setItem('pino_platform_leads', JSON.stringify(list));
+      }
+    } catch(e) {}
+    return { ok: true };
+  }
+
+  async function deletePlatformLead(id) {
+    if (!id) return { ok: false };
+    const db = rtdb();
+    if (db) {
+      try {
+        await db.ref(`platform_leads/${id}`).remove();
+      } catch (err) {
+        log('deletePlatformLead:rtdb', err);
+      }
+    }
+    try {
+      let list = JSON.parse(localStorage.getItem('pino_platform_leads') || '[]');
+      list = list.filter(l => l.id !== id);
+      localStorage.setItem('pino_platform_leads', JSON.stringify(list));
+    } catch(e) {}
+    return { ok: true };
+  }
+
+  async function convertPlatformLeadToCRM(id) {
+    const res = await fetchPlatformLeads();
+    if (!res.ok || !Array.isArray(res.data)) return { ok: false, error: 'Cannot fetch leads' };
+    const lead = res.data.find(l => l.id === id);
+    if (!lead) return { ok: false, error: 'Lead not found' };
+
+    // Format for main /leads
+    const crmLeadData = {
+      name: lead.name,
+      email: lead.email || '',
+      phone: lead.phone || '',
+      commune: lead.commune || 'Bordeaux',
+      service: lead.service || 'Entretien jardin',
+      budget: lead.budget || 0,
+      surface: '',
+      details: `[Source: ${lead.platform.toUpperCase()}] ${lead.notes || ''} (Annonce: ${lead.url || 'N/A'})`,
+      refCode: `DEV-${lead.platform.substring(0,3).toUpperCase()}-${Date.now().toString().slice(-4)}`
+    };
+
+    const saveRes = await saveLead(crmLeadData);
+    if (saveRes && saveRes.ok) {
+      await updatePlatformLead(id, { status: 'converti' });
+      return { ok: true, crmId: saveRes.id };
+    }
+    return { ok: false };
+  }
+
+  /* ─────────────────────────────────────────────────────────
    *  Exportar a window.PinoDB
    * ───────────────────────────────────────────────────────── */
   global.PinoDB = {
@@ -892,6 +1120,11 @@
     listenClientQuotes,
     fetchClientNotifications,
     markNotificationRead,
+    savePlatformLead,
+    fetchPlatformLeads,
+    updatePlatformLead,
+    deletePlatformLead,
+    convertPlatformLeadToCRM,
   };
 
 })(window);

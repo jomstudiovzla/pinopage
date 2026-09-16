@@ -1243,6 +1243,77 @@
     </div>
   </dialog>
 
+  <!-- Modal: Ajouter un Prospect Multi-Plateforme (LeBonCoin, Facebook, etc.) -->
+  <dialog id="modal-add-platform-lead" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-700 max-w-lg w-full p-0 overflow-hidden text-brand-charcoal">
+    <div class="bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 px-6 py-4 text-white flex justify-between items-center select-none">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-amber-400/20 border border-amber-400/40 text-amber-300 flex items-center justify-center font-bold text-sm">
+          <i class="fa-solid fa-bullseye"></i>
+        </div>
+        <div>
+          <h4 class="font-serif font-bold text-base">Ajouter une opportunité</h4>
+          <p class="text-[11px] text-white/70">Enregistrement rapide d'une annonce repérée</p>
+        </div>
+      </div>
+      <button type="button" onclick="document.getElementById('modal-add-platform-lead').close()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+    <form id="form-add-platform-lead" onsubmit="handleCreatePlatformLead(event)" class="p-6 space-y-4 text-xs">
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Plateforme source *</label>
+        <select id="plt-new-platform" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-800 font-medium focus:ring-2 focus:ring-emerald-600 focus:outline-hidden">
+          <option value="leboncoin">🟠 LeBonCoin (Petites annonces)</option>
+          <option value="facebook">🔵 Facebook Marketplace & Groupes</option>
+          <option value="nextdoor">🟢 Nextdoor (Quartier & Voisinage)</option>
+          <option value="yoojo">🟣 Yoojo (Missions de services)</option>
+          <option value="needhelp">🔴 NeedHelp (Jobbing jardinage)</option>
+          <option value="allovoisins">🟡 AlloVoisins (Demandes locales)</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Nom / Pseudo *</label>
+          <input type="text" id="plt-new-name" required placeholder="Ex: Jean-Luc B." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-emerald-600 focus:outline-hidden">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Commune / Secteur *</label>
+          <input type="text" id="plt-new-commune" required placeholder="Ex: Mérignac, Pessac..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-emerald-600 focus:outline-hidden">
+        </div>
+      </div>
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Besoin / Prestation demandée *</label>
+        <input type="text" id="plt-new-service" required placeholder="Ex: Taille de haie 25m + évacuation branches" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-emerald-600 focus:outline-hidden">
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Téléphone / WhatsApp</label>
+          <input type="tel" id="plt-new-phone" placeholder="Ex: 06 12 34 56 78" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-emerald-600 focus:outline-hidden">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Budget indicatif (€)</label>
+          <input type="number" step="10" id="plt-new-budget" placeholder="Ex: 250" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-emerald-600 focus:outline-hidden">
+        </div>
+      </div>
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Lien de l'annonce ou du profil</label>
+        <input type="url" id="plt-new-url" placeholder="https://..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-emerald-600 focus:outline-hidden">
+      </div>
+      <div>
+        <label class="block font-bold text-slate-700 mb-1">Notes & Contexte (accès, contraintes, urgence)</label>
+        <textarea id="plt-new-notes" rows="2" placeholder="Ex: Accès facile par le portail, souhaite une intervention rapide avant samedi." class="w-full px-3 py-2 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-emerald-600 focus:outline-hidden"></textarea>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+        <button type="button" onclick="document.getElementById('modal-add-platform-lead').close()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors cursor-pointer">
+          Annuler
+        </button>
+        <button type="submit" class="px-5 py-2 bg-gradient-to-r from-emerald-700 to-teal-800 hover:from-emerald-800 hover:to-teal-900 text-white font-extrabold rounded-xl shadow-md transition-all cursor-pointer flex items-center gap-1.5">
+          <i class="fa-solid fa-check"></i> Enregistrer
+        </button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Modal 3: Espace Administration — God Mode (Andrés Pino) -->
   <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-full p-0 overflow-hidden text-brand-charcoal">
     <!-- Admin Header (Draggable) -->
@@ -1279,6 +1350,9 @@
       </button>
       <button type="button" onclick="switchAdminTab('leads')" id="adm-tab-leads" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-address-book mr-1.5"></i> Leads & Devis (<span id="adm-leads-badge">0</span>)
+      </button>
+      <button type="button" onclick="switchAdminTab('prospection')" id="adm-tab-prospection" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+        <i class="fa-solid fa-bullseye mr-1.5 text-amber-600"></i> Prospection 6 Plateformes (<span id="adm-platform-leads-badge">0</span>)
       </button>
       <button type="button" onclick="switchAdminTab('factures')" id="adm-tab-factures" class="adm-tab py-2.5 px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> Factures & Unipros
@@ -1376,6 +1450,308 @@
               <!-- Populated dynamically by JS -->
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- 2.5 Tab Prospection 6 Plateformes (LeBonCoin, Facebook, Nextdoor, Yoojo, NeedHelp, AlloVoisins) -->
+      <div id="adm-content-prospection" class="adm-content hidden space-y-6">
+        <!-- Header Prospection -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gradient-to-r from-emerald-50 via-teal-50/60 to-amber-50/50 p-5 rounded-2xl border border-emerald-200">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                <i class="fa-solid fa-bullseye"></i>
+              </span>
+              <h4 class="font-serif font-bold text-lg text-slate-900">Hub de Prospection Multicanal (6 Plateformes Gironde)</h4>
+            </div>
+            <p class="text-xs text-slate-600 mt-1">
+              Chasse active de clients sur <strong>LeBonCoin, Facebook, Nextdoor, Yoojo, NeedHelp et AlloVoisins</strong>. Argumentaires affûtés avec Avance Immédiate 50% SAP et conversion directe en devis CRM.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button type="button" onclick="openAddPlatformLeadModal()" class="flex-1 sm:flex-initial px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer">
+              <i class="fa-solid fa-plus"></i> Ajouter une annonce
+            </button>
+            <button type="button" onclick="renderAdminProspection()" class="px-3.5 py-2.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer">
+              <i class="fa-solid fa-arrows-rotate"></i> Actualiser
+            </button>
+          </div>
+        </div>
+
+        <!-- KPIs Prospection -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="p-3.5 bg-white rounded-xl border border-slate-200 shadow-xxs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Opportunités suivies</span>
+            <span id="plt-kpi-total" class="block text-2xl font-extrabold text-slate-800 mt-0.5">0</span>
+            <span class="text-[11px] text-slate-500">Sur 6 canaux locaux</span>
+          </div>
+          <div class="p-3.5 bg-amber-50/60 rounded-xl border border-amber-200/80 shadow-xxs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-800">À contacter</span>
+            <span id="plt-kpi-pending" class="block text-2xl font-extrabold text-amber-700 mt-0.5">0</span>
+            <span class="text-[11px] text-amber-700/80">Nouveaux prospects</span>
+          </div>
+          <div class="p-3.5 bg-blue-50/60 rounded-xl border border-blue-200/80 shadow-xxs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-blue-800">En discussion</span>
+            <span id="plt-kpi-sent" class="block text-2xl font-extrabold text-blue-700 mt-0.5">0</span>
+            <span class="text-[11px] text-blue-700/80">Messages transmis</span>
+          </div>
+          <div class="p-3.5 bg-emerald-50/70 rounded-xl border border-emerald-200 shadow-xxs">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800">Convertis en Devis CRM</span>
+            <span id="plt-kpi-converted" class="block text-2xl font-extrabold text-emerald-700 mt-0.5">0</span>
+            <span class="text-[11px] text-emerald-700/80">Propositions transmises</span>
+          </div>
+        </div>
+
+        <!-- Section 1: Accès Rapides 6 Plateformes Gironde -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
+            <h5 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-satellite-dish text-emerald-600"></i> Flux d'annonces en direct — Gironde (33)
+            </h5>
+            <span class="text-xxs text-slate-500">Cliquez pour ouvrir la recherche pré-filtrée dans un nouvel onglet</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+            <!-- 1. LeBonCoin -->
+            <div class="p-3.5 rounded-xl border border-orange-200 bg-orange-50/30 flex flex-col justify-between gap-3 hover:border-orange-300 transition-colors">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="font-extrabold text-orange-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-store"></i> LeBonCoin
+                  </span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800">Particuliers 33</span>
+                </div>
+                <p class="text-slate-600 text-[11px] mt-1.5 leading-relaxed">
+                  Demandes de particuliers en Gironde pour tonte, débroussaillage, élagage et taille de haie.
+                </p>
+              </div>
+              <a href="https://www.leboncoin.fr/recherche?category=33&locations=d_33&text=jardinage" target="_blank" rel="noopener noreferrer" class="w-full py-2 px-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg text-center flex items-center justify-center gap-1.5 transition-colors">
+                Ouvrir LeBonCoin Gironde <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+              </a>
+            </div>
+
+            <!-- 2. Facebook Marketplace & Groupes -->
+            <div class="p-3.5 rounded-xl border border-blue-200 bg-blue-50/30 flex flex-col justify-between gap-3 hover:border-blue-300 transition-colors">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="font-extrabold text-blue-700 flex items-center gap-1.5">
+                    <i class="fa-brands fa-facebook"></i> Facebook Local
+                  </span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">Marketplace & Groupes</span>
+                </div>
+                <p class="text-slate-600 text-[11px] mt-1.5 leading-relaxed">
+                  Annonces Marketplace Bordeaux + groupes d'entraide Mérignac, Pessac, Talence, Le Bouscat.
+                </p>
+              </div>
+              <a href="https://www.facebook.com/marketplace/bordeaux/search/?query=jardinage" target="_blank" rel="noopener noreferrer" class="w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-center flex items-center justify-center gap-1.5 transition-colors">
+                Ouvrir FB Marketplace 33 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+              </a>
+            </div>
+
+            <!-- 3. Nextdoor -->
+            <div class="p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/30 flex flex-col justify-between gap-3 hover:border-emerald-300 transition-colors">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="font-extrabold text-emerald-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-house-chimney-user"></i> Nextdoor
+                  </span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Hyper-Local</span>
+                </div>
+                <p class="text-slate-600 text-[11px] mt-1.5 leading-relaxed">
+                  Réseau social de quartier. Demandes régulières de voisins cherchant un jardinier de confiance.
+                </p>
+              </div>
+              <a href="https://nextdoor.fr" target="_blank" rel="noopener noreferrer" class="w-full py-2 px-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg text-center flex items-center justify-center gap-1.5 transition-colors">
+                Ouvrir Nextdoor <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+              </a>
+            </div>
+
+            <!-- 4. Yoojo -->
+            <div class="p-3.5 rounded-xl border border-purple-200 bg-purple-50/30 flex flex-col justify-between gap-3 hover:border-purple-300 transition-colors">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="font-extrabold text-purple-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-handshake"></i> Yoojo
+                  </span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">Missions Jobbing</span>
+                </div>
+                <p class="text-slate-600 text-[11px] mt-1.5 leading-relaxed">
+                  Plateforme déclarée avec missions payées à l'heure ou au forfait (jardinier vérifié).
+                </p>
+              </div>
+              <a href="https://yoojo.fr/services/jardinier" target="_blank" rel="noopener noreferrer" class="w-full py-2 px-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg text-center flex items-center justify-center gap-1.5 transition-colors">
+                Ouvrir Yoojo Jardinier <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+              </a>
+            </div>
+
+            <!-- 5. NeedHelp -->
+            <div class="p-3.5 rounded-xl border border-rose-200 bg-rose-50/30 flex flex-col justify-between gap-3 hover:border-rose-300 transition-colors">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="font-extrabold text-rose-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-bolt"></i> NeedHelp
+                  </span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800">Partenaire Castorama/Brico</span>
+                </div>
+                <p class="text-slate-600 text-[11px] mt-1.5 leading-relaxed">
+                  Postulez directement aux besoins urgents de jardinage et remise en état déposés en Gironde.
+                </p>
+              </div>
+              <a href="https://www.needhelp.com/fr-fr/postuler-missions/jardinage-bricolage" target="_blank" rel="noopener noreferrer" class="w-full py-2 px-3 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-center flex items-center justify-center gap-1.5 transition-colors">
+                Ouvrir NeedHelp 33 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+              </a>
+            </div>
+
+            <!-- 6. AlloVoisins -->
+            <div class="p-3.5 rounded-xl border border-amber-200 bg-amber-50/40 flex flex-col justify-between gap-3 hover:border-amber-300 transition-colors">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="font-extrabold text-amber-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-users-viewfinder"></i> AlloVoisins
+                  </span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Volume Élevé</span>
+                </div>
+                <p class="text-slate-600 text-[11px] mt-1.5 leading-relaxed">
+                  Des dizaines de demandes de taille, tonte et nettoyage chaque semaine sur la métropole bordelaise.
+                </p>
+              </div>
+              <a href="https://www.allovoisins.com/demandes/bordeaux/jardinage" target="_blank" rel="noopener noreferrer" class="w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-center flex items-center justify-center gap-1.5 transition-colors">
+                Ouvrir AlloVoisins Bordeaux <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Générateur de Pitch & Messages d'Accroche Personnalisés -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+              <h5 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> Générateur Instantané de Pitch & Réponse (Avance Immédiate 50%)
+              </h5>
+              <p class="text-xs text-slate-500">Sélectionnez un modèle et personnalisez les détails en direct avant d'envoyer.</p>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <button type="button" onclick="selectPitchTemplate('flash')" id="pitch-btn-flash" class="pitch-tpl-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white transition-colors cursor-pointer">
+                ⚡ Flash SAP 50%
+              </button>
+              <button type="button" onclick="selectPitchTemplate('chiffre')" id="pitch-btn-chiffre" class="pitch-tpl-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer">
+                📊 Comparatif TTC vs Net
+              </button>
+              <button type="button" onclick="selectPitchTemplate('relance')" id="pitch-btn-relance" class="pitch-tpl-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer">
+                🔄 Relance 48h
+              </button>
+              <button type="button" onclick="selectPitchTemplate('b2b')" id="pitch-btn-b2b" class="pitch-tpl-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer">
+                🏢 B2B & Copro
+              </button>
+            </div>
+          </div>
+
+          <!-- Formulaire rapide pour personnaliser le pitch -->
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Nom / Salutation</label>
+              <input type="text" id="plt-pitch-name" value="Bonjour," oninput="updateGeneratedPitch()" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Commune</label>
+              <input type="text" id="plt-pitch-commune" value="Bordeaux et alentours" oninput="updateGeneratedPitch()" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Prestation</label>
+              <input type="text" id="plt-pitch-service" value="la taille de vos haies et l'entretien de votre jardin" oninput="updateGeneratedPitch()" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">Estimation TTC (€)</label>
+              <input type="number" id="plt-pitch-amount" value="200" oninput="updateGeneratedPitch()" class="w-full px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800">
+            </div>
+          </div>
+
+          <!-- Zone du message généré éditable -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Message prêt à être envoyé (modifiable librement) :</label>
+            <textarea id="plt-pitch-preview" rows="5" class="w-full p-3 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-800 text-xs font-mono leading-relaxed focus:bg-white focus:ring-2 focus:ring-emerald-600 focus:outline-hidden"></textarea>
+          </div>
+
+          <!-- Actions d'envoi rapide -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <span class="text-xxs text-slate-500 italic">
+              💡 Astuce : L'argument du crédit d'impôt immédiat 50% permet de battre les devis non déclarés tout en restant 100% légal et assuré.
+            </span>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="copyGeneratedPitch()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer">
+                <i class="fa-solid fa-copy"></i> Copier le message
+              </button>
+              <button type="button" onclick="openWhatsAppWithPitch()" class="px-3.5 py-2 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer">
+                <i class="fa-brands fa-whatsapp"></i> Envoyer via WhatsApp
+              </button>
+              <button type="button" onclick="openSmsWithPitch()" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer">
+                <i class="fa-solid fa-comment-sms"></i> SMS
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Pipeline & Suivi des Opportunités -->
+        <div class="space-y-3">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+              <h5 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-emerald-700"></i> Pipeline des Opportunités Détectées
+              </h5>
+              <p class="text-xs text-slate-500">Cliquez sur le statut d'une ligne pour le faire progresser dans votre cycle de vente.</p>
+            </div>
+            <!-- Filtres par canal -->
+            <div class="flex flex-wrap gap-1 text-xxs font-bold">
+              <button type="button" onclick="filterPlatformLeads('all')" id="plt-flt-all" class="plt-flt-btn px-2.5 py-1 rounded-full bg-emerald-700 text-white cursor-pointer">Toutes</button>
+              <button type="button" onclick="filterPlatformLeads('leboncoin')" id="plt-flt-leboncoin" class="plt-flt-btn px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">LeBonCoin</button>
+              <button type="button" onclick="filterPlatformLeads('facebook')" id="plt-flt-facebook" class="plt-flt-btn px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">Facebook</button>
+              <button type="button" onclick="filterPlatformLeads('nextdoor')" id="plt-flt-nextdoor" class="plt-flt-btn px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">Nextdoor</button>
+              <button type="button" onclick="filterPlatformLeads('yoojo')" id="plt-flt-yoojo" class="plt-flt-btn px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">Yoojo</button>
+              <button type="button" onclick="filterPlatformLeads('needhelp')" id="plt-flt-needhelp" class="plt-flt-btn px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">NeedHelp</button>
+              <button type="button" onclick="filterPlatformLeads('allovoisins')" id="plt-flt-allovoisins" class="plt-flt-btn px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">AlloVoisins</button>
+            </div>
+          </div>
+
+          <!-- Table Responsive -->
+          <div class="overflow-x-auto border border-slate-200 rounded-2xl shadow-xs bg-white">
+            <table class="min-w-[950px] w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-700 border-b border-slate-200 font-bold uppercase text-[11px]">
+                <tr>
+                  <th class="py-3 px-4 w-[130px]">Plateforme</th>
+                  <th class="py-3 px-4 w-[160px]">Contact & Commune</th>
+                  <th class="py-3 px-4 min-w-[240px]">Besoin & Notes</th>
+                  <th class="py-3 px-4 w-[110px]">Budget</th>
+                  <th class="py-3 px-4 w-[140px]">Statut</th>
+                  <th class="py-3 px-4 text-right w-[170px]">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="adm-platform-leads-body" class="divide-y divide-slate-100">
+                <!-- Rendu dynamique par JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 4: Guide Tactique de Closing par Plateforme -->
+        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
+          <h5 class="font-bold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-lightbulb text-amber-500"></i> Guide Tactique : Comment Convertir sur Chaque Canal
+          </h5>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xxs text-slate-600">
+            <div class="bg-white p-3 rounded-xl border border-slate-200">
+              <span class="font-bold text-slate-900 block mb-1">🟠 LeBonCoin & AlloVoisins</span>
+              La vitesse est la clé : premier à répondre avec une fourchette claire et l'évacuation des déchets incluse gagne le chantier 7 fois sur 10. Proposez toujours un passage rapide le soir même pour ajuster le devis.
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-slate-200">
+              <span class="font-bold text-slate-900 block mb-1">🔵 Facebook & Nextdoor</span>
+              Misez sur la réputation locale et la sympathie. Mentionnez les rues ou communes voisines où vous travaillez déjà. Les clients aiment savoir qu'Andrés est un artisan du coin recommandé.
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-slate-200">
+              <span class="font-bold text-slate-900 block mb-1">🟣 Yoojo & NeedHelp</span>
+              Indiquez que vous apportez tout le matériel pro (taille-haie thermique/batterie Stihl, remorque, broyeur) et que la facture Unipros donne droit à l'attestation fiscale officielle pour les impôts.
+            </div>
+          </div>
         </div>
       </div>
 
@@ -5627,6 +6003,9 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       if (tabKey === 'factures') {
         renderAdminFactures();
       }
+      if (tabKey === 'prospection') {
+        renderAdminProspection();
+      }
     };
 
     // Render Admin Leads — Supabase primary, localStorage fallback
@@ -6632,6 +7011,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           renderAdminUsers();
           loadAdminKPIs();
           renderAdminJobs();
+          if (typeof renderAdminProspection === 'function') renderAdminProspection();
         }
       }
     };
@@ -7422,6 +7802,325 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       if (typeof renderAdminLeads === 'function') {
         renderAdminLeads();
       }
+    };
+
+    // =========================================================================
+    // PROSPECTION MULTICANALE (6 Plateformes : LeBonCoin, FB, Nextdoor, etc.)
+    // =========================================================================
+    let _platformLeadsCache = [];
+    let _currentPlatformFilter = 'all';
+    let _currentPitchTemplate = 'flash';
+
+    const PLATFORM_CONFIG = {
+      leboncoin:   { name: 'LeBonCoin', icon: 'fa-store', badgeBg: 'bg-orange-100 text-orange-800 border-orange-200' },
+      facebook:    { name: 'Facebook', icon: 'fa-brands fa-facebook', badgeBg: 'bg-blue-100 text-blue-800 border-blue-200' },
+      nextdoor:    { name: 'Nextdoor', icon: 'fa-house-chimney-user', badgeBg: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+      yoojo:       { name: 'Yoojo', icon: 'fa-handshake', badgeBg: 'bg-purple-100 text-purple-800 border-purple-200' },
+      needhelp:    { name: 'NeedHelp', icon: 'fa-bolt', badgeBg: 'bg-rose-100 text-rose-800 border-rose-200' },
+      allovoisins: { name: 'AlloVoisins', icon: 'fa-users-viewfinder', badgeBg: 'bg-amber-100 text-amber-800 border-amber-200' }
+    };
+
+    const STATUS_CYCLE = {
+      'a_contacter':    { next: 'message_envoye', label: '⏳ À contacter', badge: 'bg-amber-100 text-amber-800 border-amber-200' },
+      'message_envoye': { next: 'en_discussion', label: '📨 Message envoyé', badge: 'bg-blue-100 text-blue-800 border-blue-200' },
+      'en_discussion':  { next: 'converti',       label: '💬 En discussion', badge: 'bg-purple-100 text-purple-800 border-purple-200' },
+      'converti':       { next: 'archive',        label: '✅ Converti en Devis', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+      'archive':        { next: 'a_contacter',    label: '📁 Non retenu / Archivé', badge: 'bg-slate-100 text-slate-700 border-slate-200' }
+    };
+
+    window.filterPlatformLeads = (platform) => {
+      _currentPlatformFilter = platform;
+      document.querySelectorAll('.plt-flt-btn').forEach(btn => {
+        btn.classList.remove('bg-emerald-700', 'text-white');
+        btn.classList.add('bg-slate-100', 'text-slate-700');
+      });
+      const activeBtn = document.getElementById(`plt-flt-${platform}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-100', 'text-slate-700');
+        activeBtn.classList.add('bg-emerald-700', 'text-white');
+      }
+      renderAdminProspectionTable();
+    };
+
+    window.renderAdminProspection = async () => {
+      const tbody = document.getElementById('adm-platform-leads-body');
+      if (tbody && _platformLeadsCache.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Chargement des opportunités...</td></tr>`;
+      }
+
+      if (window.PinoDB && typeof PinoDB.fetchPlatformLeads === 'function') {
+        _platformLeadsCache = await PinoDB.fetchPlatformLeads();
+      } else {
+        try {
+          _platformLeadsCache = JSON.parse(localStorage.getItem('pino_platform_leads') || '[]');
+        } catch(e) {
+          _platformLeadsCache = [];
+        }
+      }
+
+      // Update KPIs & Badges
+      const total = _platformLeadsCache.length;
+      const pending = _platformLeadsCache.filter(l => l.status === 'a_contacter').length;
+      const sent = _platformLeadsCache.filter(l => l.status === 'message_envoye' || l.status === 'en_discussion').length;
+      const converted = _platformLeadsCache.filter(l => l.status === 'converti').length;
+
+      const badge = document.getElementById('adm-platform-leads-badge');
+      if (badge) badge.textContent = total;
+
+      const kpiTotal = document.getElementById('plt-kpi-total');
+      if (kpiTotal) kpiTotal.textContent = total;
+
+      const kpiPending = document.getElementById('plt-kpi-pending');
+      if (kpiPending) kpiPending.textContent = pending;
+
+      const kpiSent = document.getElementById('plt-kpi-sent');
+      if (kpiSent) kpiSent.textContent = sent;
+
+      const kpiConverted = document.getElementById('plt-kpi-converted');
+      if (kpiConverted) kpiConverted.textContent = converted;
+
+      renderAdminProspectionTable();
+      updateGeneratedPitch();
+    };
+
+    function renderAdminProspectionTable() {
+      const tbody = document.getElementById('adm-platform-leads-body');
+      if (!tbody) return;
+
+      const esc = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
+
+      let list = _platformLeadsCache;
+      if (_currentPlatformFilter && _currentPlatformFilter !== 'all') {
+        list = list.filter(l => l.platform === _currentPlatformFilter);
+      }
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 text-xs">
+          <i class="fa-solid fa-bullseye text-emerald-600 text-xl mb-2 block"></i>
+          Aucune opportunité dans cette sélection. Cliquez sur <strong>"+ Ajouter une annonce"</strong> pour enregistrer une demande repérée.
+        </td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(item => {
+        const plt = PLATFORM_CONFIG[item.platform] || { name: item.platform, icon: 'fa-globe', badgeBg: 'bg-slate-100 text-slate-700 border-slate-200' };
+        const st = STATUS_CYCLE[item.status] || STATUS_CYCLE['a_contacter'];
+        const budgetStr = item.budget ? `${parseFloat(item.budget).toFixed(0)} €` : 'À débattre';
+        const phoneLink = item.phone ? `<a href="tel:${esc(item.phone)}" class="text-emerald-700 hover:underline font-bold block mt-0.5"><i class="fa-solid fa-phone text-xxs"></i> ${esc(item.phone)}</a>` : '';
+        const urlBtn = item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer" class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 transition-colors" title="Voir l'annonce source"><i class="fa-solid fa-arrow-up-right-from-square text-xxs"></i></a>` : '';
+        const isConverted = item.status === 'converti';
+
+        return `
+          <tr class="hover:bg-slate-50/70 transition-colors">
+            <td class="py-3 px-4">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xxs font-extrabold border ${plt.badgeBg}">
+                <i class="${plt.icon.startsWith('fa-brands') ? plt.icon : 'fa-solid ' + plt.icon}"></i>
+                ${plt.name}
+              </span>
+            </td>
+            <td class="py-3 px-4">
+              <div class="font-bold text-slate-900 text-xs">${esc(item.name || 'Prospect')}</div>
+              <div class="text-xxs text-slate-500 flex items-center gap-1 mt-0.5">
+                <i class="fa-solid fa-location-dot text-emerald-600"></i> ${esc(item.commune || 'Gironde')}
+              </div>
+              ${phoneLink}
+            </td>
+            <td class="py-3 px-4">
+              <div class="font-semibold text-slate-800 text-xs">${esc(item.service || 'Demande jardinage')}</div>
+              ${item.notes ? `<div class="text-xxs text-slate-500 mt-1 line-clamp-2 italic bg-slate-50 p-1.5 rounded border border-slate-100">${esc(item.notes)}</div>` : ''}
+            </td>
+            <td class="py-3 px-4 font-bold text-slate-800 text-xs">
+              ${budgetStr}
+            </td>
+            <td class="py-3 px-4">
+              <button type="button" onclick="cyclePlatformLeadStatus('${item.id}', '${item.status}')" class="px-2.5 py-1 rounded-full text-xxs font-bold border cursor-pointer transition-all hover:scale-105 active:scale-95 flex items-center gap-1 ${st.badge}" title="Cliquer pour faire avancer le statut">
+                ${st.label}
+              </button>
+            </td>
+            <td class="py-3 px-4 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                ${!isConverted ? `
+                  <button type="button" onclick="convertPlatformLeadAction('${item.id}')" class="px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xxs font-bold flex items-center gap-1 transition-colors cursor-pointer shadow-xxs" title="Convertir en Devis officiel CRM">
+                    <i class="fa-solid fa-file-signature"></i> Devis CRM
+                  </button>
+                ` : `
+                  <span class="px-2 py-1 text-xxs font-bold text-emerald-700 bg-emerald-50 rounded border border-emerald-200">
+                    <i class="fa-solid fa-check mr-1"></i> Dans CRM
+                  </span>
+                `}
+                ${urlBtn}
+                <button type="button" onclick="deletePlatformLeadAction('${item.id}')" class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 transition-colors cursor-pointer" title="Supprimer">
+                  <i class="fa-solid fa-trash text-xxs"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    window.openAddPlatformLeadModal = () => {
+      const form = document.getElementById('form-add-platform-lead');
+      if (form) form.reset();
+      const modal = document.getElementById('modal-add-platform-lead');
+      if (modal) modal.showModal();
+    };
+
+    window.handleCreatePlatformLead = async (e) => {
+      e.preventDefault();
+      const platform = document.getElementById('plt-new-platform')?.value || 'leboncoin';
+      const name = (document.getElementById('plt-new-name')?.value || '').trim();
+      const commune = (document.getElementById('plt-new-commune')?.value || '').trim();
+      const service = (document.getElementById('plt-new-service')?.value || '').trim();
+      const phone = (document.getElementById('plt-new-phone')?.value || '').trim();
+      const budget = parseFloat(document.getElementById('plt-new-budget')?.value || 0) || 0;
+      const url = (document.getElementById('plt-new-url')?.value || '').trim();
+      const notes = (document.getElementById('plt-new-notes')?.value || '').trim();
+
+      if (!name || !commune || !service) {
+        showNotificationToast('Veuillez remplir les champs obligatoires.', 'error');
+        return;
+      }
+
+      const payload = {
+        platform,
+        name,
+        commune,
+        service,
+        phone,
+        budget,
+        url,
+        notes,
+        status: 'a_contacter'
+      };
+
+      if (window.PinoDB && typeof PinoDB.savePlatformLead === 'function') {
+        await PinoDB.savePlatformLead(payload);
+      } else {
+        try {
+          const list = JSON.parse(localStorage.getItem('pino_platform_leads') || '[]');
+          list.unshift({ ...payload, id: 'plt_' + Date.now() });
+          localStorage.setItem('pino_platform_leads', JSON.stringify(list));
+        } catch(err) {}
+      }
+
+      document.getElementById('modal-add-platform-lead')?.close();
+      showNotificationToast('Opportunité enregistrée avec succès !', 'success');
+      renderAdminProspection();
+    };
+
+    window.cyclePlatformLeadStatus = async (id, currentStatus) => {
+      const next = (STATUS_CYCLE[currentStatus] && STATUS_CYCLE[currentStatus].next) || 'a_contacter';
+      if (window.PinoDB && typeof PinoDB.updatePlatformLead === 'function') {
+        await PinoDB.updatePlatformLead(id, { status: next });
+      } else {
+        try {
+          const list = JSON.parse(localStorage.getItem('pino_platform_leads') || '[]');
+          const idx = list.findIndex(l => l.id === id);
+          if (idx >= 0) {
+            list[idx].status = next;
+            localStorage.setItem('pino_platform_leads', JSON.stringify(list));
+          }
+        } catch(e) {}
+      }
+      showNotificationToast('Statut mis à jour', 'info');
+      renderAdminProspection();
+    };
+
+    window.convertPlatformLeadAction = async (id) => {
+      if (!confirm("Voulez-vous convertir ce prospect en Devis officiel dans le CRM ?\n\nIl sera transféré vers la liste des Devis pour chiffrage et validation.")) {
+        return;
+      }
+
+      let res = { ok: false };
+      if (window.PinoDB && typeof PinoDB.convertPlatformLeadToCRM === 'function') {
+        res = await PinoDB.convertPlatformLeadToCRM(id);
+      }
+
+      if (res && res.ok) {
+        showNotificationToast('Prospect converti en Devis CRM officiel !', 'success');
+        renderAdminProspection();
+        if (typeof renderAdminLeads === 'function') renderAdminLeads();
+        switchAdminTab('leads');
+      } else {
+        showNotificationToast('Erreur lors de la conversion.', 'error');
+      }
+    };
+
+    window.deletePlatformLeadAction = async (id) => {
+      if (!confirm("Voulez-vous supprimer cette opportunité de prospection ?")) return;
+      if (window.PinoDB && typeof PinoDB.deletePlatformLead === 'function') {
+        await PinoDB.deletePlatformLead(id);
+      } else {
+        try {
+          let list = JSON.parse(localStorage.getItem('pino_platform_leads') || '[]');
+          list = list.filter(l => l.id !== id);
+          localStorage.setItem('pino_platform_leads', JSON.stringify(list));
+        } catch(e) {}
+      }
+      showNotificationToast('Opportunité supprimée', 'info');
+      renderAdminProspection();
+    };
+
+    // ─────────────────────────────────────────────────────────
+    // Générateur de Pitch & Messages
+    // ─────────────────────────────────────────────────────────
+    window.selectPitchTemplate = (tplKey) => {
+      _currentPitchTemplate = tplKey;
+      document.querySelectorAll('.pitch-tpl-btn').forEach(btn => {
+        btn.classList.remove('bg-emerald-700', 'text-white');
+        btn.classList.add('bg-slate-100', 'text-slate-700');
+      });
+      const targetBtn = document.getElementById(`pitch-btn-${tplKey}`);
+      if (targetBtn) {
+        targetBtn.classList.remove('bg-slate-100', 'text-slate-700');
+        targetBtn.classList.add('bg-emerald-700', 'text-white');
+      }
+      updateGeneratedPitch();
+    };
+
+    window.updateGeneratedPitch = () => {
+      const name = (document.getElementById('plt-pitch-name')?.value || 'Bonjour,').trim();
+      const commune = (document.getElementById('plt-pitch-commune')?.value || 'Bordeaux et secteur').trim();
+      const service = (document.getElementById('plt-pitch-service')?.value || 'l\'entretien de votre jardin').trim();
+      const amount = parseFloat(document.getElementById('plt-pitch-amount')?.value || 200) || 200;
+      const net = (amount * 0.5).toFixed(0);
+
+      let msg = '';
+      if (_currentPitchTemplate === 'flash') {
+        msg = `${name}\n\nJ'ai vu votre demande concernant ${service} sur ${commune}. Je suis Andrés Pino, artisan paysagiste professionnel (Pino Espaces Verts).\n\n👉 Grâce à notre agrément Services à la Personne (SAP Unipros), vous bénéficiez de l'AVANCE IMMÉDIATE DE CRÉDIT D'IMPÔT DE 50% déduite dès la facture :\n• Montant de la prestation : ${amount} €\n• Vous ne réglez que : ${net} € directement !\n\nMatériel pro thermique et évacuation propre des déchets verts inclus. Souhaitez-vous un passage rapide ou des photos pour caler votre intervention cette semaine ?\n\nBien cordialement,\nAndrés Pino — 06 51 59 40 34\nhttps://pino-espaces-verts.fr`;
+      } else if (_currentPitchTemplate === 'chiffre') {
+        msg = `${name}\n\nVoici notre estimation chiffrée transparente pour ${service} à ${commune} :\n\n• Forfait prestation complète TTC : ${amount} €\n• Avance immédiate crédit d'impôt SAP (-50%) : -${net} €\n👉 RESTE RÉEL À VOTRE CHARGE : ${net} €\n\nInclus sans surcoût : outillage pro, carburant, ramassage et évacuation en déchetterie verte, assurance responsabilité civile pro et attestation fiscale URSSAF.\n\nDisponibilité sous 48 à 72h. Pouvons-nous échanger par téléphone ou WhatsApp au 06 51 59 40 34 ?\n\nAndrés Pino — Pino Espaces Verts`;
+      } else if (_currentPitchTemplate === 'relance') {
+        msg = `${name}\n\nJe me permets de revenir vers vous suite à votre projet pour ${service} à ${commune}.\n\nAvez-vous déjà trouvé un intervenant ou le chantier est-il toujours d'actualité cette semaine ?\n\nPour rappel, nous appliquons l'avance immédiate 50% de l'URSSAF (soit environ ${net} € net au lieu de ${amount} €). Si vous le souhaitez, je peux passer voir le jardin ce soir sans engagement.\n\nBien à vous,\nAndrés Pino — 06 51 59 40 34`;
+      } else if (_currentPitchTemplate === 'b2b') {
+        msg = `${name}\n\nAndrés Pino, gérant de Pino Espaces Verts en Gironde.\n\nNous assurons l'entretien complet pour les résidences, syndics, copropriétés et locaux d'activité : tonte grands espaces, taille de haies, élagage et désherbage raisonné.\n\nFacturation claire avec TVA, devis gratuit sous 24h et contrats d'entretien annuel ou interventions ponctuelles. Pouvons-nous convenir d'une visite sur site ?\n\nBien cordialement,\nAndrés Pino — 06 51 59 40 34\ncontact@pino-espaces-verts.fr`;
+      }
+
+      const preview = document.getElementById('plt-pitch-preview');
+      if (preview) preview.value = msg;
+    };
+
+    window.copyGeneratedPitch = () => {
+      const text = document.getElementById('plt-pitch-preview')?.value || '';
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        showNotificationToast('Message d\'accroche copié dans le presse-papier !', 'success');
+      }).catch(() => {
+        showNotificationToast('Veuillez copier le texte manuellement.', 'info');
+      });
+    };
+
+    window.openWhatsAppWithPitch = () => {
+      const text = document.getElementById('plt-pitch-preview')?.value || '';
+      const encoded = encodeURIComponent(text);
+      window.open(`https://wa.me/?text=${encoded}`, '_blank');
+    };
+
+    window.openSmsWithPitch = () => {
+      const text = document.getElementById('plt-pitch-preview')?.value || '';
+      const encoded = encodeURIComponent(text);
+      window.location.href = `sms:?&body=${encoded}`;
     };
 
     // ─────────────────────────────────────────────────────────

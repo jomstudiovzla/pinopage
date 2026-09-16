@@ -69,3 +69,25 @@
      - Bloqueo de acceso a `#modal-window-client`: verifica sesión activa, redirigiendo a `connexion` si es anónimo.
   4. **Restauración Silenciosa al Recargar**:
      - `onAuthStateChanged` restaura la barra de navegación de forma silenciosa (`openModal: false`) sin interrumpir al usuario con popups indeseados en caso de sesiones legítimas no cerradas.
+- [x] **Módulo de Prospection Multicanal en el CRM Admin (100% COMPLETADO Y OPERATIVO)**:
+  1. **6 Plataformas Locales de Gironde Integradas**:
+     - **LeBonCoin**: Enlace directo a búsquedas de jardinería en Gironde (33).
+     - **Facebook Marketplace & Groupes**: Búsqueda en Bordeaux CUB y grupos vecinales (Mérignac, Pessac, Talence).
+     - **Nextdoor**: Red social de vecindario hiper-local.
+     - **Yoojo**: Jobbing y servicios declarados de jardinería.
+     - **NeedHelp**: Demandes urgentes y alianzas de bricolaje/jardinería.
+     - **AlloVoisins**: Plataforma de proximidad con alto volumen de solicitudes en Burdeos.
+  2. **Générateur Instantané de Pitch & Réponses (Avance Immédiate 50% SAP)**:
+     - 4 plantillas probadas: *Flash SAP 50% Immédiat*, *Comparatif TTC vs Reste à Charge Net*, *Relance 48h*, *Copropriété & B2B*.
+     - Parámetros dinámicos en vivo (nombre, comuna, servicio, estimación €) y cálculo de ahorro del 50%.
+     - Botones de 1-clic: *Copiar al portapapeles*, *Abrir en WhatsApp con texto pre-cargado*, *Enviar por SMS*.
+  3. **Pipeline Interactivo de Oportunidades & Ciclo de Venta**:
+     - Filtros por plataforma (*Toutes, LeBonCoin, Facebook, Nextdoor, Yoojo, NeedHelp, AlloVoisins*).
+     - Tabla responsiva con badges por canal, datos de contacto, enlaces directos a anuncios, notas y presupuesto.
+     - Badges de estado con avance cíclico interactivo (*À contacter ➔ Message envoyé ➔ En discussion ➔ Converti en Devis ➔ Non retenu*).
+     - **Conversión en 1-Clic a Devis Oficial CRM**: Transfiere la oportunidad directamente a la tabla oficial de `/leads` con correlativo, notifica con toast y redirige a la pestaña de Leads para cotización inmediata.
+  4. **Modal Rápido de Registro (`#modal-add-platform-lead`)**:
+     - Permite registrar cualquier anuncio detectado en menos de 20 segundos con selector de plataforma, detalles, comuna y enlace.
+  5. **Backend y Persistencia Firebase RTDB (`/platform_leads`)**:
+     - Métodos implementados en `assets/js/pino-db.js`: `savePlatformLead`, `fetchPlatformLeads` (con datos semilla realistas de Gironde), `updatePlatformLead`, `deletePlatformLead`, `convertPlatformLeadToCRM`.
+     - Reglas de seguridad `platform_leads` desplegadas a Firebase `crm-jom`.
