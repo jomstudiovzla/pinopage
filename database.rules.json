@@ -27,6 +27,10 @@
     "audit_logs": {
       ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')",
       ".write": "auth != null"
+    },
+    "quotes_responses": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')"
     }
   }
 }

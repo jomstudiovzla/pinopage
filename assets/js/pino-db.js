@@ -142,6 +142,68 @@
   }
 
   /* ─────────────────────────────────────────────────────────
+   *  LEADS — Responder a solicitud de devis (Andrés Pino)
+   * ───────────────────────────────────────────────────────── */
+  async function saveLeadResponse(leadId, responseData) {
+    const payload = {
+      ...responseData,
+      responded_by: 'Andrés Pino (pino.spacesverts@gmail.com)',
+      responded_at: new Date().toISOString()
+    };
+
+    const db = rtdb();
+    if (db) {
+      try {
+        await db.ref('leads/' + leadId).update({
+          status: 'Devis envoyé',
+          response: payload,
+          updated_at: new Date().toISOString()
+        });
+        await db.ref('quotes_responses/' + leadId).set({
+          lead_id: leadId,
+          ...payload
+        });
+        return { ok: true };
+      } catch (err) {
+        log('saveLeadResponse:rtdb', err);
+      }
+    }
+
+    return { ok: true, fallback: true };
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  LEADS — Obtener solicitudes de un cliente específico
+   * ───────────────────────────────────────────────────────── */
+  async function fetchClientQuotes(clientEmail) {
+    if (!clientEmail) return { ok: false, data: [] };
+    const normEmail = clientEmail.trim().toLowerCase();
+
+    const db = rtdb();
+    if (db) {
+      try {
+        const snap = await db.ref('leads').once('value');
+        const val = snap.val() || {};
+        const matches = Object.keys(val)
+          .map(k => ({ id: k, ...val[k] }))
+          .filter(lead => (lead.email || '').trim().toLowerCase() === normEmail)
+          .reverse();
+        if (matches.length > 0) return { ok: true, data: matches };
+      } catch (err) {
+        log('fetchClientQuotes:rtdb', err);
+      }
+    }
+
+    try {
+      const local = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+      const matches = local.filter(l => (l.email || '').trim().toLowerCase() === normEmail);
+      return { ok: true, data: matches };
+    } catch(e) {
+      return { ok: false, data: [] };
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────
    *  PROFILES — Upsert perfil al login
    * ───────────────────────────────────────────────────────── */
   async function upsertProfile(fbUser, extra = {}) {
@@ -245,14 +307,15 @@
   }
 
   /* ─────────────────────────────────────────────────────────
-   *  CUPONES — Canjear PELABOLA
+   *  CUPONES — Canjear / Asignar Cupón (20% de réduction)
    * ───────────────────────────────────────────────────────── */
-  async function redeemPelabola(userId, email) {
+  async function redeemPelabola(userId, email, customCode = 'PELABOLA') {
     const couponData = {
       user_id:       userId,
       email:         email,
-      codigo_cupon:  'PELABOLA',
+      codigo_cupon:  customCode || 'PELABOLA',
       descuento_eur: 20.00,
+      descuento_pct: 20,
       estado:        'valid',
       created_at:    new Date().toISOString(),
     };
@@ -570,6 +633,8 @@
     saveLead,
     fetchLeads,
     updateLeadStatus,
+    saveLeadResponse,
+    fetchClientQuotes,
     upsertProfile,
     fetchProfiles,
     fetchUserCoupon,

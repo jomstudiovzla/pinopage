@@ -685,105 +685,89 @@
       </div>
     </div>
 
-    <!-- 3 Key Metric Hero Counters (DOCUMENTO_MAESTRO.md §3.4) -->
+    <!-- 3 Key Metric Hero Counters -->
     <div class="p-6 sm:p-8 bg-[#faf8f2] border-b border-brand-accent/20">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <!-- Card 1: Factures -->
+        <!-- Card 1: Avantage 20% (Mon Coupon) -->
         <div class="bg-white p-5 rounded-2xl border border-brand-accent/20 shadow-xs">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Factures</span>
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Mon Coupon de Bienvenue</span>
+            <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-xs"><i class="fa-solid fa-tag"></i></span>
+          </div>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span class="text-xl font-mono font-extrabold text-brand-vivid select-all" id="client-promo-code">—</span>
+            <span class="text-xxs text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full">-20%</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-2">
+            <button type="button" onclick="copyClientCouponCode()" class="text-emerald-700 font-bold hover:underline cursor-pointer flex items-center gap-1">
+              <i class="fa-solid fa-copy"></i> Copier
+            </button>
+            <span>• Déductible sur votre premier devis</span>
+          </p>
+        </div>
+
+        <!-- Card 2: Demandes & Devis -->
+        <div class="bg-white p-5 rounded-2xl border border-brand-accent/20 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Mes Devis & Estimations</span>
+            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+          </div>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span class="text-3xl font-extrabold text-brand-green" id="client-quotes-count">0</span>
+            <span class="text-xxs text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-full">Demande(s)</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1" id="client-quotes-status-text">Estimation sous 24h par Andrés</p>
+        </div>
+
+        <!-- Card 3: Factures Unipros 50% -->
+        <div class="bg-white p-5 rounded-2xl border border-brand-accent/20 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Factures & SAP 50%</span>
             <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs"><i class="fa-solid fa-file-invoice"></i></span>
           </div>
           <div class="mt-2 flex items-baseline gap-2">
             <span class="text-3xl font-extrabold text-brand-green" id="client-factures-count">0</span>
             <span class="text-xxs text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">Unipros</span>
           </div>
-          <p class="text-[11px] text-slate-500 mt-1">Aucune facture pour le moment</p>
-        </div>
-
-        <!-- Card 2: Dossiers -->
-        <div class="bg-white p-5 rounded-2xl border border-brand-accent/20 shadow-xs">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Dossiers Chantiers</span>
-            <span class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xs"><i class="fa-solid fa-folder-open"></i></span>
-          </div>
-          <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-3xl font-extrabold text-brand-green" id="client-dossiers-count">0</span>
-            <span class="text-xxs text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-full">—</span>
-          </div>
-          <p class="text-[11px] text-slate-500 mt-1">Aucun dossier pour le moment</p>
-        </div>
-
-        <!-- Card 3: Avantage 20% -->
-        <div class="bg-white p-5 rounded-2xl border border-brand-accent/20 shadow-xs">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Avantage Fidélité</span>
-            <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-xs"><i class="fa-solid fa-tag"></i></span>
-          </div>
-          <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-xl font-mono font-extrabold text-brand-vivid" id="client-promo-code">—</span>
-            <span class="text-xxs text-amber-700 font-bold bg-amber-50 px-2 py-0.5 rounded-full">après connexion</span>
-          </div>
-          <p class="text-[11px] text-slate-500 mt-1">Code unique créé par Google, un par compte</p>
+          <p class="text-[11px] text-slate-500 mt-1">Crédit d'impôt immédiat</p>
         </div>
       </div>
     </div>
 
     <!-- Client Content Body -->
     <div class="p-6 sm:p-8 space-y-8 max-h-[50vh] overflow-y-auto">
-      <!-- Section Factures -->
+      <!-- Section 1: Mes Demandes de Devis & Propositions d'Andrés Pino -->
       <div class="space-y-4">
         <div class="flex items-center justify-between">
           <h4 class="font-serif text-lg font-bold text-brand-green flex items-center gap-2">
-            <i class="fa-solid fa-receipt text-emerald-700"></i> Mes Factures & Attestations Fiscales
+            <i class="fa-solid fa-comments text-emerald-700"></i> Mes Demandes & Propositions d'Andrés Pino
+          </h4>
+          <button type="button" onclick="bookClientIntervention()" class="text-xs text-emerald-700 font-bold hover:underline flex items-center gap-1 cursor-pointer">
+            <i class="fa-solid fa-plus-circle"></i> Nouveau devis pré-rempli
+          </button>
+        </div>
+
+        <div id="client-quotes-list" class="space-y-3">
+          <!-- Dynamically populated by populateClientPortal -->
+          <div class="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Chargement de vos demandes...
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Factures & Attestations Fiscales -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h4 class="font-serif text-lg font-bold text-brand-green flex items-center gap-2">
+            <i class="fa-solid fa-receipt text-emerald-700"></i> Mes Factures & Attestations Fiscales Unipros
           </h4>
           <a href="https://app.unipros.coop" target="_blank" rel="noopener" class="text-xs text-emerald-700 font-bold hover:underline flex items-center gap-1">
-            <span>Espace Attestation Unipros (Case 7DB)</span> <i class="fa-solid fa-arrow-up-right-from-square text-xxs"></i>
+            <span>Portail Unipros (Case 7DB)</span> <i class="fa-solid fa-arrow-up-right-from-square text-xxs"></i>
           </a>
         </div>
 
-        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 text-slate-500 border-b border-slate-200 font-bold uppercase text-[10px]">
-              <tr>
-                <th class="p-3">Réf. Facture</th>
-                <th class="p-3">Prestation</th>
-                <th class="p-3">Date</th>
-                <th class="p-3">Montant TTC</th>
-                <th class="p-3">Reste à Charge (50%)</th>
-                <th class="p-3">Statut</th>
-                <th class="p-3 text-right">Document</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr class="hover:bg-slate-50/80">
-                <td class="p-3 font-mono font-bold text-slate-900">#FAC-2026-081</td>
-                <td class="p-3">Entretien de jardin & Tonte complète</td>
-                <td class="p-3 text-slate-500">14/08/2026</td>
-                <td class="p-3 font-bold text-slate-900">240,00 €</td>
-                <td class="p-3 font-bold text-emerald-700">120,00 € (SAP)</td>
-                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold text-xxs px-2 py-0.5 rounded-full">Payée</span></td>
-                <td class="p-3 text-right">
-                  <button onclick="downloadFakeInvoice('FAC-2026-081')" class="text-emerald-700 hover:text-emerald-900 font-bold hover:underline cursor-pointer">
-                    <i class="fa-solid fa-file-pdf mr-1"></i> Reçu PDF
-                  </button>
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-50/80">
-                <td class="p-3 font-mono font-bold text-slate-900">#FAC-2026-064</td>
-                <td class="p-3">Taille de haie de cèdres & évacuation</td>
-                <td class="p-3 text-slate-500">28/05/2026</td>
-                <td class="p-3 font-bold text-slate-900">380,00 €</td>
-                <td class="p-3 font-bold text-emerald-700">190,00 € (SAP)</td>
-                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold text-xxs px-2 py-0.5 rounded-full">Payée</span></td>
-                <td class="p-3 text-right">
-                  <button onclick="downloadFakeInvoice('FAC-2026-064')" class="text-emerald-700 hover:text-emerald-900 font-bold hover:underline cursor-pointer">
-                    <i class="fa-solid fa-file-pdf mr-1"></i> Reçu PDF
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div id="client-invoices-list" class="space-y-3">
+          <!-- Dynamically populated by populateClientPortal -->
         </div>
       </div>
 
@@ -793,9 +777,9 @@
           <h5 class="font-bold text-brand-green text-sm flex items-center gap-2">
             <i class="fa-solid fa-calendar-plus text-emerald-700"></i> Planifier mon prochain passage
           </h5>
-          <p class="text-xs text-slate-600">Besoin d'une tonte, taille de haie ou nettoyage d'automne ? Vos coordonnées sont déjà enregistrées.</p>
+          <p class="text-xs text-slate-600">Besoin d'une tonte, taille de haie ou nettoyage ? Vos coordonnées Google sont déjà pré-remplies.</p>
           <button onclick="bookClientIntervention()" class="mt-2 bg-brand-vivid hover:bg-brand-green text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors cursor-pointer">
-            Demander un devis pré-rempli
+            Demander un devis pré-rempli (-20%)
           </button>
         </div>
 
@@ -812,14 +796,138 @@
 
       <!-- RGPD & Données personnelles -->
       <div class="pt-4 border-t border-slate-200 flex flex-wrap justify-between items-center gap-4 text-xs text-slate-500">
-        <button onclick="exportClientDataJson()" class="hover:text-emerald-700 underline flex items-center gap-1.5 font-bold cursor-pointer">
-          <i class="fa-solid fa-download"></i> Exporter mes données personnelles (RGPD)
-        </button>
-        <button onclick="deleteClientAccount()" class="hover:text-red-600 underline flex items-center gap-1.5 text-slate-400 cursor-pointer">
-          <i class="fa-solid fa-user-xmark"></i> Supprimer mon compte (Droit à l'oubli)
-        </button>
+        <div class="flex items-center gap-2 text-[11px] text-emerald-800">
+          <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+          <span>Vos données Google sont protégées par le RGPD et utilisées exclusivement pour vos devis par Andrés Pino.</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="exportClientDataJson()" class="hover:text-emerald-700 underline flex items-center gap-1.5 font-bold cursor-pointer">
+            <i class="fa-solid fa-download"></i> Exporter (RGPD)
+          </button>
+          <button onclick="deleteClientAccount()" class="hover:text-red-600 underline flex items-center gap-1.5 text-slate-400 cursor-pointer">
+            <i class="fa-solid fa-user-xmark"></i> Supprimer
+          </button>
+        </div>
       </div>
     </div>
+  </dialog>
+
+  <!-- Modal: Répondre au Lead / Établir Devis Chiffré (Andrés Pino) -->
+  <dialog id="modal-lead-response" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-2xl w-full p-0 overflow-hidden text-brand-charcoal">
+    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 py-5 text-white flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-file-invoice-dollar"></i>
+        </span>
+        <div>
+          <h3 class="font-serif text-xl font-bold">Établir un Devis & Répondre au Client</h3>
+          <p class="text-xs text-white/70" id="resp-client-summary">Client : —</p>
+        </div>
+      </div>
+      <button type="button" onclick="document.getElementById('modal-lead-response').close()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center cursor-pointer">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <form id="lead-response-form" onsubmit="handleSendLeadResponse(event)" class="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+      <input type="hidden" id="resp-lead-id" />
+      <input type="hidden" id="resp-client-email" />
+      <input type="hidden" id="resp-client-name" />
+      <input type="hidden" id="resp-client-phone" />
+      <input type="hidden" id="resp-client-service" />
+      <input type="hidden" id="resp-client-commune" />
+      <input type="hidden" id="resp-client-budget" />
+
+      <!-- Client Request Recap Box -->
+      <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-xs space-y-1.5">
+        <div class="font-bold text-slate-700 uppercase tracking-wide text-[10px] text-emerald-800 flex items-center justify-between">
+          <span><i class="fa-solid fa-circle-info mr-1"></i> Demande reçue du client</span>
+          <span id="resp-recap-date" class="text-slate-400 font-normal">—</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-slate-700 pt-1">
+          <div><strong>Prestation :</strong> <span id="resp-recap-service">—</span></div>
+          <div><strong>Lieu :</strong> <span id="resp-recap-commune">—</span></div>
+          <div><strong>Budget estimé client :</strong> <span id="resp-recap-budget">—</span> €</div>
+          <div><strong>Contact :</strong> <span id="resp-recap-contact">—</span></div>
+        </div>
+        <div id="resp-recap-details" class="text-slate-600 italic pt-1 border-t border-slate-200"></div>
+      </div>
+
+      <!-- Pricing & Unipros 50% Calculation -->
+      <div class="p-4 bg-emerald-50/70 rounded-2xl border-2 border-emerald-200 space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-extrabold text-brand-green uppercase tracking-wide" for="resp-price">
+            Montant Total de la Prestation (€ TTC) <span class="text-red-500">*</span>
+          </label>
+          <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Crédit d'impôt Unipros 50%</span>
+        </div>
+        <div class="relative">
+          <span class="absolute left-3.5 top-2.5 text-emerald-800 font-bold text-base">€</span>
+          <input type="number" id="resp-price" min="20" step="5" required placeholder="Ex: 240"
+            oninput="calcResponseUnipros(this.value)"
+            class="w-full pl-9 pr-4 py-2.5 bg-white rounded-xl border-2 border-emerald-300 focus:outline-none focus:border-emerald-600 text-base font-extrabold text-slate-900" />
+        </div>
+        <div id="resp-calc-preview" class="p-3 bg-white rounded-xl border border-emerald-200 text-xs text-slate-700 space-y-1">
+          <div class="flex justify-between font-medium"><span>Montant facturé TTC :</span> <strong id="resp-calc-total">0,00 € TTC</strong></div>
+          <div class="flex justify-between text-emerald-700 font-medium"><span>Avance Immédiate 50% (URSSAF / Unipros) :</span> <strong id="resp-calc-credit">- 0,00 €</strong></div>
+          <div class="flex justify-between text-sm font-extrabold text-slate-900 pt-1 border-t border-slate-100"><span>👉 Reste réel à la charge du client :</span> <strong class="text-emerald-800" id="resp-calc-net">0,00 €</strong></div>
+        </div>
+      </div>
+
+      <!-- Intervention Duration & Date -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="resp-duration">
+            <i class="fa-solid fa-clock text-emerald-700 mr-1"></i> Durée estimée d'intervention <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="resp-duration" placeholder="Ex: 3h30 ou 1 demi-journée" required
+            class="w-full px-3.5 py-2.5 bg-white rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600 text-xs font-semibold" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="resp-date">
+            <i class="fa-solid fa-calendar text-emerald-700 mr-1"></i> Date d'intervention proposée
+          </label>
+          <input type="date" id="resp-date"
+            class="w-full px-3.5 py-2.5 bg-white rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600 text-xs font-semibold" />
+        </div>
+      </div>
+
+      <!-- Equipment & Supplies -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1" for="resp-equipment">
+          <i class="fa-solid fa-toolbox text-emerald-700 mr-1"></i> Matériel, outillage & évacuation
+        </label>
+        <input type="text" id="resp-equipment" placeholder="Ex: Tondeuse pro, taille-haie thermique, évacuation déchets verts comprise"
+          class="w-full px-3.5 py-2.5 bg-white rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600 text-xs font-semibold" />
+      </div>
+
+      <!-- Personalized message / Notes -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1" for="resp-notes">
+          <i class="fa-solid fa-comment-dots text-emerald-700 mr-1"></i> Message personnalisé d'Andrés Pino pour le client
+        </label>
+        <textarea id="resp-notes" rows="3" placeholder="Précisez ici les détails du travail ou des conseils particuliers..."
+          class="w-full p-3 bg-white rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600 text-xs"></textarea>
+      </div>
+
+      <!-- Coupon check -->
+      <div class="flex items-center gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-950">
+        <input type="checkbox" id="resp-apply-coupon" checked class="w-4 h-4 text-emerald-600 rounded" />
+        <label for="resp-apply-coupon" class="font-bold">Inclure la mention du coupon de bienvenue (-20% déduit) dans l'offre</label>
+      </div>
+
+      <!-- Submit button -->
+      <div class="pt-2 flex flex-col sm:flex-row gap-3">
+        <button type="submit" id="resp-submit-btn"
+          class="flex-1 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-paper-plane"></i> Enregistrer & Envoyer le Devis au Client
+        </button>
+        <button type="button" onclick="document.getElementById('modal-lead-response').close()"
+          class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer">
+          Annuler
+        </button>
+      </div>
+    </form>
   </dialog>
 
   <!-- Modal 3: Espace Administration — God Mode (Andrés Pino) -->
@@ -4597,6 +4705,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
             <td class="p-3 text-right whitespace-nowrap">
               ${phoneClean ? `<a href="${waLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center w-7 h-7 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 mr-1" title="WhatsApp"><i class="fa-brands fa-whatsapp text-xs"></i></a>` : ''}
               ${l.phone ? `<a href="tel:${l.phone}" class="inline-flex items-center justify-center w-7 h-7 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 mr-1" title="Appeler"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
+              <button onclick="openLeadResponseModal(${idx})" class="inline-flex items-center justify-center w-7 h-7 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 mr-1 cursor-pointer" title="Répondre / Devis"><i class="fa-solid fa-file-invoice-dollar text-xs"></i></button>
               <button onclick="cycleLeadStatus(${idx})" class="inline-flex items-center justify-center w-7 h-7 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 cursor-pointer" title="Changer statut"><i class="fa-solid fa-rotate text-xs"></i></button>
             </td>
           </tr>
@@ -4620,6 +4729,157 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }
 
       renderAdminLeads();
+    };
+
+    // ─────────────────────────────────────────────────────────
+    //  Lead Response — Ouvrir le modal de réponse / devis
+    // ─────────────────────────────────────────────────────────
+    window.openLeadResponseModal = (index) => {
+      const leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+      const lead = leads[index];
+      if (!lead) { showNotificationToast('Lead introuvable.', 'error'); return; }
+
+      // Populate hidden fields
+      document.getElementById('resp-lead-id').value        = lead.sbId || lead.id || '';
+      document.getElementById('resp-client-email').value    = lead.email || '';
+      document.getElementById('resp-client-name').value     = lead.name || '';
+      document.getElementById('resp-client-phone').value    = lead.phone || '';
+      document.getElementById('resp-client-service').value  = lead.service || '';
+      document.getElementById('resp-client-commune').value  = lead.commune || '';
+      document.getElementById('resp-client-budget').value   = lead.budget || '';
+
+      // Populate recap box
+      document.getElementById('resp-client-summary').textContent = `Client : ${lead.name} — ${lead.email || ''}`;
+      document.getElementById('resp-recap-service').textContent  = lead.service || '—';
+      document.getElementById('resp-recap-commune').textContent  = lead.commune || '—';
+      document.getElementById('resp-recap-budget').textContent   = lead.budget || '0';
+      document.getElementById('resp-recap-contact').textContent  = [lead.phone, lead.email].filter(Boolean).join(' | ') || '—';
+      document.getElementById('resp-recap-date').textContent     = lead.date || '—';
+      document.getElementById('resp-recap-details').textContent  = lead.details || 'Aucun détail supplémentaire.';
+
+      // Pre-fill price from client budget as starting point
+      const priceInput = document.getElementById('resp-price');
+      if (lead.budget && parseFloat(lead.budget) > 0) {
+        priceInput.value = lead.budget;
+        calcResponseUnipros(lead.budget);
+      } else {
+        priceInput.value = '';
+        calcResponseUnipros(0);
+      }
+
+      // Reset other fields
+      document.getElementById('resp-duration').value   = '';
+      document.getElementById('resp-date').value       = '';
+      document.getElementById('resp-equipment').value  = '';
+      document.getElementById('resp-notes').value      = '';
+      document.getElementById('resp-apply-coupon').checked = true;
+
+      // Open dialog
+      document.getElementById('modal-lead-response').showModal();
+    };
+
+    // ─────────────────────────────────────────────────────────
+    //  Lead Response — Calcul Unipros 50% en temps réel
+    // ─────────────────────────────────────────────────────────
+    window.calcResponseUnipros = (rawValue) => {
+      const total = parseFloat(rawValue) || 0;
+      const credit = total * 0.50;
+      const net = total - credit;
+
+      const fmt = (v) => v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      document.getElementById('resp-calc-total').textContent  = fmt(total) + ' € TTC';
+      document.getElementById('resp-calc-credit').textContent = '- ' + fmt(credit) + ' €';
+      document.getElementById('resp-calc-net').textContent    = fmt(net) + ' €';
+    };
+
+    // ─────────────────────────────────────────────────────────
+    //  Lead Response — Envoyer le devis (guardar en Firebase)
+    // ─────────────────────────────────────────────────────────
+    window.handleSendLeadResponse = async (event) => {
+      event.preventDefault();
+
+      const leadId     = document.getElementById('resp-lead-id').value;
+      const price      = parseFloat(document.getElementById('resp-price').value) || 0;
+      const duration   = document.getElementById('resp-duration').value;
+      const dateIntv   = document.getElementById('resp-date').value;
+      const equipment  = document.getElementById('resp-equipment').value;
+      const notes      = document.getElementById('resp-notes').value;
+      const applyCoupon= document.getElementById('resp-apply-coupon').checked;
+
+      const clientName  = document.getElementById('resp-client-name').value;
+      const clientEmail = document.getElementById('resp-client-email').value;
+      const clientPhone = document.getElementById('resp-client-phone').value;
+      const service     = document.getElementById('resp-client-service').value;
+      const commune     = document.getElementById('resp-client-commune').value;
+
+      if (!leadId) { showNotificationToast('Erreur : ID du lead manquant.', 'error'); return; }
+      if (price < 20) { showNotificationToast('Le montant minimum est de 20 €.', 'error'); return; }
+
+      const submitBtn = document.getElementById('resp-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Envoi en cours…';
+
+      const responseData = {
+        price_ttc:       price,
+        credit_impot:    price * 0.50,
+        net_client:      price * 0.50,
+        duration:        duration,
+        date_proposed:   dateIntv,
+        equipment:       equipment,
+        notes:           notes,
+        apply_coupon:    applyCoupon,
+        client_name:     clientName,
+        client_email:    clientEmail,
+        client_phone:    clientPhone,
+        service_type:    service,
+        commune:         commune,
+      };
+
+      try {
+        if (window.PinoDB) {
+          const result = await PinoDB.saveLeadResponse(leadId, responseData);
+          if (result.ok) {
+            // Also create a Job entry for CRM tracking
+            await PinoDB.saveJob({
+              clientName:     clientName,
+              clientEmail:    clientEmail,
+              clientPhone:    clientPhone,
+              clientCommune:  commune,
+              serviceType:    service,
+              description:    `Devis #${leadId.slice(-6)} — ${notes || 'Intervention standard'}`,
+              dateStart:      dateIntv || null,
+              hoursSpent:     null,
+              amountCharged:  price,
+              amountPaid:     0,
+              paymentStatus:  'pending',
+              paymentMethod:  'unipros',
+              notes:          `Durée estimée: ${duration}. ${equipment ? 'Matériel: ' + equipment : ''}`,
+              createdBy:      'Andrés Pino',
+            });
+          }
+        }
+
+        // Update local lead status
+        const leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+        const localLead = leads.find(l => (l.sbId || l.id) === leadId);
+        if (localLead) {
+          localLead.status = 'Devis envoyé';
+          localStorage.setItem('pino_leads', JSON.stringify(leads));
+        }
+
+        document.getElementById('modal-lead-response').close();
+        showNotificationToast(`✅ Devis envoyé à ${clientName} — ${price.toFixed(2)} € TTC (net client: ${(price * 0.5).toFixed(2)} €)`, 'success');
+        renderAdminLeads();
+        if (typeof renderAdminJobs === 'function') renderAdminJobs();
+
+      } catch (err) {
+        console.error('[pino] handleSendLeadResponse error:', err);
+        showNotificationToast('Erreur lors de l\'envoi du devis. Réessayez.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enregistrer & Envoyer le Devis au Client';
+      }
     };
 
     // Impersonation
