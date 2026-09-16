@@ -27,3 +27,17 @@
   - Pestaña de Facturas en Admin (`#adm-factures-table-body`) dinamizada desde Firebase RTDB / Supabase (`renderAdminFactures`).
   - Despacho silencioso de devis por correo vía Web3Forms (auditoría a Andrés) + FormSubmit (directo al cliente) sin popup invasivo.
   - Limpieza completa de elementos huérfanos y validación de sintaxis JavaScript.
+- [x] **Tareas P1 Críticas / Inmediatas (100% COMPLETADAS Y VERIFICADAS)**:
+  1. **Modal "Nouvelle Facture" Funcional en Admin**:
+     - Se reemplazó el `alert()` del botón *"Nouvelle Facture"* por el modal [`#modal-nouvelle-facture`](file:///Users/macbook/Documents/Antigravity/PINO/new/index.html).
+     - Correlativo automático `#FAC-2026-XXX`, selector de leads para pre-llenado en 1-clic, cálculo en tiempo real de avance 50% SAP URSSAF y neto client.
+     - Persistencia directa en Firebase Realtime Database (`/jobs`), notificación in-app al cliente y actualización de tabla con columna de Acciones.
+  2. **Botón "Accepter cette proposition" en Espace Client**:
+     - Botón interactivo en las tarjetas de propuesta chiffrée del cliente.
+     - Actualización atómica del estado a `'Devis accepté'` en Firebase RTDB (`leads/{id}/status`), guardado de timestamp y datos de aceptación.
+     - Notificación automática a Andrés Pino (`admin_notifications`) y badge de confirmación visual verde en la tarjeta.
+  3. **Generación y Descarga de Comprobante Fiscal en PDF (Case 7DB)**:
+     - `printAttestationFiscaleSAP`: Generación oficial de la *Attestation Fiscale Annuelle Services à la Personne (SAP)* con referencia legal al Art. 199 sexdecies del CGI, N° de Déclaration SAP529241671 de la Coopérative Unipros, montos facturados, crédito del 50% y casilla **Case 7DB** del Formulario 2042 RICI de la DGFiP.
+     - `printFactureClientPDF`: Generación de factura detallada con membrete, desgloses y exoneración/mentions SAP.
+     - Acceso inmediato tanto desde el Espace Client como desde el panel de Facturas de Andrés.
+  4. **Despliegue de Reglas RTDB**: Desplegadas a `crm-jom` vía Firebase CLI con validación de sintaxis aprobada.

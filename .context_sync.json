@@ -1,16 +1,17 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Sincronización en tiempo real, corrección de contadores y dinamización de facturas en PINO Espaces Verts",
-  "current_phase": "Hito 3 — CRM + Sincronización Tiempo Real",
-  "action": "Actualización de contadores del cliente, renderAdminFactures dinámico desde Firebase, listeners en vivo listenClientQuotes y entrega de Master Plan para orquestación",
+  "active_goal": "Implementación P1: Modal Nouvelle Facture, botón Accepter cette proposition y Attestation Fiscale SAP (Case 7DB)",
+  "current_phase": "Hito 3 — CRM + Facturación Fiscal SAP + Espace Client",
+  "action": "Modal Nouvelle Facture funcional con guardado en Firebase RTDB /jobs, botón Accepter proposition en tiempo real y generación imprimible de Attestation Fiscale SAP (Case 7DB)",
   "files": [
     "index.html",
     "assets/js/pino-db.js",
+    "database.rules.json",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Despliegue verificado en producción (commit 6aefda5) y traspaso de orquestación de agentes",
-  "last_commit": "6aefda5",
-  "timestamp": "2026-09-16T00:22:45-04:00"
+  "step": "P1 completado al 100%. Listo para P2 (filtros avanzados y armonización mobile) o Hito 2 (Next.js 15)",
+  "last_commit": "pending_push",
+  "timestamp": "2026-09-16T00:44:30-04:00"
 }

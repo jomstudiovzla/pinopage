@@ -208,6 +208,106 @@
   }
 
   /* ─────────────────────────────────────────────────────────
+   *  LEADS — Valider / Accepter le devis chiffré par le client
+   * ───────────────────────────────────────────────────────── */
+  async function acceptQuote(leadId, clientDetails = {}) {
+    const timestamp = new Date().toISOString();
+    const acceptancePayload = {
+      accepted: true,
+      accepted_at: timestamp,
+      accepted_by: clientDetails.name || clientDetails.email || 'Client Particulier',
+      client_email: clientDetails.email || '',
+      client_phone: clientDetails.phone || '',
+      notes: clientDetails.notes || 'Proposition validée en direct par le client'
+    };
+
+    const db = rtdb();
+    if (db) {
+      try {
+        // 1. Mettre à jour l'état du lead dans /leads/{leadId}
+        await db.ref('leads/' + leadId).update({
+          status: 'Devis accepté',
+          accepted_at: timestamp,
+          acceptance: acceptancePayload,
+          updated_at: timestamp
+        });
+
+        // 2. Mettre à jour dans /quotes_responses/{leadId} si existant
+        await db.ref('quotes_responses/' + leadId).update({
+          status: 'Devis accepté',
+          accepted_at: timestamp
+        }).catch(() => {});
+
+        // 3. Notifier Andrés Pino dans /admin_notifications
+        const notifId = 'adm_notif_' + Date.now();
+        await db.ref('admin_notifications/' + notifId).set({
+          id: notifId,
+          type: 'quote_accepted',
+          lead_id: leadId,
+          title: 'Proposition de Devis Acceptée !',
+          client_name: clientDetails.name || 'Client Particulier',
+          client_email: clientDetails.email || '',
+          message: `Le client ${clientDetails.name || ''} (${clientDetails.email || ''}) a validé votre devis chiffré.`,
+          created_at: timestamp,
+          read: false
+        }).catch(() => {});
+
+        // 4. Mettre à jour notification client pour trace dans son espace
+        const rawEmail = clientDetails.email || '';
+        const sanitizedEmail = rawEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+        if (sanitizedEmail) {
+          const clientNotifId = 'notif_acc_' + Date.now();
+          await db.ref('client_notifications/' + sanitizedEmail + '/' + clientNotifId).set({
+            id: clientNotifId,
+            lead_id: leadId,
+            type: 'quote_confirmed',
+            title: 'Devis accepté avec succès !',
+            message: 'Votre accord a été transmis à Andrés Pino. Votre date d\'intervention sera confirmée sous 24h.',
+            created_at: timestamp,
+            read: false
+          }).catch(() => {});
+        }
+
+        // 5. Enregistrer dans audit_logs
+        await db.ref('audit_logs').push({
+          sessionUser: clientDetails.email || 'client',
+          action: 'devis_accepte',
+          leadId: leadId,
+          created_at: timestamp
+        }).catch(() => {});
+
+      } catch (err) {
+        log('acceptQuote:rtdb', err);
+      }
+    }
+
+    // Fallback Supabase si présent
+    const client = sb();
+    if (client) {
+      try {
+        await client.from('leads').update({
+          status: 'Devis accepté',
+          updated_at: timestamp
+        }).eq('id', leadId);
+      } catch (e) {}
+    }
+
+    // Mise à jour de localStorage
+    try {
+      const local = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+      const idx = local.findIndex(l => l.id === leadId || l.sbId === leadId || l.ref_code === leadId);
+      if (idx !== -1) {
+        local[idx].status = 'Devis accepté';
+        local[idx].accepted_at = timestamp;
+        local[idx].acceptance = acceptancePayload;
+        localStorage.setItem('pino_leads', JSON.stringify(local));
+      }
+    } catch(e) {}
+
+    return { ok: true, timestamp };
+  }
+
+  /* ─────────────────────────────────────────────────────────
    *  NOTIFICATIONS — Écoute et gestion temps réel pour les clients
    * ───────────────────────────────────────────────────────── */
   function listenClientNotifications(clientEmail, callback) {
@@ -517,6 +617,8 @@
    * ───────────────────────────────────────────────────────── */
   async function saveJob(data) {
     const payload = {
+      fac_number:      data.facNumber    || data.fac_number || null,
+      lead_id:         data.leadId       || data.lead_id    || null,
       client_id:       data.clientId     || null,
       client_name:     data.clientName   || '',
       client_email:    data.clientEmail  || null,
@@ -541,6 +643,29 @@
       try {
         const ref = db.ref('jobs').push();
         await ref.set({ ...payload, id: ref.key });
+
+        // Si le client a un email, créer une notification in-app dans son espace
+        const rawEmail = data.clientEmail || '';
+        const sanitizedEmail = rawEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+        if (sanitizedEmail) {
+          const notifId = 'notif_fac_' + Date.now();
+          const charged = parseFloat(data.amountCharged) || 0;
+          const isUnipros = (data.paymentMethod || '').toLowerCase() === 'unipros';
+          const net = isUnipros ? (charged * 0.5) : charged;
+          await db.ref('client_notifications/' + sanitizedEmail + '/' + notifId).set({
+            id: notifId,
+            type: 'invoice_issued',
+            title: 'Nouvelle Facture & Attestation Fiscale',
+            message: `Votre facture ${payload.fac_number || '#FAC'} (${charged.toFixed(2)} € TTC) est disponible dans votre Espace Client.`,
+            fac_number: payload.fac_number || '',
+            amount_charged: charged,
+            net_client: net,
+            service: data.serviceType || 'Entretien jardin',
+            created_at: new Date().toISOString(),
+            read: false
+          }).catch(() => {});
+        }
+
         return { ok: true, id: ref.key };
       } catch (err) {
         log('saveJob:rtdb', err);
@@ -750,6 +875,7 @@
     fetchLeads,
     updateLeadStatus,
     saveLeadResponse,
+    acceptQuote,
     fetchClientQuotes,
     upsertProfile,
     fetchProfiles,

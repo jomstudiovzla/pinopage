@@ -35,6 +35,10 @@
     "client_notifications": {
       ".read": "auth != null",
       ".write": "auth != null"
+    },
+    "admin_notifications": {
+      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com')",
+      ".write": "auth != null"
     }
   }
 }

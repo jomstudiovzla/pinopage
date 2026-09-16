@@ -930,6 +930,175 @@
     </form>
   </dialog>
 
+  <!-- Modal: Nouvelle Facture & Dossier Fiscal SAP (Andrés Pino) -->
+  <dialog id="modal-nouvelle-facture" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-2xl w-full p-0 overflow-hidden text-brand-charcoal">
+    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 py-4 text-white flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-file-invoice"></i>
+        </span>
+        <div>
+          <h3 class="font-serif text-xl font-bold">Nouvelle Facture & Dossier Fiscal SAP</h3>
+          <p class="text-xs text-white/70">Émission de facture & calcul crédit d'impôt 50% Unipros</p>
+        </div>
+      </div>
+      <button type="button" onclick="document.getElementById('modal-nouvelle-facture').close()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center cursor-pointer transition-colors" title="Fermer">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <form id="admin-new-invoice-form" onsubmit="handleCreateInvoiceSubmit(event)" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+      <input type="hidden" id="fac-linked-lead-id" />
+
+      <!-- Correlatif e información general -->
+      <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+        <div>
+          <span class="text-[10px] font-bold text-slate-500 uppercase block">Numéro de Facture</span>
+          <input type="text" id="fac-invoice-number" required class="font-mono font-bold text-emerald-800 bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-sm w-36 focus:border-emerald-600 focus:outline-none" value="#FAC-2026-001" />
+        </div>
+        <div>
+          <span class="text-[10px] font-bold text-slate-500 uppercase block">Date d'émission</span>
+          <input type="date" id="fac-invoice-date" required class="font-semibold text-slate-800 bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs focus:border-emerald-600 focus:outline-none" />
+        </div>
+        <div>
+          <span class="text-[10px] font-bold text-slate-500 uppercase block">Régime Fiscal</span>
+          <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full">
+            <i class="fa-solid fa-shield-halved text-[11px]"></i> Agrément SAP 50%
+          </span>
+        </div>
+      </div>
+
+      <!-- Sélecteur de Lead existant ou Saisie Libre -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-slate-700" for="fac-lead-select">
+          <i class="fa-solid fa-user-tag text-emerald-700 mr-1"></i> Sélectionner un client ou devis existant (optionnel)
+        </label>
+        <select id="fac-lead-select" onchange="onSelectInvoiceLead(this.value)" class="w-full px-3.5 py-2.5 bg-slate-50 rounded-xl border border-slate-300 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium">
+          <option value="">— Saisie libre d'un nouveau client —</option>
+        </select>
+      </div>
+
+      <!-- Coordonnées Client -->
+      <div class="p-4 bg-white rounded-2xl border border-slate-200 space-y-3">
+        <div class="text-[11px] font-extrabold uppercase tracking-wide text-slate-600 flex items-center gap-1.5">
+          <i class="fa-solid fa-user text-emerald-700"></i> Coordonnées du Client (Bénéficiaire Fiscal)
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="fac-client-name">Nom et Prénom <span class="text-red-500">*</span></label>
+            <input type="text" id="fac-client-name" required placeholder="Ex: Jean Dupont" class="w-full px-3.5 py-2 bg-slate-50 rounded-xl border border-slate-300 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-semibold" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="fac-client-email">Adresse Email <span class="text-slate-400 font-normal">(pour l'Espace Client)</span></label>
+            <input type="email" id="fac-client-email" placeholder="client@exemple.fr" class="w-full px-3.5 py-2 bg-slate-50 rounded-xl border border-slate-300 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-semibold" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="fac-client-phone">Téléphone</label>
+            <input type="tel" id="fac-client-phone" placeholder="06 XX XX XX XX" class="w-full px-3.5 py-2 bg-slate-50 rounded-xl border border-slate-300 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="fac-client-commune">Commune / Adresse (Gironde)</label>
+            <input type="text" id="fac-client-commune" placeholder="Ex: Mérignac, Pessac, Bordeaux..." class="w-full px-3.5 py-2 bg-slate-50 rounded-xl border border-slate-300 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Détails de la Prestation -->
+      <div class="p-4 bg-white rounded-2xl border border-slate-200 space-y-3">
+        <div class="text-[11px] font-extrabold uppercase tracking-wide text-slate-600 flex items-center gap-1.5">
+          <i class="fa-solid fa-leaf text-emerald-700"></i> Nature des Travaux Paysagers
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="fac-service-type">Type de Prestation</label>
+            <select id="fac-service-type" class="w-full px-3.5 py-2 bg-slate-50 rounded-xl border border-slate-300 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-semibold">
+              <option value="Entretien jardin">Entretien courant de jardin (Tonte & Débroussaillage)</option>
+              <option value="Taille de haies">Taille de haies, arbustes & rosiers</option>
+              <option value="Nettoyage de terrain">Remise en état & Débroussaillage intensif</option>
+              <option value="Désherbage & Massifs">Entretien des massifs & désherbage</option>
+              <option value="Aménagement paysager">Aménagement paysager & Création</option>
+              <option value="Élagage raisonné">Élagage raisonné & Soin des arbres (Non-SAP)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="fac-hours">Heures d'intervention</label>
+            <input type="number" id="fac-hours" step="0.5" min="0.5" placeholder="Ex: 3.5" class="w-full px-3.5 py-2 bg-slate-50 rounded-xl border border-slate-300 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="fac-description">Description des travaux réalisés</label>
+          <textarea id="fac-description" rows="2" placeholder="Tonte de pelouse, taille des haies, évacuation des déchets verts comprise..." class="w-full p-2.5 bg-slate-50 rounded-xl border border-slate-300 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs"></textarea>
+        </div>
+      </div>
+
+      <!-- Volet Financier & Fiscal SAP -->
+      <div class="p-4 bg-emerald-50/70 rounded-2xl border-2 border-emerald-300 space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-extrabold text-emerald-900 uppercase tracking-wide" for="fac-amount-charged">
+            Montant Total Facturé (€ TTC) <span class="text-red-500">*</span>
+          </label>
+          <div class="flex items-center gap-2">
+            <label class="text-[11px] font-bold text-slate-700">Type de facture :</label>
+            <select id="fac-payment-method" onchange="calcInvoicePreview()" class="px-2 py-1 bg-white rounded-lg border border-emerald-300 text-xs font-bold text-emerald-800 focus:outline-none">
+              <option value="unipros">Unipros SAP (Avance 50%)</option>
+              <option value="direct">Direct B2B (Standard)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="relative">
+          <span class="absolute left-3.5 top-2.5 text-emerald-800 font-bold text-base">€</span>
+          <input type="number" id="fac-amount-charged" min="10" step="5" required placeholder="Ex: 360"
+            oninput="calcInvoicePreview()"
+            class="w-full pl-9 pr-4 py-2.5 bg-white rounded-xl border-2 border-emerald-400 focus:outline-none focus:border-emerald-600 text-lg font-extrabold text-slate-900 shadow-xs" />
+        </div>
+
+        <div id="fac-calc-box" class="p-3 bg-white rounded-xl border border-emerald-200 text-xs space-y-1.5">
+          <div class="flex justify-between text-slate-600 font-medium"><span>Total TTC facturé :</span> <strong id="fac-preview-total">0,00 €</strong></div>
+          <div class="flex justify-between text-emerald-700 font-bold"><span>Avance Immédiate 50% (Crédit d'impôt SAP Unipros) :</span> <strong id="fac-preview-credit">- 0,00 €</strong></div>
+          <div class="flex justify-between text-sm font-black text-slate-900 pt-1.5 border-t border-slate-200"><span>👉 Reste réel à la charge du client :</span> <strong class="text-emerald-800" id="fac-preview-net">0,00 €</strong></div>
+          <div class="text-[10px] text-slate-400 italic pt-1">Éligible à la déduction fiscale annuelle (Case 7DB de la déclaration de revenus n° 2042).</div>
+        </div>
+
+        <!-- Statut & Mode de paiement -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="fac-payment-status">Statut du Paiement</label>
+            <select id="fac-payment-status" class="w-full px-3.5 py-2 bg-white rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600 text-xs font-bold">
+              <option value="paid">Acquittée (Payée)</option>
+              <option value="pending">En attente de règlement</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="fac-settlement-mode">Mode de Règlement</label>
+            <select id="fac-settlement-mode" class="w-full px-3.5 py-2 bg-white rounded-xl border border-slate-300 focus:outline-none focus:border-emerald-600 text-xs font-semibold">
+              <option value="unipros">Prélèvement URSSAF / Unipros</option>
+              <option value="virement">Virement bancaire</option>
+              <option value="cheque">Chèque</option>
+              <option value="cesu">CESU Déclaratif / Préfinancé</option>
+              <option value="carte">Carte bancaire</option>
+              <option value="especes">Espèces</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Boutons d'action -->
+      <div class="pt-2 flex flex-col sm:flex-row gap-3">
+        <button type="submit" id="fac-submit-btn"
+          class="flex-1 py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-check"></i> Enregistrer & Émettre la Facture
+        </button>
+        <button type="button" onclick="document.getElementById('modal-nouvelle-facture').close()"
+          class="px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer">
+          Annuler
+        </button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Modal 3: Espace Administration — God Mode (Andrés Pino) -->
   <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-full p-0 overflow-hidden text-brand-charcoal">
     <!-- Admin Header (Draggable) -->
@@ -1073,7 +1242,7 @@
             <h4 class="font-bold text-base text-slate-900">Historique des Factures & Dossiers Fiscaux</h4>
             <p class="text-xs text-slate-500 mt-0.5">Factures Unipros SAP (Crédit d'impôt 50%) et factures directes B2B — données temps réel Firebase</p>
           </div>
-          <button onclick="alert('Module de création de facture Unipros prêt pour Hito 2.')" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 transition-colors shadow-xs">
+          <button type="button" onclick="openNewInvoiceModal()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 transition-colors shadow-xs">
             <i class="fa-solid fa-plus"></i> Nouvelle Facture
           </button>
         </div>
@@ -1088,6 +1257,7 @@
                 <th class="py-3.5 px-4">Montant TTC</th>
                 <th class="py-3.5 px-4">Reste Client</th>
                 <th class="py-3.5 px-4">Statut</th>
+                <th class="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody id="adm-factures-table-body" class="divide-y divide-slate-100">
@@ -4612,6 +4782,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
       const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
 
+      window._cachedClientQuotes = quotes;
       listEl.innerHTML = quotes.map(q => {
         const ref = q.ref_code || q.id || 'Demande';
         const service = q.service_type || q.service || 'Entretien jardin';
@@ -4623,16 +4794,19 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         let statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800">⏳ En cours d'évaluation</span>`;
         if (st === 'Devis envoyé') {
           statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">📄 Proposition chiffrée reçue</span>`;
-        } else if (st === 'Gagné' || st === 'Validé') {
-          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">✅ Chantier validé</span>`;
+        } else if (st === 'Devis accepté' || st === 'Validé' || st === 'Gagné' || st === 'Accepté') {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-700 text-white shadow-xs">✅ Devis accepté</span>`;
+        } else if (st === 'Facturé' || st === 'Terminé') {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-800">🧾 Chantier facturé</span>`;
         } else if (st === 'Contacté') {
           statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">📞 Prise de contact</span>`;
         }
 
         const resp = q.response || null;
+        const isAccepted = (st === 'Devis accepté' || st === 'Validé' || st === 'Gagné' || st === 'Accepté' || st === 'Facturé' || st === 'Terminé');
 
         return `
-          <div class="p-5 bg-white rounded-2xl border-2 ${resp ? 'border-emerald-600 shadow-sm' : 'border-slate-200'} space-y-4">
+          <div class="p-5 bg-white rounded-2xl border-2 ${isAccepted ? 'border-emerald-700 shadow-md bg-emerald-50/10' : (resp ? 'border-emerald-500 shadow-sm' : 'border-slate-200')} space-y-4">
             <!-- En-tête -->
             <div class="flex flex-wrap justify-between items-center gap-2 pb-3 border-b border-slate-100">
               <div class="flex items-center gap-2">
@@ -4687,22 +4861,51 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
                 ` : ''}
               </div>
 
-              <!-- Boutons d'action : 1 bouton principal WhatsApp + Appeler + PDF -->
-              <div class="pt-1 flex flex-col sm:flex-row gap-2.5">
-                <a href="https://wa.me/33651594034?text=${encodeURIComponent(`Bonjour Andrés, je valide votre devis #${ref} pour un montant net de ${parseFloat(resp.net_client || 0).toFixed(2)}€. Pouvez-vous me confirmer le rendez-vous ?`)}"
-                  target="_blank" rel="noopener"
-                  class="flex-1 py-3 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-extrabold text-xs sm:text-sm rounded-xl text-center flex items-center justify-center gap-2 shadow-xs transition-colors">
-                  <i class="fa-brands fa-whatsapp text-base"></i> Valider ce Devis par WhatsApp
-                </a>
-                <a href="tel:0651594034"
-                  class="py-3 px-4 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs rounded-xl text-center flex items-center justify-center gap-2 transition-colors">
-                  <i class="fa-solid fa-phone text-emerald-700"></i> Appeler Andrés (06 51 59 40 34)
-                </a>
-                <button type="button" onclick="printLeadQuotePDF(quotes[${quotes.indexOf(q)}])"
-                  class="py-3 px-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold text-xs rounded-xl text-center flex items-center justify-center gap-2 transition-colors cursor-pointer" title="Télécharger ou imprimer le devis officiel">
-                  <i class="fa-solid fa-file-pdf text-red-600"></i> Devis PDF
-                </button>
-              </div>
+              <!-- Boutons d'action -->
+              ${isAccepted ? `
+                <div class="p-4 bg-emerald-100/70 border-2 border-emerald-400 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+                  <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-emerald-700 text-white flex items-center justify-center text-lg shrink-0 shadow-xs">
+                      <i class="fa-solid fa-check-double"></i>
+                    </span>
+                    <div>
+                      <strong class="text-xs sm:text-sm text-emerald-950 block">Devis officiellement accepté !</strong>
+                      <span class="text-[11px] text-emerald-800 block">Andrés Pino a reçu votre accord en temps réel et réserve votre créneau d'intervention.</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <button type="button" onclick="printLeadQuotePDF(window._cachedClientQuotes ? window._cachedClientQuotes[${quotes.indexOf(q)}] : quotes[${quotes.indexOf(q)}])"
+                      class="py-2.5 px-3.5 bg-white hover:bg-emerald-50 text-emerald-900 border border-emerald-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 shadow-2xs">
+                      <i class="fa-solid fa-file-pdf text-red-600"></i> Devis PDF
+                    </button>
+                    <a href="https://wa.me/33651594034?text=${encodeURIComponent(`Bonjour Andrés, j'ai accepté le devis #${ref} via mon Espace Client. Pouvons-nous finaliser les détails ?`)}"
+                      target="_blank" rel="noopener"
+                      class="py-2.5 px-3.5 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors shadow-2xs">
+                      <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+                    </a>
+                  </div>
+                </div>
+              ` : `
+                <div class="pt-1 flex flex-col sm:flex-row gap-2.5">
+                  <button type="button" onclick="acceptClientQuote('${escapeFn(q.sbId || q.id || ref)}', '${escapeFn(q.email || email)}')"
+                    class="flex-1 py-3 px-4 bg-emerald-700 hover:bg-emerald-800 active:scale-[0.98] text-white font-extrabold text-xs sm:text-sm rounded-xl text-center flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer">
+                    <i class="fa-solid fa-circle-check text-base"></i> Accepter cette proposition
+                  </button>
+                  <a href="https://wa.me/33651594034?text=${encodeURIComponent(`Bonjour Andrés, je souhaite échanger au sujet de votre devis #${ref} pour un montant net de ${parseFloat(resp.net_client || 0).toFixed(2)}€.`)}"
+                    target="_blank" rel="noopener"
+                    class="py-3 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs rounded-xl text-center flex items-center justify-center gap-2 shadow-xs transition-colors">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+                  </a>
+                  <a href="tel:0651594034"
+                    class="py-3 px-4 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-bold text-xs rounded-xl text-center flex items-center justify-center gap-2 transition-colors">
+                    <i class="fa-solid fa-phone text-emerald-700"></i> Appeler
+                  </a>
+                  <button type="button" onclick="printLeadQuotePDF(window._cachedClientQuotes ? window._cachedClientQuotes[${quotes.indexOf(q)}] : quotes[${quotes.indexOf(q)}])"
+                    class="py-3 px-4 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold text-xs rounded-xl text-center flex items-center justify-center gap-2 transition-colors cursor-pointer" title="Télécharger ou imprimer le devis officiel">
+                    <i class="fa-solid fa-file-pdf text-red-600"></i> PDF
+                  </button>
+                </div>
+              `}
             ` : `
               <!-- Demande en cours de traitement par Andrés -->
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 bg-slate-50 rounded-xl text-xs text-slate-700">
@@ -4773,32 +4976,42 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }
 
       const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
-
+      window._cachedClientJobs = clientJobs;
       listEl.innerHTML = clientJobs.map(j => {
         const charged = parseFloat(j.amount_charged) || 0;
         const credit = charged * 0.5;
         const net = charged - credit;
         const isPaid = j.payment_status === 'paid';
+        const facNumber = j.fac_number || `#FAC-${(j.id || '').slice(-6).toUpperCase() || '2026'}`;
 
         return `
           <div class="p-4 bg-white rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-3 shadow-xs">
             <div>
               <div class="flex items-center gap-2">
-                <span class="font-mono font-bold text-xs text-slate-900">#FAC-${(j.id || '').slice(-6).toUpperCase() || '2026'}</span>
+                <span class="font-mono font-bold text-xs text-slate-900">${facNumber}</span>
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
                   ${isPaid ? 'Acquittée' : 'En attente'}
                 </span>
+                <span class="text-[10px] bg-emerald-50 text-emerald-700 font-semibold px-2 py-0.5 rounded-full border border-emerald-200">
+                  50% Déduction SAP
+                </span>
               </div>
               <div class="text-xs text-slate-700 font-bold mt-1">${escapeFn(j.service_type || 'Entretien jardin')}</div>
-              <div class="text-xs text-slate-400 mt-0.5">${j.date_start || 'Récemment'}</div>
+              <div class="text-xs text-slate-400 mt-0.5">${j.date_start ? new Date(j.date_start).toLocaleDateString('fr-FR') : 'Récemment'}</div>
             </div>
             <div class="text-right">
               <div class="text-sm font-black text-slate-900">${charged.toFixed(2)} € TTC</div>
               <div class="text-xs text-emerald-700 font-bold">Reste payé : ${net.toFixed(2)} € (50% SAP)</div>
-              <button onclick="showNotificationToast('Attestation fiscale Unipros disponible sur votre compte.', 'info')"
-                class="mt-1 text-xs text-slate-500 hover:text-emerald-700 underline font-bold cursor-pointer block">
-                Télécharger attestation
-              </button>
+              <div class="flex items-center justify-end gap-2 mt-2">
+                <button type="button" onclick="printAttestationFiscaleSAP('${escapeFn(j.id)}')"
+                  class="text-xs text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-3 py-1.5 rounded-lg font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs" title="Télécharger ou imprimer l'attestation fiscale officielle pour déclaration d'impôt (Case 7DB)">
+                  <i class="fa-solid fa-file-shield text-emerald-700"></i> Attestation Fiscale (Case 7DB)
+                </button>
+                <button type="button" onclick="printFactureClientPDF('${escapeFn(j.id)}')"
+                  class="text-xs text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-300 px-2.5 py-1.5 rounded-lg font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs" title="Télécharger la facture officielle">
+                  <i class="fa-solid fa-file-pdf text-red-600"></i> Facture
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -4983,14 +5196,17 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
       const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
 
+      window._cachedAdminLeads = leads;
       tbody.innerHTML = leads.map((l, idx) => {
         let statusBadge = `<span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-full">${l.status}</span>`;
-        if (l.status === 'Gagné') {
-          statusBadge = `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">Gagné</span>`;
+        if (l.status === 'Gagné' || l.status === 'Validé' || l.status === 'Devis accepté' || l.status === 'Accepté') {
+          statusBadge = `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1"><i class="fa-solid fa-circle-check text-[10px]"></i> ${l.status === 'Devis accepté' ? 'Devis accepté' : l.status}</span>`;
         } else if (l.status === 'Contacté') {
           statusBadge = `<span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full">Contacté</span>`;
         } else if (l.status === 'Devis envoyé') {
           statusBadge = `<span class="bg-purple-100 text-purple-800 text-xs font-bold px-2.5 py-1 rounded-full">Devis envoyé</span>`;
+        } else if (l.status === 'Facturé' || l.status === 'Terminé') {
+          statusBadge = `<span class="bg-slate-100 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-full">Facturé</span>`;
         }
 
         const phoneClean = (l.phone || '').replace(/\s+/g, '');
@@ -5019,6 +5235,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
                 ${phoneClean ? `<a href="${waLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors" title="WhatsApp"><i class="fa-brands fa-whatsapp text-sm"></i></a>` : ''}
                 ${l.phone ? `<a href="tel:${l.phone}" class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors" title="Appeler"><i class="fa-solid fa-phone text-xs"></i></a>` : ''}
                 <button onclick="openLeadResponseModal(${idx})" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-700 text-white rounded-xl hover:bg-emerald-800 transition-colors cursor-pointer shadow-xs" title="Établir un Devis & Répondre"><i class="fa-solid fa-file-invoice-dollar text-xs"></i></button>
+                <button onclick="openNewInvoiceModalForLead(${idx})" class="inline-flex items-center justify-center w-8 h-8 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors cursor-pointer shadow-xs" title="Créer Facture à partir de ce devis"><i class="fa-solid fa-receipt text-xs"></i></button>
                 <button onclick="cycleLeadStatus(${idx})" class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors cursor-pointer" title="Changer statut"><i class="fa-solid fa-rotate text-xs"></i></button>
               </div>
             </td>
@@ -5031,7 +5248,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
     window.cycleLeadStatus = async (index) => {
       const leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
       if (!leads[index]) return;
-      const flow = ['Nouveau', 'Contacté', 'Devis envoyé', 'Gagné', 'Perdu'];
+      const flow = ['Nouveau', 'Contacté', 'Devis envoyé', 'Devis accepté', 'Gagné', 'Facturé', 'Perdu'];
       const curIdx = flow.indexOf(leads[index].status);
       const newStatus = flow[(curIdx + 1) % flow.length];
       leads[index].status = newStatus;
@@ -6078,7 +6295,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       const emptyEl = document.getElementById('adm-factures-empty');
       if (!tbody) return;
 
-      tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 text-xs">
+      tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 text-xs">
         <i class="fa-solid fa-spinner fa-spin mr-2"></i> Chargement des factures...
       </td></tr>`;
 
@@ -6108,6 +6325,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       if (emptyEl) emptyEl.classList.add('hidden');
 
       const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (s => String(s || ''));
+      window._cachedAdminJobs = jobs;
 
       tbody.innerHTML = jobs.map((j, idx) => {
         const charged = parseFloat(j.amount_charged) || 0;
@@ -6115,7 +6333,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         const clientPart = isUnipros ? (charged * 0.5) : charged;
         const isPaid = j.payment_status === 'paid';
         const dateStr = j.date_start ? new Date(j.date_start).toLocaleDateString('fr-FR') : (j.created_at ? new Date(j.created_at).toLocaleDateString('fr-FR') : '—');
-        const facNumber = `#FAC-2026-${String(idx + 1).padStart(3, '0')}`;
+        const facNumber = j.fac_number || `#FAC-2026-${String(idx + 1).padStart(3, '0')}`;
 
         return `
           <tr class="hover:bg-slate-50/80 transition-colors">
@@ -6133,6 +6351,12 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
               <span class="text-xs font-bold px-2.5 py-1 rounded-full ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
                 ${isPaid ? 'Acquittée' : 'En attente'}
               </span>
+            </td>
+            <td class="py-3.5 px-4 text-right whitespace-nowrap">
+              <div class="flex items-center justify-end gap-1.5">
+                <button type="button" onclick="printAttestationFiscaleSAP('${escapeFn(j.id)}')" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-xl hover:bg-emerald-100 transition-colors cursor-pointer shadow-2xs" title="Attestation Fiscale SAP (Case 7DB)"><i class="fa-solid fa-file-shield text-xs"></i></button>
+                <button type="button" onclick="printFactureClientPDF('${escapeFn(j.id)}')" class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-200 transition-colors cursor-pointer shadow-2xs" title="Facture PDF"><i class="fa-solid fa-file-pdf text-xs text-red-600"></i></button>
+              </div>
             </td>
           </tr>
         `;
@@ -6312,6 +6536,667 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         PinoDB.exportJobsCSV(_jobsCache);
         showNotificationToast('Export CSV / Excel téléchargé !', 'success');
       }
+    };
+
+    // ─────────────────────────────────────────────────────────
+    //  NOUVELLE FACTURE — Gestion du Modal & Enregistrement Firebase /jobs
+    // ─────────────────────────────────────────────────────────
+    window.openNewInvoiceModal = async (prefillLead = null) => {
+      const modal = document.getElementById('modal-nouvelle-facture');
+      if (!modal) return;
+
+      const dateInput = document.getElementById('fac-invoice-date');
+      if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().slice(0, 10);
+      }
+
+      // 1. Calculer le correlatif #FAC-2026-XXX
+      let jobsCount = 0;
+      if (window.PinoDB) {
+        try {
+          const res = await PinoDB.fetchJobs();
+          if (res.ok && Array.isArray(res.data)) jobsCount = res.data.length;
+        } catch(e) {}
+      }
+      if (!jobsCount) {
+        try {
+          const local = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+          jobsCount = local.length;
+        } catch(e) {}
+      }
+      const facNumInput = document.getElementById('fac-invoice-number');
+      if (facNumInput) {
+        facNumInput.value = `#FAC-2026-${String(jobsCount + 1).padStart(3, '0')}`;
+      }
+
+      // 2. Peupler le sélecteur de leads / clients existants
+      const leadSelect = document.getElementById('fac-lead-select');
+      if (leadSelect) {
+        leadSelect.innerHTML = '<option value="">— Saisie libre d\'un nouveau client —</option>';
+        let allLeads = [];
+        if (window._cachedAdminLeads && window._cachedAdminLeads.length > 0) {
+          allLeads = window._cachedAdminLeads;
+        } else {
+          try { allLeads = JSON.parse(localStorage.getItem('pino_leads') || '[]'); } catch(e) {}
+        }
+        allLeads.forEach((l, i) => {
+          const opt = document.createElement('option');
+          opt.value = String(i);
+          const stBadge = l.status === 'Devis accepté' ? '⭐ [Devis accepté]' : `[${l.status || 'Lead'}]`;
+          opt.textContent = `${stBadge} ${l.name || 'Client'} — ${l.service || 'Entretien'} (${l.commune || '33'})`;
+          leadSelect.appendChild(opt);
+        });
+      }
+
+      // 3. Si prefillLead est passé (ex: clic direct depuis le tableau)
+      if (prefillLead) {
+        document.getElementById('fac-linked-lead-id').value = prefillLead.sbId || prefillLead.id || '';
+        document.getElementById('fac-client-name').value = prefillLead.name || '';
+        document.getElementById('fac-client-email').value = prefillLead.email || '';
+        document.getElementById('fac-client-phone').value = prefillLead.phone || '';
+        document.getElementById('fac-client-commune').value = prefillLead.commune || '';
+        
+        const servSelect = document.getElementById('fac-service-type');
+        if (servSelect && prefillLead.service) {
+          const match = Array.from(servSelect.options).find(o => o.value.toLowerCase().includes(prefillLead.service.toLowerCase()) || prefillLead.service.toLowerCase().includes(o.value.toLowerCase()));
+          if (match) servSelect.value = match.value;
+        }
+
+        const amountInput = document.getElementById('fac-amount-charged');
+        if (amountInput) {
+          const price = (prefillLead.response && prefillLead.response.price_ttc) || prefillLead.budget_eur || prefillLead.budget || 0;
+          if (parseFloat(price) > 0) amountInput.value = parseFloat(price);
+        }
+
+        const descInput = document.getElementById('fac-description');
+        if (descInput) {
+          descInput.value = prefillLead.details || (prefillLead.service ? `Prestation de ${prefillLead.service} à ${prefillLead.commune || 'Bordeaux'}.` : '');
+        }
+      }
+
+      calcInvoicePreview();
+      modal.showModal();
+    };
+
+    window.openNewInvoiceModalForLead = (leadIdx) => {
+      let leads = window._cachedAdminLeads || [];
+      if (leads.length === 0) {
+        try { leads = JSON.parse(localStorage.getItem('pino_leads') || '[]'); } catch(e) {}
+      }
+      const lead = leads[leadIdx];
+      if (!lead) {
+        showNotificationToast('Devis introuvable.', 'error');
+        return;
+      }
+      openNewInvoiceModal(lead);
+    };
+
+    window.onSelectInvoiceLead = (selectedIdx) => {
+      if (selectedIdx === '') {
+        document.getElementById('fac-linked-lead-id').value = '';
+        return;
+      }
+      let leads = window._cachedAdminLeads || [];
+      if (leads.length === 0) {
+        try { leads = JSON.parse(localStorage.getItem('pino_leads') || '[]'); } catch(e) {}
+      }
+      const lead = leads[parseInt(selectedIdx, 10)];
+      if (!lead) return;
+
+      document.getElementById('fac-linked-lead-id').value = lead.sbId || lead.id || '';
+      document.getElementById('fac-client-name').value = lead.name || '';
+      document.getElementById('fac-client-email').value = lead.email || '';
+      document.getElementById('fac-client-phone').value = lead.phone || '';
+      document.getElementById('fac-client-commune').value = lead.commune || '';
+
+      const servSelect = document.getElementById('fac-service-type');
+      if (servSelect && lead.service) {
+        const match = Array.from(servSelect.options).find(o => o.value.toLowerCase().includes(lead.service.toLowerCase()) || lead.service.toLowerCase().includes(o.value.toLowerCase()));
+        if (match) servSelect.value = match.value;
+      }
+
+      const amountInput = document.getElementById('fac-amount-charged');
+      if (amountInput) {
+        const price = (lead.response && lead.response.price_ttc) || lead.budget_eur || lead.budget || 0;
+        if (parseFloat(price) > 0) amountInput.value = parseFloat(price);
+      }
+
+      const descInput = document.getElementById('fac-description');
+      if (descInput) {
+        descInput.value = lead.details || (lead.service ? `Prestation de ${lead.service} à ${lead.commune || 'Bordeaux'}.` : '');
+      }
+
+      calcInvoicePreview();
+    };
+
+    window.calcInvoicePreview = () => {
+      const amountInput = document.getElementById('fac-amount-charged');
+      const methodSelect = document.getElementById('fac-payment-method');
+      const totalEl = document.getElementById('fac-preview-total');
+      const creditEl = document.getElementById('fac-preview-credit');
+      const netEl = document.getElementById('fac-preview-net');
+
+      const total = parseFloat(amountInput?.value || 0) || 0;
+      const isUnipros = (methodSelect?.value || 'unipros') === 'unipros';
+      const credit = isUnipros ? (total * 0.5) : 0;
+      const net = total - credit;
+
+      if (totalEl) totalEl.textContent = `${total.toFixed(2)} €`;
+      if (creditEl) creditEl.textContent = isUnipros ? `- ${credit.toFixed(2)} €` : '0,00 € (Non-SAP)';
+      if (netEl) netEl.textContent = `${net.toFixed(2)} €`;
+    };
+
+    window.handleCreateInvoiceSubmit = async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('fac-submit-btn');
+      const originalText = submitBtn ? submitBtn.innerHTML : 'Enregistrer';
+
+      const facNumber = (document.getElementById('fac-invoice-number')?.value || '').trim() || `#FAC-2026-${Date.now().toString().slice(-3)}`;
+      const clientName = (document.getElementById('fac-client-name')?.value || '').trim();
+      if (!clientName) {
+        showNotificationToast('Veuillez saisir le nom du client.', 'error');
+        return;
+      }
+      const clientEmail = (document.getElementById('fac-client-email')?.value || '').trim();
+      const clientPhone = (document.getElementById('fac-client-phone')?.value || '').trim();
+      const clientCommune = (document.getElementById('fac-client-commune')?.value || '').trim();
+      const serviceType = document.getElementById('fac-service-type')?.value || 'Entretien jardin';
+      const hours = document.getElementById('fac-hours')?.value || null;
+      const description = (document.getElementById('fac-description')?.value || '').trim();
+      const dateStart = document.getElementById('fac-invoice-date')?.value || new Date().toISOString().slice(0, 10);
+      const amountCharged = parseFloat(document.getElementById('fac-amount-charged')?.value || 0);
+      const paymentMethod = document.getElementById('fac-payment-method')?.value || 'unipros';
+      const paymentStatus = document.getElementById('fac-payment-status')?.value || 'paid';
+      const settlementMode = document.getElementById('fac-settlement-mode')?.value || 'unipros';
+      const linkedLeadId = document.getElementById('fac-linked-lead-id')?.value || null;
+
+      const user = getCurrentUser();
+      const createdBy = user?.uid || 'andres_pino';
+
+      const invoiceJob = {
+        id: 'job_' + Date.now(),
+        fac_number: facNumber,
+        client_name: clientName,
+        client_email: clientEmail,
+        client_phone: clientPhone,
+        client_commune: clientCommune,
+        service_type: serviceType,
+        description: description,
+        date_start: dateStart,
+        date_end: dateStart,
+        hours_spent: hours ? parseFloat(hours) : null,
+        amount_charged: amountCharged,
+        amount_paid: paymentStatus === 'paid' ? amountCharged : 0,
+        payment_status: paymentStatus,
+        payment_method: paymentMethod,
+        notes: `Règlement : ${settlementMode}. Reste client : ${(paymentMethod === 'unipros' ? amountCharged * 0.5 : amountCharged).toFixed(2)} € (SAP Case 7DB).`,
+        lead_id: linkedLeadId,
+        created_by: createdBy,
+        created_at: new Date().toISOString()
+      };
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Émission en cours...';
+      }
+
+      // 1. Sauvegarde Firebase Realtime Database
+      let savedInCloud = false;
+      if (window.PinoDB) {
+        try {
+          const res = await PinoDB.saveJob({
+            facNumber,
+            leadId: linkedLeadId,
+            clientName,
+            clientEmail,
+            clientPhone,
+            clientCommune,
+            serviceType,
+            description,
+            dateStart,
+            dateEnd: dateStart,
+            hoursSpent: hours,
+            amountCharged,
+            amountPaid: invoiceJob.amount_paid,
+            paymentStatus,
+            paymentMethod,
+            notes: invoiceJob.notes,
+            createdBy
+          });
+          if (res && res.ok) {
+            savedInCloud = true;
+            if (res.id) invoiceJob.id = res.id;
+          }
+        } catch (err) {
+          console.warn('[pino] saveJob error:', err);
+        }
+
+        // Si lié à un lead, mettre à jour le statut du lead en 'Facturé'
+        if (linkedLeadId) {
+          try {
+            await PinoDB.updateLeadStatus(linkedLeadId, 'Facturé');
+          } catch(e) {}
+        }
+      }
+
+      // 2. Persistance locale
+      try {
+        let localJobs = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+        localJobs.unshift(invoiceJob);
+        localStorage.setItem('pino_admin_jobs', JSON.stringify(localJobs));
+      } catch(e) {}
+
+      // Mettre à jour les leads locaux
+      if (linkedLeadId) {
+        try {
+          let localLeads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+          const idx = localLeads.findIndex(l => l.id === linkedLeadId || l.sbId === linkedLeadId || l.ref_code === linkedLeadId);
+          if (idx >= 0) {
+            localLeads[idx].status = 'Facturé';
+            localStorage.setItem('pino_leads', JSON.stringify(localLeads));
+          }
+        } catch(e) {}
+      }
+
+      // Synchroniser / Créer le profil client local si absent
+      if (clientName) {
+        try {
+          let localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]');
+          const exists = localUsers.some(u => (u.email && clientEmail && u.email.toLowerCase() === clientEmail.toLowerCase()) || u.fullName === clientName);
+          if (!exists) {
+            localUsers.push({
+              uid: invoiceJob.id,
+              email: clientEmail || (clientName.toLowerCase().replace(/\s+/g, '.') + '@client.fr'),
+              fullName: clientName,
+              phone: clientPhone,
+              commune: clientCommune || 'Bordeaux Métropole',
+              role: 'client',
+              authProvider: 'facturation_admin',
+              createdAt: new Date().toISOString()
+            });
+            localStorage.setItem('pino_users', JSON.stringify(localUsers));
+            if (typeof renderAdminUsers === 'function') renderAdminUsers();
+          }
+        } catch(e) {}
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+
+      document.getElementById('modal-nouvelle-facture').close();
+      showNotificationToast(`Facture ${facNumber} émise avec succès ! ${paymentMethod === 'unipros' ? '(Avance 50% déduite)' : ''}`, 'success');
+
+      // Rafraîchir les tables
+      renderAdminFactures();
+      renderAdminLeads();
+      if (typeof renderAdminKPIs === 'function') renderAdminKPIs();
+    };
+
+    // ─────────────────────────────────────────────────────────
+    //  ACCEPTATION DE DEVIS PAR LE CLIENT (1-Clic en temps réel)
+    // ─────────────────────────────────────────────────────────
+    window.acceptClientQuote = async (quoteId, clientEmail) => {
+      if (!quoteId) return;
+
+      const user = getCurrentUser() || {};
+      const clientName = user.fullName || user.displayName || 'Client Particulier';
+
+      if (!confirm(`Confirmez-vous l'acceptation de cette proposition chiffrée ?\n\nAndrés Pino sera notifié immédiatement pour caler votre rendez-vous d'intervention.`)) {
+        return;
+      }
+
+      showNotificationToast('Transmission de votre accord en cours...', 'info');
+
+      if (window.PinoDB && typeof PinoDB.acceptQuote === 'function') {
+        try {
+          await PinoDB.acceptQuote(quoteId, {
+            name: clientName,
+            email: clientEmail || user.email || '',
+            phone: user.phone || '',
+            notes: 'Accepté via Espace Client'
+          });
+        } catch(e) {
+          console.warn('[pino] acceptQuote error:', e);
+        }
+      } else {
+        // Fallback local
+        try {
+          let local = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+          const idx = local.findIndex(l => l.id === quoteId || l.sbId === quoteId || l.ref_code === quoteId);
+          if (idx >= 0) {
+            local[idx].status = 'Devis accepté';
+            local[idx].accepted_at = new Date().toISOString();
+            localStorage.setItem('pino_leads', JSON.stringify(local));
+          }
+        } catch(e) {}
+      }
+
+      showNotificationToast('🎉 Devis accepté ! Andrés Pino a été notifié et confirme votre passage sous 24h.', 'success');
+
+      if (clientEmail && typeof renderClientQuotes === 'function') {
+        renderClientQuotes(clientEmail);
+      }
+      if (typeof renderAdminLeads === 'function') {
+        renderAdminLeads();
+      }
+    };
+
+    // ─────────────────────────────────────────────────────────
+    //  ATTESTATION FISCALE SAP (Case 7DB) & FACTURE OFFICIELLE PDF
+    // ─────────────────────────────────────────────────────────
+    window.printAttestationFiscaleSAP = (jobId) => {
+      let job = null;
+      if (window._cachedAdminJobs) {
+        job = window._cachedAdminJobs.find(j => j.id === jobId);
+      }
+      if (!job && window._cachedClientJobs) {
+        job = window._cachedClientJobs.find(j => j.id === jobId);
+      }
+      if (!job) {
+        try {
+          const local = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+          job = local.find(j => j.id === jobId);
+        } catch(e) {}
+      }
+      if (!job) {
+        showNotificationToast('Facture introuvable pour générer l\'attestation fiscale.', 'error');
+        return;
+      }
+
+      const facNum = job.fac_number || `#FAC-${String(job.id || '').slice(-6).toUpperCase()}`;
+      const attestNum = `ATTEST-SAP-2026-${String(job.id || '').slice(-6).toUpperCase()}`;
+      const charged = parseFloat(job.amount_charged) || 0;
+      const credit = charged * 0.5;
+      const net = charged - credit;
+      const clientName = job.client_name || 'Client Particulier';
+      const clientEmail = job.client_email || '';
+      const clientCommune = job.client_commune || 'Bordeaux Métropole & Gironde (33)';
+      const serviceType = job.service_type || 'Entretien courant de jardin & espaces verts';
+      const dateIntervention = job.date_start ? new Date(job.date_start).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
+      const now = new Date().toLocaleDateString('fr-FR');
+
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        showNotificationToast('Veuillez autoriser les pop-ups pour afficher l\'attestation fiscale.', 'error');
+        return;
+      }
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+          <meta charset="UTF-8">
+          <title>Attestation Fiscale SAP 2026 — ${attestNum} — Pino Espaces Verts</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 40px; color: #0f172a; line-height: 1.5; font-size: 13px; }
+            .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #047857; padding-bottom: 20px; }
+            .logo { font-size: 22px; font-weight: 800; color: #047857; }
+            .coop-badge { background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; }
+            .doc-title { text-align: center; margin: 30px 0 20px 0; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
+            .doc-title h1 { font-size: 17px; margin: 0; color: #047857; text-transform: uppercase; letter-spacing: 0.5px; }
+            .doc-title p { margin: 4px 0 0 0; font-size: 11px; color: #475569; }
+            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin: 20px 0; }
+            .card { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; }
+            .card h3 { margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase; color: #047857; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th { background: #f1f5f9; text-align: left; padding: 8px 10px; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; }
+            td { padding: 10px; border-bottom: 1px solid #e2e8f0; }
+            .tax-box { background: #ecfdf5; border: 2px solid #047857; border-radius: 8px; padding: 16px; margin: 25px 0; }
+            .tax-box h4 { margin: 0 0 6px 0; font-size: 14px; color: #065f46; display: flex; align-items: center; gap: 8px; }
+            .tax-box .amount { font-size: 20px; font-weight: 900; color: #047857; }
+            .footer-sig { display: flex; justify-content: space-between; margin-top: 35px; padding-top: 15px; border-top: 1px solid #e2e8f0; }
+            .sig-box { width: 220px; text-align: center; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 12px; background: #fafafa; }
+            .legal { margin-top: 30px; font-size: 10px; color: #64748b; line-height: 1.4; }
+            @media print { body { margin: 20px; } button { display: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="logo">🌲 Pino Espaces Verts</div>
+              <div style="color: #475569; margin-top: 4px;">Artisan Paysagiste — Andrés Pino</div>
+              <div style="color: #475569;">Bordeaux Métropole & Gironde (33) • Tél : 06 51 59 40 34</div>
+              <div style="color: #475569;">pino.spacesverts@gmail.com</div>
+            </div>
+            <div style="text-align: right;">
+              <span class="coop-badge">Coopérative UNIPROS — Déclaration SAP</span>
+              <div style="font-size: 11px; color: #475569; margin-top: 5px;">N° Déclaration SAP : <strong>SAP529241671</strong></div>
+              <div style="font-size: 11px; color: #475569;">SIRET : 529 241 671 00028 • Code NAF : 8129B</div>
+              <div style="font-size: 11px; color: #475569;">14 Rue François de Neufchâteau, 88000 Épinal</div>
+            </div>
+          </div>
+
+          <div class="doc-title">
+            <h1>Attestation Fiscale — Services à la Personne (SAP)</h1>
+            <p>Délivrée en application de l'article 199 sexdecies du Code Général des Impôts (CGI)</p>
+            <div style="font-size: 12px; font-weight: bold; margin-top: 6px; color: #0f172a;">Attestation N° : ${attestNum} • Facture de référence : ${facNum}</div>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <h3>Bénéficiaire des Prestations (Client)</h3>
+              <div style="font-size: 14px; font-weight: bold; margin-bottom: 4px;">${clientName}</div>
+              <div>${clientCommune}</div>
+              ${clientEmail ? `<div>Email : ${clientEmail}</div>` : ''}
+              ${job.client_phone ? `<div>Tél : ${job.client_phone}</div>` : ''}
+            </div>
+
+            <div class="card">
+              <h3>Intervention & Cadre Légal</h3>
+              <div><strong>Prestation :</strong> ${serviceType}</div>
+              <div><strong>Date d'intervention :</strong> ${dateIntervention}</div>
+              <div><strong>Organisme agréé :</strong> Coopérative UNIPROS</div>
+              <div><strong>Date d'émission :</strong> ${now}</div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Nature des Travaux Réalisés</th>
+                <th>Date</th>
+                <th style="text-align: right;">Montant Payé TTC</th>
+                <th style="text-align: right;">Crédit d'Impôt (50%)</th>
+                <th style="text-align: right;">Reste à Charge Réel</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong>${serviceType}</strong><br>
+                  <span style="font-size: 11px; color: #64748b;">${job.description || 'Entretien courant du jardin, tonte de pelouse, taille de haies, ramassage et évacuation des déchets végétaux.'}</span>
+                </td>
+                <td>${dateIntervention}</td>
+                <td style="text-align: right; font-weight: bold;">${charged.toFixed(2)} €</td>
+                <td style="text-align: right; font-weight: bold; color: #047857;">- ${credit.toFixed(2)} €</td>
+                <td style="text-align: right; font-weight: 900; color: #065f46;">${net.toFixed(2)} €</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="tax-box">
+            <h4>📌 MONTANT À REPORTER SUR VOTRE DÉCLARATION DE REVENUS :</h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px;">
+              <div>
+                <div class="amount">${credit.toFixed(2)} €</div>
+                <div style="font-size: 12px; color: #065f46; font-weight: bold; margin-top: 2px;">Formulaire n° 2042 RICI — Case 7DB (Dépenses pour l'emploi à domicile / SAP)</div>
+              </div>
+              <div style="text-align: right; max-width: 320px; font-size: 11px; color: #065f46;">
+                En cas d'utilisation de l'Avance Immédiate de crédit d'impôt URSSAF, cette somme est pré-remplie automatiquement par la DGFiP.
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-sig">
+            <div>
+              <p style="margin: 0; font-size: 11px; color: #475569;">Fait pour valoir ce que de droit,<br>Bordeaux, le ${now}</p>
+            </div>
+            <div class="sig-box">
+              <span style="font-size: 11px; font-weight: bold; color: #047857; display: block;">Coopérative UNIPROS & Andrés Pino</span>
+              <span style="font-size: 10px; color: #64748b; display: block; margin-top: 4px;">Agrément SAP529241671<br>Attestation certifiée conforme</span>
+            </div>
+          </div>
+
+          <div class="legal">
+            <p><strong>Note d'information légale :</strong> Seules les activités d'entretien courant des jardins et potagers de particuliers définies à l'article D. 7231-1 du Code du travail ouvrent droit au crédit d'impôt de 50% prévu à l'article 199 sexdecies du CGI, dans la limite du plafond légal annuel de 5 000 € de dépenses par an et par foyer fiscal (soit 2 500 € d'avantage fiscal direct maximum). Cette attestation doit être conservée pendant 3 ans par le contribuable pour justification éventuelle auprès de l'Administration fiscale.</p>
+          </div>
+
+          <script>
+            window.onload = function() { window.print(); }
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+    };
+
+    window.printFactureClientPDF = (jobId) => {
+      let job = null;
+      if (window._cachedAdminJobs) {
+        job = window._cachedAdminJobs.find(j => j.id === jobId);
+      }
+      if (!job && window._cachedClientJobs) {
+        job = window._cachedClientJobs.find(j => j.id === jobId);
+      }
+      if (!job) {
+        try {
+          const local = JSON.parse(localStorage.getItem('pino_admin_jobs') || '[]');
+          job = local.find(j => j.id === jobId);
+        } catch(e) {}
+      }
+      if (!job) {
+        showNotificationToast('Facture introuvable.', 'error');
+        return;
+      }
+
+      const facNum = job.fac_number || `#FAC-${String(job.id || '').slice(-6).toUpperCase()}`;
+      const charged = parseFloat(job.amount_charged) || 0;
+      const isUnipros = (job.payment_method || '').toLowerCase() === 'unipros';
+      const credit = isUnipros ? (charged * 0.5) : 0;
+      const net = charged - credit;
+      const isPaid = job.payment_status === 'paid';
+      const dateIntervention = job.date_start ? new Date(job.date_start).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR');
+      const now = new Date().toLocaleDateString('fr-FR');
+
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        showNotificationToast('Veuillez autoriser les pop-ups pour afficher la facture.', 'error');
+        return;
+      }
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="fr">
+        <head>
+          <meta charset="UTF-8">
+          <title>Facture ${facNum} — Pino Espaces Verts</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 40px; color: #0f172a; line-height: 1.5; font-size: 13px; }
+            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #047857; padding-bottom: 18px; }
+            .logo { font-size: 22px; font-weight: 800; color: #047857; }
+            .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 25px 0; font-size: 13px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th { background: #f8fafc; padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; }
+            td { padding: 12px 10px; border-bottom: 1px solid #e2e8f0; }
+            .totals { margin-top: 25px; margin-left: auto; width: 360px; }
+            .totals-row { display: flex; justify-content: space-between; padding: 6px 0; }
+            .highlight { font-size: 16px; font-weight: 900; color: #047857; border-top: 2px solid #047857; padding-top: 10px; margin-top: 6px; }
+            .badge-paid { background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+            .badge-pending { background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+            .legal { margin-top: 40px; font-size: 10px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+            @media print { body { margin: 20px; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="logo">🌲 Pino Espaces Verts</div>
+              <div style="font-size: 12px; color: #475569; margin-top: 4px;">Artisan Paysagiste — Andrés Pino</div>
+              <div style="font-size: 12px; color: #475569;">Bordeaux Métropole & Gironde (33)</div>
+              <div style="font-size: 12px; color: #475569;">Tél : 06 51 59 40 34 • pino.spacesverts@gmail.com</div>
+            </div>
+            <div style="text-align: right;">
+              <span style="background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold;">
+                ${isUnipros ? 'Adhérent Coopérative Unipros (SAP)' : 'Prestation B2B'}
+              </span>
+              <h2 style="margin: 8px 0 2px 0; font-size: 20px; color: #0f172a;">FACTURE ${facNum}</h2>
+              <div style="font-size: 11px; color: #64748b;">Date : ${now} • Échéance : ${dateIntervention}</div>
+              <div style="margin-top: 4px;">Statut : <span class="${isPaid ? 'badge-paid' : 'badge-pending'}">${isPaid ? 'ACQUITTÉE' : 'EN ATTENTE DE RÈGLEMENT'}</span></div>
+            </div>
+          </div>
+
+          <div class="info-grid">
+            <div>
+              <strong style="color: #047857; font-size: 11px; text-transform: uppercase;">Facturé à :</strong><br>
+              <strong>${job.client_name || 'Client Particulier'}</strong><br>
+              ${job.client_commune || 'Bordeaux Métropole (33)'}<br>
+              ${job.client_email || ''}<br>
+              ${job.client_phone || ''}
+            </div>
+            <div>
+              <strong style="color: #047857; font-size: 11px; text-transform: uppercase;">Détails Chantier :</strong><br>
+              <strong>Prestation :</strong> ${job.service_type || 'Entretien jardin'}<br>
+              <strong>Date d'intervention :</strong> ${dateIntervention}<br>
+              <strong>Règlement :</strong> ${job.notes || (isUnipros ? 'Avance Immédiate URSSAF' : 'Virement')}
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Désignation des travaux</th>
+                <th>Heures / Qté</th>
+                <th style="text-align: right;">Montant TTC</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong>${job.service_type || 'Entretien et aménagement paysager'}</strong><br>
+                  <span style="font-size: 11px; color: #64748b;">${job.description || 'Prestation d\'entretien courant du jardin et évacuation des déchets verts.'}</span>
+                </td>
+                <td>${job.hours_spent ? job.hours_spent + ' h' : 'Forfait'}</td>
+                <td style="text-align: right; font-weight: bold;">${charged.toFixed(2)} €</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="totals">
+            <div class="totals-row">
+              <span>Total Facturé TTC :</span>
+              <strong>${charged.toFixed(2)} €</strong>
+            </div>
+            ${isUnipros ? `
+              <div class="totals-row" style="color: #047857;">
+                <span>Avance Immédiate 50% (Crédit d'impôt SAP) :</span>
+                <strong>- ${credit.toFixed(2)} €</strong>
+              </div>
+              <div class="totals-row highlight">
+                <span>👉 Reste payé par le client :</span>
+                <span>${net.toFixed(2)} €</span>
+              </div>
+            ` : `
+              <div class="totals-row highlight">
+                <span>Total Net à Régler :</span>
+                <span>${charged.toFixed(2)} €</span>
+              </div>
+            `}
+          </div>
+
+          <div class="legal">
+            <p><strong>Mentions légales & TVA :</strong> ${isUnipros ? 'Prestation de Services à la Personne (SAP) facturée par la Coopérative Unipros (SAP529241671). Éligible à 50% de crédit d\'impôt immédiat selon l\'article 199 sexdecies du Code Général des Impôts (CGI).' : 'TVA non applicable, art. 293 B du CGI ou taux standard 20%.'}</p>
+            <p style="margin-top: 8px;">Paiement par prélèvement URSSAF / virement bancaire. En cas de retard de paiement, une indemnité forfaitaire pour frais de recouvrement de 40 € sera due (art. D. 441-5 du Code de commerce).</p>
+          </div>
+
+          <script>
+            window.onload = function() { window.print(); }
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
     };
 
     // Close on backdrop click for all section windows
