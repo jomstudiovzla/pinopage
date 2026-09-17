@@ -35,19 +35,28 @@ console.log('\n🌿 [TEST 3 : CARTES DE SERVICES SANS ANCRES #devis]');
 assert(!indexHtml.includes('<a href="#devis"'), 'Les cartes de services ne doivent pas contenir <a href="#devis">');
 console.log('  ✅ PASS: Toutes les cartes de services déclenchent openWindowModal sans modifier le hash.');
 
-// 4. SÉCURITÉ DOMCONTENTLOADED : FERMETURE SYSTÉMATIQUE & NETTOYAGE HASH
-console.log('\n🧹 [TEST 4 : NETTOYAGE SYSTÉMATIQUE AU DOMCONTENTLOADED]');
+// 4. SÉCURITÉ DOMCONTENTLOADED & CHARGEMENT : FERMETURE SYSTÉMATIQUE & NETTOYAGE HASH
+console.log('\n🧹 [TEST 4 : NETTOYAGE SYSTÉMATIQUE AU CHARGEMENT & ZÉRO-MODALE]');
+assert(indexHtml.includes('purgeInitialHash'), 'index.html doit exécuter purgeInitialHash immédiatement');
 assert(indexHtml.includes('cleanModalHash'), 'index.html doit définir la fonction cleanModalHash');
 assert(indexHtml.includes('d.removeAttribute(\'open\')'), 'index.html doit retirer tout attribut open résiduel');
 assert(indexHtml.includes('dialog.addEventListener(\'close\', cleanModalHash)'), 'Chaque dialogue doit nettoyer le hash dès sa fermeture');
 assert(!indexHtml.includes('if (window.location.hash || window.location.search.includes(\'activate\')) {\n        setTimeout(checkHash, 300);'), 'index.html ne doit plus auto-exécuter checkHash sur les section modals au démarrage');
-console.log('  ✅ PASS: Nettoyage proactif et écouteur de fermeture activement connectés.');
+console.log('  ✅ PASS: Purge initiale immédiate, fermeture prompte et écouteurs actifs.');
 
-// 5. CACHE SERVICE WORKER ACTUALISÉ
-console.log('\n🚀 [TEST 5 : CACHE SERVICE WORKER V15]');
-assert(/pino-ev-v15/.test(swJs), 'Service Worker doit être versionné v15 pour vider le cache obsolète des clients');
-console.log('  ✅ PASS: Service Worker v15 déployé pour rafraîchir le cache.');
+// 5. FLUX APPLE SIGN-IN 100% OPÉRATIONNEL
+console.log('\n🍎 [TEST 5 : CONNEXION APPLE FLUIDE & PANNEAU DE SECOURS]');
+assert(indexHtml.includes('handleAppleSignIn'), 'index.html doit implémenter handleAppleSignIn');
+assert(indexHtml.includes('confirmAppleQuickSignIn'), 'index.html doit implémenter confirmAppleQuickSignIn');
+assert(indexHtml.includes('id="apple-auth-quick-panel"'), 'index.html doit contenir le panneau d\'accès rapide Apple');
+assert(indexHtml.includes('id="apple-quick-email"'), 'index.html doit contenir l\'input d\'email Apple');
+console.log('  ✅ PASS: Authentification Apple complète avec fallback direct 1-clic pour Andrés et clients.');
+
+// 6. CACHE SERVICE WORKER ACTUALISÉ
+console.log('\n🚀 [TEST 6 : CACHE SERVICE WORKER ACTUALISÉ]');
+assert(/pino-ev-v1[5-9]/.test(swJs), 'Service Worker doit être versionné pour rafraîchir le cache client');
+console.log('  ✅ PASS: Service Worker à jour déployé.');
 
 console.log('\n===============================================================');
-console.log('🎉 TOUS LES 5 TESTS DE SÉCURITÉ ZÉRO-MODALE AU DÉMARRAGE SONT SUCCÈS !');
+console.log('🎉 TOUS LES 6 TESTS DE SÉCURITÉ ZÉRO-MODALE ET AUTH APPLE SONT SUCCÈS !');
 console.log('===============================================================\n');

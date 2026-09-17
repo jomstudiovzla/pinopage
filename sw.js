@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v15-clean-startup-no-auto-modals';
+const CACHE_NAME = 'pino-ev-v16-apple-auth-clean-startup';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',
