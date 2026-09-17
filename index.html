@@ -1041,6 +1041,162 @@
     </form>
   </dialog>
 
+  <!-- Modal: Pré-enregistrer & Inviter un Client (Andrés Pino Admin) -->
+  <dialog id="modal-admin-create-client" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-lg w-[96%] max-h-[90vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
+    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 py-4 text-white flex justify-between items-center shrink-0">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center justify-center text-lg">
+          <i class="fa-solid fa-user-plus"></i>
+        </span>
+        <div>
+          <h3 class="font-serif text-xl font-bold">Ajouter / Inviter un Client</h3>
+          <p class="text-xs text-white/70">Pré-enregistrement de compte & lien d'activation par e-mail</p>
+        </div>
+      </div>
+      <button type="button" onclick="document.getElementById('modal-admin-create-client').close()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center cursor-pointer transition-colors" title="Fermer">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <form id="admin-create-client-form" onsubmit="handleAdminCreateClientSubmit(event)" class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
+      <p class="text-xs text-slate-600 leading-relaxed bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+        <i class="fa-solid fa-circle-info text-emerald-700 mr-1"></i>
+        Le compte sera pré-créé avec le code promo <strong>-20%</strong>. Le client recevra un e-mail officiel pour définir son mot de passe en 2 clics.
+      </p>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1" for="new-client-name">Nom complet du client <span class="text-red-500">*</span></label>
+        <input type="text" id="new-client-name" required placeholder="Ex: Jean-Christophe Bernard"
+          class="w-full px-3 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1" for="new-client-email">Adresse e-mail du client <span class="text-red-500">*</span></label>
+        <input type="email" id="new-client-email" required placeholder="Ex: client.bernard@gmail.com"
+          class="w-full px-3 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="new-client-phone">Téléphone</label>
+          <input type="tel" id="new-client-phone" placeholder="06 12 34 56 78"
+            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="new-client-commune">Commune / Ville</label>
+          <input type="text" id="new-client-commune" placeholder="Ex: 33700 Mérignac" value="Bordeaux Métropole"
+            class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1" for="new-client-service">Prestation / Chantier envisagé</label>
+        <select id="new-client-service" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden bg-white">
+          <option value="Entretien & Tonte">Tonte de pelouse & finitions</option>
+          <option value="Taille de haies & Arbustes">Taille de haies & arbustes</option>
+          <option value="Débroussaillage">Débroussaillage & remise en état</option>
+          <option value="Nettoyage terrasse & Extérieurs">Nettoyage haute pression terrasse & allées</option>
+          <option value="Contrat annuel B2B / Syndic">Contrat annuel pro / syndic</option>
+          <option value="Aménagement paysager complet">Aménagement paysager complet</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1" for="new-client-notes">Notes internes (visibles uniquement par Andrés)</label>
+        <textarea id="new-client-notes" rows="2" placeholder="Ex: Contacté par téléphone, jardin de 400m², souhaite devis pour fin du mois."
+          class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden"></textarea>
+      </div>
+
+      <!-- Résultat avec lien d'activation direct à copier / WhatsApp (caché au départ) -->
+      <div id="new-client-result-box" class="hidden p-3.5 bg-emerald-50 rounded-2xl border border-emerald-300 space-y-2 text-xs">
+        <div class="flex items-center gap-2 font-bold text-emerald-900">
+          <i class="fa-solid fa-circle-check text-emerald-600"></i> Client créé avec succès !
+        </div>
+        <p class="text-slate-600 text-[11px]">L'e-mail a été envoyé. Vous pouvez également copier le lien d'activation ou l'envoyer directement par WhatsApp :</p>
+        <div class="flex items-center gap-2">
+          <input type="text" id="new-client-generated-link" readonly class="flex-1 px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xxs font-mono text-slate-700 select-all" />
+          <button type="button" onclick="copyNewClientActivationLink()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xxs font-bold flex items-center gap-1 cursor-pointer">
+            <i class="fa-solid fa-copy"></i> Copier
+          </button>
+          <a id="new-client-whatsapp-btn" href="#" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xxs font-bold flex items-center gap-1 cursor-pointer">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 pt-3 border-t border-slate-200">
+        <button type="submit" id="new-client-submit-btn"
+          class="flex-1 py-3 px-5 bg-gradient-to-r from-emerald-700 to-teal-800 hover:from-emerald-800 hover:to-teal-900 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-user-check"></i> Créer le Compte & Envoyer l'Invitation
+        </button>
+        <button type="button" onclick="document.getElementById('modal-admin-create-client').close()"
+          class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer">
+          Fermer
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal: Définir Mot de Passe / Activation Client -->
+  <dialog id="modal-client-set-password" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-md w-[96%] max-h-[90vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
+    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 py-4 text-white flex justify-between items-center shrink-0">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-400/20 text-amber-300 border border-amber-400/30 flex items-center justify-center text-lg">
+          🌲
+        </span>
+        <div>
+          <h3 class="font-serif text-xl font-bold">Activer Mon Espace Client</h3>
+          <p class="text-xs text-white/70">Pino Espaces Verts • Bienvenue</p>
+        </div>
+      </div>
+      <button type="button" onclick="document.getElementById('modal-client-set-password').close()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center cursor-pointer transition-colors" title="Fermer">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <form id="client-set-password-form" onsubmit="handleClientSetPasswordSubmit(event)" class="p-6 space-y-4 overflow-y-auto flex-1">
+      <div class="text-center space-y-1">
+        <h4 class="font-bold text-slate-900 text-sm">Bienvenue chez Pino Espaces Verts</h4>
+        <p class="text-xs text-slate-600">Andrés Pino a préparé votre espace personnel. Veuillez définir votre mot de passe confidentiel pour y accéder.</p>
+      </div>
+
+      <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs flex items-center gap-2">
+        <i class="fa-solid fa-envelope text-emerald-700"></i>
+        <span class="text-slate-500">Compte :</span>
+        <strong id="client-act-email-display" class="font-mono text-slate-900">—</strong>
+        <input type="hidden" id="client-act-email" />
+        <input type="hidden" id="client-act-token" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1" for="client-act-password">
+          Nouveau mot de passe <span class="text-red-500">*</span>
+        </label>
+        <input type="password" id="client-act-password" required minlength="6" placeholder="Au moins 6 caractères"
+          class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1" for="client-act-password-confirm">
+          Confirmer le mot de passe <span class="text-red-500">*</span>
+        </label>
+        <input type="password" id="client-act-password-confirm" required minlength="6" placeholder="Répétez votre mot de passe"
+          class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+      </div>
+
+      <div id="client-act-error-box" class="hidden p-3 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs">
+        <i class="fa-solid fa-circle-exclamation mr-1"></i> <span id="client-act-error-text">Les mots de passe ne correspondent pas.</span>
+      </div>
+
+      <div class="pt-2">
+        <button type="submit" id="client-act-submit-btn"
+          class="w-full py-3.5 px-5 bg-gradient-to-r from-emerald-700 to-teal-800 hover:from-emerald-800 hover:to-teal-900 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fa-solid fa-lock"></i> Valider & Accéder à Mon Espace Client
+        </button>
+      </div>
+    </form>
+  </dialog>
+
   <!-- Modal: Nouvelle Facture & Dossier Fiscal SAP (Andrés Pino) -->
   <dialog id="modal-nouvelle-facture" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-2xl w-[96%] max-h-[90vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
     <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 py-4 text-white flex justify-between items-center shrink-0">
@@ -2177,11 +2333,16 @@
 
         <!-- Section 1: Utilisateurs Enregistrés -->
         <div class="space-y-3">
-          <div class="flex items-center justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <h5 class="font-bold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
               <i class="fa-solid fa-users text-emerald-700"></i> Comptes Utilisateurs Cloud & Locaux (<span id="adm-users-badge">3</span>)
             </h5>
-            <span class="text-xxs text-slate-500 font-medium">Synchronisation temps réel avec <code>pino_users</code></span>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="openAdminCreateClientModal()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-user-plus"></i> + Créer / Inviter un Client
+              </button>
+              <span class="text-xxs text-slate-500 font-medium hidden sm:inline">Synchronisation temps réel avec <code>pino_users</code></span>
+            </div>
           </div>
 
           <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
@@ -6456,6 +6617,13 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       if (typeof refreshCouponSection === 'function') refreshCouponSection();
       renderClientQuotes(client.email);
       renderClientInvoices(client.email);
+
+      // Effacer immédiatement les notifications et le badge dès que le client consulte son espace
+      if (window.PinoDB && typeof PinoDB.markAllClientNotificationsRead === 'function' && client.email) {
+        PinoDB.markAllClientNotificationsRead(client.email).catch(() => {});
+      }
+      const badge = document.getElementById('nav-auth-notif-badge');
+      if (badge) badge.remove();
     };
 
     // Logout
@@ -6874,8 +7042,27 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
             </td>
             <td class="py-3.5 px-4 font-black text-brand-green text-sm">${escapeFn(l.budget)} €</td>
             <td class="py-3.5 px-4">
-              <div>${statusBadge}</div>
-              ${qualPill}
+              <div class="flex flex-col gap-1 min-w-[130px]">
+                <select onchange="updateLeadDirectStatus('${escapeFn(leadKey)}', this.value)"
+                  class="text-xs font-bold rounded-xl px-2.5 py-1.5 border shadow-2xs transition-all cursor-pointer ${
+                    l.status === 'Devis accepté' || l.status === 'Gagné' || l.status === 'Accepté' ? 'bg-emerald-100 text-emerald-900 border-emerald-300' :
+                    l.status === 'Facturé' ? 'bg-teal-100 text-teal-900 border-teal-300' :
+                    l.status === 'Terminé' ? 'bg-slate-200 text-slate-800 border-slate-300' :
+                    l.status === 'Devis envoyé' ? 'bg-purple-100 text-purple-900 border-purple-300' :
+                    l.status === 'En négociation' || l.status === 'Contacté' ? 'bg-amber-100 text-amber-900 border-amber-300' :
+                    l.status === 'Sans suite' || l.status === 'Perdu' ? 'bg-red-100 text-red-900 border-red-200' :
+                    'bg-blue-100 text-blue-900 border-blue-200'
+                  }">
+                  <option value="Nouveau" ${l.status === 'Nouveau' ? 'selected' : ''}>🌱 Nouveau</option>
+                  <option value="En négociation" ${l.status === 'En négociation' || l.status === 'Contacté' ? 'selected' : ''}>💬 En négociation</option>
+                  <option value="Devis envoyé" ${l.status === 'Devis envoyé' ? 'selected' : ''}>📄 Devis envoyé</option>
+                  <option value="Devis accepté" ${l.status === 'Devis accepté' || l.status === 'Gagné' || l.status === 'Accepté' ? 'selected' : ''}>✅ Devis accepté</option>
+                  <option value="Facturé" ${l.status === 'Facturé' ? 'selected' : ''}>💶 Facturé</option>
+                  <option value="Terminé" ${l.status === 'Terminé' ? 'selected' : ''}>🎉 Terminé</option>
+                  <option value="Sans suite" ${l.status === 'Sans suite' || l.status === 'Perdu' ? 'selected' : ''}>❌ Sans suite</option>
+                </select>
+                ${qualPill}
+              </div>
             </td>
             <td class="py-3.5 px-4 text-right whitespace-nowrap">
               <div class="flex items-center justify-end gap-1.5">
@@ -6886,7 +7073,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
                 <button onclick="printLeadQuotePDF('${escapeFn(leadKey)}')" class="inline-flex items-center justify-center w-8 h-8 bg-purple-50 text-purple-700 border border-purple-200 rounded-xl hover:bg-purple-100 transition-colors cursor-pointer shadow-2xs" title="Visualiser & Télécharger Devis PDF"><i class="fa-solid fa-file-pdf text-xs"></i></button>
                 <button onclick="openLeadResponseModal('${escapeFn(leadKey)}')" class="inline-flex items-center justify-center w-8 h-8 bg-emerald-700 text-white rounded-xl hover:bg-emerald-800 transition-colors cursor-pointer shadow-xs" title="Établir un Devis & Répondre"><i class="fa-solid fa-file-invoice-dollar text-xs"></i></button>
                 <button onclick="openNewInvoiceModalForLead('${escapeFn(leadKey)}')" class="inline-flex items-center justify-center w-8 h-8 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors cursor-pointer shadow-xs" title="Créer Facture à partir de ce devis"><i class="fa-solid fa-receipt text-xs"></i></button>
-                <button onclick="cycleLeadStatus('${escapeFn(leadKey)}')" class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors cursor-pointer" title="Changer statut"><i class="fa-solid fa-rotate text-xs"></i></button>
+                <button onclick="cycleLeadStatus('${escapeFn(leadKey)}')" class="inline-flex items-center justify-center w-8 h-8 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-colors cursor-pointer" title="Changer statut suivant"><i class="fa-solid fa-rotate text-xs"></i></button>
               </div>
             </td>
           </tr>
@@ -6894,7 +7081,40 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }).join('');
     };
 
-    // Cycle lead status — actualiza en Supabase + localStorage (accepte index ou ID)
+    // Mise à jour directe du statut Lead en temps réel (1 clic dans le CRM)
+    window.updateLeadDirectStatus = async (indexOrId, newStatus) => {
+      let leads = window._cachedAdminLeads || [];
+      if (leads.length === 0) {
+        try { leads = JSON.parse(localStorage.getItem('pino_leads') || '[]'); } catch (e) {}
+      }
+      let idx = -1;
+      if (typeof indexOrId === 'number') {
+        idx = indexOrId;
+      } else {
+        idx = leads.findIndex(l => (l.id && l.id === indexOrId) || (l.sbId && l.sbId === indexOrId) || (l.ref_code && l.ref_code === indexOrId));
+      }
+      if (idx >= 0 && leads[idx]) {
+        leads[idx].status = newStatus;
+        localStorage.setItem('pino_leads', JSON.stringify(leads));
+      }
+
+      // Propager en temps réel dans Firebase RTDB et Supabase
+      if (window.PinoDB && typeof PinoDB.updateLeadStatus === 'function') {
+        try {
+          await PinoDB.updateLeadStatus(indexOrId, newStatus);
+        } catch (err) {
+          console.warn('[pino] updateLeadDirectStatus DB sync warning:', err);
+        }
+      }
+
+      if (typeof showNotificationToast === 'function') {
+        showNotificationToast(`Statut mis à jour : ${newStatus}`, 'success');
+      }
+
+      renderAdminLeads();
+    };
+
+    // Cycle lead status — actualise en séquence rapide
     window.cycleLeadStatus = async (indexOrId) => {
       const leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
       let idx = -1;
@@ -6904,18 +7124,10 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         idx = leads.findIndex(l => l.id === indexOrId || l.sbId === indexOrId || l.ref_code === indexOrId);
       }
       if (idx < 0 || !leads[idx]) return;
-      const flow = ['Nouveau', 'Contacté', 'Devis envoyé', 'Devis accepté', 'Gagné', 'Facturé', 'Perdu'];
+      const flow = ['Nouveau', 'En négociation', 'Devis envoyé', 'Devis accepté', 'Facturé', 'Terminé', 'Sans suite'];
       const curIdx = flow.indexOf(leads[idx].status);
-      const newStatus = flow[(curIdx + 1) % flow.length];
-      leads[idx].status = newStatus;
-      localStorage.setItem('pino_leads', JSON.stringify(leads));
-
-      // Actualizar en Supabase / Firebase si tenemos el ID
-      if (window.PinoDB && (leads[idx].sbId || leads[idx].id)) {
-        PinoDB.updateLeadStatus(leads[idx].sbId || leads[idx].id, newStatus).catch(() => {});
-      }
-
-      renderAdminLeads();
+      const newStatus = curIdx >= 0 ? flow[(curIdx + 1) % flow.length] : 'En négociation';
+      await window.updateLeadDirectStatus(indexOrId, newStatus);
     };
 
     // ─────────────────────────────────────────────────────────
@@ -7794,9 +8006,10 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         } else {
           tbody.innerHTML = users.map((u) => {
             const isAdm = u.role === 'admin' || u.isAdmin || isPinoEmail(u.email);
+            const isPending = u.status === 'en_attente_activation';
             const roleBadge = isAdm
               ? '<span class="bg-amber-100 text-amber-900 border border-amber-300 font-bold px-2 py-0.5 rounded-full text-xxs">👑 Gérant / Admin</span>'
-              : '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-xxs">👤 Client</span>';
+              : `<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full text-xxs">👤 Client</span>${isPending ? ' <span class="bg-amber-100 text-amber-900 border border-amber-300 font-semibold px-1.5 py-0.5 rounded text-[10px] inline-flex items-center gap-1"><i class="fa-solid fa-clock"></i> En attente MDP</span>' : ''}`;
 
             const methodBadge = (u.authProvider === 'google')
               ? '<span class="inline-flex items-center gap-1 bg-white border border-slate-300 text-slate-700 font-bold px-2 py-0.5 rounded text-xxs shadow-2xs"><svg class="w-3 h-3 inline" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg> Google</span>'
@@ -9342,6 +9555,280 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     };
 
     // =========================================================================
+    // GESTION CLIENT : INVITATION PAR L'ADMINISTRATEUR (ANDRÉS PINO) & MOT DE PASSE
+    // =========================================================================
+    window.openAdminCreateClientModal = () => {
+      const form = document.getElementById('admin-create-client-form');
+      if (form) form.reset();
+      const resBox = document.getElementById('new-client-result-box');
+      if (resBox) resBox.classList.add('hidden');
+      const submitBtn = document.getElementById('new-client-submit-btn');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-user-check"></i> Créer le Compte & Envoyer l\'Invitation';
+      }
+      const modal = document.getElementById('modal-admin-create-client');
+      if (modal && typeof modal.showModal === 'function') modal.showModal();
+    };
+
+    window.handleAdminCreateClientSubmit = async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('new-client-submit-btn');
+      const originalText = submitBtn ? submitBtn.innerHTML : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Création et invitation en cours...';
+      }
+
+      const name = (document.getElementById('new-client-name')?.value || '').trim();
+      const email = (document.getElementById('new-client-email')?.value || '').trim().toLowerCase();
+      const phone = (document.getElementById('new-client-phone')?.value || '').trim();
+      const commune = (document.getElementById('new-client-commune')?.value || '').trim() || 'Bordeaux Métropole';
+      const service = (document.getElementById('new-client-service')?.value || 'Entretien & Tonte').trim();
+      const notes = (document.getElementById('new-client-notes')?.value || '').trim();
+
+      if (!name || !email) {
+        if (typeof showNotificationToast === 'function') {
+          showNotificationToast('Veuillez renseigner au moins le nom et l\'e-mail du client.', 'error');
+        }
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        }
+        return;
+      }
+
+      try {
+        let result = null;
+        if (window.PinoDB && typeof PinoDB.inviteClientByAdmin === 'function') {
+          result = await PinoDB.inviteClientByAdmin({
+            fullName: name,
+            email: email,
+            phone: phone,
+            commune: commune,
+            service: service,
+            notes: notes
+          });
+        }
+
+        // Toujours enregistrer en fallback local
+        let localUsers = [];
+        try { localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]'); } catch (err) {}
+        const existingIdx = localUsers.findIndex(u => (u.email || '').toLowerCase() === email);
+        const userObj = {
+          uid: 'client_' + Date.now(),
+          fullName: name,
+          email: email,
+          phone: phone,
+          commune: commune,
+          role: 'client',
+          promoCode: result?.promoCode || ('PINO-' + Math.random().toString(36).substring(2, 6).toUpperCase()),
+          status: 'en_attente_activation',
+          createdDate: new Date().toLocaleDateString('fr-FR'),
+          authProvider: 'email_invited'
+        };
+        if (existingIdx >= 0) {
+          localUsers[existingIdx] = { ...localUsers[existingIdx], ...userObj };
+        } else {
+          localUsers.push(userObj);
+        }
+        localStorage.setItem('pino_users', JSON.stringify(localUsers));
+
+        // Afficher la boîte de résultat avec le lien d'activation
+        const activationLink = result?.activationLink || `${window.location.origin}${window.location.pathname}#activate?email=${encodeURIComponent(email)}&token=${result?.token || 'pino_tok'}`;
+        const resBox = document.getElementById('new-client-result-box');
+        const linkInput = document.getElementById('new-client-generated-link');
+        const waBtn = document.getElementById('new-client-whatsapp-btn');
+
+        if (linkInput) linkInput.value = activationLink;
+        if (waBtn) {
+          const cleanPhone = phone.replace(/[^0-9]/g, '');
+          const waPhone = cleanPhone.startsWith('0') ? '33' + cleanPhone.substring(1) : (cleanPhone.startsWith('33') ? cleanPhone : '33651594034');
+          const waMsg = `Bonjour ${name}, Andrés Pino a préparé votre Espace Client chez Pino Espaces Verts avec votre coupon de bienvenue -20%. Vous pouvez activer votre compte et choisir votre mot de passe ici : ${activationLink}`;
+          waBtn.href = `https://wa.me/${waPhone}?text=${encodeURIComponent(waMsg)}`;
+        }
+        if (resBox) resBox.classList.remove('hidden');
+
+        if (typeof showNotificationToast === 'function') {
+          showNotificationToast(`✅ Client ${name} créé ! E-mail d'invitation envoyé.`, 'success');
+        }
+
+        // Rafraîchir l'affichage des utilisateurs
+        if (typeof renderAdminUsers === 'function') {
+          renderAdminUsers();
+        }
+
+      } catch (err) {
+        console.error('[pino] handleAdminCreateClientSubmit error:', err);
+        if (typeof showNotificationToast === 'function') {
+          showNotificationToast('Erreur lors de la création du client. Vérifiez la connexion.', 'error');
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Invitation générée !';
+        }
+      }
+    };
+
+    window.copyNewClientActivationLink = () => {
+      const linkInput = document.getElementById('new-client-generated-link');
+      if (linkInput && linkInput.value) {
+        navigator.clipboard.writeText(linkInput.value).then(() => {
+          if (typeof showNotificationToast === 'function') {
+            showNotificationToast('📋 Lien d\'activation copié dans le presse-papier !', 'success');
+          }
+        }).catch(() => {
+          linkInput.select();
+          document.execCommand('copy');
+          if (typeof showNotificationToast === 'function') {
+            showNotificationToast('📋 Lien d\'activation copié !', 'success');
+          }
+        });
+      }
+    };
+
+    // Modal Client : Définition du mot de passe à l'activation
+    window.openClientSetPasswordModal = (email, token) => {
+      const modal = document.getElementById('modal-client-set-password');
+      if (!modal) return;
+      const emailDisplay = document.getElementById('client-act-email-display');
+      const emailHidden = document.getElementById('client-act-email');
+      const tokenHidden = document.getElementById('client-act-token');
+      const pwdInput = document.getElementById('client-act-password');
+      const pwdConfirm = document.getElementById('client-act-password-confirm');
+      const errorBox = document.getElementById('client-act-error-box');
+
+      if (emailDisplay) emailDisplay.textContent = email || '—';
+      if (emailHidden) emailHidden.value = email || '';
+      if (tokenHidden) tokenHidden.value = token || '';
+      if (pwdInput) pwdInput.value = '';
+      if (pwdConfirm) pwdConfirm.value = '';
+      if (errorBox) errorBox.classList.add('hidden');
+
+      if (typeof modal.showModal === 'function') modal.showModal();
+    };
+
+    window.handleClientSetPasswordSubmit = async (e) => {
+      e.preventDefault();
+      const email = (document.getElementById('client-act-email')?.value || '').trim().toLowerCase();
+      const token = (document.getElementById('client-act-token')?.value || '').trim();
+      const password = (document.getElementById('client-act-password')?.value || '').trim();
+      const confirm = (document.getElementById('client-act-password-confirm')?.value || '').trim();
+      const errorBox = document.getElementById('client-act-error-box');
+      const errorText = document.getElementById('client-act-error-text');
+      const submitBtn = document.getElementById('client-act-submit-btn');
+
+      if (!password || password.length < 6) {
+        if (errorBox && errorText) {
+          errorText.textContent = 'Le mot de passe doit comporter au moins 6 caractères.';
+          errorBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (password !== confirm) {
+        if (errorBox && errorText) {
+          errorText.textContent = 'Les deux mots de passe ne correspondent pas.';
+          errorBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      const originalText = submitBtn ? submitBtn.innerHTML : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Activation du compte...';
+      }
+
+      try {
+        let result = null;
+        if (window.PinoDB && typeof PinoDB.activateClientPassword === 'function') {
+          result = await PinoDB.activateClientPassword(email, token, password);
+        }
+
+        // Mettre à jour l'état local du compte
+        let localUsers = [];
+        try { localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]'); } catch (err) {}
+        const uIdx = localUsers.findIndex(u => (u.email || '').toLowerCase() === email);
+        let clientProfile = null;
+        if (uIdx >= 0) {
+          localUsers[uIdx].password = password;
+          localUsers[uIdx].status = 'actif';
+          clientProfile = localUsers[uIdx];
+          localStorage.setItem('pino_users', JSON.stringify(localUsers));
+        }
+
+        // Fermer le modal
+        const modal = document.getElementById('modal-client-set-password');
+        if (modal) modal.close();
+
+        // Connecter l'utilisateur automatiquement
+        const sessionUser = {
+          email: email,
+          fullName: clientProfile?.fullName || email.split('@')[0],
+          role: 'client',
+          promoCode: clientProfile?.promoCode || 'PINO-BIENVENUE20',
+          provider: 'email_activated',
+          loginTime: new Date().toISOString()
+        };
+        localStorage.setItem('pino_current_user', JSON.stringify(sessionUser));
+        if (typeof updateAuthUI === 'function') updateAuthUI();
+
+        if (typeof showNotificationToast === 'function') {
+          showNotificationToast('🎉 Compte activé avec succès ! Bienvenue dans votre Espace Client.', 'success');
+        }
+
+        // Ouvrir directement l'Espace Client
+        if (typeof window.openWindowModal === 'function') {
+          window.openWindowModal('espace');
+        }
+
+        // Nettoyer l'URL hash
+        try {
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.pathname);
+          }
+        } catch (e) {}
+
+      } catch (err) {
+        console.error('[pino] handleClientSetPasswordSubmit error:', err);
+        if (errorBox && errorText) {
+          errorText.textContent = err.message || 'Erreur lors de l\'activation. Veuillez réessayer.';
+          errorBox.classList.remove('hidden');
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        }
+      }
+    };
+
+    // Détection et routage automatique de l'URL d'activation (#activate?email=...&token=...)
+    window.handleActivationUrlRoute = (hashOrSearch) => {
+      try {
+        let str = hashOrSearch || window.location.hash || window.location.search || '';
+        if (!str.includes('activate') && !str.includes('token')) return;
+
+        let email = '';
+        let token = '';
+
+        if (str.includes('?')) {
+          const params = new URLSearchParams(str.split('?')[1]);
+          email = params.get('email') || '';
+          token = params.get('token') || '';
+        }
+
+        if (email) {
+          window.openClientSetPasswordModal(decodeURIComponent(email), decodeURIComponent(token));
+        }
+      } catch (err) {
+        console.warn('[pino] handleActivationUrlRoute error:', err);
+      }
+    };
+
+    // =========================================================================
     // PROSPECTION MULTICANALE (6 Plateformes : LeBonCoin, FB, Nextdoor, etc.)
     // =========================================================================
     let _platformLeadsCache = [];
@@ -10537,7 +11024,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           if (dialog.id === 'modal-window-admin') return;
 
           // 3. Ne jamais fermer les formulaires de travail ou l'espace client au clic extérieur pour ne pas perdre les données saisies
-          if (['modal-window-client', 'modal-nouvelle-facture', 'modal-lead-response', 'modal-repair-lead', 'modal-add-platform-lead'].includes(dialog.id)) return;
+          if (['modal-window-client', 'modal-nouvelle-facture', 'modal-lead-response', 'modal-repair-lead', 'modal-add-platform-lead', 'modal-admin-create-client', 'modal-client-set-password'].includes(dialog.id)) return;
 
           // 4. Pour les dialogues légaux et informatifs, vérifier si le clic est sur le fond extérieur
           const rect = dialog.getBoundingClientRect();
@@ -10551,15 +11038,22 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         });
       });
 
-      // Handle hash navigation (e.g. #services, #devis, #connexion, #admin)
+      // Handle hash navigation (e.g. #services, #devis, #connexion, #admin, #activate)
       const checkHash = () => {
-        const h = window.location.hash.replace('#', '').toLowerCase();
+        const rawHash = window.location.hash || '';
+        if (rawHash.includes('activate') || window.location.search.includes('activate')) {
+          if (typeof window.handleActivationUrlRoute === 'function') {
+            window.handleActivationUrlRoute(rawHash || window.location.search);
+          }
+          return;
+        }
+        const h = rawHash.replace('#', '').toLowerCase();
         if (['services', 'forfaits', 'realisations', 'galerie', 'unipros', 'b2b', 'entreprises', 'devis', 'connexion', 'auth', 'admin', 'espace'].includes(h)) {
           window.openWindowModal(h);
         }
       };
       window.addEventListener('hashchange', checkHash);
-      if (window.location.hash) {
+      if (window.location.hash || window.location.search.includes('activate')) {
         setTimeout(checkHash, 300);
       }
     });

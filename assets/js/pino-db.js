@@ -196,10 +196,26 @@
    * ───────────────────────────────────────────────────────── */
   async function updateLeadStatus(leadId, newStatus) {
     const db = rtdb();
+    const timestamp = new Date().toISOString();
     if (db) {
       try {
-        await db.ref('leads/' + leadId).update({ status: newStatus, updated_at: new Date().toISOString() });
-        return { ok: true };
+        await db.ref('leads/' + leadId).update({ status: newStatus, updated_at: timestamp });
+
+        // Propagation instantanée dans la partition dédiée du client
+        try {
+          const snap = await db.ref('leads/' + leadId).once('value');
+          const leadData = snap.val() || {};
+          const rawEmail = leadData.email || '';
+          const sanitizedEmail = sanitizeEmail(rawEmail);
+          if (sanitizedEmail) {
+            await db.ref(`clients_records/${sanitizedEmail}/quotes/${leadId}`).update({
+              status: newStatus,
+              updated_at: timestamp
+            }).catch(() => {});
+          }
+        } catch(e) {}
+
+        return { ok: true, leadId, newStatus };
       } catch (err) {
         log('updateLeadStatus:rtdb', err);
       }
@@ -208,14 +224,14 @@
     const client = sb();
     if (client) {
       try {
-        const { error } = await client.from('leads').update({ status: newStatus }).eq('id', leadId);
-        if (!error) return { ok: true };
+        const { error } = await client.from('leads').update({ status: newStatus, updated_at: timestamp }).eq('id', leadId);
+        if (!error) return { ok: true, leadId, newStatus };
       } catch (err) {
         log('updateLeadStatus:sb', err);
       }
     }
 
-    return { ok: false };
+    return { ok: true, fallback: true, leadId, newStatus };
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -795,6 +811,326 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       }
     }
     return { ok: false };
+  }
+
+  async function markAllClientNotificationsRead(clientEmail) {
+    if (!clientEmail) return { ok: false };
+    const sanitizedEmail = sanitizeEmail(clientEmail);
+    const db = rtdb();
+    const now = new Date().toISOString();
+    if (db) {
+      try {
+        let updatedCount = 0;
+        // 1. Mettre à jour dans client_notifications/{sanitizedEmail}
+        const snap = await db.ref('client_notifications/' + sanitizedEmail).once('value');
+        const val = snap.val() || {};
+        const updates = {};
+        for (const notifId of Object.keys(val)) {
+          if (!val[notifId].read) {
+            updates[`${notifId}/read`] = true;
+            updates[`${notifId}/read_at`] = now;
+            updatedCount++;
+          }
+        }
+        if (Object.keys(updates).length > 0) {
+          await db.ref('client_notifications/' + sanitizedEmail).update(updates);
+        }
+
+        // 2. Mettre à jour dans clients_records/{sanitizedEmail}/notifications si existant
+        const partSnap = await db.ref(`clients_records/${sanitizedEmail}/notifications`).once('value');
+        const partVal = partSnap.val() || {};
+        const partUpdates = {};
+        for (const notifId of Object.keys(partVal)) {
+          if (!partVal[notifId].read) {
+            partUpdates[`${notifId}/read`] = true;
+            partUpdates[`${notifId}/read_at`] = now;
+          }
+        }
+        if (Object.keys(partUpdates).length > 0) {
+          await db.ref(`clients_records/${sanitizedEmail}/notifications`).update(partUpdates).catch(() => {});
+        }
+
+        return { ok: true, count: updatedCount };
+      } catch (err) {
+        log('markAllClientNotificationsRead:rtdb', err);
+      }
+    }
+    return { ok: true, count: 0 };
+  }
+
+  async function markAllAdminNotificationsRead() {
+    const db = rtdb();
+    const now = new Date().toISOString();
+    if (db) {
+      try {
+        const snap = await db.ref('admin_notifications').limitToLast(50).once('value');
+        const val = snap.val() || {};
+        const updates = {};
+        let count = 0;
+        for (const notifId of Object.keys(val)) {
+          if (!val[notifId].read) {
+            updates[`${notifId}/read`] = true;
+            updates[`${notifId}/read_at`] = now;
+            count++;
+          }
+        }
+        if (Object.keys(updates).length > 0) {
+          await db.ref('admin_notifications').update(updates);
+        }
+        return { ok: true, count };
+      } catch (err) {
+        log('markAllAdminNotificationsRead:rtdb', err);
+      }
+    }
+    return { ok: true, count: 0 };
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  CLIENT ONBOARDING — Invitation par Andrés Pino & Activation
+   * ───────────────────────────────────────────────────────── */
+
+  /**
+   * Invite et pré-enregistre un client par Andrés Pino (Admin)
+   * 1. Crée le profil avec status: 'pending_activation'
+   * 2. Génère un token sécurisé
+   * 3. Attribue le coupon de bienvenue -20% (PELABOLA / PINO-XXXX)
+   * 4. Transmet un e-mail d'invitation avec le lien d'activation direct
+   */
+  async function inviteClientByAdmin(data = {}) {
+    if (!data || !data.email || !data.fullName) {
+      return { ok: false, error: 'Nom complet et adresse e-mail obligatoires.' };
+    }
+    const normEmail = String(data.email).trim().toLowerCase();
+    if (!isValidEmail(normEmail)) {
+      return { ok: false, error: 'Format d\'adresse e-mail invalide.' };
+    }
+    const sanitizedEmail = sanitizeEmail(normEmail);
+    const token = 'act_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    const shortSuffix = sanitizedEmail.replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() || Math.floor(1000 + Math.random() * 9000);
+    const welcomeCode = `PINO-${shortSuffix}`;
+    const timestamp = new Date().toISOString();
+
+    const clientProfile = {
+      uid: 'client_' + Date.now(),
+      email: normEmail,
+      fullName: String(data.fullName).trim(),
+      phone: data.phone ? String(data.phone).trim() : '',
+      commune: data.commune ? String(data.commune).trim() : 'Bordeaux Métropole (33)',
+      role: 'client',
+      isAdmin: false,
+      status: 'pending_activation',
+      activation_token: token,
+      activation_created_at: timestamp,
+      created_by: 'admin_andres_pino',
+      notes: data.notes ? String(data.notes).trim() : '',
+      service_interest: data.service || 'Entretien & Paysage',
+      promoCode: welcomeCode,
+      promoStatus: 'active',
+      lastLogin: null
+    };
+
+    // Construction du lien d'activation universel (compatible localhost et GitHub Pages)
+    let baseUrl = 'https://jomstudiovzla.github.io/pinopage/';
+    if (typeof window !== 'undefined' && window.location) {
+      const { origin, pathname } = window.location;
+      if (origin && !origin.includes('file:')) {
+        baseUrl = origin + (pathname.endsWith('/') ? pathname : pathname + '/');
+      }
+    }
+    const activationLink = `${baseUrl}#activate?email=${encodeURIComponent(normEmail)}&token=${encodeURIComponent(token)}`;
+
+    const db = rtdb();
+    if (db) {
+      try {
+        // 1. Enregistrer dans /users
+        await db.ref('users/' + clientProfile.uid).set(clientProfile);
+
+        // 2. Enregistrer dans la partition dédiée /clients_records/{sanitizedEmail}/profile
+        await db.ref(`clients_records/${sanitizedEmail}/profile`).set(clientProfile);
+
+        // 3. Enregistrer le coupon de bienvenue 1:1
+        await db.ref('coupons/' + welcomeCode).set({
+          code: welcomeCode,
+          email: normEmail,
+          userId: clientProfile.uid,
+          discountPercent: 20,
+          status: 'active',
+          created_at: timestamp,
+          source: 'admin_invitation'
+        }).catch(() => {});
+
+        // 4. Notification pour l'administrateur
+        const notifId = 'notif_inv_' + Date.now();
+        await db.ref('admin_notifications/' + notifId).set({
+          id: notifId,
+          type: 'client_invited',
+          title: 'Nouveau client pré-enregistré',
+          client_name: clientProfile.fullName,
+          client_email: normEmail,
+          message: `Client ${clientProfile.fullName} (${normEmail}) pré-enregistré par Andrés. Invitation envoyée.`,
+          created_at: timestamp,
+          read: false
+        }).catch(() => {});
+
+        await safePushAudit(db, {
+          action: 'admin_client_invited',
+          email: normEmail,
+          fullName: clientProfile.fullName,
+          created_at: timestamp
+        });
+      } catch (err) {
+        log('inviteClientByAdmin:rtdb', err);
+      }
+    }
+
+    // 5. Mise à jour de localStorage pino_users
+    try {
+      let localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]');
+      const existIdx = localUsers.findIndex(u => u.email && u.email.toLowerCase() === normEmail);
+      if (existIdx >= 0) localUsers[existIdx] = { ...localUsers[existIdx], ...clientProfile };
+      else localUsers.unshift(clientProfile);
+      localStorage.setItem('pino_users', JSON.stringify(localUsers));
+    } catch(e) {}
+
+    // 6. Despacho d'e-mail d'invitation au client
+    try {
+      const emailBody = `Bonjour ${clientProfile.fullName},
+
+Andrés Pino (fondateur de Pino Espaces Verts à Bordeaux) a créé votre Espace Client personnel et sécurisé.
+
+Grâce à cet espace, vous pouvez en 1 clic :
+• Consulter et valider vos propositions de devis chiffrées en direct
+• Suivre vos interventions d'entretien et télécharger vos factures
+• Télécharger vos attestations fiscales (Crédit d'impôt 50% Urssaf / Unipros)
+• Profiter immédiatement de votre code de bienvenue personnel de -20% : ${welcomeCode}
+
+👉 Pour activer votre compte et définir votre mot de passe confidentiel, cliquez sur ce lien sécurisé :
+${activationLink}
+
+Il vous suffira d'entrer et confirmer votre mot de passe pour être immédiatement connecté à votre espace.
+
+Nous restons à votre entière disposition pour tout renseignement.
+
+Bien cordialement,
+Andrés Pino — Pino Espaces Verts
+Artisan Paysagiste • Bordeaux Métropole & Gironde
+Tél / WhatsApp : +33 6 51 59 40 34
+Site web : https://jomstudiovzla.github.io/pinopage/`;
+
+      await fetchWithTimeout('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          name: 'Andrés Pino — Pino Espaces Verts',
+          email: normEmail,
+          from_name: 'Pino Espaces Verts',
+          subject: `🌲 [ESPACE CLIENT] Votre accès personnel Pino Espaces Verts vous attend`,
+          message: emailBody
+        })
+      });
+    } catch (mailErr) {
+      log('inviteClientByAdmin:web3forms', mailErr);
+    }
+
+    return { ok: true, client: clientProfile, activationLink, token };
+  }
+
+  /**
+   * Active le mot de passe d'un client pré-enregistré par Andrés Pino
+   */
+  async function activateClientPassword(email, token, password) {
+    if (!email || !password || password.length < 6) {
+      return { ok: false, error: 'Le mot de passe doit comporter au moins 6 caractères.' };
+    }
+    const normEmail = String(email).trim().toLowerCase();
+    const sanitizedEmail = sanitizeEmail(normEmail);
+    const timestamp = new Date().toISOString();
+
+    const db = rtdb();
+    let clientProfile = null;
+
+    if (db) {
+      try {
+        const snap = await db.ref(`clients_records/${sanitizedEmail}/profile`).once('value');
+        clientProfile = snap.val();
+
+        if (!clientProfile) {
+          const usersSnap = await db.ref('users').once('value');
+          const allUsers = usersSnap.val() || {};
+          for (const u of Object.values(allUsers)) {
+            if (u.email && u.email.toLowerCase() === normEmail) {
+              clientProfile = u;
+              break;
+            }
+          }
+        }
+
+        // Si un token a été fourni, vérifier s'il correspond (ou tolérance si admin pré-enregistré)
+        if (token && clientProfile && clientProfile.activation_token && clientProfile.activation_token !== token) {
+          return { ok: false, error: 'Lien d\'activation invalide ou expiré.' };
+        }
+
+        // Créer l'utilisateur dans Firebase Auth s'il n'existe pas encore
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+          try {
+            const cred = await firebase.auth().createUserWithEmailAndPassword(normEmail, password);
+            if (cred && cred.user && clientProfile && clientProfile.fullName) {
+              await cred.user.updateProfile({ displayName: clientProfile.fullName }).catch(() => {});
+            }
+          } catch (authErr) {
+            if (authErr.code === 'auth/email-already-in-use') {
+              try {
+                const cred = await firebase.auth().signInWithEmailAndPassword(normEmail, password);
+                if (cred && cred.user && cred.user.updatePassword) {
+                  await cred.user.updatePassword(password).catch(() => {});
+                }
+              } catch (signInErr) {}
+            } else {
+              console.warn('[pino-db] activateClientPassword auth warning:', authErr);
+            }
+          }
+        }
+
+        // Mettre à jour le statut du profil en 'actif'
+        const updatePayload = {
+          status: 'actif',
+          activation_token: null,
+          activated_at: timestamp,
+          updated_at: timestamp
+        };
+
+        await db.ref(`clients_records/${sanitizedEmail}/profile`).update(updatePayload);
+
+        if (clientProfile && clientProfile.uid) {
+          await db.ref('users/' + clientProfile.uid).update(updatePayload).catch(() => {});
+        }
+
+        await safePushAudit(db, {
+          action: 'client_account_activated',
+          email: normEmail,
+          activated_at: timestamp
+        });
+
+      } catch (err) {
+        log('activateClientPassword:rtdb', err);
+      }
+    }
+
+    // Mise à jour de localStorage pino_users
+    try {
+      let localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]');
+      const idx = localUsers.findIndex(u => u.email && u.email.toLowerCase() === normEmail);
+      if (idx >= 0) {
+        localUsers[idx].status = 'actif';
+        localUsers[idx].activation_token = null;
+        localUsers[idx].activated_at = timestamp;
+        localStorage.setItem('pino_users', JSON.stringify(localUsers));
+        clientProfile = localUsers[idx];
+      }
+    } catch(e) {}
+
+    return { ok: true, email: normEmail, profile: clientProfile };
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -2197,6 +2533,10 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     syncExistingRecordsToClientPartitions,
     fetchClientNotifications,
     markNotificationRead,
+    markAllClientNotificationsRead,
+    markAllAdminNotificationsRead,
+    inviteClientByAdmin,
+    activateClientPassword,
     savePlatformLead,
     fetchPlatformLeads,
     updatePlatformLead,

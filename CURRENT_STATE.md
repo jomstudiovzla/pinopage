@@ -10,6 +10,20 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
+## ✅ Onboarding Client par Admin, Pipeline CRM Temps Réel & Auto-Clearing Notifs (100% OPÉRATIONNEL)
+- [x] **Onboarding Client par l'Administrateur (Andrés Pino)** :
+  - Andrés peut pré-créer un client depuis son panneau Admin (`+ Créer / Inviter un Client`).
+  - Le système pré-enregistre le compte dans `/users` et `/clients_records`, génère un code promo de bienvenue unique (-20%), crée un jeton sécurisé d'activation et expédie un e-mail officiel d'invitation avec lien direct.
+  - Possibilité pour Andrés de copier le lien d'activation ou de l'envoyer directement via WhatsApp en 1 clic.
+  - Le client clique sur le lien (`#activate?email=...&token=...`) et n'a qu'à saisir et confirmer son mot de passe confidentiel deux fois pour activer son compte et entrer directement dans son Espace Client.
+- [x] **Pipeline CRM avec mise à jour des statuts en 1 clic en temps réel** :
+  - La table des leads dans l'Espace Admin intègre désormais un sélecteur `<select>` interactif avec code couleur immédiat pour chaque phase : `🌱 Nouveau`, `💬 En négociation`, `📄 Devis envoyé`, `✅ Devis accepté`, `💶 Facturé`, `🎉 Terminé`, `❌ Sans suite`.
+  - La mise à jour est synchronisée instantanément dans Firebase Realtime Database et Supabase sans rechargement de page.
+- [x] **Effacement automatique des badges et compteurs de notifications** :
+  - Dès que le client ou l'administrateur consulte ses messages ou ouvre son Espace Client/Admin, les notifications sont marquées comme lues (`read: true`) dans la base de données et le badge rouge (`#nav-auth-notif-badge`) est immédiatement retiré pour éviter l'accumulation indéfinie de compteurs.
+- [x] **Service Worker v12** :
+  - Cache mis à jour à `pino-ev-v12-crm-onboarding`.
+
 ## ✅ Corrección Crítica: Autenticación Firebase en Safari / iPadOS (100% RESUELTO)
 - [x] **Solución del error `auth/operation-not-supported-in-this-environment` en Safari / iOS / iPadOS**:
   - **Causa raíz identificada**: En Safari (especialmente iPadOS/iOS), el bloqueo de cookies de terceros y el particionamiento de almacenamiento ITP bloquean el iframe interno que usa `signInWithPopup` (`pagepino-e8e97.firebaseapp.com/__/auth/iframe`), disparando el error técnico en inglés en un toast rojo.

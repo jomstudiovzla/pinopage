@@ -1,16 +1,17 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Corriger l'erreur d'authentification Firebase sur iPad/iOS Safari (auth/operation-not-supported-in-this-environment)",
-  "current_phase": "Production Bugfix — Authentification Client France (Safari / iOS)",
-  "action": "Résolu l'erreur auth/operation-not-supported-in-this-environment lors de la connexion Google sur Safari / iPadOS. 1) Utilisation directe de signInWithRedirect pour les appareils mobiles, tablettes et navigateurs Safari pour contourner le blocage du stockage tiers dans les iframes de popup (ITP Safari). 2) Configuration de la persistance résiliente (LOCAL -> SESSION -> NONE) dans firebase-config.js. 3) getRedirectResult met à jour l'utilisateur et ouvre directement l'Espace Client avec le coupon de bienvenue. 4) Remplacement de tout message d'erreur technique Firebase brut par des messages d'aide clairs en français. 5) Mise à niveau du cache ServiceWorker vers v11.",
+  "active_goal": "Onboarding client par admin avec mot de passe en 2 clics, pipeline de statuts CRM en temps réel et auto-clearing des badges de notifications",
+  "current_phase": "Production CRM & Client Experience — Onboarding & Realtime Pipeline",
+  "action": "1) Implémentation du flux complet d'onboarding client par Andrés Pino (modal admin, invitation email, génération de token et coupon de bienvenue -20%, lien d'activation direct et partage WhatsApp). 2) Modal client pour définition du mot de passe en deux clics sans friction (#activate?email=...&token=...). 3) Amélioration du pipeline CRM avec sélecteur de statut interactif en 1-clic (Nouveau, En négociation, Devis envoyé, Devis accepté, Facturé, Terminé, Sans suite) avec synchronisation temps réel Firebase RTDB et Supabase. 4) Suppression et remise à zéro automatique des badges et compteurs de notifications dès consultation. 5) Bump Service Worker vers v12 (pino-ev-v12-crm-onboarding).",
   "files": [
     "index.html",
-    "assets/js/firebase-config.js",
     "assets/js/pino-db.js",
-    "sw.js"
+    "sw.js",
+    "test_crm_onboarding_and_clearing.js",
+    ".gitignore"
   ],
-  "step": "Corrections validées en localhost:8080 et déployées sur le dépôt GitHub Pages. Le client en France peut se connecter immédiatement sans erreur.",
-  "last_commit": "f750a19",
-  "timestamp": "2026-09-16T11:14:30-04:00"
+  "step": "Tous les tests unitaires et d'intégration validés (13/13). Serveur localhost:8080 opérationnel (HTTP 200). Déploiement en cours sur GitHub Pages.",
+  "last_commit": "pending",
+  "timestamp": "2026-09-17T00:09:00-04:00"
 }

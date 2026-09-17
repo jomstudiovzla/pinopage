@@ -8,3 +8,4 @@ error/
 supabase/.temp/
 supabase/.env
 .env.local
+correcciones/
