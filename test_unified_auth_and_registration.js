@@ -55,8 +55,8 @@ console.log('  ✅ PASS: Unification multicanale (Apple, Google, E-mail/Mot de p
 
 // TEST 5 : VERSIONNEMENT DU SERVICE WORKER
 console.log('\n🚀 [TEST 5 : SERVICE WORKER VERSIONNÉ V19]');
-assert(swJs.includes('pino-ev-v19-unified-auth-full-registration'), 'sw.js utilise le cache v19');
-console.log('  ✅ PASS: Service Worker v19 prêt pour le déploiement.');
+assert(/pino-ev-v(19|20)/.test(swJs), 'sw.js utilise le cache versionné v19/v20');
+console.log('  ✅ PASS: Service Worker v19/v20 prêt pour le déploiement.');
 
 console.log('\n===============================================================');
 console.log('🎉 TOUS LES 5 TESTS D\'AUTHENTIFICATION ET D\'UNIFICATION SONT 100% SUCCÈS !');

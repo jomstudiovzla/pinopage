@@ -54,7 +54,7 @@ console.log('  ✅ PASS: Authentification Apple complète avec fallback direct 1
 
 // 6. CACHE SERVICE WORKER ACTUALISÉ
 console.log('\n🚀 [TEST 6 : CACHE SERVICE WORKER ACTUALISÉ]');
-assert(/pino-ev-v1[5-9]/.test(swJs), 'Service Worker doit être versionné pour rafraîchir le cache client');
+assert(/pino-ev-v(1[5-9]|2[0-9])/.test(swJs), 'Service Worker doit être versionné pour rafraîchir le cache client');
 console.log('  ✅ PASS: Service Worker à jour déployé.');
 
 console.log('\n===============================================================');

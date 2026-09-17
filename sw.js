@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v19-unified-auth-full-registration';
+const CACHE_NAME = 'pino-ev-v20-turbo-europe';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',

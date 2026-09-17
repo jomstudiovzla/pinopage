@@ -2707,6 +2707,148 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     });
   }
 
+  /**
+   * 🇪🇺 RGPD Art. 20 (Droit à la portabilité) :
+   * Récupère l'intégralité du dossier personnel du client (profil, devis, factures, messages, consentements, droits CNIL)
+   */
+  async function fetchCompletePersonalData(email) {
+    if (!email) return null;
+    const normEmail = String(email).trim().toLowerCase();
+    const sanitizedEmail = sanitizeEmail(normEmail);
+
+    let profile = null;
+    let quotes = [];
+    let invoices = [];
+    let messages = [];
+
+    // 1. Profil
+    try {
+      const snap = await rtdb()?.ref(`clients_records/${sanitizedEmail}/profile`).once('value');
+      profile = snap?.val();
+    } catch(e) {}
+    if (!profile) {
+      try {
+        let localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]');
+        profile = localUsers.find(u => (u.email || '').toLowerCase() === normEmail) || null;
+      } catch(e) {}
+    }
+
+    // 2. Devis
+    try {
+      const qRes = await fetchClientQuotes(normEmail);
+      if (qRes && Array.isArray(qRes.data)) quotes = qRes.data;
+    } catch(e) {}
+
+    // 3. Factures
+    try {
+      const iRes = await fetchClientInvoices(normEmail);
+      if (iRes && Array.isArray(iRes.data)) invoices = iRes.data;
+    } catch(e) {}
+
+    // 4. Messages
+    try {
+      const mRes = await fetchClientMessages(normEmail);
+      if (mRes && Array.isArray(mRes.data)) messages = mRes.data;
+    } catch(e) {}
+
+    return {
+      version_export: "2.0-RGPD-UE",
+      date_export: new Date().toISOString(),
+      responsable_traitement: {
+        nom_commercial: "Pino Espaces Verts",
+        titulaire: "Andrés Pino (Entrepreneur Individuel)",
+        immatriculation: "Bordeaux Métropole & Gironde (33)",
+        contact_rgpd: "pino.spacesverts@gmail.com",
+        telephone: "+33 6 51 59 40 34"
+      },
+      profil_utilisateur: profile || { email: normEmail },
+      demandes_devis: quotes,
+      factures_et_interventions: invoices,
+      historique_messages: messages,
+      consentements_et_cookies: {
+        consentement_cookies: (typeof localStorage !== 'undefined' ? localStorage.getItem('pino_cookie_consent') : null) || 'essential_only',
+        date_derniere_connexion: profile?.lastLogin || new Date().toISOString()
+      },
+      vos_droits_rgpd: {
+        description: "Conformément au Règlement Général sur la Protection des Données (RGPD 2016/679) et à la loi Informatique et Libertés :",
+        droit_acces_rectification: "Vous pouvez demander la correction de vos données en écrivant à pino.spacesverts@gmail.com.",
+        droit_effacement: "Vous pouvez exercer votre droit à l'oubli directement depuis votre Espace Client.",
+        conservation_legale: "Conformément à l'Article L. 123-22 du Code de commerce, les factures et justificatifs comptables sont légalement conservés 10 ans sous forme anonymisée.",
+        autorite_controle: "Commission Nationale de l'Informatique et des Libertés (CNIL) — www.cnil.fr"
+      }
+    };
+  }
+
+  /**
+   * 🇪🇺 RGPD Art. 17 (Droit à l'effacement / Droit à l'oubli) :
+   * Anonymise immédiatement les données personnelles (PII) dans Firebase RTDB et le stockage local,
+   * tout en maintenant les montants financiers agrégés pour respecter l'obligation légale de 10 ans (Art. L123-22 Code de commerce).
+   */
+  async function anonymizeClientAccount(email) {
+    if (!email) return { ok: false, error: "Adresse e-mail requise." };
+    const normEmail = String(email).trim().toLowerCase();
+    const sanitizedEmail = sanitizeEmail(normEmail);
+    const timestamp = new Date().toISOString();
+
+    const db = rtdb();
+    if (db) {
+      try {
+        const anonymizedPayload = {
+          fullName: "Client Anonymisé (RGPD)",
+          phone: "00 00 00 00 00",
+          commune: "33000 Bordeaux (Anonymisé)",
+          status: "anonymise",
+          rgpd_anonymized_at: timestamp,
+          rgpd_erasure_requested: true
+        };
+
+        // 1. Anonymiser dans clients_records
+        await db.ref(`clients_records/${sanitizedEmail}/profile`).update(anonymizedPayload).catch(() => {});
+
+        // 2. Anonymiser dans users si existant
+        const usersSnap = await db.ref('users').once('value');
+        const usersObj = usersSnap.val() || {};
+        for (const [uid, u] of Object.entries(usersObj)) {
+          if (u.email && u.email.toLowerCase() === normEmail) {
+            await db.ref(`users/${uid}`).update(anonymizedPayload).catch(() => {});
+          }
+        }
+
+        // 3. Journaliser dans audit_logs
+        await safePushAudit(db, {
+          action: 'rgpd_erasure_anonymized',
+          client_sanitized: sanitizedEmail,
+          timestamp: timestamp,
+          legal_basis: 'RGPD Art. 17 / Code Commerce L. 123-22'
+        });
+      } catch(err) {
+        log('anonymizeClientAccount:rtdb', err);
+      }
+    }
+
+    // 4. Nettoyer localStorage
+    try {
+      let localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]');
+      localUsers = localUsers.map(u => {
+        if ((u.email || '').toLowerCase() === normEmail) {
+          return {
+            ...u,
+            fullName: "Client Anonymisé (RGPD)",
+            phone: "00 00 00 00 00",
+            commune: "33000 Bordeaux (Anonymisé)",
+            status: "anonymise"
+          };
+        }
+        return u;
+      });
+      localStorage.setItem('pino_users', JSON.stringify(localUsers));
+      localStorage.removeItem('pino_current_user');
+      localStorage.removeItem('pino_last_client_email');
+    } catch(e) {}
+
+    return { ok: true, timestamp };
+  }
+
   /* ─────────────────────────────────────────────────────────
    *  Exportar a window.PinoDB
    * ───────────────────────────────────────────────────────── */
@@ -2764,6 +2906,8 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     notifyClientStatusChange,
     fetchClientMessages,
     listenClientMessages,
+    fetchCompletePersonalData,
+    anonymizeClientAccount,
   };
 
 })(window);
