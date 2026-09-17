@@ -41,9 +41,9 @@ console.log('  ✅ PASS: Formulaire interactif et tolérant (téléphone et comm
 
 // 4. VÉRIFICATION DU ROUTAGE ET DU CACHE SERVICE WORKER
 console.log('\n🚀 [TEST 4 : SERVICE WORKER V21 ACTUALISÉ]');
-assert(swJs.includes('pino-ev-v21-turbo-europe-apple-fix'), 'sw.js utilise le cache v21');
+assert(swJs.includes('pino-ev-v21') || swJs.includes('pino-ev-v22'), 'sw.js utilise le cache v21 ou supérieur');
 assert(indexHtml.includes('\'register\': \'modal-window-auth\''), 'openWindowModal route register vers la modale d\'auth');
-console.log('  ✅ PASS: Déploiement v21 et routage immédiat validés.');
+console.log('  ✅ PASS: Déploiement service worker et routage immédiat validés.');
 
 console.log('\n===============================================================');
 console.log('🎉 TOUS LES TESTS DE CRÉATION DE COMPTE & LOGO APPLE SONT VALIDÉS !');

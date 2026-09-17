@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v21-turbo-europe-apple-fix';
+const CACHE_NAME = 'pino-ev-v22-turbo-europe-admin-audio-bell';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',

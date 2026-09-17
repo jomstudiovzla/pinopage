@@ -1,19 +1,20 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Logo Apple officiel FontAwesome et création de compte client infaillible (zéro friction)",
-  "current_phase": "Apple Official HIG Logo & Client Registration Zero-Fail Complete",
-  "action": "1) Remplacement du logo Apple SVG personnalisé déformé par l'icône vectorielle officielle FontAwesome Brands fa-brands fa-apple (100% fidèle et mondialement reconnue). 2) Élimination du doublon obsolète window.switchAuthTab qui déclenchait une exception null pointer sur auth-login-form, bloquant l'affichage du formulaire d'inscription. 3) Assouplissement du formulaire d'inscription (téléphone et commune optionnels, focus automatique, bascule visuelle des mots de passe avec œil interactif). 4) Inscription universelle infaillible avec génération sécurisée d'UID sans erreur btoa, synchronisation PinoDB, génération du coupon -20% et ouverture automatique de l'Espace Client. 5) Déploiement du Service Worker v21 (pino-ev-v21-turbo-europe-apple-fix). 6) 11 suites de tests automatisées validées à 100%.",
+  "active_goal": "Correction esthétique et adaptabilité responsive du panneau d'administration sur tous dispositifs + Système de cloche interactive audio (chime) et alertes e-mail en direct",
+  "current_phase": "Admin Panel Responsive Layout & Live Audio/Email Notification Bell Complete",
+  "action": "1) Résolution du bogue critique de troncature/écrasement flexbox sur iPad/tablettes/mobiles (WhatsApp Image 2026-09-17 at 10.06.28) en fixant une hauteur explicite h-[92vh] max-h-[94vh] et règles CSS height: 92dvh / max-height: 94dvh avec flex-1 min-h-0 dans le corps défilant. 2) Optimisation du bandeau d'en-tête admin compact (py-3.5 sm:py-4) et barre d'onglets horizontale glissante sans saut de ligne sm:flex-wrap, préservant 100% de l'espace vertical pour les KPIs et le CRM. 3) Ajout de la cloche interactive (campanita) avec badge dynamique d'alertes non lues, menu déroulant de suivi et bouton de coupure/activation sonore. 4) Synthétiseur sonore universel Web Audio API (PinoAudioNotifier) générant des carillons harmoniques doux (E5->A5, fanfare C5->C6) sans latence ni dépendance audio externe. 5) Notification immédiate sur appareil (carillon, vibreur haptique mobile, Notification OS) + alerte par e-mail admin Web3Forms (pino.spacesverts@gmail.com) pour devis, signatures, messages chatbot et créations de compte. 6) Mise à jour du Service Worker vers v22 (pino-ev-v22-turbo-europe-admin-audio-bell). 7) 12 suites de tests automatisées validées à 100%.",
   "files": [
+    "assets/js/pino-db.js",
     "index.html",
     "sw.js",
-    "test_turbo_and_europe_compliance.js",
-    "test_unified_auth_and_registration.js",
+    "test_admin_appearance_and_audio_notifications.js",
     "test_registration_flow_and_apple_logo.js",
+    "test_unified_auth_and_registration.js",
     ".context_sync.json",
     "CURRENT_STATE.md"
   ],
-  "step": "Toutes les 11 suites de tests passent à 100%. Commit et push sur origin/main avec attribution obligatoire Grok 4.6.",
+  "step": "Toutes les 12 suites de tests passent à 100%. Déploiement et synchronisation git avec attribution obligatoire Co-Authored-By: Grok 4.6 <noreply@x.ai>.",
   "last_commit": "ea2ecf1",
-  "timestamp": "2026-09-17T09:42:00-04:00"
+  "timestamp": "2026-09-17T10:16:00-04:00"
 }

@@ -1986,66 +1986,117 @@
   </dialog>
 
   <!-- Modal 3: Espace Administration — God Mode (Andrés Pino) -->
-  <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-[96%] max-h-[92vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
+  <dialog id="modal-window-admin" class="section-window bg-white rounded-2xl sm:rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-[96%] h-[92vh] max-h-[94vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
     <!-- Admin Header (Stable CRM Panel - Non-draggable to prevent accidental closure) -->
-    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 sm:px-8 pt-5 pb-6 sm:pb-8 text-white select-none shrink-0">
-      <div class="flex flex-wrap justify-between items-center gap-4">
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-2xl shadow-lg">
+    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-4 sm:px-6 py-3.5 sm:py-4 text-white select-none shrink-0">
+      <div class="flex flex-wrap justify-between items-center gap-3 sm:gap-4">
+        <div class="flex items-center gap-3 sm:gap-4">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-xl sm:text-2xl shadow-lg shrink-0">
             👑
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="font-serif text-2xl font-bold">Panneau d'Administration</h3>
-              <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">God Mode</span>
+              <h3 class="font-serif text-lg sm:text-xl md:text-2xl font-bold leading-tight">Panneau d'Administration</h3>
+              <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider whitespace-nowrap">God Mode</span>
             </div>
-            <p class="text-xs text-white/70">Gérant : Andrés Pino • <code class="text-emerald-300">pino.spacesverts@gmail.com</code></p>
+            <p class="text-[11px] sm:text-xs text-white/70 truncate max-w-[220px] sm:max-w-none">Gérant : Andrés Pino • <code class="text-emerald-300">pino.spacesverts@gmail.com</code></p>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="handleLogout()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <!-- Campanita de Notifications Interactive avec Badge et Menu Déroulant -->
+          <div class="relative">
+            <button type="button" id="admin-notif-bell-btn" onclick="toggleAdminNotificationsPanel()" class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer" title="Notifications et alertes clients en direct">
+              <i id="admin-bell-icon" class="fa-solid fa-bell text-base sm:text-lg text-amber-300"></i>
+              <span id="admin-notif-badge" class="hidden absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-md animate-pulse">0</span>
+            </button>
+
+            <!-- Dropdown Panel pour la Campanita -->
+            <div id="admin-notif-dropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 max-w-[calc(100vw-32px)] bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden">
+              <div class="p-3.5 bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 text-white flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center text-xs">🔔</span>
+                  <div>
+                    <h4 class="text-xs font-bold leading-tight">Alertes Clients en Direct</h4>
+                    <p class="text-[10px] text-white/60" id="admin-notif-subtitle">0 non lue(s)</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button type="button" onclick="if (window.PinoAudioNotifier) PinoAudioNotifier.playChime('default')" class="px-2 py-1 bg-white/15 hover:bg-white/25 rounded-lg text-[10px] font-bold text-amber-200 transition-colors cursor-pointer" title="Tester le carillon">
+                    <i class="fa-solid fa-music mr-1"></i> Tester
+                  </button>
+                  <button type="button" onclick="markAllAdminNotifsReadUI()" class="px-2 py-1 bg-white/15 hover:bg-white/25 rounded-lg text-[10px] font-bold text-white transition-colors cursor-pointer" title="Tout marquer comme lu">
+                    <i class="fa-solid fa-check-double mr-1"></i> Tout lu
+                  </button>
+                </div>
+              </div>
+
+              <!-- Liste des notifications clients -->
+              <div id="admin-notif-list" class="max-h-80 overflow-y-auto divide-y divide-slate-100 text-xs">
+                <div class="p-6 text-center text-slate-400 text-xs">
+                  <i class="fa-regular fa-bell-slash text-2xl mb-2 text-slate-300 block"></i>
+                  <p>Aucune nouvelle notification pour le moment.</p>
+                </div>
+              </div>
+
+              <!-- Footer du Dropdown -->
+              <div class="p-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xxs text-slate-500 font-medium">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                  Écoute en direct active
+                </span>
+                <span id="admin-notif-audio-status" class="text-emerald-700 font-bold">Son actif 🔊</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bouton Activer / Couper Son -->
+          <button type="button" id="admin-sound-toggle-btn" onclick="toggleAdminSound()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer" title="Activer / Couper les alertes sonores">
+            <i id="admin-sound-toggle-icon" class="fa-solid fa-volume-high text-emerald-300 text-sm sm:text-base"></i>
           </button>
-          <button onclick="document.getElementById('modal-window-admin').close()" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer la fenêtre">
-            <i class="fa-solid fa-xmark text-lg"></i>
+
+          <button onclick="handleLogout()" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> <span class="hidden xs:inline">Déconnexion</span>
+          </button>
+          <button onclick="document.getElementById('modal-window-admin').close()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer la fenêtre">
+            <i class="fa-solid fa-xmark text-base sm:text-lg"></i>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Admin Sub-Navigation Tabs (Horizontal swipeable on mobile) -->
-    <div class="flex overflow-x-auto no-scrollbar sm:flex-wrap border-b border-slate-200 bg-slate-50 text-xs font-bold px-3 sm:px-6 pt-2 gap-1.5 sm:gap-2 shrink-0">
-      <button type="button" onclick="switchAdminTab('kpis')" id="adm-tab-kpis" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl border-b-2 border-emerald-700 text-emerald-800 bg-white">
+    <!-- Admin Sub-Navigation Tabs (Horizontal swipeable on mobile & tablet) -->
+    <div class="flex overflow-x-auto no-scrollbar border-b border-slate-200 bg-slate-50 text-xs font-bold px-3 sm:px-6 pt-1.5 sm:pt-2 gap-1.5 sm:gap-2 shrink-0 scroll-smooth">
+      <button type="button" onclick="switchAdminTab('kpis')" id="adm-tab-kpis" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl border-b-2 border-emerald-700 text-emerald-800 bg-white">
         <i class="fa-solid fa-chart-pie mr-1.5"></i> Tableau de bord & KPIs
       </button>
-      <button type="button" onclick="switchAdminTab('leads')" id="adm-tab-leads" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('leads')" id="adm-tab-leads" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-address-book mr-1.5"></i> Leads & Devis (<span id="adm-leads-badge">0</span>)
       </button>
-      <button type="button" onclick="switchAdminTab('prospection')" id="adm-tab-prospection" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('prospection')" id="adm-tab-prospection" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-bullseye mr-1.5 text-amber-600"></i> Prospection 6 Plateformes (<span id="adm-platform-leads-badge">0</span>)
       </button>
-      <button type="button" onclick="switchAdminTab('factures')" id="adm-tab-factures" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('factures')" id="adm-tab-factures" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> Factures & Unipros
       </button>
-      <button type="button" onclick="switchAdminTab('promos')" id="adm-tab-promos" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('promos')" id="adm-tab-promos" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-tags mr-1.5"></i> Promotions & Codes
       </button>
-      <button type="button" onclick="switchAdminTab('users')" id="adm-tab-users" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('users')" id="adm-tab-users" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-users mr-1.5"></i> Utilisateurs & Base (<span id="adm-users-badge">3</span>)
       </button>
-      <button type="button" onclick="switchAdminTab('impersonate')" id="adm-tab-impersonate" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('impersonate')" id="adm-tab-impersonate" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-user-secret mr-1.5"></i> Voir comme client
       </button>
-      <button type="button" onclick="switchAdminTab('travaux'); renderAdminJobs()" id="adm-tab-travaux" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('travaux'); renderAdminJobs()" id="adm-tab-travaux" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-briefcase mr-1.5"></i> Travaux CRM (<span id="adm-jobs-badge">0</span>)
       </button>
-      <button type="button" onclick="switchAdminTab('config'); renderAdminQualityConfig();" id="adm-tab-config" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('config'); renderAdminQualityConfig();" id="adm-tab-config" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-sliders mr-1.5 text-emerald-700"></i> Configuration & Qualité (<span id="adm-repair-badge">0</span>)
       </button>
     </div>
 
     <!-- Admin Tab Content Body -->
-    <div class="p-4 sm:p-8 overflow-y-auto flex-1 space-y-6">
+    <div class="p-3 sm:p-6 lg:p-8 overflow-y-auto flex-1 min-h-0 space-y-6">
       <!-- 1. Tab KPIs -->
       <div id="adm-content-kpis" class="adm-content space-y-6">
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -6045,6 +6096,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       border: none;
       outline: none;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+      margin: auto;
     }
     dialog.section-window::backdrop {
       background: rgba(15, 23, 42, 0.7);
@@ -6062,6 +6114,35 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       to {
         opacity: 1;
         transform: scale(1) translateY(0);
+      }
+    }
+
+    /* Règle vitale responsive tous dispositifs (iPad, Tablettes, iPhone, Desktop) */
+    #modal-window-admin,
+    #modal-window-client {
+      height: 92vh !important;
+      height: 92dvh !important;
+      max-height: 94vh !important;
+      max-height: 94dvh !important;
+      width: 96% !important;
+      max-width: 1200px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      margin: auto !important;
+    }
+    #modal-window-admin:not([open]),
+    #modal-window-client:not([open]) {
+      display: none !important;
+    }
+    @media (max-width: 768px) {
+      #modal-window-admin,
+      #modal-window-client {
+        height: 96vh !important;
+        height: 96dvh !important;
+        max-height: 98vh !important;
+        max-height: 98dvh !important;
+        width: 98% !important;
+        border-radius: 1.25rem !important;
       }
     }
   </style>
@@ -6770,6 +6851,18 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         else localUsers.unshift(record);
         localStorage.setItem('pino_users', JSON.stringify(localUsers));
         localStorage.setItem('pino_last_client_email', email);
+
+        if (window.PinoDB && typeof PinoDB.notifyAdminByEmail === 'function') {
+          PinoDB.notifyAdminByEmail({
+            subject: `👤 [NOUVEAU CLIENT] Inscription de ${fullName || email}`,
+            type: 'client_registered',
+            clientName: fullName || email,
+            clientEmail: email,
+            clientPhone: phone || 'Non renseigné',
+            commune: commune || 'Bordeaux Métropole',
+            details: `Nouveau compte client particulier créé. Code promo de bienvenue attribué : PINO-BIENVENUE20.`
+          }).catch(e => console.warn('[Register] notifyAdminByEmail err:', e));
+        }
 
         showNotificationToast('🌿 Compte créé avec succès ! Bienvenue ' + fullName + '. Votre remise de -20% est activée.', 'success');
 
@@ -7541,6 +7634,9 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       if (typeof window.stopClientNotificationListeners === 'function') {
         window.stopClientNotificationListeners();
       }
+      if (typeof window.stopAdminNotificationsListener === 'function') {
+        window.stopAdminNotificationsListener();
+      }
 
       // 6. Supprimer immédiatement tous les badges de notification dans l'interface
       const badge = document.getElementById('nav-auth-notif-badge');
@@ -7612,6 +7708,9 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         if (typeof window.stopClientNotificationListeners === 'function') {
           window.stopClientNotificationListeners();
         }
+        if (typeof window.stopAdminNotificationsListener === 'function') {
+          window.stopAdminNotificationsListener();
+        }
         return;
       } else if (user.role === 'admin' || user.isAdmin) {
         navText.textContent = "👑 Andrés (Admin)";
@@ -7624,6 +7723,9 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         }
         const badge = document.getElementById('nav-auth-notif-badge');
         if (badge) badge.remove();
+        if (typeof window.startAdminNotificationsListener === 'function') {
+          window.startAdminNotificationsListener();
+        }
       } else {
         const shortName = (user.fullName || 'Client').split(' ')[0];
         navText.textContent = `👤 Mon Espace (${shortName})`;
@@ -7654,6 +7756,9 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       if (targetTab) {
         targetTab.classList.add('border-b-2', 'border-emerald-700', 'text-emerald-800', 'bg-white');
         targetTab.classList.remove('text-slate-500');
+        try {
+          targetTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } catch (e) {}
       }
 
       try {
@@ -8420,6 +8525,363 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           navBtn.appendChild(badge);
         }
         badge.textContent = String(unreadList.length);
+      }
+    };
+
+    // ─────────────────────────────────────────────────────────
+    //  SYSTÈME DE NOTIFICATION AUDIO & CAMPANITA ADMIN (TEMPS RÉEL)
+    //  Synthèse Web Audio API pure (zéro fichier mp3 externe, zéro latence, 100% hors-ligne)
+    // ─────────────────────────────────────────────────────────
+    let _audioCtxInstance = null;
+    function getAudioContext() {
+      if (!_audioCtxInstance && (window.AudioContext || window.webkitAudioContext)) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        _audioCtxInstance = new AudioCtx();
+      }
+      if (_audioCtxInstance && _audioCtxInstance.state === 'suspended') {
+        _audioCtxInstance.resume().catch(() => {});
+      }
+      return _audioCtxInstance;
+    }
+
+    // Déverrouillage automatique de l'audio context au premier geste utilisateur
+    ['click', 'touchstart', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, () => {
+        if (_audioCtxInstance && _audioCtxInstance.state === 'suspended') {
+          _audioCtxInstance.resume().catch(() => {});
+        }
+      }, { once: true, passive: true });
+    });
+
+    function formatTimeAgoShort(date) {
+      if (!date || isNaN(date.getTime())) return 'Récemment';
+      const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+      if (seconds < 60) return "À l'instant";
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes} min`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours} h`;
+      const days = Math.floor(hours / 24);
+      return `${days} j`;
+    }
+
+    window.PinoAudioNotifier = {
+      isMuted: () => localStorage.getItem('pino_admin_sound_enabled') === 'false',
+      toggleMute: () => {
+        const current = localStorage.getItem('pino_admin_sound_enabled') !== 'false';
+        const next = !current;
+        localStorage.setItem('pino_admin_sound_enabled', String(next));
+        window.PinoAudioNotifier.updateSoundUI();
+        if (typeof showNotificationToast === 'function') {
+          showNotificationToast(next ? '🔊 Son des notifications activé' : '🔇 Son des notifications coupé', 'info');
+        }
+        if (next) {
+          window.PinoAudioNotifier.playChime('default');
+        }
+        return next;
+      },
+      updateSoundUI: () => {
+        const isEnabled = localStorage.getItem('pino_admin_sound_enabled') !== 'false';
+        const icon = document.getElementById('admin-sound-toggle-icon');
+        const statusText = document.getElementById('admin-notif-audio-status');
+        if (icon) {
+          icon.className = isEnabled 
+            ? 'fa-solid fa-volume-high text-emerald-300 text-sm sm:text-base' 
+            : 'fa-solid fa-volume-xmark text-red-300 text-sm sm:text-base';
+        }
+        if (statusText) {
+          statusText.textContent = isEnabled ? 'Son actif 🔊' : 'Son coupé 🔇';
+          statusText.className = isEnabled ? 'text-emerald-700 font-bold' : 'text-slate-400 font-bold';
+        }
+      },
+      playChime: (type = 'default') => {
+        if (window.PinoAudioNotifier.isMuted()) return;
+        try {
+          const ctx = getAudioContext();
+          if (!ctx) return;
+
+          let notes = [
+            { freq: 659.25, time: 0, duration: 0.22 },
+            { freq: 880.00, time: 0.16, duration: 0.40 }
+          ];
+          if (type === 'quote_signed' || type === 'quote_accepted') {
+            notes = [
+              { freq: 523.25, time: 0, duration: 0.14 },
+              { freq: 659.25, time: 0.12, duration: 0.14 },
+              { freq: 783.99, time: 0.24, duration: 0.14 },
+              { freq: 1046.50, time: 0.36, duration: 0.55 }
+            ];
+          } else if (type === 'client_registered') {
+            notes = [
+              { freq: 587.33, time: 0, duration: 0.16 },
+              { freq: 739.99, time: 0.14, duration: 0.16 },
+              { freq: 880.00, time: 0.28, duration: 0.45 }
+            ];
+          }
+
+          const now = ctx.currentTime;
+          notes.forEach(n => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(n.freq, now + n.time);
+
+            gain.gain.setValueAtTime(0.0001, now + n.time);
+            gain.gain.linearRampToValueAtTime(0.28, now + n.time + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + n.time + n.duration);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(now + n.time);
+            osc.stop(now + n.time + n.duration + 0.05);
+          });
+        } catch (err) {
+          console.warn('[AudioNotifier] Audio error:', err);
+        }
+      },
+      notifyDevice: (title, body, type = 'default') => {
+        // 1. Jouer le carillon sonore
+        window.PinoAudioNotifier.playChime(type);
+
+        // 2. Vibration haptique sur smartphone/tablette
+        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+          try {
+            navigator.vibrate([160, 90, 160]);
+          } catch (e) {}
+        }
+
+        // 3. Notification système OS si accordée
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+          try {
+            new Notification(title || 'Pino Espaces Verts', {
+              body: body || 'Nouvelle interaction client reçue !',
+              icon: 'assets/img/pino-icon-192.png'
+            });
+          } catch (e) {}
+        }
+
+        // 4. Animation visuelle sur la cloche
+        const bellIcon = document.getElementById('admin-bell-icon');
+        if (bellIcon) {
+          bellIcon.classList.add('animate-bounce');
+          setTimeout(() => bellIcon.classList.remove('animate-bounce'), 2500);
+        }
+      }
+    };
+
+    window.toggleAdminSound = () => {
+      window.PinoAudioNotifier.toggleMute();
+    };
+
+    window.toggleAdminNotificationsPanel = () => {
+      const dropdown = document.getElementById('admin-notif-dropdown');
+      if (!dropdown) return;
+      const isHidden = dropdown.classList.contains('hidden');
+      if (isHidden) {
+        dropdown.classList.remove('hidden');
+        window.PinoAudioNotifier.updateSoundUI();
+        if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+          Notification.requestPermission().catch(() => {});
+        }
+      } else {
+        dropdown.classList.add('hidden');
+      }
+    };
+
+    // Fermer le dropdown au clic en dehors
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('admin-notif-dropdown');
+      const bellBtn = document.getElementById('admin-notif-bell-btn');
+      if (!dropdown || dropdown.classList.contains('hidden')) return;
+      if (bellBtn && bellBtn.contains(e.target)) return;
+      if (!dropdown.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    let _adminNotifsCache = [];
+    let _adminNotifsKnownIds = new Set();
+    let _adminNotifsInitialLoad = true;
+    let _stopAdminNotifsListener = null;
+
+    window.startAdminNotificationsListener = () => {
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (!user || (!user.isAdmin && user.role !== 'admin')) {
+        window.stopAdminNotificationsListener();
+        return;
+      }
+      if (_stopAdminNotifsListener) return;
+
+      window.PinoAudioNotifier.updateSoundUI();
+
+      if (window.PinoDB && typeof PinoDB.listenAdminNotifications === 'function') {
+        _stopAdminNotifsListener = PinoDB.listenAdminNotifications((notifs) => {
+          const userCheck = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+          if (!userCheck || (!userCheck.isAdmin && userCheck.role !== 'admin')) {
+            window.stopAdminNotificationsListener();
+            return;
+          }
+
+          _adminNotifsCache = notifs || [];
+          const unreadList = _adminNotifsCache.filter(n => !n.read);
+
+          // Détection de NOUVELLES notifications arrivées en direct
+          if (!_adminNotifsInitialLoad) {
+            const incoming = unreadList.filter(n => !_adminNotifsKnownIds.has(n.id));
+            if (incoming.length > 0) {
+              const latest = incoming[0];
+              const title = latest.subject || latest.title || '🔔 Nouvelle interaction client';
+              const body = latest.clientName ? `${latest.clientName} (${latest.commune || 'Bordeaux'})` : (latest.details || '');
+              window.PinoAudioNotifier.notifyDevice(title, body, latest.type || 'lead');
+              if (typeof showNotificationToast === 'function') {
+                showNotificationToast(`🔔 ${title}`, 'success');
+              }
+            }
+          }
+
+          _adminNotifsCache.forEach(n => {
+            if (n.id) _adminNotifsKnownIds.add(n.id);
+          });
+          _adminNotifsInitialLoad = false;
+
+          window.renderAdminNotificationsUI(_adminNotifsCache);
+        });
+      }
+    };
+
+    window.stopAdminNotificationsListener = () => {
+      if (typeof _stopAdminNotifsListener === 'function') {
+        try { _stopAdminNotifsListener(); } catch (e) {}
+        _stopAdminNotifsListener = null;
+      }
+      _adminNotifsInitialLoad = true;
+      _adminNotifsKnownIds.clear();
+      _adminNotifsCache = [];
+    };
+
+    window.renderAdminNotificationsUI = (notifsList = []) => {
+      const badge = document.getElementById('admin-notif-badge');
+      const subtitle = document.getElementById('admin-notif-subtitle');
+      const container = document.getElementById('admin-notif-list');
+
+      const unreadList = (notifsList || []).filter(n => !n.read);
+
+      if (badge) {
+        if (unreadList.length > 0) {
+          badge.textContent = String(unreadList.length);
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+
+      if (subtitle) {
+        subtitle.textContent = `${unreadList.length} non lue(s) • ${_adminNotifsCache.length} au total`;
+      }
+
+      if (!container) return;
+      if (!notifsList || notifsList.length === 0) {
+        container.innerHTML = `
+          <div class="p-6 text-center text-slate-400 text-xs">
+            <i class="fa-regular fa-bell-slash text-2xl mb-2 text-slate-300 block"></i>
+            <p>Aucune notification enregistrée pour le moment.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = notifsList.map(item => {
+        const isUnread = !item.read;
+        const timeAgo = item.created_at ? formatTimeAgoShort(new Date(item.created_at)) : 'Récemment';
+        
+        let iconHtml = '📝';
+        let badgeColor = 'bg-blue-100 text-blue-800';
+        let tabTarget = 'leads';
+
+        if (item.type === 'quote_accepted' || item.type === 'quote_signed') {
+          iconHtml = '✍️';
+          badgeColor = 'bg-emerald-100 text-emerald-800';
+          tabTarget = 'travaux';
+        } else if (item.type === 'client_registered') {
+          iconHtml = '👤';
+          badgeColor = 'bg-purple-100 text-purple-800';
+          tabTarget = 'users';
+        } else if (item.type === 'chatbot_devis') {
+          iconHtml = '🤖';
+          badgeColor = 'bg-amber-100 text-amber-800';
+          tabTarget = 'leads';
+        } else if (item.type === 'invoice_paid') {
+          iconHtml = '💳';
+          badgeColor = 'bg-teal-100 text-teal-800';
+          tabTarget = 'factures';
+        }
+
+        return `
+          <div class="p-3 hover:bg-slate-50 transition-colors flex items-start justify-between gap-2.5 ${isUnread ? 'bg-amber-50/50 font-semibold' : 'bg-white text-slate-600'}">
+            <div class="flex items-start gap-2.5 flex-1 min-w-0 cursor-pointer" onclick="openAdminNotifAction('${item.id}', '${tabTarget}')">
+              <span class="w-8 h-8 rounded-xl ${badgeColor} flex items-center justify-center text-sm shrink-0 shadow-2xs">
+                ${iconHtml}
+              </span>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-1">
+                  <h5 class="text-xs ${isUnread ? 'font-bold text-slate-900' : 'font-medium text-slate-700'} truncate">
+                    ${String(item.subject || item.title || 'Notification Client').replace(/[&<>"']/g, '')}
+                  </h5>
+                  <span class="text-[10px] text-slate-400 whitespace-nowrap">${timeAgo}</span>
+                </div>
+                <p class="text-[11px] text-slate-600 truncate mt-0.5">
+                  ${String(item.clientName ? `${item.clientName} (${item.commune || 'Bordeaux'})` : (item.details || item.body || '')).replace(/[&<>"']/g, '')}
+                </p>
+                ${item.service ? `<span class="inline-block mt-1 text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600">${String(item.service).replace(/[&<>"']/g, '')}</span>` : ''}
+              </div>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              ${isUnread ? `
+                <button type="button" onclick="markSingleAdminNotifReadUI('${item.id}')" class="w-7 h-7 rounded-lg hover:bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs transition-colors cursor-pointer" title="Marquer comme lu">
+                  <i class="fa-solid fa-check"></i>
+                </button>
+              ` : `
+                <span class="w-7 h-7 flex items-center justify-center text-[10px] text-slate-300">
+                  <i class="fa-solid fa-check-double"></i>
+                </span>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    };
+
+    window.openAdminNotifAction = async (notifId, targetTab) => {
+      if (notifId) {
+        await window.markSingleAdminNotifReadUI(notifId);
+      }
+      const dropdown = document.getElementById('admin-notif-dropdown');
+      if (dropdown) dropdown.classList.add('hidden');
+      if (typeof switchAdminTab === 'function') {
+        switchAdminTab(targetTab || 'leads');
+      }
+    };
+
+    window.markSingleAdminNotifReadUI = async (notifId) => {
+      if (!notifId) return;
+      if (window.PinoDB && typeof PinoDB.markAdminNotificationRead === 'function') {
+        await PinoDB.markAdminNotificationRead(notifId);
+      }
+      const item = _adminNotifsCache.find(x => x.id === notifId);
+      if (item) item.read = true;
+      window.renderAdminNotificationsUI(_adminNotifsCache);
+    };
+
+    window.markAllAdminNotifsReadUI = async () => {
+      if (window.PinoDB && typeof PinoDB.markAllAdminNotificationsRead === 'function') {
+        await PinoDB.markAllAdminNotificationsRead();
+      }
+      _adminNotifsCache.forEach(n => { n.read = true; });
+      window.renderAdminNotificationsUI(_adminNotifsCache);
+      if (typeof showNotificationToast === 'function') {
+        showNotificationToast('Toutes les alertes ont été marquées comme lues.', 'info');
       }
     };
 
@@ -9380,6 +9842,9 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
         // Render admin leads, users, KPIs and jobs if opening admin
         if (targetId === 'modal-window-admin') {
+          if (typeof window.startAdminNotificationsListener === 'function') {
+            window.startAdminNotificationsListener();
+          }
           if (window.PinoDB && typeof PinoDB.syncExistingRecordsToClientPartitions === 'function') {
             PinoDB.syncExistingRecordsToClientPartitions().catch(() => {});
           }

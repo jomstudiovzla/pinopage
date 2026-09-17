@@ -944,6 +944,60 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     return { ok: true, count: 0 };
   }
 
+  async function fetchAdminNotifications() {
+    const db = rtdb();
+    if (db) {
+      try {
+        const snap = await db.ref('admin_notifications').limitToLast(50).once('value');
+        const val = snap.val() || {};
+        const list = Object.keys(val).map(k => ({ ...val[k], id: k }));
+        list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        return { ok: true, data: list };
+      } catch (err) {
+        log('fetchAdminNotifications:rtdb', err);
+      }
+    }
+    return { ok: true, data: [] };
+  }
+
+  function listenAdminNotifications(callback) {
+    const db = rtdb();
+    if (!db || typeof callback !== 'function') return () => {};
+    try {
+      const ref = db.ref('admin_notifications').limitToLast(50);
+      const onVal = (snap) => {
+        const val = snap.val() || {};
+        const list = Object.keys(val).map(k => ({ ...val[k], id: k }));
+        list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        callback(list);
+      };
+      ref.on('value', onVal);
+      return () => {
+        try { ref.off('value', onVal); } catch (e) {}
+      };
+    } catch (err) {
+      log('listenAdminNotifications:rtdb', err);
+      return () => {};
+    }
+  }
+
+  async function markAdminNotificationRead(notifId) {
+    if (!notifId) return { ok: false };
+    const db = rtdb();
+    if (db) {
+      try {
+        await db.ref(`admin_notifications/${notifId}`).update({
+          read: true,
+          read_at: new Date().toISOString()
+        });
+        return { ok: true };
+      } catch (err) {
+        log('markAdminNotificationRead:rtdb', err);
+      }
+    }
+    return { ok: true, fallback: true };
+  }
+
   /* ─────────────────────────────────────────────────────────
    *  CLIENT ONBOARDING — Invitation par Andrés Pino & Activation
    * ───────────────────────────────────────────────────────── */
@@ -2893,6 +2947,9 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     markNotificationRead,
     markAllClientNotificationsRead,
     markAllAdminNotificationsRead,
+    fetchAdminNotifications,
+    listenAdminNotifications,
+    markAdminNotificationRead,
     inviteClientByAdmin,
     activateClientPassword,
     savePlatformLead,
