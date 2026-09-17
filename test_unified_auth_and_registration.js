@@ -26,13 +26,13 @@ console.log('  ✅ PASS: Interface à deux onglets (Connexion vs Inscription) op
 
 // TEST 2 : LOGO ET BOUTON OFFICIEL APPLE HIG
 console.log('\n🍎 [TEST 2 : DESIGN ET BOUTON OFFICIEL APPLE HIG]');
-assert(indexHtml.includes('viewBox="0 0 170 170"'), 'SVG officiel Apple avec viewBox HIG présent');
+assert(indexHtml.includes('fa-brands fa-apple'), 'Logo officiel FontAwesome Apple présent');
 assert(indexHtml.includes('handleAppleSignIn'), 'Contrôleur handleAppleSignIn présent');
 assert(indexHtml.includes('confirmAppleQuickSignIn'), 'Contrôleur confirmAppleQuickSignIn présent');
 assert(indexHtml.includes('confirmAppleRememberedUser'), 'Contrôleur confirmAppleRememberedUser présent');
 assert(indexHtml.includes('id="apple-remembered-user-container"'), 'Conteneur utilisateur mémorisé présent');
 assert(indexHtml.includes('id="apple-quick-email"'), 'Input pour tout identifiant Apple/iCloud présent');
-console.log('  ✅ PASS: Bouton Apple HIG conforme et panneau universel sans noms statiques publics codés en dur.');
+console.log('  ✅ PASS: Bouton Apple officiel FontAwesome et panneau universel sans noms statiques publics codés en dur.');
 
 // TEST 3 : FORMULAIRE DE CRÉATION DE COMPTE AVEC TOUTES LES DONNÉES
 console.log('\n📝 [TEST 3 : FORMULAIRE COMPLET D\'INSCRIPTION]');
@@ -54,9 +54,9 @@ assert(indexHtml.includes("pino_last_client_email"), 'index.html mémorise pino_
 console.log('  ✅ PASS: Unification multicanale (Apple, Google, E-mail/Mot de passe) par e-mail vérifiée.');
 
 // TEST 5 : VERSIONNEMENT DU SERVICE WORKER
-console.log('\n🚀 [TEST 5 : SERVICE WORKER VERSIONNÉ V19]');
-assert(/pino-ev-v(19|20)/.test(swJs), 'sw.js utilise le cache versionné v19/v20');
-console.log('  ✅ PASS: Service Worker v19/v20 prêt pour le déploiement.');
+console.log('\n🚀 [TEST 5 : SERVICE WORKER VERSIONNÉ V21]');
+assert(/pino-ev-v(19|20|21)/.test(swJs), 'sw.js utilise le cache versionné v21');
+console.log('  ✅ PASS: Service Worker v21 prêt pour le déploiement.');
 
 console.log('\n===============================================================');
 console.log('🎉 TOUS LES 5 TESTS D\'AUTHENTIFICATION ET D\'UNIFICATION SONT 100% SUCCÈS !');

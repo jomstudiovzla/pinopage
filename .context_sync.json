@@ -1,21 +1,19 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Moteur Turbo ultra-performant (0ms perception), conformité européenne intégrale (RGPD Art 17/20, formats téléphoniques UE, DNS preconnect Europe)",
-  "current_phase": "Turbo Engine & European Infrastructure Complete",
-  "action": "1) Déploiement des Resource Hints et Turbo Preconnect vers le cluster Europe (europe-west1.firebasedatabase.app). 2) Accélération graphique via CSS content-visibility: auto sur les sections lourdes. 3) Moteur PinoTurbo avec préchauffage instantané des modales au survol/toucher. 4) Formatteur et validateur intelligent de numéros de téléphone français et européens (+33, 06, 07, indicatifs UE). 5) Implémentation RGPD Art. 20 (portabilité complète du dossier personnel en JSON) et Art. 17 (droit à l'effacement et anonymisation légale avec conservation fiscale décennale Art. L123-22 Code de commerce). 6) Service Worker v20 Turbo Europe déployé. 7) 10 suites de tests automatisées validées à 100%.",
+  "active_goal": "Logo Apple officiel FontAwesome et création de compte client infaillible (zéro friction)",
+  "current_phase": "Apple Official HIG Logo & Client Registration Zero-Fail Complete",
+  "action": "1) Remplacement du logo Apple SVG personnalisé déformé par l'icône vectorielle officielle FontAwesome Brands fa-brands fa-apple (100% fidèle et mondialement reconnue). 2) Élimination du doublon obsolète window.switchAuthTab qui déclenchait une exception null pointer sur auth-login-form, bloquant l'affichage du formulaire d'inscription. 3) Assouplissement du formulaire d'inscription (téléphone et commune optionnels, focus automatique, bascule visuelle des mots de passe avec œil interactif). 4) Inscription universelle infaillible avec génération sécurisée d'UID sans erreur btoa, synchronisation PinoDB, génération du coupon -20% et ouverture automatique de l'Espace Client. 5) Déploiement du Service Worker v21 (pino-ev-v21-turbo-europe-apple-fix). 6) 11 suites de tests automatisées validées à 100%.",
   "files": [
-    "assets/js/pino-db.js",
     "index.html",
     "sw.js",
-    "test_crm_intuitive_pipeline_and_notifications.js",
-    "test_no_auto_modal_startup.js",
-    "test_unified_auth_and_registration.js",
     "test_turbo_and_europe_compliance.js",
+    "test_unified_auth_and_registration.js",
+    "test_registration_flow_and_apple_logo.js",
     ".context_sync.json",
     "CURRENT_STATE.md"
   ],
-  "step": "Toutes les 10 suites de tests passent à 100%. Commit et push sur origin/main avec attribution obligatoire Grok 4.6.",
-  "last_commit": "848c8e9",
-  "timestamp": "2026-09-17T09:29:00-04:00"
+  "step": "Toutes les 11 suites de tests passent à 100%. Commit et push sur origin/main avec attribution obligatoire Grok 4.6.",
+  "last_commit": "b316bcf",
+  "timestamp": "2026-09-17T09:42:00-04:00"
 }
