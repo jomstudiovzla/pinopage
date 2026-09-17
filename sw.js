@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v14-crm-intuitive-pipeline';
+const CACHE_NAME = 'pino-ev-v15-clean-startup-no-auto-modals';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',

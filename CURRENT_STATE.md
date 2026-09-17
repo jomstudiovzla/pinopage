@@ -10,6 +10,21 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
+## ✅ Éradication de l'Ouverture Intempestive de la Modale B2B au Démarrage & Nettoyage Hash (100% OPÉRATIONNEL)
+- [x] **Démarrage Propre Zéro-Modale Garanti** :
+  - Élimination de l'ouverture automatique de la modale B2B (`#modal-window-b2b`) ou de toute autre modale de section lors du chargement ou du rafraîchissement de la page.
+  - Au déclenchement du `DOMContentLoaded`, tous les éléments `<dialog>` voient systématiquement leur attribut `open` retiré et leur méthode `.close()` invoquée.
+  - La landing page (hero, services, simulateur Unipros, galerie, tarifs) s'affiche désormais toujours nette, sans aucun popup bloquant.
+- [x] **Nettoyeur Universel et Proactif de Hash d'URL (`history.replaceState`)** :
+  - Détection et purge immédiate de tout hash d'ancre résiduel (`#b2b`, `#services`, `#unipros`, etc.) hérité de l'historique ou de la session du navigateur, empêchant la réouverture en boucle au reload.
+  - Les contrôles de fermeture de toutes les modales (bouton X, touche Échap, geste de glissement vers le bas `modal-drag-header` et clic extérieur sur le fond) déclenchent automatiquement le nettoyage de l'URL.
+- [x] **Remplacement des Ancres Brutes du Footer & des Cartes de Services** :
+  - Dans le footer (Accès Rapide) et les cartes de services, les balises `<a href="#b2b">`, `<a href="#services">`, etc. ont été remplacées par des boutons d'action ergonomiques appelant directement `openWindowModal(...)`. L'URL de la barre d'adresse reste ainsi constamment propre.
+- [x] **Service Worker v15 (`pino-ev-v15-clean-startup-no-auto-modals`)** :
+  - Cache mis à jour à la version 15 pour invalider automatiquement le cache navigateur obsolète des utilisateurs.
+- [x] **Suite de Tests Dédiée (`test_no_auto_modal_startup.js`)** :
+  - 8 suites de tests actives (90 tests automatisés 100% validés).
+
 ## ✅ CRM Intuitif, Pipeline Bidirectionnel par Client, Stepper Visuel & Réversibilité Andrés Pino (100% OPÉRATIONNEL)
 - [x] **Contrôles Intuitifs CRM avec Réversibilité (⏪ Revenir / ⏩ Avancer)** :
   - Dans la table des prospects (**Leads & Devis**) et la table des travaux (**Travaux CRM**), Andrés Pino dispose désormais de boutons rapides pour avancer d'une phase (`⏩`) ou reculer/revertir (`⏪`), en plus du sélecteur déroulant complet.

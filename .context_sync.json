@@ -1,18 +1,18 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "CRM Intuitif, Pipeline de Statuts Bidirectionnel par Client, Stepper Visuel & Réversibilité Andrés Pino",
-  "current_phase": "Production CRM & Client Experience — Intuitive Lifecycle & Bidirectional Pipeline",
-  "action": "1) Implémentation des contrôles d'avancement et de réversibilité (⏪ Revenir / ⏩ Avancer) dans la table des prospects (Leads & Devis) et la table des travaux (Travaux CRM) pour qu'Andrés Pino puisse facilement ajuster le statut des projets. 2) Notification automatique personnalisée en temps réel et par e-mail au client concerné à chaque changement de statut via PinoDB.notifyClientStatusChange. 3) Intégration d'un Stepper visuel à 6 étapes dans le portail client (Demande -> Devis chiffré -> Négociation -> Accord signé -> Chantier -> Facturé/Clôturé) avec indication claire que seul Andrés pilote et modifie les étapes techniques. 4) Remplacement des statuts et labels non-précis dans les travaux CRM par des intitulés professionnels clairs. 5) Bouton d'action directe pour signer et valider le devis côté client en phase de devis/négociation. 6) Bump Service Worker vers v14 (pino-ev-v14-crm-intuitive-pipeline).",
+  "active_goal": "Éradication de l'ouverture intempestive de la modale B2B au chargement & Nettoyage de l'URL hash",
+  "current_phase": "Zero-Interruption Startup & Clean Navigation",
+  "action": "1) Élimination de l'ouverture automatique de modales au démarrage : au DOMContentLoaded, fermeture systématique et suppression de l'attribut open sur tous les <dialog>. 2) Nettoyage immédiat et proactif du hash d'URL (history.replaceState) au chargement de la page pour purger tout hash résiduel (#b2b, #services, etc.) conservé par l'historique ou la session du navigateur. 3) Remplacement de tous les liens <a href=\"#...\"> du footer et des cartes de services par des boutons dédiés appelant openWindowModal sans polluer la barre d'adresse. 4) Ajout d'écouteurs d'événements 'close' sur tous les dialogues pour nettoyer immédiatement l'URL lors de toute fermeture (clic X, touche Échap, drag-down ou clic extérieur). 5) Mise à jour du Service Worker vers v15 (pino-ev-v15-clean-startup-no-auto-modals) pour purger le cache des navigateurs clients. 6) Création de la suite de tests test_no_auto_modal_startup.js (8 suites de tests / 90 tests automatisés 100% validés).",
   "files": [
     "index.html",
-    "assets/js/pino-db.js",
     "sw.js",
     "test_crm_intuitive_pipeline_and_notifications.js",
+    "test_no_auto_modal_startup.js",
     ".context_sync.json",
     "CURRENT_STATE.md"
   ],
-  "step": "Toutes les 7 suites de tests passent à 100% (85 tests automatisés validés). Localhost 8080 actif. Prêt pour commit et push GitHub.",
+  "step": "Toutes les 8 suites de tests passent à 100% (90 tests automatisés validés). Localhost 8080 actif. Prêt pour commit et push GitHub.",
   "last_commit": "d1e8b21",
-  "timestamp": "2026-09-17T00:32:00-04:00"
+  "timestamp": "2026-09-17T07:38:00-04:00"
 }

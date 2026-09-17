@@ -3291,9 +3291,9 @@
               <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-600"></i> Zéro tracas administratif, tout est automatisé</li>
             </ul>
           </div>
-          <a href="#unipros" class="inline-flex items-center justify-center gap-2 w-full py-3 bg-[#f0fdf4] hover:bg-brand-vivid text-brand-green hover:text-white font-extrabold text-xs rounded-xl border border-emerald-300 transition-colors">
+          <button type="button" onclick="openWindowModal('unipros')" class="inline-flex items-center justify-center gap-2 w-full py-3 bg-[#f0fdf4] hover:bg-brand-vivid text-brand-green hover:text-white font-extrabold text-xs rounded-xl border border-emerald-300 transition-colors cursor-pointer">
             <span>Simuler mon tarif SAP</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
-          </a>
+          </button>
         </div>
 
         <!-- Service Card 2: Service de Création de Jardin (PDF Página 1) -->
@@ -3320,22 +3320,22 @@
               <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-vivid"></i> Paillage écorce ou minéral limitant l'arrosage</li>
             </ul>
           </div>
-          <a href="#devis" class="inline-flex items-center justify-center gap-2 w-full py-3 bg-brand-light hover:bg-brand-green text-brand-green hover:text-white font-extrabold text-xs rounded-xl border border-brand-accent/30 transition-colors">
+          <button type="button" onclick="openWindowModal('devis')" class="inline-flex items-center justify-center gap-2 w-full py-3 bg-brand-light hover:bg-brand-green text-brand-green hover:text-white font-extrabold text-xs rounded-xl border border-brand-accent/30 transition-colors cursor-pointer">
             <span>Devis Création de Jardin</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
-          </a>
+          </button>
         </div>
 
         <!-- Service Card 3: Taille de Haies & Élagage -->
         <div class="bg-white p-8 rounded-3xl border-2 border-brand-accent/30 hover:border-brand-vivid shadow-md hover:shadow-2xl transition-all duration-300 group flex flex-col justify-between relative overflow-hidden">
           <div class="absolute top-0 right-0 bg-emerald-700 text-white text-[11px] font-extrabold px-3 py-1 rounded-bl-xl uppercase tracking-wider">
-            ✂️ Précision Végétale
+            ✂️ Précision & Soin
           </div>
           <div>
             <div class="w-14 h-14 bg-brand-vivid/10 text-brand-vivid rounded-2xl flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform duration-300">
               <i class="fa-solid fa-scissors"></i>
             </div>
             <div class="inline-block text-[11px] font-extrabold text-brand-vivid uppercase tracking-wider mb-1">
-              Structure & Intimité
+              Tailles & Élagage Doux
             </div>
             <h3 class="font-serif text-2xl font-extrabold text-brand-green mb-3">
               Taille de Haies & Élagage d'Arbres
@@ -3349,9 +3349,9 @@
               <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-vivid"></i> Évacuation complète des branchages broyés</li>
             </ul>
           </div>
-          <a href="#devis" class="inline-flex items-center justify-center gap-2 w-full py-3 bg-brand-light hover:bg-brand-green text-brand-green hover:text-white font-extrabold text-xs rounded-xl border border-brand-accent/30 transition-colors">
+          <button type="button" onclick="openWindowModal('devis')" class="inline-flex items-center justify-center gap-2 w-full py-3 bg-brand-light hover:bg-brand-green text-brand-green hover:text-white font-extrabold text-xs rounded-xl border border-brand-accent/30 transition-colors cursor-pointer">
             <span>Devis Taille de Haies</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
-          </a>
+          </button>
         </div>
 
         <!-- Service Card 4: Tonte & Entretien de Gazon -->
@@ -3378,9 +3378,9 @@
               <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-vivid"></i> Ramassage systématique des brins d'herbe</li>
             </ul>
           </div>
-          <a href="#devis" class="inline-flex items-center justify-center gap-2 w-full py-3 bg-brand-light hover:bg-brand-green text-brand-green hover:text-white font-extrabold text-xs rounded-xl border border-brand-accent/30 transition-colors">
+          <button type="button" onclick="openWindowModal('devis')" class="inline-flex items-center justify-center gap-2 w-full py-3 bg-brand-light hover:bg-brand-green text-brand-green hover:text-white font-extrabold text-xs rounded-xl border border-brand-accent/30 transition-colors cursor-pointer">
             <span>Devis Tonte Pelouse</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
-          </a>
+          </button>
         </div>
 
         <!-- Service Card 5: Débroussaillage & Nettoyage Extérieur -->
@@ -3407,9 +3407,9 @@
               <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-vivid"></i> Terrain remis à neuf prêt à être réutilisé</li>
             </ul>
           </div>
-          <a href="#devis" class="inline-flex items-center justify-center gap-2 w-full py-3 bg-brand-light hover:bg-brand-green text-brand-green hover:text-white font-extrabold text-xs rounded-xl border border-brand-accent/30 transition-colors">
+          <button type="button" onclick="openWindowModal('devis')" class="inline-flex items-center justify-center gap-2 w-full py-3 bg-brand-light hover:bg-brand-green text-brand-green hover:text-white font-extrabold text-xs rounded-xl border border-brand-accent/30 transition-colors cursor-pointer">
             <span>Devis Remise en État</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
-          </a>
+          </button>
         </div>
 
         <!-- Service Card 6: Solutions Entreprises & Syndics (B2B) -->
@@ -4086,9 +4086,9 @@
             </div>
           </label>
 
-          <a href="#devis" class="block w-full text-center bg-brand-vivid hover:bg-brand-green text-white font-bold py-3.5 rounded-xl transition-all duration-200 shadow-md">
+          <button type="button" onclick="openWindowModal('devis')" class="block w-full text-center bg-brand-vivid hover:bg-brand-green text-white font-bold py-3.5 rounded-xl transition-all duration-200 shadow-md cursor-pointer">
             Demander ce budget en devis
-          </a>
+          </button>
           
           <span class="text-[10px] text-brand-charcoal/50 leading-relaxed block text-center mt-2">
             * Cordonnées de simulation estimatives, soumises aux conditions d'éligibilité de l'Urssaf et de la coopérative agréée Unipros.
@@ -4887,10 +4887,10 @@
       <div class="space-y-4">
         <h4 class="font-semibold text-brand-accent uppercase tracking-widest text-xs">Accès Rapide</h4>
         <div class="grid grid-cols-2 gap-2 text-xs">
-          <a href="#services" class="hover:underline">Services</a>
-          <a href="#galerie" class="hover:underline">Réalisations</a>
-          <a href="#unipros" class="hover:underline">Crédit Impôt</a>
-          <a href="#b2b" class="hover:underline">Pro / B2B</a>
+          <button type="button" onclick="openWindowModal('services')" class="text-left hover:underline cursor-pointer">Services</button>
+          <button type="button" onclick="openWindowModal('realisations')" class="text-left hover:underline cursor-pointer">Réalisations</button>
+          <button type="button" onclick="openWindowModal('unipros')" class="text-left hover:underline cursor-pointer">Crédit Impôt</button>
+          <button type="button" onclick="openWindowModal('b2b')" class="text-left hover:underline cursor-pointer">Pro / B2B</button>
         </div>
       </div>
       <div class="space-y-4">
@@ -8740,6 +8740,13 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         }
       });
 
+      // Nettoyer tout hash d'ancre pour éviter la persistance d'URL résiduelle
+      if (window.location.hash && !window.location.hash.includes('activate')) {
+        try {
+          history.replaceState(null, '', window.location.pathname + window.location.search);
+        } catch (e) {}
+      }
+
       if (targetModal) {
         targetModal.showModal();
         
@@ -11756,29 +11763,44 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       }
     };
 
-    // Close on backdrop click for all section windows
+    // ─── INITIALISATION GLOBALE & GESTION DES MODALES ───
     document.addEventListener('DOMContentLoaded', () => {
-      // ── Sécurité: Fermer TOUT dialogue/modale ouvert au chargement initial ──
-      // Aucun dialogue ne doit être visible au premier affichage de la page.
-      document.querySelectorAll('dialog[open]').forEach(d => d.close());
+      // 1. Sécurité Zéro-Modal au démarrage initial :
+      // Aucun dialogue ne doit être visible au premier affichage de la page
+      document.querySelectorAll('dialog').forEach(d => {
+        d.removeAttribute('open');
+        try { d.close(); } catch (e) {}
+      });
+
+      // 2. Nettoyeur universel de hash d'URL pour empêcher la réouverture intempestive au refresh
+      const cleanModalHash = () => {
+        if (window.location.hash && !window.location.hash.includes('activate')) {
+          try {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+          } catch (e) {}
+        }
+      };
+
+      // Si l'URL contient un hash résiduel (ex: #b2b, #services), le nettoyer immédiatement
+      cleanModalHash();
 
       initDefaultUsers();
       initDefaultLeads();
       updateAuthUI();
       initModalDragToClose();
 
+      // 3. Gestionnaire de clic extérieur et écouteur de fermeture sur tous les dialogues
       document.querySelectorAll('dialog').forEach(dialog => {
         dialog.addEventListener('click', (e) => {
-          // 1. Si le clic provient d'un élément interne au dialogue (bouton, onglet, menu select, etc.), ne JAMAIS fermer !
+          // Si le clic provient d'un élément interne au dialogue, ne jamais fermer
           if (e.target !== dialog) return;
 
-          // 2. Ne jamais fermer l'Espace Admin CRM au clic extérieur (évite la fermeture intempestive lors du saut d'options)
+          // Ne jamais fermer l'Espace Admin CRM au clic extérieur
           if (dialog.id === 'modal-window-admin') return;
 
-          // 3. Ne jamais fermer les formulaires de travail ou l'espace client au clic extérieur pour ne pas perdre les données saisies
+          // Ne jamais fermer les formulaires de travail au clic extérieur
           if (['modal-window-client', 'modal-nouvelle-facture', 'modal-lead-response', 'modal-repair-lead', 'modal-add-platform-lead', 'modal-admin-create-client', 'modal-client-set-password', 'modal-client-signature'].includes(dialog.id)) return;
 
-          // 4. Pour les dialogues légaux et informatifs, vérifier si le clic est sur le fond extérieur
           const rect = dialog.getBoundingClientRect();
           const isInDialog = (
             rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
@@ -11786,28 +11808,38 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           );
           if (!isInDialog) {
             dialog.close();
+            cleanModalHash();
           }
         });
+
+        // Dès qu'un dialogue se ferme (bouton X, touche Echap, drag-down, API), nettoyer le hash
+        dialog.addEventListener('close', cleanModalHash);
       });
 
-      // Handle hash navigation (e.g. #services, #devis, #connexion, #admin, #activate)
-      const checkHash = () => {
-        const rawHash = window.location.hash || '';
-        if (rawHash.includes('activate') || window.location.search.includes('activate')) {
-          if (typeof window.handleActivationUrlRoute === 'function') {
+      // 4. Routage d'activation invité uniquement (#activate?email=...&token=...)
+      const rawHash = window.location.hash || '';
+      if (rawHash.includes('activate') || window.location.search.includes('activate')) {
+        if (typeof window.handleActivationUrlRoute === 'function') {
+          setTimeout(() => {
             window.handleActivationUrlRoute(rawHash || window.location.search);
+          }, 300);
+        }
+      }
+
+      // 5. Écouteur hashchange pour actions déclenchées dynamiquement
+      window.addEventListener('hashchange', () => {
+        const currentHash = window.location.hash || '';
+        if (currentHash.includes('activate') || window.location.search.includes('activate')) {
+          if (typeof window.handleActivationUrlRoute === 'function') {
+            window.handleActivationUrlRoute(currentHash || window.location.search);
           }
           return;
         }
-        const h = rawHash.replace('#', '').toLowerCase();
+        const h = currentHash.replace('#', '').toLowerCase();
         if (['services', 'forfaits', 'realisations', 'galerie', 'unipros', 'b2b', 'entreprises', 'devis', 'connexion', 'auth', 'admin', 'espace'].includes(h)) {
           window.openWindowModal(h);
         }
-      };
-      window.addEventListener('hashchange', checkHash);
-      if (window.location.hash || window.location.search.includes('activate')) {
-        setTimeout(checkHash, 300);
-      }
+      });
     });
   </script>
 </body>

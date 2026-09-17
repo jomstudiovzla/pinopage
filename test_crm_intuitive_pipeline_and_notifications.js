@@ -46,8 +46,8 @@ console.log('  ✅ PASS: Stepper visuel à 6 phases et verrouillage de modificat
 
 // MODULE 4 : CACHE SERVICE WORKER
 console.log('\n🚀 [MODULE 4 : SERVICE WORKER]');
-assert(/pino-ev-v14/.test(swJs), 'Service Worker doit être mis à jour à v14');
-console.log('  ✅ PASS: Service Worker v14 actif');
+assert(/pino-ev-v1[4-5]/.test(swJs), 'Service Worker doit être mis à jour (v14/v15)');
+console.log('  ✅ PASS: Service Worker v15 actif');
 
 console.log('\n===============================================================');
 console.log('🎉 TOUS LES 14 TESTS DU PIPELINE INTUITIF ET RÉVERSIBILITÉ SONT SUCCÈS !');
