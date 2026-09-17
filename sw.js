@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v18-apple-auth-perfect-login';
+const CACHE_NAME = 'pino-ev-v19-unified-auth-full-registration';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',

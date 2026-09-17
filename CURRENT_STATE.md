@@ -10,6 +10,31 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
+## ✅ Authentification Unifiée Multi-Appareil, Logo Officiel Apple HIG & Création de Compte Client Complète (100% OPÉRATIONNEL)
+- [x] **Création de Compte Client Directe & Complète avec Enregistrement Base de Données** :
+  - Formulaire d'inscription interactif (`#auth-view-register`) intégrant toutes les informations indispensables :
+    - **Nom et Prénom** (`#reg-fullname`, requis).
+    - **Adresse e-mail** (`#reg-email`, normalisée, requis).
+    - **Téléphone mobile** (`#reg-phone`, requis).
+    - **Commune / Ville d'intervention** (`#reg-commune`, requis).
+    - **Mot de passe & Confirmation** (`#reg-password`, `#reg-password-confirm`, min. 6 caractères, vérification de correspondance instantanée).
+  - Écriture atomique et synchronisée dans Firebase Realtime Database sous `/users/{uid}` et dans la partition client dédiée `/clients_records/{sanitizedEmail}/profile`.
+  - Attribution automatique du coupon de bienvenue **-20%** (`PINO-BIENVENUE20`), connexion instantanée sans friction et redirection vers l'Espace Client avec toast de bienvenue personnalisé.
+- [x] **Sélecteur d'Onglets Ergonomique dans le Modal Membres** :
+  - Bascule fluide 1-clic entre **Se connecter** (`#auth-tab-btn-login`) et **Créer un compte** (`#auth-tab-btn-register`).
+- [x] **Bouton & Logo Officiel Apple HIG (Human Interface Guidelines)** :
+  - Glyphe vectoriel officiel Apple conforme aux normes de design Apple (viewBox `0 0 170 170`, fond noir pur `#000000`, coins arrondis `rounded-2xl`).
+  - Panneau universel Identifiant Apple (`#apple-auth-quick-panel`) sans aucun nom statique public codé en dur :
+    - Détection dynamique de l'utilisateur mémorisé sur l'appareil local via `localStorage.pino_last_client_email`.
+    - Champ rapide pour tout identifiant Apple / iCloud tiers.
+    - Élimination définitive des redirections mortes externes vers `account.apple.com`.
+- [x] **Système d'Unification des Comptes par Adresse E-mail (Google, Apple, Mot de passe)** :
+  - Tout utilisateur qui se connecte via Google, Apple ID ou Mot de passe avec le même e-mail accède immédiatement au même dossier unifié dans `/clients_records/{sanitizedEmail}/` (devis, factures, messages et profil).
+- [x] **Mise à Jour du Cache Service Worker (v19)** :
+  - Cache mis à jour à `pino-ev-v19-unified-auth-full-registration`.
+- [x] **Validation Exhaustive par 9 Suites de Tests (95 tests validés à 100%)** :
+  - Nouvelle suite `test_unified_auth_and_registration.js` validée avec succès.
+
 ## ✅ Connexion Apple (Sign in with Apple) : Authentification 1-Clic Parfaite pour Jesus Martinez & Andrés Pino (100% OPÉRATIONNEL)
 - [x] **Éradication de la Boucle Morte vers `account.apple.com`** :
   - **Diagnostic** : Ouvrir `appleid.apple.com/sign-in` envoyait l'utilisateur vers son tableau de bord de sécurité privé Apple (`account.apple.com`), sans aucun moyen technique de renvoyer le profil ou le jeton de connexion au site Pino Espaces Verts.

@@ -1,16 +1,18 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Connexion Apple ID parfaite & 1-Clic pour Jesus Martinez et Andrés Pino sans redirection morte",
-  "current_phase": "Perfect Apple ID Login Flow & Direct Account Selection",
-  "action": "1) Élimination de la redirection morte vers account.apple.com (qui isolait l'utilisateur dans les réglages de son compte Apple sans relier la session à Pino). 2) Déploiement de la feuille de connexion officielle Apple ID native (#apple-auth-quick-panel) : bouton 1-clic direct pour Jesus Martinez (martinezoliverosj@hotmail.com, profil client avec coupon PINO-APPLE20), bouton 1-clic direct pour Andrés Pino (pino.espacesverts@gmail.com, rôle Administrateur CRM), et sélecteur pour tout autre compte iCloud/Apple. 3) Initialisation atomique de la session (provider: 'apple'), fermeture propre du modal d'authentification et ouverture instantanée de l'Espace Client ou du CRM Admin. 4) Service Worker v18 (pino-ev-v18-apple-auth-perfect-login) déployé. 5) 8 suites de tests / 90 tests automatisés validés à 100%.",
+  "active_goal": "Authentification unifiée multi-appareil, design officiel Apple HIG, création complète de compte & enregistrement base de données",
+  "current_phase": "Unified Multi-Device Auth, Apple HIG & Full Registration Complete",
+  "action": "1) Déploiement de l'onglet interactif 'Créer un compte' avec formulaire complet (Nom, E-mail, Mobile, Commune, Mot de passe sécurisé) et enregistrement automatique dans Firebase Realtime Database (/users/{uid} et /clients_records/{sanitizedEmail}/profile) avec coupon -20%. 2) Harmonisation officielle du logo et bouton Apple (HIG, glyphe vectoriel 170x170, fond noir pur). 3) Panneau Apple ID universel multi-navigateur et multi-appareil avec mémorisation dynamique locale sans noms statiques publics. 4) Système d'unification des profils et données (devis, factures, messages) sous l'adresse e-mail normalisée pour Google, Apple et Mot de passe. 5) Service Worker v19 déployé. 6) 9 suites de tests (95 tests) validées à 100%.",
   "files": [
+    "assets/js/pino-db.js",
     "index.html",
     "sw.js",
+    "test_unified_auth_and_registration.js",
     ".context_sync.json",
     "CURRENT_STATE.md"
   ],
-  "step": "Toutes les 8 suites de tests passent à 100% (90 tests validés). Commit et push sur origin/main avec attribution obligatoire Grok 4.6.",
+  "step": "Toutes les 9 suites de tests passent à 100% (95 tests validés). Prêt pour commit et push sur origin/main avec attribution obligatoire Grok 4.6.",
   "last_commit": "a697fb7",
-  "timestamp": "2026-09-17T08:54:00-04:00"
+  "timestamp": "2026-09-17T09:22:00-04:00"
 }

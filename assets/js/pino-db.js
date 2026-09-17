@@ -1270,14 +1270,15 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
   async function upsertProfile(fbUser, extra = {}) {
     if (!fbUser?.uid) return { ok: false };
 
-    const normEmail = (fbUser.email || '').toLowerCase();
+    const normEmail = (fbUser.email || '').trim().toLowerCase();
     const isAdmin = normEmail === 'pino.spacesverts@gmail.com' ||
                     normEmail === 'pino.espacesverts@gmail.com';
+    const sanitizedEmail = normEmail ? normEmail.replace(/[.#$[\]]/g, '_') : null;
 
     const payload = {
       id:            fbUser.uid,
       uid:           fbUser.uid,
-      email:         fbUser.email,
+      email:         normEmail,
       full_name:     extra.fullName || fbUser.displayName || (isAdmin ? 'Andrés Pino' : 'Client Particulier'),
       phone:         extra.phone    || fbUser.phoneNumber || null,
       commune:       extra.commune  || 'Bordeaux',
@@ -1292,6 +1293,17 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     if (db) {
       try {
         await db.ref('users/' + fbUser.uid).update(payload);
+        if (sanitizedEmail) {
+          await db.ref(`clients_records/${sanitizedEmail}/profile`).update({
+            fullName: payload.full_name,
+            email: normEmail,
+            phone: payload.phone,
+            commune: payload.commune,
+            role: payload.role,
+            lastAuthProvider: payload.auth_provider,
+            updatedAt: payload.updated_at
+          }).catch(() => {});
+        }
         return { ok: true };
       } catch (err) {
         log('upsertProfile:rtdb', err);
@@ -2709,6 +2721,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     acceptQuote,
     fetchClientQuotes,
     upsertProfile,
+    saveProfile: upsertProfile,
     fetchProfiles,
     fetchUserCoupon,
     redeemPelabola,

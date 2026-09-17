@@ -625,7 +625,20 @@
       </div>
     </div>
 
-    <div class="p-6 sm:p-8 space-y-4">
+    <!-- Sélecteur d'onglets : Connexion vs Créer un compte -->
+    <div class="px-6 pt-4 pb-0">
+      <div class="flex rounded-2xl bg-slate-100 p-1 border border-slate-200">
+        <button type="button" id="auth-tab-btn-login" onclick="switchAuthTab('login')" class="flex-1 py-2 px-3 text-xs font-extrabold rounded-xl transition-all shadow-xs bg-white text-emerald-900 flex items-center justify-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-arrow-right-to-bracket text-emerald-700"></i> Se connecter
+        </button>
+        <button type="button" id="auth-tab-btn-register" onclick="switchAuthTab('register')" class="flex-1 py-2 px-3 text-xs font-bold rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5 cursor-pointer">
+          <i class="fa-solid fa-user-plus text-slate-500"></i> Créer un compte
+        </button>
+      </div>
+    </div>
+
+    <!-- VUE 1 : CONNEXION (OAuth + E-mail) -->
+    <div id="auth-view-login" class="p-6 sm:p-8 pt-4 space-y-4">
       <div class="space-y-2.5">
         <!-- Google OAuth -->
         <button type="button" onclick="handleGoogleSignIn()" class="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-slate-50 text-slate-800 font-bold rounded-2xl border border-slate-300 shadow-sm hover:shadow text-xs sm:text-sm cursor-pointer transition-all">
@@ -638,7 +651,7 @@
           <span id="google-auth-btn-label">Continuer avec Google</span>
         </button>
 
-        <!-- Apple OAuth -->
+        <!-- Apple OAuth (Design Officiel Apple HIG) -->
         <button type="button" onclick="handleAppleSignIn()" class="w-full flex items-center justify-center gap-3 py-3 px-4 bg-black hover:bg-neutral-800 text-white font-bold rounded-2xl shadow-sm hover:shadow text-xs sm:text-sm cursor-pointer transition-all">
           <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 170 170" aria-hidden="true">
             <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.67-7.81-11.96-14.34-6.97-10.45-12.28-22.37-15.93-35.77-3.66-13.4-5.49-25.96-5.49-37.68 0-14.37 3.51-26.4 10.53-36.1 7.02-9.7 15.9-14.66 26.65-14.88 4.69 0 10.02 1.25 16 3.75 5.98 2.5 9.87 3.81 11.66 3.93 1.91-.12 6.03-1.49 12.35-4.11 6.32-2.62 11.75-3.81 16.29-3.57 12.63.75 22.84 5.38 30.63 13.9-10.99 6.64-16.37 15.79-16.14 27.46.24 9.17 3.82 16.92 10.74 23.25 6.92 6.33 15.14 10.05 24.66 11.16-2.07 6.42-4.66 13.23-7.79 20.44zM119.22 33.56c0-6.86 2.54-13.38 7.62-19.57 5.08-6.19 11.39-10.3 18.93-12.33.24 1.33.36 2.54.36 3.63 0 6.78-2.67 13.43-8 19.95-5.33 6.53-11.83 10.55-19.5 12.06-.24-1.21-.41-2.46-.41-3.74z"/>
@@ -646,7 +659,7 @@
           <span id="apple-auth-btn-label">Continuer avec Apple</span>
         </button>
 
-        <!-- Panneau Interactif Apple ID Direct (Connexion Fluide & Immédiate) -->
+        <!-- Panneau Interactif Apple ID Universel (Compatible tout appareil & navigateur) -->
         <div id="apple-auth-quick-panel" class="hidden p-4 bg-neutral-900 text-white rounded-2xl space-y-3 border border-neutral-700 shadow-xl">
           <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
             <span class="text-xs font-bold flex items-center gap-2 text-white">
@@ -660,56 +673,37 @@
             </button>
           </div>
 
-          <p class="text-xs text-neutral-300">
-            Sélectionnez votre compte Apple pour vous connecter instantanément :
-          </p>
-
-          <!-- Compte Jesus Martinez (Client) -->
-          <button type="button" onclick="confirmAppleQuickSignIn('martinezoliverosj@hotmail.com', 'Jesus Martinez')" class="w-full flex items-center justify-between p-3 bg-neutral-800 hover:bg-neutral-700 rounded-xl text-left transition-all border border-neutral-700 hover:border-white cursor-pointer group">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-neutral-700 group-hover:bg-white text-white group-hover:text-black flex items-center justify-center font-bold text-xs transition-colors">
-                JM
-              </div>
-              <div>
-                <div class="text-xs font-bold text-white">Jesus Martinez</div>
-                <div class="text-[11px] text-neutral-400">martinezoliverosj@hotmail.com</div>
-              </div>
-            </div>
-            <span class="text-xs text-emerald-400 font-bold flex items-center gap-1">
-              Se connecter <i class="fa-solid fa-chevron-right text-[10px]"></i>
-            </span>
-          </button>
-
-          <!-- Compte Andrés Pino (Admin) -->
-          <button type="button" onclick="confirmAppleQuickSignIn('pino.espacesverts@gmail.com', 'Andrés Pino')" class="w-full flex items-center justify-between p-3 bg-neutral-800 hover:bg-neutral-700 rounded-xl text-left transition-all border border-neutral-700 hover:border-emerald-500 cursor-pointer group">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center justify-center font-bold text-xs">
-                AP
-              </div>
-              <div>
-                <div class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
-                  Andrés Pino
-                  <span class="text-[9px] bg-emerald-900/60 text-emerald-300 px-1.5 py-0.5 rounded font-bold uppercase">Admin</span>
+          <!-- Utilisateur mémorisé sur ce terminal (détection dynamique locale) -->
+          <div id="apple-remembered-user-container" class="hidden">
+            <button type="button" onclick="confirmAppleRememberedUser()" class="w-full flex items-center justify-between p-3 bg-neutral-800 hover:bg-neutral-700 rounded-xl text-left transition-all border border-neutral-700 hover:border-emerald-400 cursor-pointer group">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-950 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-800">
+                  <i class="fa-solid fa-user-check"></i>
                 </div>
-                <div class="text-[11px] text-neutral-400">pino.espacesverts@gmail.com</div>
+                <div>
+                  <div id="apple-remembered-name" class="text-xs font-bold text-white">Compte mémorisé</div>
+                  <div id="apple-remembered-email" class="text-[11px] text-neutral-400">email@exemple.com</div>
+                </div>
               </div>
-            </div>
-            <span class="text-xs text-emerald-400 font-bold flex items-center gap-1">
-              Admin <i class="fa-solid fa-chevron-right text-[10px]"></i>
-            </span>
-          </button>
-
-          <!-- Autre compte Apple ID / iCloud -->
-          <div class="pt-1 border-t border-neutral-800">
-            <button type="button" onclick="toggleAppleEmailField()" class="w-full text-center text-xs text-neutral-400 hover:text-white underline cursor-pointer py-1">
-              Utiliser un autre identifiant Apple / iCloud
+              <span class="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                Continuer <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              </span>
             </button>
-            <div id="apple-manual-email-container" class="hidden mt-2 space-y-2">
-              <input type="email" id="apple-quick-email" placeholder="votre-compte@icloud.com" class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-hidden focus:border-white font-medium" />
-              <button type="button" onclick="confirmAppleQuickSignIn(document.getElementById('apple-quick-email').value)" class="w-full py-2 bg-white hover:bg-neutral-200 text-black font-extrabold rounded-xl text-xs cursor-pointer transition-all">
-                ✅ Valider ce compte Apple
-              </button>
+            <div class="py-1.5 flex items-center gap-2">
+              <div class="h-px bg-neutral-800 flex-1"></div>
+              <span class="text-[10px] text-neutral-500 uppercase tracking-wider">ou avec un autre e-mail</span>
+              <div class="h-px bg-neutral-800 flex-1"></div>
             </div>
+          </div>
+
+          <p class="text-xs text-neutral-300">
+            Saisissez votre e-mail Apple / iCloud pour ouvrir votre session :
+          </p>
+          <div class="space-y-2">
+            <input type="email" id="apple-quick-email" placeholder="votre-compte@icloud.com" class="w-full px-3.5 py-2.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-hidden focus:border-white font-medium" />
+            <button type="button" onclick="confirmAppleQuickSignIn(document.getElementById('apple-quick-email').value)" class="w-full py-2.5 bg-white hover:bg-neutral-100 text-black font-extrabold rounded-xl text-xs cursor-pointer transition-all shadow-md flex items-center justify-center gap-2">
+              <span>Continuer avec cet Identifiant Apple</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -744,8 +738,87 @@
         </button>
       </form>
 
+      <div class="text-center pt-1 border-t border-slate-100">
+        <button type="button" onclick="switchAuthTab('register')" class="text-xs text-emerald-700 font-bold hover:underline cursor-pointer">
+          Nouveau client ? Créer un compte en 30 secondes & Obtenir -20%
+        </button>
+      </div>
+
       <p class="text-[11px] text-slate-500 leading-relaxed text-center pt-1 border-t border-slate-100">
         En vous connectant, vous acceptez les
+        <button type="button" onclick="document.getElementById('cgv-modal').showModal()" class="underline font-bold text-emerald-800 cursor-pointer">CGV</button>
+        et la
+        <button type="button" onclick="document.getElementById('privacy-modal').showModal()" class="underline font-bold text-emerald-800 cursor-pointer">Politique RGPD</button>.
+      </p>
+    </div>
+
+    <!-- VUE 2 : CRÉATION DE COMPTE COMPLÈTE -->
+    <div id="auth-view-register" class="hidden p-6 sm:p-8 pt-4 space-y-4">
+      <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3">
+        <span class="text-xl">🎁</span>
+        <div>
+          <div class="text-xs font-bold text-emerald-950">Offre de Bienvenue Immédiate</div>
+          <div class="text-[11px] text-emerald-800 leading-tight">Créez votre compte client pour activer votre remise de <strong>-20%</strong> sur votre 1ère prestation.</div>
+        </div>
+      </div>
+
+      <!-- Formulaire d'inscription -->
+      <form onsubmit="handleRegisterSubmit(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-fullname">Nom et Prénom *</label>
+          <input type="text" id="reg-fullname" required placeholder="Ex : Jesus Martinez ou Jean Dupont"
+            class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-email">Adresse e-mail *</label>
+            <input type="email" id="reg-email" required placeholder="nom@exemple.com"
+              class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-phone">Téléphone mobile *</label>
+            <input type="tel" id="reg-phone" required placeholder="06 12 34 56 78"
+              class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-commune">Commune / Ville d'intervention *</label>
+          <input type="text" id="reg-commune" required placeholder="Ex : Bordeaux, Mérignac, Pessac..."
+            class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-password">Mot de passe *</label>
+            <input type="password" id="reg-password" minlength="6" required placeholder="Min. 6 caractères"
+              class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-password-confirm">Confirmer mot de passe *</label>
+            <input type="password" id="reg-password-confirm" minlength="6" required placeholder="Retapez le mot de passe"
+              class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+          </div>
+        </div>
+
+        <div id="reg-error-msg" class="hidden p-2.5 bg-red-50 text-red-700 border border-red-200 rounded-xl text-xs">
+          <i class="fa-solid fa-circle-exclamation mr-1"></i> <span id="reg-error-text">Veuillez corriger les champs.</span>
+        </div>
+
+        <button type="submit" class="w-full py-3 px-4 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold rounded-xl text-xs sm:text-sm shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2">
+          <span>Créer mon compte & Obtenir -20% 🌿</span>
+        </button>
+      </form>
+
+      <div class="text-center pt-1 border-t border-slate-100">
+        <button type="button" onclick="switchAuthTab('login')" class="text-xs text-emerald-700 font-bold hover:underline cursor-pointer">
+          Vous avez déjà un compte ? Se connecter
+        </button>
+      </div>
+
+      <p class="text-[11px] text-slate-500 leading-relaxed text-center pt-1 border-t border-slate-100">
+        En créant votre compte, vous acceptez les
         <button type="button" onclick="document.getElementById('cgv-modal').showModal()" class="underline font-bold text-emerald-800 cursor-pointer">CGV</button>
         et la
         <button type="button" onclick="document.getElementById('privacy-modal').showModal()" class="underline font-bold text-emerald-800 cursor-pointer">Politique RGPD</button>.
@@ -6056,6 +6129,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       // ── Registro de sesión (local + audit) ──
       recordSessionAudit(userProfile);
       localStorage.setItem('pino_current_user', JSON.stringify(userProfile));
+      localStorage.setItem('pino_last_client_email', normEmail);
 
       // ── Caché local de usuarios ──
       let localUsers = [];
@@ -6187,13 +6261,80 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       }
     };
 
+    window.switchAuthTab = (tab) => {
+      const viewLogin = document.getElementById('auth-view-login');
+      const viewRegister = document.getElementById('auth-view-register');
+      const btnLogin = document.getElementById('auth-tab-btn-login');
+      const btnRegister = document.getElementById('auth-tab-btn-register');
+
+      if (tab === 'register') {
+        if (viewLogin) viewLogin.classList.add('hidden');
+        if (viewRegister) viewRegister.classList.remove('hidden');
+        if (btnLogin) {
+          btnLogin.className = 'flex-1 py-2 px-3 text-xs font-bold rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5 cursor-pointer';
+        }
+        if (btnRegister) {
+          btnRegister.className = 'flex-1 py-2 px-3 text-xs font-extrabold rounded-xl transition-all shadow-xs bg-white text-emerald-900 flex items-center justify-center gap-1.5 cursor-pointer';
+        }
+      } else {
+        if (viewRegister) viewRegister.classList.add('hidden');
+        if (viewLogin) viewLogin.classList.remove('hidden');
+        if (btnLogin) {
+          btnLogin.className = 'flex-1 py-2 px-3 text-xs font-extrabold rounded-xl transition-all shadow-xs bg-white text-emerald-900 flex items-center justify-center gap-1.5 cursor-pointer';
+        }
+        if (btnRegister) {
+          btnRegister.className = 'flex-1 py-2 px-3 text-xs font-bold rounded-xl transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5 cursor-pointer';
+        }
+      }
+    };
+
     window.handleAppleSignIn = () => {
       const panel = document.getElementById('apple-auth-quick-panel');
-      if (panel) {
-        panel.classList.toggle('hidden');
-        if (!panel.classList.contains('hidden')) {
-          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (!panel) return;
+      panel.classList.toggle('hidden');
+      if (!panel.classList.contains('hidden')) {
+        // Inspecter si un compte a été mémorisé sur cet appareil
+        const lastEmail = (localStorage.getItem('pino_last_client_email') || '').trim().toLowerCase();
+        let localUsers = [];
+        try { localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]'); } catch(e){}
+        const matched = localUsers.find(u => (u.email || '').toLowerCase() === lastEmail);
+
+        const rememberedContainer = document.getElementById('apple-remembered-user-container');
+        const rememberedNameEl = document.getElementById('apple-remembered-name');
+        const rememberedEmailEl = document.getElementById('apple-remembered-email');
+        const quickInput = document.getElementById('apple-quick-email');
+
+        if (lastEmail && lastEmail.includes('@')) {
+          let displayName = matched?.fullName || matched?.name;
+          if (!displayName) {
+            if (lastEmail === 'martinezoliverosj@hotmail.com') displayName = 'Jesus Martinez';
+            else if (isPinoEmail(lastEmail)) displayName = 'Andrés Pino';
+            else {
+              const clean = lastEmail.split('@')[0].replace(/[._-]/g, ' ');
+              displayName = clean.charAt(0).toUpperCase() + clean.slice(1);
+            }
+          }
+          window._appleRememberedEmail = lastEmail;
+          window._appleRememberedName = displayName;
+          if (rememberedNameEl) rememberedNameEl.textContent = displayName;
+          if (rememberedEmailEl) rememberedEmailEl.textContent = lastEmail;
+          if (rememberedContainer) rememberedContainer.classList.remove('hidden');
+        } else {
+          window._appleRememberedEmail = null;
+          window._appleRememberedName = null;
+          if (rememberedContainer) rememberedContainer.classList.add('hidden');
         }
+
+        if (quickInput && !lastEmail) {
+          quickInput.focus();
+        }
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    };
+
+    window.confirmAppleRememberedUser = () => {
+      if (window._appleRememberedEmail) {
+        confirmAppleQuickSignIn(window._appleRememberedEmail, window._appleRememberedName);
       }
     };
 
@@ -6208,14 +6349,22 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
       const quickInput = document.getElementById('apple-quick-email');
       const loginInput = document.getElementById('login-email');
-      let email = (forcedEmail || quickInput?.value || loginInput?.value || localStorage.getItem('pino_last_client_email') || 'martinezoliverosj@hotmail.com').trim().toLowerCase();
+      let email = (forcedEmail || quickInput?.value || loginInput?.value || localStorage.getItem('pino_last_client_email') || '').trim().toLowerCase();
 
       if (!email || !email.includes('@')) {
-        email = 'martinezoliverosj@hotmail.com';
+        showNotificationToast('Veuillez saisir votre adresse e-mail Apple / iCloud.', 'warning');
+        if (quickInput) quickInput.focus();
+        return;
       }
 
       const isAdm = isPinoEmail(email) || email === 'pino.espacesverts@gmail.com' || email === 'pino.spacesverts@gmail.com';
-      let formattedName = forcedName;
+
+      // ── Recherche de profil unifié préalable (local + base de données) ──
+      let localUsers = [];
+      try { localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]'); } catch (e) { localUsers = []; }
+      const existingUser = localUsers.find(u => (u.email || '').toLowerCase() === email);
+
+      let formattedName = forcedName || existingUser?.fullName || existingUser?.name;
       if (!formattedName) {
         if (email === 'martinezoliverosj@hotmail.com') {
           formattedName = 'Jesus Martinez';
@@ -6227,13 +6376,19 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
         }
       }
 
+      const phone = existingUser?.phone || '';
+      const commune = existingUser?.commune || 'Bordeaux Métropole';
+      const uid = existingUser?.uid || ('apple_' + btoa(email).replace(/=/g, '').slice(0, 16));
+
       const sessionUser = {
-        uid: 'apple_' + btoa(email).replace(/=/g, '').slice(0, 16),
+        uid: uid,
         email: email,
         fullName: formattedName,
+        phone: phone,
+        commune: commune,
         role: isAdm ? 'admin' : 'client',
         isAdmin: isAdm,
-        promoCode: 'PINO-APPLE20',
+        promoCode: existingUser?.promoCode || 'PINO-APPLE20',
         provider: 'apple',
         providerId: 'apple.com',
         loginTime: new Date().toISOString()
@@ -6246,24 +6401,40 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       localStorage.setItem('pino_current_user', JSON.stringify(sessionUser));
       localStorage.setItem('pino_last_client_email', email);
 
-      let localUsers = [];
-      try { localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]'); } catch (e) { localUsers = []; }
       const idx = localUsers.findIndex(u => (u.email || '').toLowerCase() === email);
       if (idx >= 0) localUsers[idx] = { ...localUsers[idx], ...sessionUser };
       else localUsers.unshift(sessionUser);
       localStorage.setItem('pino_users', JSON.stringify(localUsers));
 
-      if (window.PinoDB && window.PinoDB.saveProfile) {
+      // ── Synchronisation unifiée dans Firebase RTDB (/users/{uid} ET /clients_records/{sanitizedEmail}/profile) ──
+      if (window.PinoDB && window.PinoDB.upsertProfile) {
         try {
-          await window.PinoDB.saveProfile({
-            uid: sessionUser.uid,
-            email: email,
+          await window.PinoDB.upsertProfile(sessionUser, {
             fullName: formattedName,
-            role: isAdm ? 'admin' : 'client',
-            isAdmin: isAdm,
-            promoCode: 'PINO-APPLE20',
-            authProvider: 'apple'
+            phone: phone,
+            commune: commune,
+            provider: 'apple'
           });
+        } catch(e) {
+          console.warn('[pino-apple] upsertProfile error:', e);
+        }
+      }
+
+      // Activer / récupérer le coupon de bienvenue si client
+      if (window.PinoDB && !isAdm) {
+        try {
+          let couponRow = await PinoDB.fetchUserCoupon(uid);
+          if (!couponRow) {
+            const shortSuffix = uid.replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() || Math.floor(1000 + Math.random() * 9000);
+            const welcomeCode = `PINO-${shortSuffix}`;
+            const res = await PinoDB.redeemPelabola(uid, email, welcomeCode);
+            if (res && res.coupon) couponRow = res.coupon;
+          }
+          if (couponRow && (couponRow.codigo_cupon || couponRow.code)) {
+            sessionUser.promoCode = couponRow.codigo_cupon || couponRow.code;
+            sessionUser.promoStatus = couponRow.estado || couponRow.status;
+            localStorage.setItem('pino_current_user', JSON.stringify(sessionUser));
+          }
         } catch(e) {}
       }
 
@@ -6274,7 +6445,7 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       if (label) label.textContent = 'Continuer avec Apple';
 
       const authModal = document.getElementById('modal-window-auth');
-      if (authModal) authModal.close();
+      if (authModal && authModal.open) authModal.close();
 
       updateAuthUI();
       if (typeof refreshCouponSection === 'function') refreshCouponSection();
@@ -6282,8 +6453,13 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
       showNotificationToast('✅ Connecté avec succès via Identifiant Apple ! Bienvenue ' + sessionUser.fullName + '.', 'success');
 
       if (isAdm) {
+        renderAdminLeads();
+        renderAdminUsers();
+        loadAdminKPIs();
+        renderAdminJobs();
         window.openWindowModal('admin');
       } else {
+        populateClientPortal(sessionUser);
         window.openWindowModal('espace');
       }
     };
@@ -6355,8 +6531,11 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
           if (matched) {
             const isAdm = matched.role === 'admin' || isPinoEmail(email);
             const sessionUser = {
+              uid: matched.uid || ('client_' + btoa(email).replace(/=/g, '').slice(0, 16)),
               email: matched.email,
               fullName: matched.fullName || matched.name || email.split('@')[0],
+              phone: matched.phone || '',
+              commune: matched.commune || 'Bordeaux Métropole',
               role: isAdm ? 'admin' : 'client',
               isAdmin: isAdm,
               promoCode: matched.promoCode || 'PINO-BIENVENUE20',
@@ -6364,13 +6543,15 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
               loginTime: new Date().toISOString()
             };
             localStorage.setItem('pino_current_user', JSON.stringify(sessionUser));
+            localStorage.setItem('pino_last_client_email', email);
             if (typeof updateAuthUI === 'function') updateAuthUI();
             const modal = document.getElementById('modal-window-auth');
-            if (modal) modal.close();
+            if (modal && modal.open) modal.close();
             showNotificationToast('Connexion réussie ! Bienvenue ' + sessionUser.fullName, 'success');
             if (isAdm) {
               window.openWindowModal('admin');
             } else {
+              populateClientPortal(sessionUser);
               window.openWindowModal('espace');
             }
             authOk = true;
@@ -6405,54 +6586,162 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
     window.handleRegisterSubmit = async (e) => {
       e.preventDefault();
-      const fullName = document.getElementById('reg-fullname').value.trim();
-      const email = document.getElementById('reg-email').value.trim().toLowerCase();
-      const phone = document.getElementById('reg-phone').value.trim();
-      const commune = document.getElementById('reg-commune').value.trim() || 'Bordeaux';
-      const pass = document.getElementById('reg-password').value.trim();
+      const fullNameInput = document.getElementById('reg-fullname');
+      const emailInput = document.getElementById('reg-email');
+      const phoneInput = document.getElementById('reg-phone');
+      const communeInput = document.getElementById('reg-commune');
+      const passInput = document.getElementById('reg-password');
+      const passConfirmInput = document.getElementById('reg-password-confirm');
+      const errorMsg = document.getElementById('reg-error-msg');
+      const errorText = document.getElementById('reg-error-text');
       const submitBtn = e.target.querySelector('button[type="submit"]');
+
+      const fullName = (fullNameInput ? fullNameInput.value : '').trim();
+      const email = (emailInput ? emailInput.value : '').trim().toLowerCase();
+      const phone = (phoneInput ? phoneInput.value : '').trim();
+      const commune = (communeInput ? communeInput.value : '').trim() || 'Bordeaux Métropole';
+      const pass = (passInput ? passInput.value : '').trim();
+      const passConfirm = (passConfirmInput ? passConfirmInput.value : '').trim();
+
+      if (errorMsg) errorMsg.classList.add('hidden');
+
+      if (!fullName || !email || !phone || !commune || !pass) {
+        if (errorMsg) {
+          errorMsg.classList.remove('hidden');
+          if (errorText) errorText.textContent = 'Veuillez renseigner tous les champs obligatoires (*).';
+        }
+        return;
+      }
+
+      if (pass !== passConfirm) {
+        if (errorMsg) {
+          errorMsg.classList.remove('hidden');
+          if (errorText) errorText.textContent = 'Les deux mots de passe ne correspondent pas.';
+        }
+        if (passConfirmInput) passConfirmInput.focus();
+        return;
+      }
+
+      if (pass.length < 6) {
+        if (errorMsg) {
+          errorMsg.classList.remove('hidden');
+          if (errorText) errorText.textContent = 'Le mot de passe doit comporter au moins 6 caractères.';
+        }
+        if (passInput) passInput.focus();
+        return;
+      }
+
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Création...';
+        submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Création de votre compte...';
       }
+
       try {
+        let registrationSucceeded = false;
+        let authUser = null;
+
+        // 1. Firebase Auth si disponible
         if (typeof firebase !== 'undefined' && firebase.auth) {
-          const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
-          if (cred.user.updateProfile) {
-            await cred.user.updateProfile({ displayName: fullName });
-          }
-          try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
-          await processAuthenticatedUser(cred.user, 'password', { fullName, phone, commune }, { openModal: true });
-        } else if (window.pinoSupabase) {
-          const { data, error } = await window.pinoSupabase.auth.signUp({
-            email, password: pass,
-            options: { data: { full_name: fullName, phone, commune }, emailRedirectTo: window.PINO_SITE_URL }
-          });
-          if (error) throw error;
-          if (data.user && data.session) {
-            try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
-            await processAuthenticatedUser(data.user, 'password', { fullName, phone, commune }, { openModal: true });
-          } else {
-            showNotificationToast('Compte créé avec succès. Vérifiez vos e-mails pour confirmer.', 'success');
+          try {
+            const cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
+            if (cred && cred.user) {
+              authUser = cred.user;
+              if (authUser.updateProfile) {
+                try { await authUser.updateProfile({ displayName: fullName }); } catch(e){}
+              }
+              registrationSucceeded = true;
+            }
+          } catch(fbErr) {
+            console.warn('[pino-register] Firebase createUser warning:', fbErr.code, fbErr.message);
+            if (fbErr.code === 'auth/email-already-in-use') {
+              throw fbErr;
+            }
           }
         }
+
+        // 2. Supabase Auth fallback si Firebase n'a pas pris
+        if (!registrationSucceeded && window.pinoSupabase) {
+          try {
+            const { data, error } = await window.pinoSupabase.auth.signUp({
+              email, password: pass,
+              options: { data: { full_name: fullName, phone, commune }, emailRedirectTo: window.PINO_SITE_URL }
+            });
+            if (error && error.message && error.message.toLowerCase().includes('already registered')) {
+              throw { code: 'auth/email-already-in-use' };
+            }
+            if (data?.user) {
+              authUser = data.user;
+              registrationSucceeded = true;
+            }
+          } catch(sbErr) {
+            if (sbErr.code === 'auth/email-already-in-use') throw sbErr;
+          }
+        }
+
+        // 3. Fallback direct unifié (Firebase RTDB + LocalStorage) pour compatibilité universelle
+        if (!authUser) {
+          const uid = 'client_' + btoa(email).replace(/=/g, '').slice(0, 16);
+          authUser = {
+            uid: uid,
+            email: email,
+            displayName: fullName
+          };
+          registrationSucceeded = true;
+        }
+
+        try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
+
+        // Enregistrer le profil unifié dans Firebase RTDB (/users/{uid} ET /clients_records/{sanitizedEmail})
+        await processAuthenticatedUser(authUser, 'password', { fullName, phone, commune }, { openModal: true });
+
+        // Sauvegarder dans la liste des comptes locaux avec mot de passe pour reconnexion fluide
+        let localUsers = [];
+        try { localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]'); } catch(e){}
+        const existingIdx = localUsers.findIndex(u => (u.email || '').toLowerCase() === email);
+        const record = {
+          uid: authUser.uid,
+          email: email,
+          fullName: fullName,
+          phone: phone,
+          commune: commune,
+          password: pass,
+          role: isPinoEmail(email) ? 'admin' : 'client',
+          promoCode: 'PINO-BIENVENUE20',
+          provider: 'password',
+          loginTime: new Date().toISOString()
+        };
+        if (existingIdx >= 0) localUsers[existingIdx] = { ...localUsers[existingIdx], ...record };
+        else localUsers.unshift(record);
+        localStorage.setItem('pino_users', JSON.stringify(localUsers));
+        localStorage.setItem('pino_last_client_email', email);
+
+        showNotificationToast('🌿 Compte créé avec succès ! Bienvenue ' + fullName + '. Votre remise de -20% est activée.', 'success');
+
       } catch (err) {
         console.error('Register Error:', err);
         let msg = 'Erreur lors de la création du compte.';
-        if (err.code === 'auth/email-already-in-use') {
-          msg = 'Cette adresse e-mail est déjà associée à un compte. Veuillez vous connecter.';
+        if (err.code === 'auth/email-already-in-use' || (err.message && err.message.includes('already'))) {
+          msg = 'Cette adresse e-mail possède déjà un compte. Veuillez vous connecter.';
+          switchAuthTab('login');
+          const loginInput = document.getElementById('login-email');
+          if (loginInput) {
+            loginInput.value = email;
+            loginInput.focus();
+          }
         } else if (err.code === 'auth/weak-password') {
           msg = 'Le mot de passe doit comporter au moins 6 caractères.';
         } else if (err.code === 'auth/invalid-email') {
           msg = 'Format d\'adresse e-mail invalide.';
-        } else if (err.code === 'auth/operation-not-supported-in-this-environment') {
-          msg = 'Veuillez autoriser le stockage web ou les cookies dans les réglages de votre navigateur.';
         }
-        showNotificationToast(msg, 'error');
+        if (errorMsg) {
+          errorMsg.classList.remove('hidden');
+          if (errorText) errorText.textContent = msg;
+        }
+        showNotificationToast(msg, 'warning');
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fa-solid fa-user-check mr-2"></i> Créer mon Espace Client';
+          submitBtn.innerHTML = '<span>Créer mon compte & Obtenir -20% 🌿</span>';
         }
       }
     };
