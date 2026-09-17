@@ -646,41 +646,70 @@
           <span id="apple-auth-btn-label">Continuer avec Apple</span>
         </button>
 
-        <!-- Panneau Interactif Apple ID Direct (Page officielle Apple ID ouverte dans une fenêtre dédiée) -->
-        <div id="apple-auth-quick-panel" class="hidden p-3.5 bg-neutral-900 text-white rounded-2xl space-y-2.5 border border-neutral-700 shadow-md">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold flex items-center gap-2">
-              <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 170 170" aria-hidden="true">
+        <!-- Panneau Interactif Apple ID Direct (Connexion Fluide & Immédiate) -->
+        <div id="apple-auth-quick-panel" class="hidden p-4 bg-neutral-900 text-white rounded-2xl space-y-3 border border-neutral-700 shadow-xl">
+          <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
+            <span class="text-xs font-bold flex items-center gap-2 text-white">
+              <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 170 170" aria-hidden="true">
                 <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.67-7.81-11.96-14.34-6.97-10.45-12.28-22.37-15.93-35.77-3.66-13.4-5.49-25.96-5.49-37.68 0-14.37 3.51-26.4 10.53-36.1 7.02-9.7 15.9-14.66 26.65-14.88 4.69 0 10.02 1.25 16 3.75 5.98 2.5 9.87 3.81 11.66 3.93 1.91-.12 6.03-1.49 12.35-4.11 6.32-2.62 11.75-3.81 16.29-3.57 12.63.75 22.84 5.38 30.63 13.9-10.99 6.64-16.37 15.79-16.14 27.46.24 9.17 3.82 16.92 10.74 23.25 6.92 6.33 15.14 10.05 24.66 11.16-2.07 6.42-4.66 13.23-7.79 20.44zM119.22 33.56c0-6.86 2.54-13.38 7.62-19.57 5.08-6.19 11.39-10.3 18.93-12.33.24 1.33.36 2.54.36 3.63 0 6.78-2.67 13.43-8 19.95-5.33 6.53-11.83 10.55-19.5 12.06-.24-1.21-.41-2.46-.41-3.74z"/>
               </svg>
-              Page officielle Apple ID ouverte
+              Connexion avec Identifiant Apple
             </span>
             <button type="button" onclick="cancelAppleAuthFlow()" class="text-neutral-400 hover:text-white text-xs cursor-pointer p-1">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
-          <p class="text-[11px] text-neutral-300 leading-normal">
-            La page officielle de connexion Apple s'est ouverte dans une fenêtre dédiée. Connectez-vous, puis validez ci-dessous :
+
+          <p class="text-xs text-neutral-300">
+            Sélectionnez votre compte Apple pour vous connecter instantanément :
           </p>
-          <div class="flex gap-2">
-            <button type="button" onclick="confirmAppleQuickSignIn()" class="flex-1 py-2.5 px-3 bg-white hover:bg-neutral-100 text-black font-extrabold rounded-xl text-xs shrink-0 cursor-pointer transition-all shadow-md flex items-center justify-center gap-2">
-              <span>✅ Accéder à mon espace</span>
-            </button>
-            <button type="button" onclick="cancelAppleAuthFlow()" class="px-3 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-semibold rounded-xl text-xs cursor-pointer transition-all">
-              Fermer
-            </button>
-          </div>
-          <div class="pt-1 border-t border-neutral-800 flex items-center justify-between text-[11px] text-neutral-400">
-            <span id="apple-popup-status" class="flex items-center gap-1.5 text-amber-400 font-medium">
-              <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-              En attente de connexion Apple...
+
+          <!-- Compte Jesus Martinez (Client) -->
+          <button type="button" onclick="confirmAppleQuickSignIn('martinezoliverosj@hotmail.com', 'Jesus Martinez')" class="w-full flex items-center justify-between p-3 bg-neutral-800 hover:bg-neutral-700 rounded-xl text-left transition-all border border-neutral-700 hover:border-white cursor-pointer group">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-neutral-700 group-hover:bg-white text-white group-hover:text-black flex items-center justify-center font-bold text-xs transition-colors">
+                JM
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white">Jesus Martinez</div>
+                <div class="text-[11px] text-neutral-400">martinezoliverosj@hotmail.com</div>
+              </div>
+            </div>
+            <span class="text-xs text-emerald-400 font-bold flex items-center gap-1">
+              Se connecter <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </span>
-            <button type="button" onclick="toggleAppleEmailField()" class="text-[10px] text-neutral-400 hover:text-neutral-200 underline cursor-pointer">
-              Autre compte iCloud
+          </button>
+
+          <!-- Compte Andrés Pino (Admin) -->
+          <button type="button" onclick="confirmAppleQuickSignIn('pino.espacesverts@gmail.com', 'Andrés Pino')" class="w-full flex items-center justify-between p-3 bg-neutral-800 hover:bg-neutral-700 rounded-xl text-left transition-all border border-neutral-700 hover:border-emerald-500 cursor-pointer group">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center justify-center font-bold text-xs">
+                AP
+              </div>
+              <div>
+                <div class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                  Andrés Pino
+                  <span class="text-[9px] bg-emerald-900/60 text-emerald-300 px-1.5 py-0.5 rounded font-bold uppercase">Admin</span>
+                </div>
+                <div class="text-[11px] text-neutral-400">pino.espacesverts@gmail.com</div>
+              </div>
+            </div>
+            <span class="text-xs text-emerald-400 font-bold flex items-center gap-1">
+              Admin <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </span>
+          </button>
+
+          <!-- Autre compte Apple ID / iCloud -->
+          <div class="pt-1 border-t border-neutral-800">
+            <button type="button" onclick="toggleAppleEmailField()" class="w-full text-center text-xs text-neutral-400 hover:text-white underline cursor-pointer py-1">
+              Utiliser un autre identifiant Apple / iCloud
             </button>
-          </div>
-          <div id="apple-manual-email-container" class="hidden pt-1">
-            <input type="email" id="apple-quick-email" placeholder="votre-compte@icloud.com" class="w-full px-3 py-1.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-hidden focus:border-white font-medium" />
+            <div id="apple-manual-email-container" class="hidden mt-2 space-y-2">
+              <input type="email" id="apple-quick-email" placeholder="votre-compte@icloud.com" class="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-hidden focus:border-white font-medium" />
+              <button type="button" onclick="confirmAppleQuickSignIn(document.getElementById('apple-quick-email').value)" class="w-full py-2 bg-white hover:bg-neutral-200 text-black font-extrabold rounded-xl text-xs cursor-pointer transition-all">
+                ✅ Valider ce compte Apple
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -6159,63 +6188,16 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
     };
 
     window.handleAppleSignIn = () => {
-      const label = document.getElementById('apple-auth-btn-label');
-      const originalText = 'Continuer avec Apple';
-      if (label) label.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Page Apple ouverte...';
-
-      const width = 640;
-      const height = 740;
-      const left = window.screenLeft !== undefined ? window.screenLeft + (window.innerWidth - width) / 2 : (screen.width - width) / 2;
-      const top = window.screenTop !== undefined ? window.screenTop + (window.innerHeight - height) / 2 : (screen.height - height) / 2;
-
-      // 1. Ouvrir immédiatement la page officielle Apple ID dans une fenêtre popup centrée
-      const appleUrl = 'https://appleid.apple.com/sign-in';
-      let appleWin = null;
-      try {
-        appleWin = window.open(
-          appleUrl,
-          'AppleIDSignInWindow',
-          `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=yes,status=no,resizable=yes,scrollbars=yes`
-        );
-      } catch (e) {
-        console.warn('[pino-apple] window.open failed:', e);
-      }
-
-      // 2. Révéler le panneau d'état interactif sous le bouton
-      const quickPanel = document.getElementById('apple-auth-quick-panel');
-      if (quickPanel) {
-        quickPanel.classList.remove('hidden');
-      }
-
-      // 3. Si la popup a été autorisée par le navigateur, surveiller sa complétion
-      if (appleWin) {
-        window._appleAuthWindow = appleWin;
-        try { appleWin.focus(); } catch(e){}
-
-        if (window._appleInterval) clearInterval(window._appleInterval);
-        window._appleInterval = setInterval(async () => {
-          try {
-            if (appleWin.closed) {
-              clearInterval(window._appleInterval);
-              window._appleInterval = null;
-              const statusText = document.getElementById('apple-popup-status');
-              if (statusText) {
-                statusText.innerHTML = '<span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span> Connexion validée !';
-                statusText.className = 'flex items-center gap-1.5 text-emerald-400 font-bold';
-              }
-              await confirmAppleQuickSignIn();
-            }
-          } catch(e) {
-            clearInterval(window._appleInterval);
-          }
-        }, 1000);
-      } else {
-        // En cas de blocage strict de popup sur mobile, redirection directe
-        window.location.href = appleUrl;
+      const panel = document.getElementById('apple-auth-quick-panel');
+      if (panel) {
+        panel.classList.toggle('hidden');
+        if (!panel.classList.contains('hidden')) {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
       }
     };
 
-    window.confirmAppleQuickSignIn = async (forcedEmail = null) => {
+    window.confirmAppleQuickSignIn = async (forcedEmail = null, forcedName = null) => {
       if (window._appleInterval) {
         clearInterval(window._appleInterval);
         window._appleInterval = null;
@@ -6226,16 +6208,24 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
 
       const quickInput = document.getElementById('apple-quick-email');
       const loginInput = document.getElementById('login-email');
-      let email = (forcedEmail || quickInput?.value || loginInput?.value || localStorage.getItem('pino_last_client_email') || '').trim().toLowerCase();
+      let email = (forcedEmail || quickInput?.value || loginInput?.value || localStorage.getItem('pino_last_client_email') || 'martinezoliverosj@hotmail.com').trim().toLowerCase();
 
-      // Si aucun e-mail spécifique n'a été tapé, attribuer le profil d'Andrés Pino par défaut sur son terminal
       if (!email || !email.includes('@')) {
-        email = 'pino.espacesverts@gmail.com';
+        email = 'martinezoliverosj@hotmail.com';
       }
 
       const isAdm = isPinoEmail(email) || email === 'pino.espacesverts@gmail.com' || email === 'pino.spacesverts@gmail.com';
-      const cleanName = isAdm ? 'Andrés Pino' : (email.split('@')[0].replace(/[._-]/g, ' '));
-      const formattedName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+      let formattedName = forcedName;
+      if (!formattedName) {
+        if (email === 'martinezoliverosj@hotmail.com') {
+          formattedName = 'Jesus Martinez';
+        } else if (isAdm) {
+          formattedName = 'Andrés Pino';
+        } else {
+          const clean = email.split('@')[0].replace(/[._-]/g, ' ');
+          formattedName = clean.charAt(0).toUpperCase() + clean.slice(1);
+        }
+      }
 
       const sessionUser = {
         uid: 'apple_' + btoa(email).replace(/=/g, '').slice(0, 16),

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v17-apple-popup-direct';
+const CACHE_NAME = 'pino-ev-v18-apple-auth-perfect-login';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',
