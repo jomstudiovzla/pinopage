@@ -1986,27 +1986,27 @@
   </dialog>
 
   <!-- Modal 3: Espace Administration — God Mode (Andrés Pino) -->
-  <dialog id="modal-window-admin" class="section-window bg-white rounded-2xl sm:rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-[96%] h-[92vh] max-h-[94vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
+  <dialog id="modal-window-admin" class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-[96%] max-h-[92vh] flex flex-col p-0 overflow-hidden text-brand-charcoal m-auto">
     <!-- Admin Header (Stable CRM Panel - Non-draggable to prevent accidental closure) -->
-    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-4 sm:px-6 py-3.5 sm:py-4 text-white select-none shrink-0">
-      <div class="flex flex-wrap justify-between items-center gap-3 sm:gap-4">
-        <div class="flex items-center gap-3 sm:gap-4">
-          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-xl sm:text-2xl shadow-lg shrink-0">
+    <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 sm:px-8 pt-5 pb-6 sm:pb-8 text-white select-none shrink-0">
+      <div class="flex flex-wrap justify-between items-center gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-2xl shadow-lg">
             👑
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="font-serif text-lg sm:text-xl md:text-2xl font-bold leading-tight">Panneau d'Administration</h3>
-              <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider whitespace-nowrap">God Mode</span>
+              <h3 class="font-serif text-2xl font-bold">Panneau d'Administration</h3>
+              <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">God Mode</span>
             </div>
-            <p class="text-[11px] sm:text-xs text-white/70 truncate max-w-[220px] sm:max-w-none">Gérant : Andrés Pino • <code class="text-emerald-300">pino.spacesverts@gmail.com</code></p>
+            <p class="text-xs text-white/70">Gérant : Andrés Pino • <code class="text-emerald-300">pino.spacesverts@gmail.com</code></p>
           </div>
         </div>
-        <div class="flex items-center gap-1.5 sm:gap-2">
+        <div class="flex items-center gap-2">
           <!-- Campanita de Notifications Interactive avec Badge et Menu Déroulant -->
           <div class="relative">
-            <button type="button" id="admin-notif-bell-btn" onclick="toggleAdminNotificationsPanel()" class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer" title="Notifications et alertes clients en direct">
-              <i id="admin-bell-icon" class="fa-solid fa-bell text-base sm:text-lg text-amber-300"></i>
+            <button type="button" id="admin-notif-bell-btn" onclick="toggleAdminNotificationsPanel()" class="relative w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer" title="Notifications et alertes clients en direct">
+              <i id="admin-bell-icon" class="fa-solid fa-bell text-lg text-amber-300"></i>
               <span id="admin-notif-badge" class="hidden absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-red-600 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-md animate-pulse">0</span>
             </button>
 
@@ -2050,44 +2050,44 @@
           </div>
 
           <!-- Bouton Activer / Couper Son -->
-          <button type="button" id="admin-sound-toggle-btn" onclick="toggleAdminSound()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer" title="Activer / Couper les alertes sonores">
-            <i id="admin-sound-toggle-icon" class="fa-solid fa-volume-high text-emerald-300 text-sm sm:text-base"></i>
+          <button type="button" id="admin-sound-toggle-btn" onclick="toggleAdminSound()" class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer" title="Activer / Couper les alertes sonores">
+            <i id="admin-sound-toggle-icon" class="fa-solid fa-volume-high text-emerald-300"></i>
           </button>
 
-          <button onclick="handleLogout()" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i> <span class="hidden xs:inline">Déconnexion</span>
+          <button onclick="handleLogout()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
           </button>
-          <button onclick="document.getElementById('modal-window-admin').close()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer la fenêtre">
-            <i class="fa-solid fa-xmark text-base sm:text-lg"></i>
+          <button onclick="document.getElementById('modal-window-admin').close()" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/30 text-white flex items-center justify-center transition-colors cursor-pointer" aria-label="Fermer la fenêtre">
+            <i class="fa-solid fa-xmark text-lg"></i>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Admin Sub-Navigation Tabs (Horizontal swipeable on mobile & tablet) -->
-    <div class="flex overflow-x-auto no-scrollbar border-b border-slate-200 bg-slate-50 text-xs font-bold px-3 sm:px-6 pt-1.5 sm:pt-2 gap-1.5 sm:gap-2 shrink-0 scroll-smooth">
-      <button type="button" onclick="switchAdminTab('kpis')" id="adm-tab-kpis" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl border-b-2 border-emerald-700 text-emerald-800 bg-white">
+    <!-- Admin Sub-Navigation Tabs (Wrap so no tabs are cut off on desktop) -->
+    <div class="flex overflow-x-auto no-scrollbar sm:flex-wrap border-b border-slate-200 bg-slate-50 text-xs font-bold px-3 sm:px-6 pt-2 gap-1.5 sm:gap-2 shrink-0">
+      <button type="button" onclick="switchAdminTab('kpis')" id="adm-tab-kpis" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl border-b-2 border-emerald-700 text-emerald-800 bg-white">
         <i class="fa-solid fa-chart-pie mr-1.5"></i> Tableau de bord & KPIs
       </button>
-      <button type="button" onclick="switchAdminTab('leads')" id="adm-tab-leads" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('leads')" id="adm-tab-leads" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-address-book mr-1.5"></i> Leads & Devis (<span id="adm-leads-badge">0</span>)
       </button>
-      <button type="button" onclick="switchAdminTab('prospection')" id="adm-tab-prospection" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('prospection')" id="adm-tab-prospection" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-bullseye mr-1.5 text-amber-600"></i> Prospection 6 Plateformes (<span id="adm-platform-leads-badge">0</span>)
       </button>
-      <button type="button" onclick="switchAdminTab('factures')" id="adm-tab-factures" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('factures')" id="adm-tab-factures" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> Factures & Unipros
       </button>
-      <button type="button" onclick="switchAdminTab('promos')" id="adm-tab-promos" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('promos')" id="adm-tab-promos" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-tags mr-1.5"></i> Promotions & Codes
       </button>
-      <button type="button" onclick="switchAdminTab('users')" id="adm-tab-users" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('users')" id="adm-tab-users" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-users mr-1.5"></i> Utilisateurs & Base (<span id="adm-users-badge">3</span>)
       </button>
-      <button type="button" onclick="switchAdminTab('impersonate')" id="adm-tab-impersonate" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('impersonate')" id="adm-tab-impersonate" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-user-secret mr-1.5"></i> Voir comme client
       </button>
-      <button type="button" onclick="switchAdminTab('travaux'); renderAdminJobs()" id="adm-tab-travaux" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
+      <button type="button" onclick="switchAdminTab('travaux'); renderAdminJobs()" id="adm-tab-travaux" class="adm-tab whitespace-nowrap shrink-0 py-2.5 px-3.5 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
         <i class="fa-solid fa-briefcase mr-1.5"></i> Travaux CRM (<span id="adm-jobs-badge">0</span>)
       </button>
       <button type="button" onclick="switchAdminTab('config'); renderAdminQualityConfig();" id="adm-tab-config" class="adm-tab whitespace-nowrap shrink-0 py-2 sm:py-2.5 px-3 sm:px-4 rounded-t-xl text-slate-500 hover:text-slate-800">
@@ -6120,10 +6120,8 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
     /* Règle vitale responsive tous dispositifs (iPad, Tablettes, iPhone, Desktop) */
     #modal-window-admin,
     #modal-window-client {
-      height: 92vh !important;
-      height: 92dvh !important;
-      max-height: 94vh !important;
-      max-height: 94dvh !important;
+      max-height: 92vh !important;
+      max-height: 92dvh !important;
       width: 96% !important;
       max-width: 1200px !important;
       display: flex !important;
@@ -6137,10 +6135,8 @@ Envoyé depuis le site officiel https://www.pinoespacesverts.fr`;
     @media (max-width: 768px) {
       #modal-window-admin,
       #modal-window-client {
-        height: 96vh !important;
-        height: 96dvh !important;
-        max-height: 98vh !important;
-        max-height: 98dvh !important;
+        max-height: 96vh !important;
+        max-height: 96dvh !important;
         width: 98% !important;
         border-radius: 1.25rem !important;
       }

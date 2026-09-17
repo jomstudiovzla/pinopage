@@ -11,11 +11,10 @@
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
 ## ✅ Panneau d'Administration Multi-Dispositifs (iPad, Mobile, Desktop) & Cloche de Notification Audio/E-mail (100% OPÉRATIONNEL)
-- [x] **Résolution du Bogue de Troncature & Écrasement Flexbox (Capture `error/WhatsApp Image 2026-09-17 at 10.06.28.jpeg`)** :
-  - Modal `#modal-window-admin` dimensionné avec hauteur réactive explicite `h-[92vh] max-h-[94vh]` et règles CSS avec Dynamic Viewport Height : `height: 92dvh !important; max-height: 94dvh !important;`.
-  - Conteneur de contenu étiré sur 100% de l'espace disponible via `overflow-y-auto flex-1 min-h-0 space-y-6` avec défilement natif fluide `-webkit-overflow-scrolling: touch;`.
-  - Bandeau d'en-tête admin compacté (`py-3.5 sm:py-4`, `px-4 sm:px-6`) restituant plus de 60px d'espace vertical aux KPIs et tableaux CRM.
-  - Barre d'onglets administrative sur une seule ligne horizontale swipeable (`overflow-x-auto no-scrollbar scroll-smooth`), éliminant l'empilement sur 2 ou 3 rangées sur iPad et mobile, avec centrage automatique de l'onglet actif au clic (`scrollIntoView`).
+- [x] **Préservation des Proportions Majestueuses & Élimination du Vide Blanc (Retour Visuel Immédiat)** :
+  - Modal `#modal-window-admin` dimensionné avec hauteur naturelle adaptative (`max-h-[92vh]`, `max-height: 92dvh !important;`) sans `height: 92vh` forcé sur desktop, supprimant tout vide blanc artificiel sous les cartes de KPIs.
+  - En-tête majestueux intégral restauré : Grande couronne royale dorée `w-14 h-14`, typographie `font-serif text-2xl font-bold`, badge doré `GOD MODE`, padding d'origine (`px-6 sm:px-8 pt-5 pb-6 sm:pb-8`) et bouton textuel complet `Déconnexion`.
+  - Barre d'onglets sur 2 rangées enveloppantes (`sm:flex-wrap`) : les 9 onglets sont tous visibles en permanence sur tablette et desktop, sans coupure latérale (`V...`).
 - [x] **Cloche Interactive (*Campanita*) avec Badge Dynamique & Menu Déroulant** :
   - Bouton cloche `#admin-notif-bell-btn` avec icône cloche dorée `#admin-bell-icon` et badge compteur pulsant `#admin-notif-badge`.
   - Menu déroulant flottant `#admin-notif-dropdown` avec boutons *"Tester"* et *"Tout lu"*, liste scrollable d'alertes clients avec icônes par catégorie (devis, signatures, inscriptions, chatbot, paiements) et pied de page d'état en direct.

@@ -1,13 +1,16 @@
 /**
  * Test Suite: Admin Panel Cross-Device Appearance & Audio Bell Notifications
  * Verifies:
- * 1. Admin modal responsive styling (h-[92vh], dvh rules, flex-1 min-h-0)
- * 2. Header compact padding & single-line horizontal swipeable tabs
- * 3. Campanita UI elements (bell, pulsing badge, dropdown panel, sound toggle)
- * 4. Web Audio API synthesizer (PinoAudioNotifier with chords/chimes)
- * 5. Device vibration & notification triggers
- * 6. Dual device + email notification on client actions (quotes, registrations, messages)
- * 7. Service Worker v22 bump
+ * 1. Admin modal natural content-fitting styling (max-h-[92vh], max-height dvh, flex-1 min-h-0)
+ * 2. Header majestic proportions (w-14 h-14 crown, px-6 sm:px-8 padding, Déconnexion)
+ * 3. 2-row wrapping tabs (sm:flex-wrap) ensuring zero tab truncation (all 9 tabs visible)
+ * 4. Campanita UI elements (bell, pulsing badge, dropdown panel, sound toggle)
+ * 5. Web Audio API synthesizer (PinoAudioNotifier with chords/chimes)
+ * 6. Device vibration & notification triggers
+ * 7. Dual device + email notification on client actions (quotes, registrations, messages)
+ * 8. Realtime Database admin notification methods in pino-db.js
+ * 9. Listener lifecycle hooks
+ * 10. Service Worker v22 bump
  */
 
 const fs = require('fs');
@@ -28,18 +31,19 @@ const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
 const pinoDb = fs.readFileSync(pinoDbPath, 'utf8');
 const swJs = fs.readFileSync(swJsPath, 'utf8');
 
-// Test 1: Admin modal container has explicit responsive height and flex column
-console.log('👉 Test 1: Admin modal responsive height and flexbox configuration');
+// Test 1: Admin modal container has natural max-height and flex column (no forced empty white void)
+console.log('👉 Test 1: Admin modal natural height and flexbox configuration');
 assert(indexHtml.includes('id="modal-window-admin"'), 'modal-window-admin must exist');
-assert(indexHtml.includes('h-[92vh]'), 'modal-window-admin must specify explicit height h-[92vh]');
-assert(indexHtml.includes('max-h-[94vh]'), 'modal-window-admin must specify max-h-[94vh]');
+assert(indexHtml.includes('max-h-[92vh]'), 'modal-window-admin must specify natural max-h-[92vh]');
+assert(!indexHtml.includes('class="section-window bg-white rounded-3xl shadow-2xl border-2 border-emerald-800 max-w-6xl w-[96%] h-[92vh]'), 'modal-window-admin must NOT force h-[92vh] to prevent huge empty white voids');
 assert(indexHtml.includes('flex flex-col'), 'modal-window-admin must be flex flex-col');
 assert(indexHtml.includes('overflow-hidden'), 'modal-window-admin must be overflow-hidden');
 
 // Test 2: CSS rules for dialog.section-window, dvh and mobile viewport
 console.log('👉 Test 2: CSS dvh rules for iPad and mobile viewports');
-assert(indexHtml.includes('height: 92dvh !important;'), 'CSS must specify height: 92dvh !important');
-assert(indexHtml.includes('max-height: 94dvh !important;'), 'CSS must specify max-height: 94dvh !important');
+assert(indexHtml.includes('max-height: 92vh !important;'), 'CSS must specify max-height: 92vh !important');
+assert(indexHtml.includes('max-height: 92dvh !important;'), 'CSS must specify max-height: 92dvh !important');
+assert(!/(?<!max-)height:\s*92vh/.test(indexHtml), 'CSS must NOT force height: 92vh !important on desktop');
 assert(indexHtml.includes('#modal-window-admin:not([open])'), 'CSS must handle closed dialog with display: none !important');
 assert(indexHtml.includes('@media (max-width: 768px)'), 'CSS must include media query for mobile/tablet');
 
@@ -47,11 +51,11 @@ assert(indexHtml.includes('@media (max-width: 768px)'), 'CSS must include media 
 console.log('👉 Test 3: Content body flex-1 min-h-0 expansion');
 assert(indexHtml.includes('overflow-y-auto flex-1 min-h-0'), 'Admin tab content body must have overflow-y-auto flex-1 min-h-0');
 
-// Test 4: Header has compact padding & single-line horizontal tabs
-console.log('👉 Test 4: Compact header padding & horizontal swipeable tabs');
-assert(indexHtml.includes('px-4 sm:px-6 py-3.5 sm:py-4'), 'Admin header must have compact padding');
-assert(indexHtml.includes('flex overflow-x-auto no-scrollbar border-b'), 'Tab bar must be single-line horizontal scrollable');
-assert(!indexHtml.includes('flex overflow-x-auto no-scrollbar sm:flex-wrap'), 'Tab bar must NOT wrap on sm tablets');
+// Test 4: Header has original majestic proportions & tabs wrap cleanly on tablet/desktop
+console.log('👉 Test 4: Majestic header proportions & 2-row wrapping tabs');
+assert(indexHtml.includes('w-14 h-14 rounded-2xl bg-amber-400'), 'Admin crown must be majestic w-14 h-14');
+assert(indexHtml.includes('px-6 sm:px-8 pt-5 pb-6 sm:pb-8'), 'Admin header must have majestic padding px-6 sm:px-8 pt-5 pb-6 sm:pb-8');
+assert(indexHtml.includes('sm:flex-wrap'), 'Tab bar must wrap (sm:flex-wrap) so all 9 tabs are visible without truncation');
 
 // Test 5: Campanita UI elements
 console.log('👉 Test 5: Campanita interactive bell, badge, dropdown & sound toggle');
@@ -93,4 +97,4 @@ assert(indexHtml.includes('stopAdminNotificationsListener();'), 'stopAdminNotifi
 console.log('👉 Test 10: Service Worker v22 cache update');
 assert(swJs.includes('pino-ev-v22-turbo-europe-admin-audio-bell'), 'sw.js must have CACHE_NAME v22');
 
-console.log('✅ ALL 10 TESTS PASSED SUCCESFULLY! The Admin panel is fully responsive across all devices and the audio bell with dual device + email notifications is operational.');
+console.log('✅ ALL 10 TESTS PASSED SUCCESFULLY! The Admin panel appearance is preserved with majestic proportions, wrapping tabs, natural content fitting, and full audio bell notifications.');
