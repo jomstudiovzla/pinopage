@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v13-multi-auth-sig';
+const CACHE_NAME = 'pino-ev-v14-crm-intuitive-pipeline';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',

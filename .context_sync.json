@@ -1,19 +1,18 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Système d'authentification multicanal (Apple + Google + Email), formulaire scindé SAP/Direct avec compression photos, signature électronique tactile et résilience hors-ligne",
-  "current_phase": "Production Client & Legal Excellence — Multi-Auth, Digital Signature & Resilience",
-  "action": "1) Authentification multicanale avec OAuth Apple, Google et formulaire Email/Password avec repli résilient sur les profils invités créés par Andrés. 2) Scission claire du formulaire de devis (Services à la Personne 50% URSSAF vs Jardinerie Directe / B2B) avec calcul automatique des déductions fiscales. 3) Téléchargement multimédia avec compression d'image directe par canvas pour optimiser la bande passante. 4) Signature électronique manuscrite tactile (conforme Art. 1367 Code Civil & eIDAS simple) lors de l'acceptation de devis, intégrée avec horodatage et empreinte dans le devis PDF. 5) Conformité fiscale stricte avec mentions dynamiques Art. 199 sexdecies du CGI, Art. 293 B du CGI et Case 7DB. 6) File d'attente hors-ligne résiliente avec retries exponentiels et monitoring d'erreurs non capturées vers audit_logs. 7) Bump Service Worker vers v13 (pino-ev-v13-multi-auth-sig).",
+  "active_goal": "CRM Intuitif, Pipeline de Statuts Bidirectionnel par Client, Stepper Visuel & Réversibilité Andrés Pino",
+  "current_phase": "Production CRM & Client Experience — Intuitive Lifecycle & Bidirectional Pipeline",
+  "action": "1) Implémentation des contrôles d'avancement et de réversibilité (⏪ Revenir / ⏩ Avancer) dans la table des prospects (Leads & Devis) et la table des travaux (Travaux CRM) pour qu'Andrés Pino puisse facilement ajuster le statut des projets. 2) Notification automatique personnalisée en temps réel et par e-mail au client concerné à chaque changement de statut via PinoDB.notifyClientStatusChange. 3) Intégration d'un Stepper visuel à 6 étapes dans le portail client (Demande -> Devis chiffré -> Négociation -> Accord signé -> Chantier -> Facturé/Clôturé) avec indication claire que seul Andrés pilote et modifie les étapes techniques. 4) Remplacement des statuts et labels non-précis dans les travaux CRM par des intitulés professionnels clairs. 5) Bouton d'action directe pour signer et valider le devis côté client en phase de devis/négociation. 6) Bump Service Worker vers v14 (pino-ev-v14-crm-intuitive-pipeline).",
   "files": [
     "index.html",
     "assets/js/pino-db.js",
     "sw.js",
-    "test_multi_auth_quotes_and_resilience.js",
-    "test_suite_enhancements.js",
-    "test_crm_onboarding_and_clearing.js",
-    ".context_sync.json"
+    "test_crm_intuitive_pipeline_and_notifications.js",
+    ".context_sync.json",
+    "CURRENT_STATE.md"
   ],
-  "step": "Tous les 5 suites de tests passent à 100% (71 tests validés). Serveur localhost:8080 actif. Code prêt pour synchronisation GitHub avec attribution requise.",
-  "last_commit": "a7e1646",
-  "timestamp": "2026-09-17T00:23:30-04:00"
+  "step": "Toutes les 7 suites de tests passent à 100% (85 tests automatisés validés). Localhost 8080 actif. Prêt pour commit et push GitHub.",
+  "last_commit": "pending",
+  "timestamp": "2026-09-17T00:32:00-04:00"
 }

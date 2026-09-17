@@ -10,6 +10,23 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
+## ✅ CRM Intuitif, Pipeline Bidirectionnel par Client, Stepper Visuel & Réversibilité Andrés Pino (100% OPÉRATIONNEL)
+- [x] **Contrôles Intuitifs CRM avec Réversibilité (⏪ Revenir / ⏩ Avancer)** :
+  - Dans la table des prospects (**Leads & Devis**) et la table des travaux (**Travaux CRM**), Andrés Pino dispose désormais de boutons rapides pour avancer d'une phase (`⏩`) ou reculer/revertir (`⏪`), en plus du sélecteur déroulant complet.
+  - La gestion est fluide, sans friction, permettant à Andrés d'adapter immédiatement l'avancement selon les échanges avec le client.
+- [x] **Pipeline Projet en 6 Phases Officielles & Notifications Bidirectionnelles par Client** :
+  - Les 6 étapes clés : `1. Demande reçue` ➔ `2. Devis chiffré envoyé` ➔ `3. En négociation` ➔ `4. Devis validé & signé` ➔ `5. Chantier en cours` ➔ `6. Facturé & Clôturé`.
+  - À chaque changement d'étape réalisé par Andrés, le système déclenche automatiquement via `PinoDB.notifyClientStatusChange` une notification ciblée dans `client_notifications/{sanitizedEmail}` ainsi qu'un e-mail d'information direct au client.
+- [x] **Stepper Visuel dans l'Espace Client (Lecture seule avec Verrouillage)** :
+  - Dans l'Espace Client (`renderClientQuotes`), chaque devis/projet affiche un Stepper dynamique avec indicateur de phase en direct.
+  - Mention explicite de sécurité et gouvernance : `🔒 Seul Andrés Pino pilote et modifie les étapes techniques`. Le client ne peut pas modifier les statuts.
+  - En phase de devis ou de négociation, le client dispose d'un bouton d'action directe : `✍️ Signer & Valider ce devis (0€ maintenant)` qui ouvre le modal de signature tactile.
+- [x] **Amélioration de l'Affichage des Travaux CRM** :
+  - Nettoyage des intitulés de service (suppression de `non-precise` au profit d'intitulés professionnels clairs).
+  - Statuts interactifs avec mise à jour automatique des montants encaissés (`amount_paid`) lors du passage à `Payé`.
+- [x] **Service Worker v14** :
+  - Cache mis à jour à `pino-ev-v14-crm-intuitive-pipeline`.
+
 ## ✅ Authentification Multicanale, Formulaire Scindé, Signature Électronique Tactile & Résilience (100% OPÉRATIONNEL)
 - [x] **Module 1 : Système d'Authentification Multicanal** :
   - Intégration complète d'OAuth 2.0 avec **Sign in with Apple** (`#apple-auth-btn-label`, `handleAppleSignIn`) et Google Sign-In (`signInWithRedirect` / `signInWithPopup`).

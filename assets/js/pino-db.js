@@ -725,6 +725,65 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     }
   }
 
+  /**
+   * Notifier le client de l'évolution de son dossier ou statut de devis/chantier
+   */
+  async function notifyClientStatusChange(opts = {}) {
+    const rawEmail = (opts.clientEmail || '').trim().toLowerCase();
+    if (!rawEmail) return { ok: false, error: 'Email requis' };
+    const clientName = opts.clientName || 'Client Particulier';
+    const newStatus = opts.newStatus || 'Mis à jour';
+    const ref = opts.refCode || 'Dossier';
+
+    const statusCatalog = {
+      'Nouveau': {
+        title: `🌱 Demande reçue : #${ref}`,
+        msg: `Bonjour ${clientName},\nVotre demande de devis #${ref} a été bien enregistrée. Andrés Pino étudie votre projet et prépare votre estimation sous 24h.`
+      },
+      'Devis envoyé': {
+        title: `📄 Devis chiffré prêt : #${ref}`,
+        msg: `Bonjour ${clientName},\nAndrés Pino a préparé votre devis chiffré #${ref} avec l'Avance Immédiate de 50% SAP déduite. Vous pouvez le consulter et le valider directement en 1 clic dans votre Espace Client.`
+      },
+      'En négociation': {
+        title: `💬 Négociation & échange en cours : #${ref}`,
+        msg: `Bonjour ${clientName},\nVotre devis #${ref} est actuellement en cours d'échange et d'ajustement avec Andrés Pino.`
+      },
+      'Devis accepté': {
+        title: `✍️ Devis validé & signé : #${ref}`,
+        msg: `Bonjour ${clientName},\nVotre accord pour le devis #${ref} a été officiellement enregistré. Andrés Pino bloque votre créneau d'intervention.`
+      },
+      'Chantier en cours': {
+        title: `🚜 Travaux en cours d'intervention : #${ref}`,
+        msg: `Bonjour ${clientName},\nAndrés Pino réalise actuellement vos travaux d'espaces verts selon les prestations convenues.`
+      },
+      'Facturé': {
+        title: `🧾 Facture & Attestation SAP prêtes : #${ref}`,
+        msg: `Bonjour ${clientName},\nVotre facture et votre attestation fiscale officielle (Case 7DB) sont disponibles dans votre Espace Client.`
+      },
+      'Terminé': {
+        title: `🎉 Prestation achevée & soldée : #${ref}`,
+        msg: `Bonjour ${clientName},\nVos travaux sont terminés avec succès. Merci de votre confiance avec Pino Espaces Verts !`
+      },
+      'Sans suite': {
+        title: `📁 Dossier classé sans suite : #${ref}`,
+        msg: `Bonjour ${clientName},\nVotre dossier a été clôturé.`
+      }
+    };
+
+    const item = statusCatalog[newStatus] || {
+      title: `Évolution de votre dossier #${ref}`,
+      msg: `Bonjour ${clientName},\nLe statut de votre dossier auprès de Pino Espaces Verts est désormais : ${newStatus}.`
+    };
+
+    return await sendClientDirectMessage({
+      clientEmail: rawEmail,
+      clientName: clientName,
+      subject: `🌲 [PINO] ${item.title}`,
+      message: item.msg,
+      templateType: 'status_evolution'
+    });
+  }
+
   async function fetchClientMessages(clientEmail) {
     if (!clientEmail) return { ok: false, data: [] };
     const sanitizedEmail = clientEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
@@ -2689,6 +2748,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     notifyAdminByEmail,
     notifyClientByEmail,
     sendClientDirectMessage,
+    notifyClientStatusChange,
     fetchClientMessages,
     listenClientMessages,
   };
