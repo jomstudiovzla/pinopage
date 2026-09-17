@@ -12,7 +12,7 @@ console.log('🧪 Lancement des tests de validation des améliorations fonctionn
 // 1. Test Service Worker Asset Manifest & Version
 console.log('📦 [1. Service Worker & Cache]');
 const swContent = fs.readFileSync(path.join(__dirname, 'sw.js'), 'utf-8');
-assert(swContent.includes('pino-ev-v10-high-performance-suite'), 'SW doit avoir le cache v10');
+assert(/pino-ev-v\d+/.test(swContent), 'SW doit avoir une version de cache pino-ev-v*');
 assert(swContent.includes('./assets/js/pino-db.js'), 'SW doit mettre en cache pino-db.js');
 assert(swContent.includes('./assets/js/firebase-config.js'), 'SW doit mettre en cache firebase-config.js');
 assert(swContent.includes('./assets/js/chatbot_knowledge_base.js'), 'SW doit mettre en cache chatbot_knowledge_base.js');

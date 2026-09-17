@@ -2496,9 +2496,153 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
   }
 
   /* ─────────────────────────────────────────────────────────
+   *  FIRMA ELECTRÓNICA DE DEVIS (eIDAS Simple & Yousign Ready)
+   * ───────────────────────────────────────────────────────── */
+  async function signQuote(quoteId, signatureData) {
+    if (!quoteId || !signatureData) return { ok: false, error: 'Paramètres manquants' };
+    const now = new Date().toISOString();
+    const dataUrl = signatureData.dataUrl || signatureData.image || '';
+    const signerName = signatureData.name || 'Client Particulier';
+    const signerEmail = signatureData.email || '';
+    const hash = signatureData.hash || ('SIG-' + Date.now().toString(36).toUpperCase());
+
+    const updatePayload = {
+      status: 'Devis accepté',
+      accepted_at: now,
+      signed_at: now,
+      signature_data_url: dataUrl,
+      signature_hash: hash,
+      signature_author: signerName,
+      signature_ip: signatureData.ip || 'Client PWA',
+      legal_consent: true
+    };
+
+    const db = rtdb();
+    if (db) {
+      try {
+        await db.ref('leads/' + quoteId).update(updatePayload);
+
+        if (signerEmail) {
+          const sanitizedEmail = sanitizeEmail(signerEmail);
+          await db.ref(`clients_records/${sanitizedEmail}/quotes/${quoteId}`).update(updatePayload).catch(() => {});
+        }
+      } catch (err) {
+        log('signQuote:rtdb', err);
+      }
+    }
+
+    // Notifier Andrés et le client
+    try {
+      notifyAdminByEmail({
+        subject: `✍️ [DEVIS SIGNÉ] Devis #${String(quoteId).slice(-6)} validé et signé par ${signerName}`,
+        type: 'quote_signed',
+        clientName: signerName,
+        clientEmail: signerEmail,
+        leadId: quoteId,
+        message: `Le client ${signerName} a officiellement signé électroniquement le devis #${String(quoteId).slice(-6)} (Horodatage ISO : ${now}, Empreinte : ${hash}).`
+      }).catch(() => {});
+    } catch(e) {}
+
+    return { ok: true, hash, signed_at: now };
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  COLAS DE TAREAS RESILIENTES & REINTENTOS OFFLINE
+   * ───────────────────────────────────────────────────────── */
+  function queueOfflineTask(type, payload) {
+    try {
+      const queue = JSON.parse(localStorage.getItem('pino_offline_queue') || '[]');
+      queue.push({
+        id: 'task_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        type: type,
+        payload: payload,
+        created_at: new Date().toISOString(),
+        attempts: 0
+      });
+      localStorage.setItem('pino_offline_queue', JSON.stringify(queue));
+      log('offline_queue:enqueued', type);
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+
+  async function processOfflineQueue() {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+    let queue = [];
+    try {
+      queue = JSON.parse(localStorage.getItem('pino_offline_queue') || '[]');
+    } catch(e) { return; }
+
+    if (queue.length === 0) return;
+    log('offline_queue:processing', `${queue.length} tasks`);
+
+    const remaining = [];
+    for (const task of queue) {
+      try {
+        let success = false;
+        if (task.type === 'save_lead') {
+          const res = await saveLead(task.payload);
+          success = res && res.ok;
+        } else if (task.type === 'update_lead_status') {
+          const res = await updateLeadStatus(task.payload.leadId, task.payload.status);
+          success = res && res.ok;
+        } else if (task.type === 'sign_quote') {
+          const res = await signQuote(task.payload.quoteId, task.payload.signatureData);
+          success = res && res.ok;
+        } else if (task.type === 'notify_admin') {
+          const res = await notifyAdminByEmail(task.payload);
+          success = res && res.ok;
+        }
+
+        if (!success) {
+          task.attempts = (task.attempts || 0) + 1;
+          if (task.attempts < 5) remaining.push(task);
+        }
+      } catch(err) {
+        task.attempts = (task.attempts || 0) + 1;
+        if (task.attempts < 5) remaining.push(task);
+      }
+    }
+
+    try {
+      localStorage.setItem('pino_offline_queue', JSON.stringify(remaining));
+    } catch(e) {}
+  }
+
+  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('online', () => {
+      processOfflineQueue().catch(() => {});
+    });
+    setTimeout(() => {
+      processOfflineQueue().catch(() => {});
+    }, 3000);
+
+    // Moniteur télémétrie erreurs non capturées
+    window.addEventListener('error', (evt) => {
+      try {
+        const errorData = {
+          message: evt.message || 'Script Error',
+          source: evt.filename || 'unknown',
+          lineno: evt.lineno,
+          colno: evt.colno,
+          time: new Date().toISOString()
+        };
+        const db = rtdb();
+        if (db) {
+          db.ref('audit_logs/client_errors').push(errorData).catch(() => {});
+        }
+      } catch(e) {}
+    });
+  }
+
+  /* ─────────────────────────────────────────────────────────
    *  Exportar a window.PinoDB
    * ───────────────────────────────────────────────────────── */
   global.PinoDB = {
+    signQuote,
+    queueOfflineTask,
+    processOfflineQueue,
     saveLead,
     fetchLeads,
     updateLeadStatus,

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v12-crm-onboarding';
+const CACHE_NAME = 'pino-ev-v13-multi-auth-sig';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',

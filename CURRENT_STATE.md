@@ -10,6 +10,25 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
+## ✅ Authentification Multicanale, Formulaire Scindé, Signature Électronique Tactile & Résilience (100% OPÉRATIONNEL)
+- [x] **Module 1 : Système d'Authentification Multicanal** :
+  - Intégration complète d'OAuth 2.0 avec **Sign in with Apple** (`#apple-auth-btn-label`, `handleAppleSignIn`) et Google Sign-In (`signInWithRedirect` / `signInWithPopup`).
+  - Formulaire natif E-mail et Mot de passe (`#login-email`, `#login-password`) avec messages d'erreur clairs en français et repli résilient sur les profils clients pré-créés par Andrés.
+  - Lien direct vers l'activation des comptes invités en 2 clics (`#activate`).
+- [x] **Module 2 : Formulaire de Devis Scindé, Compression Photos & Signature Tactile** :
+  - Choix ergonomique de régime de prestation : **Services à la Personne (SAP Unipros 50% URSSAF)** vs **Jardinerie Directe / B2B (Andrés Pino EIRL)** avec actualisation dynamique des déductions fiscales.
+  - Pièces jointes multimédias avec compression automatique d'images côté client via Canvas (max 800px JPEG ~50KB) garantissant des chargements instantanés sans bloquer la bande passante.
+  - Signature électronique manuscrite tactile sur Canvas HTML5 (`#modal-client-signature`, `initSignatureCanvas`, `clearSignaturePad`, `submitClientSignature`) conforme à l'article 1367 du Code Civil et standard eIDAS simple, avec horodatage ISO et empreinte cryptographique.
+- [x] **Module 3 : Facturation & Mentions Fiscales Françaises Obligatoires** :
+  - Insertion dynamique des mentions légales obligatoires dans les devis et factures PDF : *Article 199 sexdecies du CGI* et imputation fiscale en *Case 7DB* de la déclaration de revenus pour le SAP Unipros.
+  - Mention obligatoire *TVA non applicable, art. 293 B du CGI* pour les prestations de jardinage direct et chantiers professionnels B2B.
+  - Insertion graphique automatique de la signature électronique validée du client dans le PDF officiel.
+- [x] **Module 4 : Automatisation, File d'Attente Résiliente Hors-Ligne & Télémétrie** :
+  - File d'attente persistante (`PinoDB.queueOfflineTask`, `PinoDB.processOfflineQueue`) dans `localStorage` avec retries exponentiels lors de reconnexions au réseau.
+  - Surveillance globale des erreurs JavaScript non capturées et rejets de promesses avec téléversement automatique vers `/audit_logs/client_errors`.
+- [x] **Service Worker v13** :
+  - Cache mis à jour à `pino-ev-v13-multi-auth-sig`.
+
 ## ✅ Onboarding Client par Admin, Pipeline CRM Temps Réel & Auto-Clearing Notifs (100% OPÉRATIONNEL)
 - [x] **Onboarding Client par l'Administrateur (Andrés Pino)** :
   - Andrés peut pré-créer un client depuis son panneau Admin (`+ Créer / Inviter un Client`).

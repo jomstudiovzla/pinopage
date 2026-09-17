@@ -1,17 +1,19 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Onboarding client par admin avec mot de passe en 2 clics, pipeline de statuts CRM en temps réel et auto-clearing des badges de notifications",
-  "current_phase": "Production CRM & Client Experience — Onboarding & Realtime Pipeline",
-  "action": "1) Implémentation du flux complet d'onboarding client par Andrés Pino (modal admin, invitation email, génération de token et coupon de bienvenue -20%, lien d'activation direct et partage WhatsApp). 2) Modal client pour définition du mot de passe en deux clics sans friction (#activate?email=...&token=...). 3) Amélioration du pipeline CRM avec sélecteur de statut interactif en 1-clic (Nouveau, En négociation, Devis envoyé, Devis accepté, Facturé, Terminé, Sans suite) avec synchronisation temps réel Firebase RTDB et Supabase. 4) Suppression et remise à zéro automatique des badges et compteurs de notifications dès consultation. 5) Bump Service Worker vers v12 (pino-ev-v12-crm-onboarding).",
+  "active_goal": "Système d'authentification multicanal (Apple + Google + Email), formulaire scindé SAP/Direct avec compression photos, signature électronique tactile et résilience hors-ligne",
+  "current_phase": "Production Client & Legal Excellence — Multi-Auth, Digital Signature & Resilience",
+  "action": "1) Authentification multicanale avec OAuth Apple, Google et formulaire Email/Password avec repli résilient sur les profils invités créés par Andrés. 2) Scission claire du formulaire de devis (Services à la Personne 50% URSSAF vs Jardinerie Directe / B2B) avec calcul automatique des déductions fiscales. 3) Téléchargement multimédia avec compression d'image directe par canvas pour optimiser la bande passante. 4) Signature électronique manuscrite tactile (conforme Art. 1367 Code Civil & eIDAS simple) lors de l'acceptation de devis, intégrée avec horodatage et empreinte dans le devis PDF. 5) Conformité fiscale stricte avec mentions dynamiques Art. 199 sexdecies du CGI, Art. 293 B du CGI et Case 7DB. 6) File d'attente hors-ligne résiliente avec retries exponentiels et monitoring d'erreurs non capturées vers audit_logs. 7) Bump Service Worker vers v13 (pino-ev-v13-multi-auth-sig).",
   "files": [
     "index.html",
     "assets/js/pino-db.js",
     "sw.js",
+    "test_multi_auth_quotes_and_resilience.js",
+    "test_suite_enhancements.js",
     "test_crm_onboarding_and_clearing.js",
-    ".gitignore"
+    ".context_sync.json"
   ],
-  "step": "Tous les tests unitaires et d'intégration validés (13/13). Serveur localhost:8080 opérationnel (HTTP 200). Déploiement en cours sur GitHub Pages.",
-  "last_commit": "077daa4",
-  "timestamp": "2026-09-17T00:09:30-04:00"
+  "step": "Tous les 5 suites de tests passent à 100% (71 tests validés). Serveur localhost:8080 actif. Code prêt pour synchronisation GitHub avec attribution requise.",
+  "last_commit": "pending",
+  "timestamp": "2026-09-17T00:23:30-04:00"
 }
