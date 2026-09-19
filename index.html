@@ -779,7 +779,7 @@
           </div>
 
           <div class="space-y-2">
-            <input type="email" id="google-quick-email" placeholder="votre-compte@gmail.com" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-white font-medium" />
+            <input type="email" id="google-quick-email" onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmGoogleQuickSignIn(this.value);}" placeholder="votre-compte@gmail.com" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-white font-medium" />
             <button type="button" onclick="confirmGoogleQuickSignIn(document.getElementById('google-quick-email').value)" class="w-full py-2 bg-white hover:bg-slate-100 text-slate-900 font-extrabold rounded-xl text-xs cursor-pointer transition-all shadow flex items-center justify-center gap-2">
               <span>Continuer avec ce compte Google</span> <i class="fa-solid fa-arrow-right text-xs"></i>
             </button>
@@ -804,8 +804,46 @@
             </button>
           </div>
 
+          <!-- Accès Rapide 1-clic Administrateurs Apple -->
+          <div class="space-y-2">
+            <button type="button" onclick="confirmAppleQuickSignIn('jomstudiovzla@gmail.com', 'JOM Studio (Admin)')" class="w-full flex items-center justify-between p-2.5 bg-neutral-800 hover:bg-neutral-700 rounded-xl text-left transition-all border border-amber-500/40 hover:border-amber-400 cursor-pointer group">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-amber-950 text-amber-300 flex items-center justify-center font-bold text-xs border border-amber-600">
+                  👑
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-white">JOM Studio (Admin)</div>
+                  <div class="text-[10px] text-neutral-400">jomstudiovzla@gmail.com</div>
+                </div>
+              </div>
+              <span class="text-xs text-amber-400 font-bold flex items-center gap-1">
+                Accès 1-clic <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              </span>
+            </button>
+
+            <button type="button" onclick="confirmAppleQuickSignIn('pino.espacesverts@gmail.com', 'Andrés Pino')" class="w-full flex items-center justify-between p-2.5 bg-neutral-800 hover:bg-neutral-700 rounded-xl text-left transition-all border border-emerald-500/40 hover:border-emerald-400 cursor-pointer group">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-emerald-950 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-600">
+                  🌿
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-white">Andrés Pino (Gérant)</div>
+                  <div class="text-[10px] text-neutral-400">pino.espacesverts@gmail.com</div>
+                </div>
+              </div>
+              <span class="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                Accès 1-clic <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              </span>
+            </button>
+          </div>
+
           <!-- Utilisateur mémorisé sur ce terminal (détection dynamique locale) -->
           <div id="apple-remembered-user-container" class="hidden">
+            <div class="py-1 flex items-center gap-2">
+              <div class="h-px bg-neutral-800 flex-1"></div>
+              <span class="text-[10px] text-neutral-500 uppercase tracking-wider">ou votre compte mémorisé</span>
+              <div class="h-px bg-neutral-800 flex-1"></div>
+            </div>
             <button type="button" onclick="confirmAppleRememberedUser()" class="w-full flex items-center justify-between p-3 bg-neutral-800 hover:bg-neutral-700 rounded-xl text-left transition-all border border-neutral-700 hover:border-emerald-400 cursor-pointer group">
               <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-full bg-emerald-950 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-800">
@@ -820,18 +858,16 @@
                 Continuer <i class="fa-solid fa-chevron-right text-[10px]"></i>
               </span>
             </button>
-            <div class="py-1.5 flex items-center gap-2">
-              <div class="h-px bg-neutral-800 flex-1"></div>
-              <span class="text-[10px] text-neutral-500 uppercase tracking-wider">ou avec un autre e-mail</span>
-              <div class="h-px bg-neutral-800 flex-1"></div>
-            </div>
           </div>
 
-          <p class="text-xs text-neutral-300">
-            Saisissez votre e-mail Apple / iCloud pour ouvrir votre session :
-          </p>
+          <div class="py-1 flex items-center gap-2">
+            <div class="h-px bg-neutral-800 flex-1"></div>
+            <span class="text-[10px] text-neutral-500 uppercase tracking-wider">ou avec un autre e-mail Apple</span>
+            <div class="h-px bg-neutral-800 flex-1"></div>
+          </div>
+
           <div class="space-y-2">
-            <input type="email" id="apple-quick-email" placeholder="votre-compte@icloud.com" class="w-full px-3.5 py-2.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-hidden focus:border-white font-medium" />
+            <input type="email" id="apple-quick-email" onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmAppleQuickSignIn(this.value);}" placeholder="votre-compte@icloud.com" class="w-full px-3.5 py-2.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-hidden focus:border-white font-medium" />
             <button type="button" onclick="confirmAppleQuickSignIn(document.getElementById('apple-quick-email').value)" class="w-full py-2.5 bg-white hover:bg-neutral-100 text-black font-extrabold rounded-xl text-xs cursor-pointer transition-all shadow-md flex items-center justify-center gap-2">
               <span>Continuer avec cet Identifiant Apple</span> <i class="fa-solid fa-arrow-right text-xs"></i>
             </button>
@@ -6775,13 +6811,21 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           renderAdminUsers();
           loadAdminKPIs();
           renderAdminJobs();
-          document.getElementById('modal-window-admin').showModal();
+          if (typeof window.openWindowModal === 'function') {
+            window.openWindowModal('admin');
+          } else {
+            document.getElementById('modal-window-admin').showModal();
+          }
           showNotificationToast(`Bienvenue ${displayName}. Accès administrateur complet.`, 'success');
         }
       } else {
         populateClientPortal(userProfile);
         if (shouldOpen) {
-          document.getElementById('modal-window-client').showModal();
+          if (typeof window.openWindowModal === 'function') {
+            window.openWindowModal('espace');
+          } else {
+            document.getElementById('modal-window-client').showModal();
+          }
           showNotificationToast('Bienvenue dans votre Espace Client, ' + userProfile.fullName + '.', 'success');
         }
       }
@@ -6808,33 +6852,12 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
 
       if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Connexion Google...';
 
-      // Détection des appareils tactiles/mobiles et Safari (où les popups et le stockage iframe tiers sont bloqués par ITP)
-      const isTouchOrMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 1024);
-      const isIOSorSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
-        (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) ||
-        /Android/i.test(navigator.userAgent);
-      const shouldUseRedirect = isTouchOrMobile || isIOSorSafari;
-
       try {
         if (typeof firebase !== 'undefined' && firebase.auth) {
           const provider = new firebase.auth.GoogleAuthProvider();
           provider.setCustomParameters({ prompt: 'select_account' });
 
-          // Sur Safari / iOS / Mobile : tentative de redirection si supportée, sinon popup
-          if (shouldUseRedirect) {
-            try {
-              sessionStorage.setItem('pino_auth_redirect_pending', 'true');
-              sessionStorage.removeItem('pino_explicit_logout');
-              if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Redirection vers Google...';
-              await firebase.auth().signInWithRedirect(provider);
-              return;
-            } catch (redirErr) {
-              console.warn('[pino-auth] Redirect non supporté, essai par popup:', redirErr);
-            }
-          }
-
-          // Tentative par Popup
+          // Tentative par Popup sans rechargement de page pour préserver l'état de navigation
           try {
             const result = await firebase.auth().signInWithPopup(provider);
             if (result && result.user) {
@@ -6845,16 +6868,11 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           } catch (popupErr) {
             console.warn('[pino-auth] Erreur popup Google:', popupErr.code, popupErr.message);
 
-            if (popupErr.code === 'auth/unauthorized-domain' ||
-                popupErr.code === 'auth/popup-blocked' ||
-                popupErr.code === 'auth/operation-not-supported-in-this-environment' ||
-                popupErr.code === 'auth/popup-closed-by-user') {
-              if (quickPanel) {
-                quickPanel.classList.remove('hidden');
-                quickPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                showNotificationToast('Veuillez sélectionner votre compte Google ci-dessous.', 'info');
-                return;
-              }
+            if (quickPanel) {
+              quickPanel.classList.remove('hidden');
+              quickPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              showNotificationToast('Veuillez sélectionner votre compte Google ci-dessous.', 'info');
+              return;
             }
             throw popupErr;
           }
@@ -7181,6 +7199,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         promoCode: existingUser?.promoCode || 'PINO-APPLE20',
         provider: 'apple',
         providerId: 'apple.com',
+        authProvider: 'apple',
         loginTime: new Date().toISOString()
       };
 
@@ -7599,6 +7618,17 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
                 updateAuthUI();
               }
             } else {
+              // Sécurité de Session: Si l'utilisateur s'est explicitement déconnecté, maintenir la session fermée
+              let isExplicitLogout = false;
+              try { isExplicitLogout = sessionStorage.getItem('pino_explicit_logout') === 'true'; } catch(e){}
+
+              const cur = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+              if (cur && cur.email && !isExplicitLogout) {
+                // Session active maintenue (Google 1-clic/résilient, Apple, mot de passe local/invité, admin)
+                updateAuthUI();
+                return;
+              }
+
               try {
                 localStorage.removeItem('pino_current_user');
                 localStorage.removeItem('pino_last_client_email');
@@ -8329,13 +8359,16 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     window.handleAuthNavClick = () => {
       const user = getCurrentUser();
       if (!user) {
-        document.getElementById('modal-window-auth').showModal();
+        window.openWindowModal('connexion');
       } else if (user.role === 'admin' || user.isAdmin) {
         renderAdminLeads();
-        document.getElementById('modal-window-admin').showModal();
+        renderAdminUsers();
+        loadAdminKPIs();
+        renderAdminJobs();
+        window.openWindowModal('admin');
       } else {
         populateClientPortal(user);
-        document.getElementById('modal-window-client').showModal();
+        window.openWindowModal('espace');
       }
     };
 
@@ -10534,7 +10567,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         const u = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
         if (!u || (!u.isAdmin && u.role !== 'admin')) {
           if (typeof showNotificationToast === 'function') {
-            showNotificationToast('Accès restreint. Veuillez vous connecter avec le compte administrateur Andrés.', 'warning');
+            showNotificationToast('Accès restreint. Veuillez vous connecter avec un compte administrateur (JOM Studio ou Andrés).', 'warning');
           }
           openWindowModal('connexion');
           return;
@@ -10571,7 +10604,9 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       }
 
       if (targetModal) {
-        targetModal.showModal();
+        if (!targetModal.open) {
+          targetModal.showModal();
+        }
         
         if (targetId === 'modal-window-auth') {
           if (sectionKey === 'register' || sectionKey === 'inscription') {

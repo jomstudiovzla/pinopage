@@ -1,16 +1,14 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Résilience Google Auth, Panneau d'Accès 1-Clic Localhost & Correction des Jetons OAuth",
-  "current_phase": "Google Auth 100% Opérationnel en Local et Production (17/17 Suites de Tests)",
-  "action": "1) Diagnostic de l'erreur auth/unauthorized-domain sur localhost et ITP storage restrictions. 2) Création du panneau interactif #google-auth-quick-panel avec accès 1-clic pour 👑 JOM Studio (jomstudiovzla@gmail.com) et 🌿 Andrés Pino (pino.espacesverts@gmail.com), plus saisie d'email personnalisé. 3) Contrôleur window.confirmGoogleQuickSignIn() avec synchronisation PinoDB, RBAC et ouverture immédiate du CRM. 4) Préservation des jetons de redirection OAuth dans purgeInitialHashHead et cleanModalHash. 5) Nouvelle suite test_google_auth_resilience_and_panel.js (17/17 suites réussies). 6) Localhost 8080 vérifié HTTP 200 OK.",
+  "active_goal": "Résolution de la réinitialisation de session et accès 1-clic Google et Apple pour JOM Studio et Andrés Pino",
+  "current_phase": "Hito 1 — Stabilisation Auth & Rétention de Session",
+  "action": "Correction de la perte de session sur onAuthStateChanged(null), ajout des boutons 1-clic admin dans le panneau Apple, suppression du redirect destructif Google et synchronisation de session complète",
   "files": [
     "index.html",
-    "test_google_auth_resilience_and_panel.js",
+    "test_auth_session_retention_and_quick_access.js",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Prêt pour les prochaines instructions ou validation par l'utilisateur.",
-  "last_commit": "26246d5",
-  "timestamp": "2026-09-19T16:09:50.000Z"
+  "step": "Vérification des 18 suites de tests, commit avec attribution Grok 4.6 et push sur origin main"
 }

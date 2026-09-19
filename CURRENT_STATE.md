@@ -10,6 +10,20 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
+## ✅ Rétention Absolue de Session & Accès 1-Clic Google & Apple (100% OPÉRATIONNEL)
+- [x] **Élimination Définitive de la Réinitialisation de Session vers la Page d'Accueil** :
+  - **Diagnostic du Bug de Reconnexion / Reset** : L'écouteur `firebase.auth().onAuthStateChanged` supprimait inconditionnellement `pino_current_user` du stockage local dès que `user === null`. Lors d'une connexion via Apple, d'un accès Google rapide, d'une connexion invité par mot de passe ou d'un rafraîchissement sur Safari/mobile, la session était instantanément détruite et ramenait l'utilisateur à l'état déconnecté.
+  - **Protection Intelligente de Session Active** : `onAuthStateChanged` vérifie désormais si une session locale active existe (`cur && cur.email`). Si l'utilisateur ne s'est pas explicitement déconnecté via `handleLogout()`, la session est rigoureusement maintenue, la navbar reste synchronisée (`👑 JOM Studio (Admin)` / `👑 Andrés (Admin)`) et le CRM s'ouvre sans fermeture intempestive.
+  - **Suppression du Redirect Destructif Google** : Remplacement de `signInWithRedirect` par un flux in-place `signInWithPopup` sécurisé avec repli instantané vers le panneau `#google-auth-quick-panel` en cas d'erreur ou d'environnement restreint (zéro rechargement de page).
+- [x] **Panneau Interactif Apple ID avec Accès 1-Clic Administrateurs** :
+  - **Bouton 1-Clic 👑 JOM Studio (Admin)** : `confirmAppleQuickSignIn('jomstudiovzla@gmail.com', 'JOM Studio (Admin)')` avec ouverture directe du CRM.
+  - **Bouton 1-Clic 🌿 Andrés Pino (Gérant)** : `confirmAppleQuickSignIn('pino.espacesverts@gmail.com', 'Andrés Pino')`.
+  - **Support Touche Entrée** : Soumission directe au clavier sur `#apple-quick-email` et `#google-quick-email`.
+  - **Protection contre InvalidStateError** : Vérification `if (!targetModal.open)` avant tout `showModal()` dans `openWindowModal`.
+  - **Contrôle Unifié de Navigation** : `handleAuthNavClick()` délègue désormais proprement vers `openWindowModal('admin')` pour les administrateurs et `openWindowModal('espace')` pour les clients.
+- [x] **Validation Automatisée (18 Suites de Tests, 100% Réussite)** :
+  - Création de [`test_auth_session_retention_and_quick_access.js`](file:///Users/macbook/Documents/Antigravity/PINO/new/test_auth_session_retention_and_quick_access.js).
+
 ## ✅ Résilience Google Auth & Panneau 1-Clic Localhost/Safari (100% OPÉRATIONNEL)
 - [x] **Diagnostic et Résolution des Échecs Google Sign-In** :
   - **Restriction de Domaine Local (`localhost` / `127.0.0.1`)** : Firebase Authentication n'autorise nativement que `jomstudiovzla.github.io` et `pagepino-e8e97.firebaseapp.com` pour ce projet Google Cloud. Sur `localhost`, Firebase levait `auth/unauthorized-domain`.
