@@ -11236,7 +11236,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       const user = getCurrentUser();
       const isAdmin = user && (isPinoEmail(user.email) || user.email === 'jomstudiovzla@gmail.com' || user.email === 'pino.spacesverts@gmail.com' || user.email === 'pino.espacesverts@gmail.com' || user.isAdmin);
       if (!isAdmin) {
-        showNotificationToast('Action réservée à la gérance administrative.', 'error');
+        showNotificationToast('Action réservée à l\'administrateur Andrés Pino.', 'error');
         return;
       }
 
