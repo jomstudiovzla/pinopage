@@ -10,6 +10,20 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
+## ✅ CRM Intuitif : Barre d'Actions Rapides, Pipeline Commercial Kanban & Synthèse Financière (100% OPÉRATIONNEL)
+- [x] **Barre d'Actions Rapides Intuitives (Accès 1-clic pour Andrés Pino)** :
+  - Rangée d'accès direct placée immédiatement sous la navigation du panneau d'administration : `+ Facture`, `✉️ Message Client`, `📋 Traiter Devis`, `🎯 Prospection (84)` et `🔄 Actualiser Tout`.
+  - Fonction `window.refreshAdminDashboardAll()` synchronisant instantanément les KPIs, prospects, factures, prospection, travaux et sessions avec feedback toast.
+- [x] **Pipeline Commercial Visuel Kanban (6 Étapes Clés du Devis au Chantier)** :
+  - 6 cartes d'étapes interactives au-dessus de la table des leads : *Tous les flux*, *🌱 1. Reçus*, *📄 2. Devis chiffrés*, *✍️ 3. Signés / Validés*, *🚜 4. En chantier*, *🧾 5. Facturés SAP*.
+  - Compteurs temps réel dynamiques (`stage-count-all`, `stage-count-nouveau`, `stage-count-envoye`, `stage-count-accepte`, `stage-count-chantier`, `stage-count-facture`).
+  - Filtrage instantané au clic avec mise en avant visuelle (anneau émeraude actif).
+- [x] **Synthèse Financière & Trésorerie Globale (KPIs Directs dans l'Onglet Factures)** :
+  - 4 cartes de synthèse financière en temps réel : *Total Facturé*, *Total Encaissé (chèques/virements)*, *Reste à Percevoir*, *Part Unipros SAP 50%*.
+  - Calcul dynamique excluant les factures annulées et s'actualisant lors des encaissements ou filtrages.
+- [x] **Tests Automatisés Déployés (15 Suites de Tests, 100% Réussite)** :
+  - Création de [`test_crm_pipeline_kanban_and_kpis.js`](file:///Users/macbook/Documents/Antigravity/PINO/new/test_crm_pipeline_kanban_and_kpis.js) validant tous les nouveaux modules.
+
 ## ✅ Améliorations Fonctionnelles Approfondies : Canvas Retina, Statuts Factures & File d'Attente Complète (100% OPÉRATIONNEL)
 - [x] **Signature Numérique Tactile Haute Résolution (Retina / DPR Scaling)** :
   - Support de `window.devicePixelRatio` pour éliminer tout effet flou/pixelisé sur écrans haute définition (iPhone, iPad, MacBook Retina).

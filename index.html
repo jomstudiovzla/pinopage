@@ -2102,6 +2102,32 @@
       </button>
     </div>
 
+    <!-- Barre d'Actions Rapides Intuitives (Accès direct 1-clic pour Andrés Pino) -->
+    <div class="px-3 sm:px-6 py-2 bg-emerald-50/80 border-b border-emerald-100 flex flex-wrap items-center justify-between gap-2 text-xs shrink-0">
+      <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+        <span class="text-[11px] font-bold text-emerald-900 flex items-center gap-1 uppercase tracking-wider">
+          <i class="fa-solid fa-bolt text-amber-500"></i> Actions Rapides :
+        </span>
+        <button type="button" onclick="openNewInvoiceModal()" class="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl shadow-2xs flex items-center gap-1 transition-all cursor-pointer">
+          <i class="fa-solid fa-plus text-[10px]"></i> Facture
+        </button>
+        <button type="button" onclick="openAdminMessageClientModal('', 'Client Particulier', '')" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-800 font-bold border border-slate-300 rounded-xl shadow-2xs flex items-center gap-1 transition-all cursor-pointer">
+          <i class="fa-solid fa-paper-plane text-emerald-700 text-[10px]"></i> Message Client
+        </button>
+        <button type="button" onclick="switchAdminTab('leads')" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-800 font-bold border border-slate-300 rounded-xl shadow-2xs flex items-center gap-1 transition-all cursor-pointer">
+          <i class="fa-solid fa-list-check text-blue-700 text-[10px]"></i> Traiter Devis
+        </button>
+        <button type="button" onclick="switchAdminTab('prospection')" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-800 font-bold border border-slate-300 rounded-xl shadow-2xs flex items-center gap-1 transition-all cursor-pointer">
+          <i class="fa-solid fa-bullseye text-amber-600 text-[10px]"></i> Prospection (84)
+        </button>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="refreshAdminDashboardAll()" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors flex items-center gap-1 cursor-pointer text-xs" title="Actualiser toutes les données CRM">
+          <i class="fa-solid fa-arrows-rotate text-[10px]"></i> Actualiser Tout
+        </button>
+      </div>
+    </div>
+
     <!-- Admin Tab Content Body -->
     <div class="p-3 sm:p-6 lg:p-8 overflow-y-auto flex-1 min-h-0 space-y-6">
       <!-- 1. Tab KPIs -->
@@ -2169,6 +2195,70 @@
               <i class="fa-solid fa-arrows-rotate"></i> Actualiser
             </button>
           </div>
+        </div>
+
+        <!-- Pipeline Commercial Visuel (Étapes du Devis au Chantier) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-1">
+          <button type="button" id="stage-card-all" onclick="handleAdminLeadsStageFilter('ALL')" class="p-2.5 bg-emerald-700 text-white rounded-xl border border-emerald-800 shadow-2xs text-left transition-all cursor-pointer ring-2 ring-emerald-600">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-100">Tous les flux</span>
+              <i class="fa-solid fa-layer-group text-xs text-emerald-200"></i>
+            </div>
+            <div class="flex items-baseline gap-1 mt-1">
+              <span id="stage-count-all" class="text-xl font-black">0</span>
+              <span class="text-[10px] text-emerald-200">dossiers</span>
+            </div>
+          </button>
+          <button type="button" id="stage-card-nouveau" onclick="handleAdminLeadsStageFilter('NOUVEAU')" class="p-2.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-2xs text-left transition-all cursor-pointer">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700">🌱 1. Reçus</span>
+              <i class="fa-solid fa-inbox text-xs text-amber-500"></i>
+            </div>
+            <div class="flex items-baseline gap-1 mt-1">
+              <span id="stage-count-nouveau" class="text-xl font-black text-slate-900">0</span>
+              <span class="text-[10px] text-slate-500">à chiffrer</span>
+            </div>
+          </button>
+          <button type="button" id="stage-card-envoye" onclick="handleAdminLeadsStageFilter('DEVIS_ENVOYE')" class="p-2.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-2xs text-left transition-all cursor-pointer">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-blue-700">📄 2. Devis chiffrés</span>
+              <i class="fa-solid fa-paper-plane text-xs text-blue-500"></i>
+            </div>
+            <div class="flex items-baseline gap-1 mt-1">
+              <span id="stage-count-envoye" class="text-xl font-black text-slate-900">0</span>
+              <span class="text-[10px] text-slate-500">en attente</span>
+            </div>
+          </button>
+          <button type="button" id="stage-card-accepte" onclick="handleAdminLeadsStageFilter('SIGNE')" class="p-2.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-2xs text-left transition-all cursor-pointer">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700">✍️ 3. Signés / Validés</span>
+              <i class="fa-solid fa-file-signature text-xs text-emerald-600"></i>
+            </div>
+            <div class="flex items-baseline gap-1 mt-1">
+              <span id="stage-count-accepte" class="text-xl font-black text-slate-900">0</span>
+              <span class="text-[10px] text-slate-500">validés</span>
+            </div>
+          </button>
+          <button type="button" id="stage-card-chantier" onclick="handleAdminLeadsStageFilter('CHANTIER')" class="p-2.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-2xs text-left transition-all cursor-pointer">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-purple-700">🚜 4. En chantier</span>
+              <i class="fa-solid fa-trowel-bricks text-xs text-purple-600"></i>
+            </div>
+            <div class="flex items-baseline gap-1 mt-1">
+              <span id="stage-count-chantier" class="text-xl font-black text-slate-900">0</span>
+              <span class="text-[10px] text-slate-500">en cours</span>
+            </div>
+          </button>
+          <button type="button" id="stage-card-facture" onclick="handleAdminLeadsStageFilter('FACTURE')" class="p-2.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-2xs text-left transition-all cursor-pointer">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-teal-700">🧾 5. Facturés SAP</span>
+              <i class="fa-solid fa-receipt text-xs text-teal-600"></i>
+            </div>
+            <div class="flex items-baseline gap-1 mt-1">
+              <span id="stage-count-facture" class="text-xl font-black text-slate-900">0</span>
+              <span class="text-[10px] text-slate-500">clôturés</span>
+            </div>
+          </button>
         </div>
 
         <!-- Filtre Prospects / Devis par Client & Recherche Live -->
@@ -2532,6 +2622,42 @@
             <button type="button" onclick="openNewInvoiceModal()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer flex items-center gap-1.5 transition-colors shadow-xs">
               <i class="fa-solid fa-plus"></i> Nouvelle Facture
             </button>
+          </div>
+        </div>
+
+        <!-- Synthèse Financière & Trésorerie Globale (KPIs Directs) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+          <div class="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-2xs">
+            <div class="flex items-center justify-between text-slate-500">
+              <span class="text-[10px] font-bold uppercase tracking-wider">Total Facturé</span>
+              <span class="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 text-xs"><i class="fa-solid fa-receipt"></i></span>
+            </div>
+            <div id="adm-factures-kpi-total" class="text-xl font-black text-slate-900 mt-1">0.00 €</div>
+            <span class="text-[10px] text-slate-500 block mt-0.5">Toutes factures confondues</span>
+          </div>
+          <div class="p-3.5 bg-emerald-50/70 rounded-2xl border border-emerald-200 shadow-2xs">
+            <div class="flex items-center justify-between text-emerald-800">
+              <span class="text-[10px] font-bold uppercase tracking-wider">Total Encaissé</span>
+              <span class="w-6 h-6 rounded-lg bg-emerald-700 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-circle-check"></i></span>
+            </div>
+            <div id="adm-factures-kpi-paid" class="text-xl font-black text-emerald-800 mt-1">0.00 €</div>
+            <span class="text-[10px] text-emerald-700 block mt-0.5">Règlements reçus (chèque/virement)</span>
+          </div>
+          <div class="p-3.5 bg-amber-50/70 rounded-2xl border border-amber-200 shadow-2xs">
+            <div class="flex items-center justify-between text-amber-800">
+              <span class="text-[10px] font-bold uppercase tracking-wider">Reste à Percevoir</span>
+              <span class="w-6 h-6 rounded-lg bg-amber-500 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-clock"></i></span>
+            </div>
+            <div id="adm-factures-kpi-due" class="text-xl font-black text-amber-800 mt-1">0.00 €</div>
+            <span class="text-[10px] text-amber-700 block mt-0.5">Factures en attente d'encaissement</span>
+          </div>
+          <div class="p-3.5 bg-teal-50/70 rounded-2xl border border-teal-200 shadow-2xs">
+            <div class="flex items-center justify-between text-teal-800">
+              <span class="text-[10px] font-bold uppercase tracking-wider">Part SAP 50%</span>
+              <span class="w-6 h-6 rounded-lg bg-teal-700 text-white flex items-center justify-center text-xs"><i class="fa-solid fa-shield-halved"></i></span>
+            </div>
+            <div id="adm-factures-kpi-sap" class="text-xl font-black text-teal-800 mt-1">0.00 €</div>
+            <span class="text-[10px] text-teal-700 block mt-0.5">Crédit d'impôt immédiat / différé</span>
           </div>
         </div>
 
@@ -8072,9 +8198,57 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       }
     };
 
-    // Gestion du filtre Client et Recherche dans les Leads / Devis Admin
+    // Actualisation Globale du Tableau de Bord & Données CRM Andrés Pino
+    window.refreshAdminDashboardAll = async () => {
+      try {
+        if (typeof showNotificationToast === 'function') {
+          showNotificationToast('Actualisation complète du CRM en cours…', 'info');
+        }
+        if (typeof loadAdminKPIs === 'function') await loadAdminKPIs();
+        if (typeof renderAdminLeads === 'function') await renderAdminLeads();
+        if (typeof renderAdminFactures === 'function') await renderAdminFactures();
+        if (typeof renderAdminProspection === 'function') await renderAdminProspection();
+        if (typeof renderAdminJobs === 'function') await renderAdminJobs();
+        if (typeof loadAdminSessions === 'function') await loadAdminSessions();
+        if (typeof showNotificationToast === 'function') {
+          showNotificationToast('✅ Tableau de bord CRM et finances synchronisés !', 'success');
+        }
+      } catch (err) {
+        console.warn('[Admin] refreshAdminDashboardAll error:', err);
+      }
+    };
+
+    // Gestion du filtre Client, Étape du Pipeline et Recherche dans les Leads / Devis Admin
     window._activeLeadsClientFilter = 'ALL';
     window._activeLeadsSearchQuery = '';
+    window._activeLeadsStageFilter = 'ALL';
+
+    window.handleAdminLeadsStageFilter = (stage) => {
+      window._activeLeadsStageFilter = stage || 'ALL';
+      const stageKeys = ['all', 'nouveau', 'envoye', 'accepte', 'chantier', 'facture'];
+      const stageMap = {
+        'ALL': 'all',
+        'NOUVEAU': 'nouveau',
+        'DEVIS_ENVOYE': 'envoye',
+        'SIGNE': 'accepte',
+        'CHANTIER': 'chantier',
+        'FACTURE': 'facture'
+      };
+      const activeKey = stageMap[window._activeLeadsStageFilter] || 'all';
+      stageKeys.forEach(k => {
+        const card = document.getElementById(`stage-card-${k}`);
+        if (card) {
+          if (k === activeKey) {
+            card.classList.remove('bg-white', 'text-slate-700', 'border-slate-200');
+            card.classList.add('bg-emerald-700', 'text-white', 'border-emerald-800', 'shadow-2xs', 'ring-2', 'ring-emerald-600');
+          } else {
+            card.classList.remove('bg-emerald-700', 'text-white', 'border-emerald-800', 'shadow-2xs', 'ring-2', 'ring-emerald-600');
+            card.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
+          }
+        }
+      });
+      renderAdminLeads();
+    };
 
     window.handleAdminLeadsClientFilterChange = (clientEmail) => {
       window._activeLeadsClientFilter = clientEmail || 'ALL';
@@ -8163,12 +8337,38 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 text-sm">Aucun lead enregistré pour le moment.</td></tr>`;
         if (filterSelect) filterSelect.innerHTML = '<option value="ALL">📋 Tous les prospects & clients (0)</option>';
         if (statsEl) statsEl.innerHTML = '';
+        ['all', 'nouveau', 'envoye', 'accepte', 'chantier', 'facture'].forEach(k => {
+          const el = document.getElementById(`stage-count-${k}`);
+          if (el) el.textContent = '0';
+        });
         return;
       }
 
       const escapeFn = typeof escapeHtml === 'function' ? escapeHtml : (str => String(str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]));
 
       window._cachedAdminLeads = leads;
+
+      // Calcul et mise à jour des compteurs du Pipeline Commercial (Kanban)
+      const countStageAll = leads.length;
+      const countStageNouveau = leads.filter(l => (l.status === 'Nouveau' || !l.status)).length;
+      const countStageEnvoye = leads.filter(l => (l.status === 'Devis envoyé' || l.status === 'Contacté' || l.status === 'En négociation')).length;
+      const countStageAccepte = leads.filter(l => (l.status === 'Devis accepté' || l.status === 'Gagné' || l.status === 'Accepté' || l.status === 'Signé' || l.status === 'Validé')).length;
+      const countStageChantier = leads.filter(l => (l.status === 'Chantier en cours')).length;
+      const countStageFacture = leads.filter(l => (l.status === 'Facturé' || l.status === 'Terminé')).length;
+
+      const elCountStageAll = document.getElementById('stage-count-all');
+      const elCountStageNouveau = document.getElementById('stage-count-nouveau');
+      const elCountStageEnvoye = document.getElementById('stage-count-envoye');
+      const elCountStageAccepte = document.getElementById('stage-count-accepte');
+      const elCountStageChantier = document.getElementById('stage-count-chantier');
+      const elCountStageFacture = document.getElementById('stage-count-facture');
+
+      if (elCountStageAll) elCountStageAll.textContent = countStageAll;
+      if (elCountStageNouveau) elCountStageNouveau.textContent = countStageNouveau;
+      if (elCountStageEnvoye) elCountStageEnvoye.textContent = countStageEnvoye;
+      if (elCountStageAccepte) elCountStageAccepte.textContent = countStageAccepte;
+      if (elCountStageChantier) elCountStageChantier.textContent = countStageChantier;
+      if (elCountStageFacture) elCountStageFacture.textContent = countStageFacture;
 
       // 1. Annuaire des prospects / clients pour le sélecteur
       const leadClientsMap = new Map();
@@ -8237,6 +8437,25 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         });
         if (statsEl) {
           statsEl.innerHTML += ` <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-xs font-semibold shadow-2xs">🔍 ${displayedLeads.length} trouvé(s)</span>`;
+        }
+      }
+
+      // Filtre rapide par Étape du Pipeline Commercial (Kanban)
+      const activeStage = (window._activeLeadsStageFilter || 'ALL');
+      if (activeStage !== 'ALL') {
+        if (activeStage === 'NOUVEAU') {
+          displayedLeads = displayedLeads.filter(l => l.status === 'Nouveau' || !l.status);
+        } else if (activeStage === 'DEVIS_ENVOYE') {
+          displayedLeads = displayedLeads.filter(l => l.status === 'Devis envoyé' || l.status === 'Contacté' || l.status === 'En négociation');
+        } else if (activeStage === 'SIGNE') {
+          displayedLeads = displayedLeads.filter(l => l.status === 'Devis accepté' || l.status === 'Gagné' || l.status === 'Accepté' || l.status === 'Signé' || l.status === 'Validé');
+        } else if (activeStage === 'CHANTIER') {
+          displayedLeads = displayedLeads.filter(l => l.status === 'Chantier en cours');
+        } else if (activeStage === 'FACTURE') {
+          displayedLeads = displayedLeads.filter(l => l.status === 'Facturé' || l.status === 'Terminé');
+        }
+        if (statsEl) {
+          statsEl.innerHTML += ` <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs font-semibold shadow-2xs">📌 Étape: ${activeStage} (${displayedLeads.length})</span>`;
         }
       }
 
@@ -10440,6 +10659,14 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         if (filterSelect) filterSelect.innerHTML = '<option value="ALL">📋 Tous les clients (0 facture)</option>';
         if (dossierCard) dossierCard.classList.add('hidden');
         if (statsEl) statsEl.innerHTML = '';
+        const kpiTotalEl = document.getElementById('adm-factures-kpi-total');
+        const kpiPaidEl = document.getElementById('adm-factures-kpi-paid');
+        const kpiDueEl = document.getElementById('adm-factures-kpi-due');
+        const kpiSapEl = document.getElementById('adm-factures-kpi-sap');
+        if (kpiTotalEl) kpiTotalEl.textContent = '0.00 €';
+        if (kpiPaidEl) kpiPaidEl.textContent = '0.00 €';
+        if (kpiDueEl) kpiDueEl.textContent = '0.00 €';
+        if (kpiSapEl) kpiSapEl.textContent = '0.00 €';
         return;
       }
 
@@ -10492,6 +10719,33 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       if (elPaid) elPaid.textContent = `(${countPaid})`;
       if (elPending) elPending.textContent = `(${countPending})`;
       if (elCancelled) elCancelled.textContent = `(${countCancelled})`;
+
+      // 1.2 Calcul et affichage de la Synthèse Financière & Trésorerie (KPIs Directs)
+      let totalChargedAll = 0;
+      let totalPaidAll = 0;
+      let totalSapCreditAll = 0;
+
+      jobs.forEach(j => {
+        if (j.payment_status !== 'cancelled') {
+          const ch = parseFloat(j.amount_charged) || 0;
+          totalChargedAll += ch;
+          if (j.payment_status === 'paid') totalPaidAll += ch;
+          if ((j.payment_method || '').toLowerCase() === 'unipros') {
+            totalSapCreditAll += (ch * 0.5);
+          }
+        }
+      });
+      const totalDueAll = Math.max(0, totalChargedAll - totalPaidAll);
+
+      const kpiTotalEl = document.getElementById('adm-factures-kpi-total');
+      const kpiPaidEl = document.getElementById('adm-factures-kpi-paid');
+      const kpiDueEl = document.getElementById('adm-factures-kpi-due');
+      const kpiSapEl = document.getElementById('adm-factures-kpi-sap');
+
+      if (kpiTotalEl) kpiTotalEl.textContent = `${totalChargedAll.toFixed(2)} €`;
+      if (kpiPaidEl) kpiPaidEl.textContent = `${totalPaidAll.toFixed(2)} €`;
+      if (kpiDueEl) kpiDueEl.textContent = `${totalDueAll.toFixed(2)} €`;
+      if (kpiSapEl) kpiSapEl.textContent = `${totalSapCreditAll.toFixed(2)} €`;
 
       // 2. Peupler le dropdown de filtre par client
       const activeFilter = (window._activeFacturesClientFilter || 'ALL').trim().toLowerCase();
