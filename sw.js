@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v22-turbo-europe-admin-audio-bell';
+const CACHE_NAME = 'pino-ev-v23-turbo-europe-vaucluse-email-automation';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',

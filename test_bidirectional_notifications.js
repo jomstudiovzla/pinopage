@@ -183,7 +183,7 @@ async function runTests() {
     assert.strictEqual(res.ok, true, 'Résultat doit être ok');
     assert.strictEqual(sentMails.length, 1, 'Un appel fetch Web3Forms doit avoir été émis');
     assert.strictEqual(sentMails[0].url, 'https://api.web3forms.com/submit', 'URL Web3Forms correcte');
-    assert.strictEqual(sentMails[0].body.to, 'pino.spacesverts@gmail.com', 'Destinataire doit être pino.spacesverts@gmail.com');
+    assert.strictEqual(sentMails[0].body.to, 'pino.espacesverts@gmail.com', 'Destinataire doit être pino.espacesverts@gmail.com');
     assert.ok(sentMails[0].body.message.includes('Michel Durant'), 'Message doit mentionner le nom du client');
 
     // Vérifier admin_notifications dans RTDB
@@ -212,9 +212,9 @@ async function runTests() {
     // FormSubmit + Copie Web3Forms
     assert.strictEqual(sentMails.length, 2, 'Deux appels doivent avoir été émis (FormSubmit + Copie audit)');
     assert.ok(sentMails[0].url.includes('formsubmit.co/ajax/sophie.martin%40wanadoo.fr'), 'URL FormSubmit vers le client');
-    assert.strictEqual(sentMails[0].body._replyto, 'pino.spacesverts@gmail.com', 'ReplyTo vers Andrés');
+    assert.strictEqual(sentMails[0].body._replyto, 'pino.espacesverts@gmail.com', 'ReplyTo vers Andrés');
     assert.strictEqual(sentMails[1].url, 'https://api.web3forms.com/submit', 'Copie audit via Web3Forms');
-    assert.strictEqual(sentMails[1].body.to, 'pino.spacesverts@gmail.com');
+    assert.strictEqual(sentMails[1].body.to, 'pino.espacesverts@gmail.com');
 
     // Vérifier stockage dans client_notifications et clients_records/messages
     const sanitizedEmail = 'sophie_martin@wanadoo_fr';
@@ -266,7 +266,7 @@ async function runTests() {
 
     // Vérifier que les e-mails d'alerte ont été transmis
     assert.ok(sentMails.length >= 2, 'Au moins 2 emails transmis (Admin alert + Client confirm)');
-    const adminAlert = sentMails.find(m => m.body.to === 'pino.spacesverts@gmail.com' && m.body.subject.includes('[DEVIS ACCEPTÉ]'));
+    const adminAlert = sentMails.find(m => m.body.to === 'pino.espacesverts@gmail.com' && m.body.subject.includes('[DEVIS ACCEPTÉ]'));
     assert.ok(adminAlert, 'Andrés Pino doit recevoir l\'alerte d\'acceptation de devis');
     assert.ok(adminAlert.body.message.includes('Claire Leroy'));
   });

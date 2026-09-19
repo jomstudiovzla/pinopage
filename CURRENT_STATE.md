@@ -10,6 +10,31 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
+## ✅ Spécifications Techniques, Architecture des Agents & Automatisation Intégrale des E-mails (100% IMPLÉMENTÉ & VALIDÉ)
+- [x] **Consolidation Juridique & Géographique Officielle (Document CGV Entraigues-sur-la-Sorgue)** :
+  - **Titulaire & Raison Sociale** : Andres Pino — Pino Espaces Verts (Entreprise Individuelle).
+  - **SIRET Officiel** : `105 075 006 00012`.
+  - **Siège Social & Rayon d'Intervention** : 1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue (Vaucluse 84), rayon de 35 à 40 km (Avignon, Carpentras, Cavaillon, Sorgues, Vedène, Le Pontet, L'Isle-sur-la-Sorgue, etc.).
+  - **Régime Fiscal & Avantages** : Déclaration SAP déposée le 26/06/2026. Crédit d'impôt de 50% (CGI art. 199 sexdecies).
+  - **Règlement Strictement Traçable** : Chèque à l'ordre exact de **`PINO ANDRES`**, virement bancaire direct, CESU préfinancé. Suppression absolue des paiements carte non traçables et espèces (qui n'ouvrent pas droit au 50%).
+  - **Médiateur & Juridiction** : CM2C (`https://www.cm2c.net/`) et Tribunal d'Avignon.
+  - **E-mail Canonique de l'Administrateur** : `pino.espacesverts@gmail.com`.
+- [x] **Élimination Intégrale des Textes Résiduels Obsolètes (Bordeaux / Gironde)** :
+  - Remplacement à 100% des mentions de Gironde (33) par le Vaucluse (84) et Entraigues-sur-la-Sorgue dans les formulaires, modales, avis clients, réalisations, simulateurs de pitch B2B, attestations fiscales SAP et hubs de prospection.
+  - Actualisation du médiateur CNPM vers CM2C et juridiction vers Tribunal d'Avignon.
+- [x] **Tunnel Devis Libre (Sans Compte / Zéro-Friction) & Automatisation d'E-mails** :
+  - Saisie de devis en libre accès sans inscription obligatoire.
+  - Champ de coupon intégré avec recalcul immédiat de 20% de remise (`applyDevisCoupon`).
+  - Écran de succès enrichi avec :
+    - Étape 1 : Récapitulatif chiffré certifié SAP 50% transmis à `pino.espacesverts@gmail.com` et au client.
+    - Étape 2 : Signature tactile numérique immédiate sans quitter la page (`triggerImmediateQuoteSign`).
+    - Étape 3 : Prise de rendez-vous de visite technique en 1 clic (`confirmQuoteAppointment`) avec notification e-mail instantanée à Andrés.
+- [x] **Service Worker & Cache** :
+  - Versionné à `pino-ev-v23-turbo-europe-vaucluse-email-automation`.
+- [x] **Tests Automatisés (13 Suites de Tests, 100% Réussite)** :
+  - [`test_email_automation_and_cgv_compliance.js`](file:///Users/macbook/Documents/Antigravity/PINO/new/test_email_automation_and_cgv_compliance.js) créé et validé.
+  - Toutes les 13 suites de tests Node.js s'exécutent avec 0 échec.
+
 ## ✅ Panneau d'Administration Multi-Dispositifs (iPad, Mobile, Desktop) & Cloche de Notification Audio/E-mail (100% OPÉRATIONNEL)
 - [x] **Préservation des Proportions Majestueuses & Élimination du Vide Blanc (Retour Visuel Immédiat)** :
   - Modal `#modal-window-admin` dimensionné avec hauteur naturelle adaptative (`max-h-[92vh]`, `max-height: 92dvh !important;`) sans `height: 92vh` forcé sur desktop, supprimant tout vide blanc artificiel sous les cartes de KPIs.

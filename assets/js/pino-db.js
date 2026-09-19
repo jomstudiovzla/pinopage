@@ -31,7 +31,7 @@
     if (err) console.warn('[pino-db]', tag, err.message || err);
   }
 
-  const PINO_ADMIN_EMAIL = 'pino.spacesverts@gmail.com';
+  const PINO_ADMIN_EMAIL = 'pino.espacesverts@gmail.com';
   const WEB3FORMS_ACCESS_KEY = '646876c1-a20d-48d6-953e-8c3b7a5a4c9b';
 
   async function safePushAudit(db, payload) {
@@ -113,7 +113,7 @@
           }).catch(() => {});
         }
 
-        // Notification automatique de l'admin Andrés Pino en temps réel
+        // Notification automatique de l'admin Andrés Pino en temps réel (pino.espacesverts@gmail.com)
         notifyAdminByEmail({
           subject: `🌿 [NOUVEAU DEVIS] Demande de ${data.name || 'Prospect'} (${data.service || 'Entretien'})`,
           type: 'new_lead',
@@ -122,8 +122,33 @@
           clientPhone: data.phone || '',
           leadId: ref.key,
           amount: data.budget || null,
-          message: `Nouvelle demande reçue depuis le site web officiel.\nPrestation : ${data.service || 'Entretien'}\nCommune : ${data.commune || 'Bordeaux'}\nSurface : ${data.surface ? data.surface + ' m²' : 'Non précisée'}\nDétails : ${data.details || 'Aucun'}`
+          message: `Nouvelle demande reçue depuis le site web officiel.\nPrestation : ${data.service || 'Entretien'}\nCommune : ${data.commune || 'Entraigues-sur-la-Sorgue'}\nSurface : ${data.surface ? data.surface + ' m²' : 'Non précisée'}\nBudget estimé : ${data.budget || 'Non précisé'} €\nDétails : ${data.details || 'Aucun'}`
         }).catch(() => {});
+
+        // Notification automatique immédiate au client (même sans compte / visiteur libre)
+        if (data.email && isValidEmail(data.email)) {
+          const isSap = data.regime !== 'direct_pino';
+          const budgetNum = parseFloat(data.budget) || 0;
+          const netEstime = isSap ? Math.round(budgetNum / 2) : budgetNum;
+          notifyClientByEmail({
+            clientEmail: data.email,
+            clientName: data.name || 'Client Particulier',
+            subject: `🌿 Confirmation de votre Demande de Devis — Pino Espaces Verts (Entraigues-sur-la-Sorgue)`,
+            type: 'quote_confirmed',
+            message: `Nous avons bien reçu votre demande de devis pour l'entretien et l'aménagement de vos espaces extérieurs.\n\n` +
+              `RÉSUMÉ DE VOTRE PROJET :\n` +
+              `- Commune d'intervention : ${data.commune || 'Entraigues-sur-la-Sorgue'}\n` +
+              `- Prestation souhaitée : ${data.service || 'Entretien espaces verts'}\n` +
+              `- Surface estimée : ${data.surface ? data.surface + ' m²' : 'Non précisée'}\n` +
+              `- Régime : ${isSap ? "Services à la Personne (Crédit d'Impôt 50% URSSAF)" : "Jardinerie Directe / Professionnel"}\n` +
+              `- Montant indicatif : ${budgetNum} € TTC\n` +
+              (isSap ? `- Reste à charge réel après 50% SAP : ~${netEstime} €\n` : '') +
+              `\n💡 Zéro euro à payer maintenant : cette demande est 100% gratuite et sans aucun engagement. Andrés Pino va étudier votre dossier et vous contactera dans les plus brefs délais pour convenir de la visite technique sur place.`,
+            amountCharged: budgetNum,
+            netClient: netEstime,
+            actionUrl: `https://jomstudiovzla.github.io/pinopage/#suivi?id=${ref.key}&email=${encodeURIComponent(data.email)}`
+          }).catch(() => {});
+        }
 
         return { ok: true, id: ref.key };
       } catch (err) {
@@ -240,7 +265,7 @@
   async function saveLeadResponse(leadId, responseData) {
     const payload = {
       ...responseData,
-      responded_by: 'Andrés Pino (pino.spacesverts@gmail.com)',
+      responded_by: 'Andrés Pino (pino.espacesverts@gmail.com)',
       responded_at: new Date().toISOString()
     };
 
@@ -586,10 +611,12 @@ Si vous avez la moindre question, vous pouvez joindre Andrés Pino directement p
 Bien cordialement,
 
 Andrés Pino — Pino Espaces Verts
-Artisan Paysagiste & Membre Déclaré Coopérative Unipros
-Services à la Personne (SAP) — Agrément Crédit d'Impôt 50% Immédiat
-Téléphone : 06 51 59 40 34 | E-mail : pino.spacesverts@gmail.com
-Bordeaux Métropole & Gironde (33)
+Artisan Paysagiste — Entraigues-sur-la-Sorgue (Vaucluse 84)
+Services à la Personne (SAP) — Déclaration 26/06/2026 — Crédit d'Impôt 50%
+SIRET : 105 075 006 00012 | Siège : 1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue
+Téléphone : 06 51 59 40 34 | E-mail : pino.espacesverts@gmail.com
+Rayon d'intervention : Entraigues-sur-la-Sorgue et 35-40 km (Avignon, Carpentras, Cavaillon, Sorgues, Vedène)
+Règlements autorisés SAP : Chèque à l'ordre exact de PINO ANDRES, Virement bancaire, CESU
 Site web : https://jomstudiovzla.github.io/pinopage/`;
 
     let clientEmailSent = false;
@@ -2811,8 +2838,8 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       responsable_traitement: {
         nom_commercial: "Pino Espaces Verts",
         titulaire: "Andrés Pino (Entrepreneur Individuel)",
-        immatriculation: "Bordeaux Métropole & Gironde (33)",
-        contact_rgpd: "pino.spacesverts@gmail.com",
+        immatriculation: "SIRET 105 075 006 00012 — Entraigues-sur-la-Sorgue (Vaucluse 84)",
+        contact_rgpd: "pino.espacesverts@gmail.com",
         telephone: "+33 6 51 59 40 34"
       },
       profil_utilisateur: profile || { email: normEmail },
@@ -2825,7 +2852,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       },
       vos_droits_rgpd: {
         description: "Conformément au Règlement Général sur la Protection des Données (RGPD 2016/679) et à la loi Informatique et Libertés :",
-        droit_acces_rectification: "Vous pouvez demander la correction de vos données en écrivant à pino.spacesverts@gmail.com.",
+        droit_acces_rectification: "Vous pouvez demander la correction de vos données en écrivant à pino.espacesverts@gmail.com.",
         droit_effacement: "Vous pouvez exercer votre droit à l'oubli directement depuis votre Espace Client.",
         conservation_legale: "Conformément à l'Article L. 123-22 du Code de commerce, les factures et justificatifs comptables sont légalement conservés 10 ans sous forme anonymisée.",
         autorite_controle: "Commission Nationale de l'Informatique et des Libertés (CNIL) — www.cnil.fr"

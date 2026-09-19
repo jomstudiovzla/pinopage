@@ -14,11 +14,13 @@ window.PINO_CHATBOT_KB = {
     phoneFormatted: "06 51 59 40 34",
     phoneUrl: "tel:+33651594034",
     whatsappUrl: "https://wa.me/33651594034",
-    email: "pino.spacesverts@gmail.com",
-    emailUrl: "mailto:pino.spacesverts@gmail.com",
+    email: "pino.espacesverts@gmail.com",
+    emailUrl: "mailto:pino.espacesverts@gmail.com",
     instagram: "@pino.espacesverts",
     instagramUrl: "https://www.instagram.com/pino.espacesverts",
-    zone: "Bordeaux Métropole & Gironde (33)",
+    address: "1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue",
+    siret: "105 075 006 00012",
+    zone: "Entraigues-sur-la-Sorgue & Vaucluse (84) — Rayon de 35 à 40 km",
     hours: "Lundi au Samedi, 8h00 - 19h00 (Urgences & Devis sous 24h)",
     insurance: "Responsabilité Civile Professionnelle (RC Pro) complète",
     quoteNotice: "Déplacement & Devis 100% Gratuits sous 24h"
@@ -112,16 +114,18 @@ window.PINO_CHATBOT_KB = {
       eligibleUnipros: false,
       priceFrom: "Sur devis sous 24h",
       creditPrice: "Facturation avec TVA 100% déductible pour professionnels",
-      details: "Contrats d'entretien programmés pour syndics, cours d'immeubles, bureaux et commerces sur Bordeaux Métropole."
+      details: "Contrats d'entretien programmés pour syndics, cours d'immeubles, bureaux et commerces sur Entraigues-sur-la-Sorgue et le Vaucluse (84)."
     }
   ],
 
   // 5. Communes desservies
   localities: [
-    "Bordeaux (Caudéran, Centre, Nansouty, Chartrons, etc.)",
-    "Talence", "Pessac", "Mérignac", "Gradignan", "Villenave-d'Ornon", 
-    "Bègles", "Le Bouscat", "Bruges", "Eysines", "Blanquefort", 
-    "Saint-Médard-en-Jalles", "Le Haillan", "Cenon", "Floirac", "Lormont"
+    "Entraigues-sur-la-Sorgue (84320)",
+    "Avignon (84000)", "Carpentras (84200)", "Cavaillon (84300)", "Sorgues (84700)",
+    "Vedène (84270)", "Le Pontet (84130)", "L'Isle-sur-la-Sorgue (84800)",
+    "Althen-des-Paluds (84210)", "Monteux (84170)", "Pernes-les-Fontaines (84210)",
+    "Morières-lès-Avignon (84310)", "Bédarrides (84370)", "Courthézon (84350)",
+    "Châteauneuf-du-Pape (84230)", "Orange (84100)", "Vaucluse & Rayon 35-40 km"
   ]
 };
 
@@ -489,15 +493,15 @@ window.resolveChatbotQuery = function(userText) {
   }
 
   // 6. Zone d'intervention
-  if (/\b(zone|secteur|secteurs|villes?|communes?|quartiers?|déplacement|deplacement|bordeaux|merignac|mérignac|pessac|talence|cauderan|caudéran|gradignan|gironde|bègles|begles|villenave|bouscat|bruges|eysines|floirac|cenon|lormont)\b/i.test(q) || /\b(o[uù] (êtes|vous|intervenez|travaillez))\b/i.test(q)) {
+  if (/\b(zone|secteur|secteurs|villes?|communes?|quartiers?|déplacement|deplacement|entraigues|avignon|carpentras|cavaillon|sorgues|vedène|vedene|pontet|isle-sur-la-sorgue|vaucluse|84320|84000|84200|84300|84700|84270|84130|84800|84210|84170|84310|84370|84350|84230|84100|bordeaux|gironde)\b/i.test(q) || /\b(o[uù] (êtes|vous|intervenez|travaillez))\b/i.test(q)) {
     return `
       <div class="space-y-2">
         <p class="font-bold text-emerald-800 flex items-center gap-1.5">
           <i class="fa-solid fa-map-location-dot text-base text-emerald-600"></i>
-          Zone d'Intervention : Bordeaux Métropole & Gironde
+          Zone d'Intervention : Entraigues-sur-la-Sorgue & Vaucluse (84)
         </p>
         <p class="text-xs text-slate-700 leading-relaxed">
-          Pino Espaces Verts se déplace gratuitement sur <strong>Bordeaux et toute sa périphérie</strong> :
+          Pino Espaces Verts se déplace gratuitement sur <strong>Entraigues-sur-la-Sorgue, Avignon et tout le Vaucluse (rayon 35-40 km)</strong> :
         </p>
         <div class="p-2 bg-slate-100 rounded-xl text-[11px] text-slate-700 leading-relaxed">
           ${kb.localities.join(" • ")}
@@ -561,7 +565,7 @@ window.resolveChatbotQuery = function(userText) {
         </div>
       </div>
       <p class="text-[11px] text-slate-500">
-        Disponibilité : ${kb.pino.hours}. Déplacement et chiffrage 100% gratuits sur Bordeaux et Gironde.
+        Disponibilité : ${kb.pino.hours}. Déplacement et chiffrage 100% gratuits sur Entraigues-sur-la-Sorgue et tout le Vaucluse (84).
       </p>
     </div>
   `;

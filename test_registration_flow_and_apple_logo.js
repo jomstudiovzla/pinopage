@@ -41,7 +41,7 @@ console.log('  ✅ PASS: Formulaire interactif et tolérant (téléphone et comm
 
 // 4. VÉRIFICATION DU ROUTAGE ET DU CACHE SERVICE WORKER
 console.log('\n🚀 [TEST 4 : SERVICE WORKER V21 ACTUALISÉ]');
-assert(swJs.includes('pino-ev-v21') || swJs.includes('pino-ev-v22'), 'sw.js utilise le cache v21 ou supérieur');
+assert(swJs.includes('pino-ev-v21') || swJs.includes('pino-ev-v22') || swJs.includes('pino-ev-v23'), 'sw.js utilise le cache v21 ou supérieur');
 assert(indexHtml.includes('\'register\': \'modal-window-auth\''), 'openWindowModal route register vers la modale d\'auth');
 console.log('  ✅ PASS: Déploiement service worker et routage immédiat validés.');
 

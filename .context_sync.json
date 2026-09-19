@@ -1,16 +1,25 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Restauration des proportions majestueuses d'origine du Panneau Admin, onglets sur 2 lignes visibles et élimination du vide blanc vertical sur Desktop, tout en conservant la cloche audio et alertes e-mail",
-  "current_phase": "Admin Panel Majestic Proportions Restored & Live Notifications Operational",
-  "action": "1) Restauration de la grande couronne royale w-14 h-14, du titre majestueux font-serif text-2xl font-bold, du badge GOD MODE et du padding généreux px-6 sm:px-8 pt-5 pb-6 sm:pb-8. 2) Rétablissement des onglets enveloppants (sm:flex-wrap) sur 2 rangées sur tablette et desktop, garantissant que l'intégralité des 9 onglets est visible sans aucune troncature latérale (V...). 3) Remplacement de la hauteur forcée desktop height: 92vh par une hauteur naturelle adaptative max-h-[92vh] / max-height: 92dvh, supprimant tout vide blanc artificiel sous les cartes de KPIs. 4) Maintien intégral de la cloche interactive (campanita) avec badge d'alertes en direct, menu déroulant de suivi et bascule de son. 5) Maintien du synthétiseur sonore universel Web Audio API (PinoAudioNotifier) et de la double alerte (sur appareil et par e-mail pino.spacesverts@gmail.com). 6) 12 suites de tests automatisées validées à 100%.",
+  "active_goal": "Especificaciones técnicas completas, arquitectura de enjambre de agentes y sistema integral de automatización de correos transaccionales desde la página para Pino Espaces Verts (Entraigues-sur-la-Sorgue)",
+  "current_phase": "Especificaciones, Automatización de Correos y CGV Vaucluse 100% Implementados y Validados",
+  "action": "1) Datos legales CGV integrados: SIRET 105 075 006 00012, 1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue, radio 35-40 km, pagos PINO ANDRES (Chèque/Virement/CESU sin tarjeta ni efectivo), CM2C y Tribunal d'Avignon. 2) Purga 100% de menciones residuales de Gironde/Bordeaux. 3) Despacho automático bidireccional de emails hacia pino.espacesverts@gmail.com y clientes. 4) Flujo de devis sin login con cupón, recálculo 20%, firma digital táctil y cita técnica en 1 clic. 5) Service Worker actualizado a v23. 6) 13/13 suites de pruebas automatizadas aprobadas.",
   "files": [
+    "especificaciones_agentes_proyecto.md",
+    "test_email_automation_and_cgv_compliance.js",
     "index.html",
+    "assets/js/pino-db.js",
+    "assets/js/chatbot_knowledge_base.js",
+    "assets/flyer/flyer_9_16.html",
+    "sw.js",
     "test_admin_appearance_and_audio_notifications.js",
-    "CURRENT_STATE.md",
-    ".context_sync.json"
+    "test_bidirectional_notifications.js",
+    "test_registration_flow_and_apple_logo.js",
+    "test_unified_auth_and_registration.js",
+    ".context_sync.json",
+    "CURRENT_STATE.md"
   ],
-  "step": "Validation complète et push sur main pour mise à jour immédiate sur GitHub Pages.",
+  "step": "Listo para confirmación del CEO y despliegue continuo en producción.",
   "last_commit": "15f9d4b",
-  "timestamp": "2026-09-17T10:30:00-04:00"
+  "timestamp": "2026-09-19T10:55:00-04:00"
 }
