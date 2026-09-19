@@ -1,15 +1,15 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Claude 3.5 Sonnet",
-  "active_goal": "Suppression intégrale de tout affichage administrateur dans l'authentification (Google, Apple, e-mail)",
-  "current_phase": "Hito 1 — Authentification Client 100% Épurée",
-  "action": "Élimination totale des boutons JOM Studio et Andrés Pino des panneaux Google et Apple. L'interface ne présente strictement que Continuer avec Google, Continuer avec Apple et la connexion / inscription par e-mail sans aucune exposition de privilèges admin",
+  "active_goal": "Déclenchement direct et universel de Google et Apple OAuth sans panneau intermédiaire",
+  "current_phase": "Hito 1 — Authentification Client 100% Épurée & Directe",
+  "action": "Élimination totale de l'interception de clic sur 'Continuer avec Google' et 'Continuer avec Apple'. Le flux ouvre directement la fenêtre popup officielle de sélection de compte sans aucune carte sombre ni demande d'email intermédiaire, sur tout navigateur, appareil ou pays.",
   "files": [
     "index.html",
-    "test_google_auth_resilience_and_panel.js",
     "test_auth_session_retention_and_quick_access.js",
+    "test_universal_auth_resilience_and_instant_login.js",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Validation de l'ensemble des 19 suites de tests et synchronisation git"
+  "step": "Validation des 19 suites de tests et synchronisation git vers origin/main"
 }

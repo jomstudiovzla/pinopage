@@ -29,11 +29,11 @@ assert(indexHtml.includes('// ── FERMETURE IMMÉDIATE DU PANNEAU & MODALE D\
 assert(indexHtml.includes('// ── SYNCHRONISATION EN ARRIÈRE-PLAN (NON-BLOQUANTE) ──'), 'La synchronisation réseau doit s\'exécuter en tâche de fond');
 console.log('  ✅ PASS: Fermeture et bascule d\'interface à 0ms avant toute requête réseau ou RTDB.');
 
-// ── 3. COMPATIBILITÉ MULTI-TERMINAUX (MOBILE / TOUT PAYS) DANS handleGoogleSignIn ──
-console.log('\n📱 [TEST 3 : COMPATIBILITÉ SMARTPHONE & DÉTECTION MOBILE]');
-assert(indexHtml.includes('const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);'), 'handleGoogleSignIn doit détecter les smartphones et tablettes');
-assert(indexHtml.includes('if (isMobile || isLocalHost)'), 'Les mobiles et environnements locaux doivent bénéficier de l\'ouverture immédiate');
-console.log('  ✅ PASS: Zéro blocage popup sur Safari iOS, Chrome Android et réseaux internationaux.');
+// ── 3. DÉCLENCHEMENT DIRECT GOOGLE & APPLE AUTH SANS INTERCEPTION BLOQUANTE ──
+console.log('\n📱 [TEST 3 : DÉCLENCHEMENT DIRECT GOOGLE & APPLE SANS PANNEAU BLOQUANT]');
+assert(indexHtml.includes('await firebase.auth().signInWithPopup(provider)'), 'handleGoogleSignIn doit déclencher directement le popup Google officiel');
+assert(indexHtml.includes("OAuthProvider('apple.com')"), 'handleAppleSignIn doit instancier le fournisseur officiel Apple');
+console.log('  ✅ PASS: Déclenchement direct du flux officiel sur tout appareil, navigateur et pays.');
 
 // ── 4. SÉCURITÉ DE CONNEXION ADMIN UNIVERSELLE DANS handleLoginSubmit ──
 console.log('\n🔒 [TEST 4 : FALLBACK ADMIN MAÎTRE SANS DÉPENDANCE RÉSEAU]');

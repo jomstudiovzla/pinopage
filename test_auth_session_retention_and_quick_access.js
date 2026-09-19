@@ -32,8 +32,8 @@ console.log('  ✅ PASS: Panneau Apple épuré, confidentiel avec support de la 
 console.log('\n🔍 [TEST 3 : GOOGLE SIGN-IN EN PLACE SANS REDIRECT DISRUPTIF]');
 assert(indexHtml.includes('await firebase.auth().signInWithPopup(provider)'), 'handleGoogleSignIn doit privilégier signInWithPopup');
 assert(!indexHtml.includes('await firebase.auth().signInWithRedirect(provider)'), 'signInWithRedirect ne doit plus être forcé pour éviter les rechargements complets');
-assert(indexHtml.includes("quickPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' })"), 'Secours quickPanel doit défiler doucement lors d\'erreurs');
-console.log('  ✅ PASS: Flux Google popup optimisé avec repli immédiat sur le panneau interactif.');
+assert(indexHtml.includes("google-auth-btn-label"), 'Libellé d\'état dynamique du bouton Google présent');
+console.log('  ✅ PASS: Flux Google popup officiel optimisé sans panneau intrusif.');
 
 // ── 4. CONTRÔLE DE MODALE UNIFIÉ DANS processAuthenticatedUser & handleAuthNavClick ──
 console.log('\n🎛️ [TEST 4 : CONTRÔLE DE MODALE SÉCURISÉ & ANTI-INVALIDSTATE]');

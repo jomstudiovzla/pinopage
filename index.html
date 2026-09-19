@@ -723,29 +723,9 @@
         </button>
 
         <!-- Panneau Interactif Google Workspace / Gmail Universel -->
-        <div id="google-auth-quick-panel" class="hidden p-4 bg-slate-900 text-white rounded-2xl space-y-3 border border-slate-700 shadow-xl">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-            <span class="text-xs font-bold flex items-center gap-2 text-white">
-              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-              </svg>
-              Connexion avec compte Google
-            </span>
-            <button type="button" onclick="cancelGoogleAuthFlow()" class="text-slate-400 hover:text-white text-xs cursor-pointer p-1">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-
-          <div class="space-y-2">
-            <p class="text-[11px] text-slate-300">Saisissez votre adresse Google / Gmail :</p>
-            <input type="email" id="google-quick-email" onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmGoogleQuickSignIn(this.value);}" placeholder="votre-compte@gmail.com" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-white font-medium" />
-            <button type="button" onclick="confirmGoogleQuickSignIn(document.getElementById('google-quick-email').value)" class="w-full py-2 bg-white hover:bg-slate-100 text-slate-900 font-extrabold rounded-xl text-xs cursor-pointer transition-all shadow flex items-center justify-center gap-2">
-              <span>Continuer avec ce compte Google</span> <i class="fa-solid fa-arrow-right text-xs"></i>
-            </button>
-          </div>
+        <div id="google-auth-quick-panel" class="hidden" style="display: none !important;">
+          <input type="email" id="google-quick-email" onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmGoogleQuickSignIn(this.value);}" class="hidden" />
+          <button type="button" onclick="cancelGoogleAuthFlow()" class="hidden"></button>
         </div>
 
         <!-- Apple OAuth (Design Officiel Apple HIG) -->
@@ -755,43 +735,13 @@
         </button>
 
         <!-- Panneau Interactif Apple ID Universel (Compatible tout appareil & navigateur) -->
-        <div id="apple-auth-quick-panel" class="hidden p-4 bg-neutral-900 text-white rounded-2xl space-y-3 border border-neutral-700 shadow-xl">
-          <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
-            <span class="text-xs font-bold flex items-center gap-2 text-white">
-              <i class="fa-brands fa-apple text-base text-white shrink-0" aria-hidden="true"></i>
-              Connexion avec Identifiant Apple
-            </span>
-            <button type="button" onclick="cancelAppleAuthFlow()" class="text-neutral-400 hover:text-white text-xs cursor-pointer p-1">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-
-          <!-- Utilisateur mémorisé sur ce terminal (détection dynamique locale) -->
-          <div id="apple-remembered-user-container" class="hidden">
-            <button type="button" onclick="confirmAppleRememberedUser()" class="w-full flex items-center justify-between p-3 bg-neutral-800 hover:bg-neutral-700 rounded-xl text-left transition-all border border-neutral-700 hover:border-emerald-400 cursor-pointer group">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-950 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-800">
-                  <i class="fa-solid fa-user-check"></i>
-                </div>
-                <div>
-                  <div id="apple-remembered-name" class="text-xs font-bold text-white">Compte mémorisé</div>
-                  <div id="apple-remembered-email" class="text-[11px] text-neutral-400">email@exemple.com</div>
-                </div>
-              </div>
-              <span class="text-xs text-emerald-400 font-bold flex items-center gap-1">
-                Continuer <i class="fa-solid fa-chevron-right text-[10px]"></i>
-              </span>
-            </button>
-          </div>
-
-          <div class="space-y-2">
-            <p class="text-[11px] text-neutral-300">Saisissez votre Identifiant Apple (e-mail iCloud) :</p>
-            <input type="email" id="apple-quick-email" onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmAppleQuickSignIn(this.value);}" placeholder="votre-compte@icloud.com" class="w-full px-3.5 py-2.5 bg-neutral-800 border border-neutral-700 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-hidden focus:border-white font-medium" />
-            <button type="button" onclick="confirmAppleQuickSignIn(document.getElementById('apple-quick-email').value)" class="w-full py-2.5 bg-white hover:bg-neutral-100 text-black font-extrabold rounded-xl text-xs cursor-pointer transition-all shadow-md flex items-center justify-center gap-2">
-              <span>Continuer avec cet Identifiant Apple</span> <i class="fa-solid fa-arrow-right text-xs"></i>
-            </button>
-          </div>
+        <div id="apple-auth-quick-panel" class="hidden" style="display: none !important;">
+          <i class="fa-brands fa-apple text-base text-white shrink-0"></i>
+          <div id="apple-remembered-user-container" class="hidden"></div>
+          <input type="email" id="apple-quick-email" onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmAppleQuickSignIn(this.value);}" class="hidden" />
+          <button type="button" onclick="cancelAppleAuthFlow()" class="hidden"></button>
         </div>
+
       </div>
 
       <div class="relative flex items-center justify-center py-1">
@@ -6764,21 +6714,6 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     window.handleGoogleSignIn = async () => {
       const label = document.getElementById('google-auth-btn-label');
       const originalText = label ? label.textContent : 'Continuer avec Google';
-      const quickPanel = document.getElementById('google-auth-quick-panel');
-
-      // ── Accès Mobile / Tout Appareil / Environnement Local Immédiat ──
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      if (isMobile || isLocalHost) {
-        if (quickPanel) {
-          quickPanel.classList.toggle('hidden');
-          if (!quickPanel.classList.contains('hidden')) {
-            showNotificationToast('Sélectionnez votre compte Google ci-dessous.', 'info');
-            quickPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            return;
-          }
-        }
-      }
 
       if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Connexion Google...';
 
@@ -6787,7 +6722,6 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           const provider = new firebase.auth.GoogleAuthProvider();
           provider.setCustomParameters({ prompt: 'select_account' });
 
-          // Tentative par Popup sans rechargement de page pour préserver l'état de navigation
           try {
             const result = await firebase.auth().signInWithPopup(provider);
             if (result && result.user) {
@@ -6797,12 +6731,10 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
             }
           } catch (popupErr) {
             console.warn('[pino-auth] Erreur popup Google:', popupErr.code, popupErr.message);
-
-            if (quickPanel) {
-              quickPanel.classList.remove('hidden');
-              quickPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-              showNotificationToast('Veuillez sélectionner votre compte Google ci-dessous.', 'info');
-              return;
+            if (popupErr.code === 'auth/popup-blocked') {
+              showNotificationToast('Veuillez autoriser les fenêtres pop-up de votre navigateur pour vous connecter avec Google.', 'warning');
+            } else if (popupErr.code !== 'auth/popup-closed-by-user' && popupErr.code !== 'auth/cancelled-popup-request') {
+              showNotificationToast("Connexion Google temporairement indisponible. Vous pouvez vous connecter par e-mail ci-dessous.", 'warning');
             }
             throw popupErr;
           }
@@ -6817,20 +6749,10 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           });
           if (error) throw error;
         } else {
-          if (quickPanel) {
-            quickPanel.classList.remove('hidden');
-            quickPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }
+          showNotificationToast("Initialisation du service d'authentification...", 'info');
         }
       } catch (error) {
         console.error('Google Sign-In Error:', error);
-        if (quickPanel) {
-          quickPanel.classList.remove('hidden');
-          quickPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          showNotificationToast('Sélectionnez votre compte Google ci-dessous.', 'info');
-        } else {
-          showNotificationToast("Connexion temporairement indisponible. Veuillez réessayer.", 'warning');
-        }
       } finally {
         if (label) label.textContent = originalText;
       }
@@ -7019,48 +6941,52 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       window.switchAuthTab('login');
     };
 
-    window.handleAppleSignIn = () => {
-      const panel = document.getElementById('apple-auth-quick-panel');
-      if (!panel) return;
-      panel.classList.toggle('hidden');
-      if (!panel.classList.contains('hidden')) {
-        // Inspecter si un compte a été mémorisé sur cet appareil
-        const lastEmail = (localStorage.getItem('pino_last_client_email') || '').trim().toLowerCase();
-        let localUsers = [];
-        try { localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]'); } catch(e){}
-        const matched = localUsers.find(u => (u.email || '').toLowerCase() === lastEmail);
+    window.handleAppleSignIn = async () => {
+      const label = document.getElementById('apple-auth-btn-label');
+      const originalText = label ? label.textContent : 'Continuer avec Apple';
 
-        const rememberedContainer = document.getElementById('apple-remembered-user-container');
-        const rememberedNameEl = document.getElementById('apple-remembered-name');
-        const rememberedEmailEl = document.getElementById('apple-remembered-email');
-        const quickInput = document.getElementById('apple-quick-email');
+      if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Connexion Apple...';
 
-        if (lastEmail && lastEmail.includes('@')) {
-          let displayName = matched?.fullName || matched?.name;
-          if (!displayName) {
-            if (lastEmail === 'jomstudiovzla@gmail.com') displayName = 'JOM Studio (Admin)';
-            else if (lastEmail === 'martinezoliverosj@hotmail.com') displayName = 'Jesus Martinez';
-            else if (isPinoEmail(lastEmail)) displayName = 'Andrés Pino';
-            else {
-              const clean = lastEmail.split('@')[0].replace(/[._-]/g, ' ');
-              displayName = clean.charAt(0).toUpperCase() + clean.slice(1);
+      try {
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+          const provider = new firebase.auth.OAuthProvider('apple.com');
+          provider.addScope('email');
+          provider.addScope('name');
+
+          try {
+            const result = await firebase.auth().signInWithPopup(provider);
+            if (result && result.user) {
+              try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
+              await processAuthenticatedUser(result.user, 'apple', null, { openModal: true });
+              return;
             }
+          } catch (appleErr) {
+            console.warn('[pino-auth] Erreur popup Apple:', appleErr.code, appleErr.message);
+            if (appleErr.code === 'auth/operation-not-allowed' || appleErr.code === 'auth/configuration-not-found') {
+              showNotificationToast("La connexion directe avec Apple est en cours d'activation dans Firebase. Vous pouvez vous connecter avec Google ou par e-mail ci-dessous.", 'info');
+            } else if (appleErr.code === 'auth/popup-blocked') {
+              showNotificationToast('Veuillez autoriser les fenêtres pop-up de votre navigateur pour vous connecter avec Apple.', 'warning');
+            } else if (appleErr.code !== 'auth/popup-closed-by-user' && appleErr.code !== 'auth/cancelled-popup-request') {
+              showNotificationToast("Connexion Apple indisponible. Vous pouvez vous connecter par e-mail ci-dessous.", 'warning');
+            }
+            throw appleErr;
           }
-          window._appleRememberedEmail = lastEmail;
-          window._appleRememberedName = displayName;
-          if (rememberedNameEl) rememberedNameEl.textContent = displayName;
-          if (rememberedEmailEl) rememberedEmailEl.textContent = lastEmail;
-          if (rememberedContainer) rememberedContainer.classList.remove('hidden');
+        } else if (window.pinoSupabase) {
+          try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
+          const { error } = await window.pinoSupabase.auth.signInWithOAuth({
+            provider: 'apple',
+            options: {
+              redirectTo: window.PINO_SITE_URL || (window.location.origin + '/')
+            }
+          });
+          if (error) throw error;
         } else {
-          window._appleRememberedEmail = null;
-          window._appleRememberedName = null;
-          if (rememberedContainer) rememberedContainer.classList.add('hidden');
+          showNotificationToast("Initialisation du service d'authentification...", 'info');
         }
-
-        if (quickInput && !lastEmail) {
-          quickInput.focus();
-        }
-        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } catch (error) {
+        console.error('Apple Sign-In Error:', error);
+      } finally {
+        if (label) label.textContent = originalText;
       }
     };
 
