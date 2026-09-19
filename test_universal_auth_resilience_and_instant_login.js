@@ -14,13 +14,14 @@ console.log('===============================================================\n')
 const indexHtmlPath = path.join(__dirname, 'index.html');
 const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
 
-// ── 1. BARRE PERMANENTE D'ACCÈS RAPIDE ADMINISTRATEUR (1-CLIC DIRECT) ──
-console.log('👑 [TEST 1 : ACCÈS DIRECT ADMINISTRATEURS EN TÊTE DU FORMULAIRE]');
-assert(indexHtml.includes('👑 Accès Direct Administrateurs (1-Clic)'), 'La barre d\'accès direct administrateurs doit être visible en tête');
-assert(indexHtml.includes('Instantané 0ms'), 'Le badge Instantané 0ms doit être affiché');
-assert(indexHtml.includes("onclick=\"confirmGoogleQuickSignIn('jomstudiovzla@gmail.com', 'JOM Studio (Admin)')\""), 'Bouton 1-clic direct pour JOM Studio présent');
-assert(indexHtml.includes("onclick=\"confirmGoogleQuickSignIn('pino.espacesverts@gmail.com', 'Andrés Pino')\""), 'Bouton 1-clic direct pour Andrés Pino présent');
-console.log('  ✅ PASS: Accès direct administrateur immédiatement accessible dès l\'ouverture de la modale.');
+// ── 1. VUE DE CONNEXION ÉPURÉE & STANDARD SANS POLLUTION ADMIN PUBLIQUE ──
+console.log('✨ [TEST 1 : INTERFACE DE CONNEXION ÉPURÉE SANS PANNEAU ADMIN EXPOSÉ]');
+assert(!indexHtml.includes('👑 Accès Direct Administrateurs (1-Clic)'), 'Le bandeau administrateur ne doit pas polluer la vue publique de connexion');
+assert(!indexHtml.includes('Instantané 0ms'), 'Le badge administrateur 0ms ne doit pas être visible publiquement');
+assert(indexHtml.includes('handleGoogleSignIn()'), 'Bouton Google officiel présent');
+assert(indexHtml.includes('handleAppleSignIn()'), 'Bouton Apple officiel présent');
+assert(indexHtml.includes('handleLoginSubmit(event)'), 'Formulaire de connexion par e-mail et mot de passe présent');
+console.log('  ✅ PASS: Interface de connexion épurée, conforme et sécurisée.');
 
 // ── 2. FLUX OPTIMISTE 0MS NON-BLOQUANT DANS confirmGoogleQuickSignIn & confirmAppleQuickSignIn ──
 console.log('\n⚡ [TEST 2 : CONTRÔLEURS RAPIDES 0MS SANS ATTENTE RÉSEAU BLOQUANTE]');

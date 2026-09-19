@@ -16,11 +16,9 @@
     1. Sur smartphones (iPhone Safari, Android Chrome), les fenêtres popup OAuth sont bloquées par défaut, et les redirections détruisaient l'état JavaScript de la page, ramenant l'utilisateur au début déconnecté.
     2. Dans `confirmGoogleQuickSignIn`, `confirmAppleQuickSignIn` et `processAuthenticatedUser`, les appels réseau `await PinoDB.upsertProfile()` et `await PinoDB.fetchUserCoupon()` bloquaient la fermeture de la modale et la mise à jour UI. Sur réseaux cellulaires, à forte latence ou depuis l'étranger (ex: Venezuela, connexions mobiles), ces promesses restaient en suspens, figeant l'interface avant que la session ne soit finalisée.
     3. Dans `handleLoginSubmit`, si le compte n'était pas encore synchronisé dans le stockage local d'un nouvel appareil, la connexion admin par mot de passe échouait avec "Identifiants non reconnus".
-  - **Barre Permanente d'Accès Direct Administrateurs (1-Clic Immédiat)** :
-    - Placée de manière visible et permanente tout en haut du formulaire de connexion (`#auth-view-login`).
-    - **👑 JOM Studio (Admin Principal)** : `confirmGoogleQuickSignIn('jomstudiovzla@gmail.com', 'JOM Studio (Admin)')`.
-    - **🌿 Andrés Pino (Gérant)** : `confirmGoogleQuickSignIn('pino.espacesverts@gmail.com', 'Andrés Pino')`.
-    - Accès 100% instantané en 0ms sans devoir ouvrir de sous-menu ni saisir d'identifiant.
+  - **Interface Client Épurée & Sécurisée (Retrait du Bandeau Public Admin)** :
+    - Retrait du bloc d'accès direct administrateurs en tête du formulaire `#auth-view-login` pour garantir une interface client sobre, sans exposition d'adresses privées.
+    - Accès administrateur préservé via authentification normale (e-mail admin avec mot de passe reconnu instantanément en 0ms ou OAuth Google/Apple).
   - **Exécution Optimiste 0ms & Synchronisation Asynchrone** :
     - Enregistrement immédiat de la session dans `localStorage.setItem('pino_current_user')` et mise à jour de la liste locale.
     - Fermeture immédiate de la modale d'authentification (`modal-window-auth.close()`), mise à jour de la barre de navigation (`updateAuthUI()`) et bascule instantanée vers l'Espace Admin ou Espace Client en **0 milliseconde**.
