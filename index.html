@@ -2553,6 +2553,23 @@
           <div id="adm-factures-filter-stats" class="text-xs font-semibold text-slate-600 flex items-center gap-2"></div>
         </div>
 
+        <!-- Filtres rapides par Statut de Paiement & Compteurs -->
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-xs font-bold text-slate-500 mr-1"><i class="fa-solid fa-filter text-emerald-700 mr-1"></i>Statut :</span>
+          <button type="button" onclick="handleAdminFacturesStatusFilter('ALL')" id="btn-fac-filter-all" class="px-3 py-1 rounded-xl font-bold bg-slate-800 text-white shadow-2xs cursor-pointer transition-all">
+            Tous <span id="count-fac-all" class="ml-1 opacity-80">(0)</span>
+          </button>
+          <button type="button" onclick="handleAdminFacturesStatusFilter('paid')" id="btn-fac-filter-paid" class="px-3 py-1 rounded-xl font-bold bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-800 cursor-pointer transition-all">
+            ✅ Acquittées <span id="count-fac-paid" class="ml-1 opacity-80">(0)</span>
+          </button>
+          <button type="button" onclick="handleAdminFacturesStatusFilter('pending')" id="btn-fac-filter-pending" class="px-3 py-1 rounded-xl font-bold bg-slate-100 hover:bg-amber-100 text-slate-700 hover:text-amber-800 cursor-pointer transition-all">
+            ⏳ En attente <span id="count-fac-pending" class="ml-1 opacity-80">(0)</span>
+          </button>
+          <button type="button" onclick="handleAdminFacturesStatusFilter('cancelled')" id="btn-fac-filter-cancelled" class="px-3 py-1 rounded-xl font-bold bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-800 cursor-pointer transition-all">
+            ❌ Annulées <span id="count-fac-cancelled" class="ml-1 opacity-80">(0)</span>
+          </button>
+        </div>
+
         <!-- Fiche Dossier Client Actif (affichée lorsqu'un client individuel est sélectionné) -->
         <div id="adm-factures-client-dossier-card" class="hidden p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl flex flex-wrap items-center justify-between gap-4">
           <div class="space-y-1">
@@ -10362,6 +10379,23 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       renderAdminFactures();
     };
 
+    window._activeFacturesStatusFilter = 'ALL';
+    window.handleAdminFacturesStatusFilter = (status) => {
+      window._activeFacturesStatusFilter = status || 'ALL';
+      const s = (status || 'ALL').toLowerCase();
+      ['all', 'paid', 'pending', 'cancelled'].forEach(k => {
+        const btn = document.getElementById(`btn-fac-filter-${k}`);
+        if (btn) {
+          if (s === k) {
+            btn.className = 'px-3 py-1 rounded-xl font-bold bg-slate-800 text-white shadow-2xs cursor-pointer transition-all';
+          } else {
+            btn.className = 'px-3 py-1 rounded-xl font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer transition-all';
+          }
+        }
+      });
+      renderAdminFactures();
+    };
+
     window.admFilterFacturesByClient = (clientEmail) => {
       window._activeFacturesClientFilter = (clientEmail || '').trim().toLowerCase();
       if (typeof switchAdminTab === 'function') switchAdminTab('factures');
@@ -10443,6 +10477,21 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           if (j.client_commune && c.commune === 'Entraigues-sur-la-Sorgue (84)') c.commune = j.client_commune;
         }
       });
+
+      // 1.1 Mise à jour des compteurs de statut
+      const countAll = jobs.length;
+      const countPaid = jobs.filter(j => j.payment_status === 'paid').length;
+      const countPending = jobs.filter(j => !j.payment_status || j.payment_status === 'pending').length;
+      const countCancelled = jobs.filter(j => j.payment_status === 'cancelled').length;
+
+      const elAll = document.getElementById('count-fac-all');
+      const elPaid = document.getElementById('count-fac-paid');
+      const elPending = document.getElementById('count-fac-pending');
+      const elCancelled = document.getElementById('count-fac-cancelled');
+      if (elAll) elAll.textContent = `(${countAll})`;
+      if (elPaid) elPaid.textContent = `(${countPaid})`;
+      if (elPending) elPending.textContent = `(${countPending})`;
+      if (elCancelled) elCancelled.textContent = `(${countCancelled})`;
 
       // 2. Peupler le dropdown de filtre par client
       const activeFilter = (window._activeFacturesClientFilter || 'ALL').trim().toLowerCase();
@@ -10527,6 +10576,16 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         });
         if (statsEl) {
           statsEl.innerHTML += ` <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-xs font-semibold shadow-2xs">🔍 ${displayedJobs.length} trouvée(s)</span>`;
+        }
+      }
+
+      // Filtre rapide par Statut de Paiement
+      const statusFilter = (window._activeFacturesStatusFilter || 'ALL').toLowerCase();
+      if (statusFilter !== 'all') {
+        if (statusFilter === 'pending') {
+          displayedJobs = displayedJobs.filter(j => !j.payment_status || j.payment_status === 'pending');
+        } else {
+          displayedJobs = displayedJobs.filter(j => (j.payment_status || '').toLowerCase() === statusFilter);
         }
       }
 
@@ -11291,25 +11350,49 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     let _sigCtx = null;
     let _sigIsDrawing = false;
     let _sigHasStrokes = false;
+    let _sigStrokePointsCount = 0;
 
     function initSignatureCanvas() {
       _sigCanvas = document.getElementById('client-signature-canvas');
       if (!_sigCanvas) return;
+
+      const rect = _sigCanvas.getBoundingClientRect();
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const displayWidth = rect.width > 0 ? rect.width : 460;
+      const displayHeight = rect.height > 0 ? rect.height : 150;
+
+      let previousData = null;
+      if (_sigHasStrokes && _sigCanvas.width > 0 && _sigCanvas.height > 0) {
+        try { previousData = _sigCanvas.toDataURL(); } catch(e) {}
+      }
+
+      _sigCanvas.width = Math.round(displayWidth * dpr);
+      _sigCanvas.height = Math.round(displayHeight * dpr);
+      _sigCanvas.style.width = displayWidth + 'px';
+      _sigCanvas.style.height = displayHeight + 'px';
+
       _sigCtx = _sigCanvas.getContext('2d');
-      _sigCtx.lineWidth = 2.5;
+      _sigCtx.scale(dpr, dpr);
+      _sigCtx.lineWidth = 2.8;
       _sigCtx.lineCap = 'round';
       _sigCtx.lineJoin = 'round';
       _sigCtx.strokeStyle = '#064e3b';
 
+      if (previousData) {
+        const img = new Image();
+        img.onload = () => {
+          if (_sigCtx) _sigCtx.drawImage(img, 0, 0, displayWidth, displayHeight);
+        };
+        img.src = previousData;
+      }
+
       const getPos = (e) => {
-        const rect = _sigCanvas.getBoundingClientRect();
+        const bound = _sigCanvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        const scaleX = _sigCanvas.width / rect.width;
-        const scaleY = _sigCanvas.height / rect.height;
         return {
-          x: (clientX - rect.left) * scaleX,
-          y: (clientY - rect.top) * scaleY
+          x: clientX - bound.left,
+          y: clientY - bound.top
         };
       };
 
@@ -11319,6 +11402,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         const pos = getPos(e);
         _sigCtx.beginPath();
         _sigCtx.moveTo(pos.x, pos.y);
+        _sigStrokePointsCount++;
         const placeholder = document.getElementById('sig-canvas-placeholder');
         if (placeholder) placeholder.classList.add('hidden');
       };
@@ -11330,6 +11414,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         _sigCtx.lineTo(pos.x, pos.y);
         _sigCtx.stroke();
         _sigHasStrokes = true;
+        _sigStrokePointsCount++;
       };
 
       const stopDrawing = (e) => {
@@ -11358,6 +11443,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         _sigCtx.clearRect(0, 0, _sigCanvas.width, _sigCanvas.height);
       }
       _sigHasStrokes = false;
+      _sigStrokePointsCount = 0;
       const placeholder = document.getElementById('sig-canvas-placeholder');
       if (placeholder) placeholder.classList.remove('hidden');
     };
@@ -11406,8 +11492,8 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     };
 
     window.submitClientSignature = async () => {
-      if (!_sigHasStrokes) {
-        showNotificationToast('Veuillez apposer votre signature manuscrite dans le cadre prévu.', 'error');
+      if (!_sigHasStrokes || _sigStrokePointsCount < 6) {
+        showNotificationToast('Signature trop brève. Veuillez tracer votre signature manuscrite dans le cadre.', 'warning');
         return;
       }
       const legalCheck = document.getElementById('sig-legal-check');

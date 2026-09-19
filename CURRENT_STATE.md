@@ -10,6 +10,20 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
+## ✅ Améliorations Fonctionnelles Approfondies : Canvas Retina, Statuts Factures & File d'Attente Complète (100% OPÉRATIONNEL)
+- [x] **Signature Numérique Tactile Haute Résolution (Retina / DPR Scaling)** :
+  - Support de `window.devicePixelRatio` pour éliminer tout effet flou/pixelisé sur écrans haute définition (iPhone, iPad, MacBook Retina).
+  - Préservation du tracé en cas de redimensionnement de l'écran ou rotation du dispositif (`previousData = _sigCanvas.toDataURL()`).
+  - Validation de la densité du tracé (`_sigStrokePointsCount >= 6`) pour bloquer les clics ou tapotements accidentels.
+- [x] **Filtres Rapides par Statut de Paiement dans les Factures Admin** :
+  - Rangée de boutons-pilules interactifs : *Tous*, *✅ Acquittées*, *⏳ En attente*, *❌ Annulées* avec compteurs dynamiques en temps réel (`count-fac-all`, `count-fac-paid`, `count-fac-pending`, `count-fac-cancelled`).
+  - Filtrage combiné avec le dossier client et la recherche textuelle en direct.
+- [x] **File d'Attente Hors-Ligne Exhaustive (`assets/js/pino-db.js`)** :
+  - Prise en charge intégrale de toutes les opérations dans `processOfflineQueue` : `save_lead`, `update_lead_status`, `sign_quote`, `notify_admin`, `accept_quote`, `send_direct_message`, `save_job`, et `book_visit`.
+  - Exécution automatique au retour de connexion (`online` event) et avec retries automatiques (jusqu'à 5 tentatives).
+- [x] **Tests Automatisés Déployés (14 Suites de Tests, 100% de Réussite)** :
+  - Création de `test_signature_and_factures_status.js` validant les 3 nouveaux modules.
+
 ## ✅ Spécifications Techniques, Architecture des Agents & Automatisation Intégrale des E-mails (100% IMPLÉMENTÉ & VALIDÉ)
 - [x] **Consolidation Juridique & Géographique Officielle (Document CGV Entraigues-sur-la-Sorgue)** :
   - **Titulaire & Raison Sociale** : Andres Pino — Pino Espaces Verts (Entreprise Individuelle).

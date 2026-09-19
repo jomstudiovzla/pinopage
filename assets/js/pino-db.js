@@ -2745,6 +2745,18 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         } else if (task.type === 'notify_admin') {
           const res = await notifyAdminByEmail(task.payload);
           success = res && res.ok;
+        } else if (task.type === 'accept_quote') {
+          const res = await acceptQuote(task.payload.quoteId, task.payload.clientEmail, task.payload.clientName);
+          success = res && res.ok;
+        } else if (task.type === 'send_direct_message') {
+          const res = await sendClientDirectMessage(task.payload);
+          success = res && res.ok;
+        } else if (task.type === 'save_job') {
+          const res = await saveJob(task.payload);
+          success = res && res.ok;
+        } else if (task.type === 'book_visit') {
+          const res = await bookTechnicalVisit(task.payload.quoteId, task.payload.visitDate, task.payload.visitTime, task.payload.notes);
+          success = res && res.ok;
         }
 
         if (!success) {
