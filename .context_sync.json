@@ -1,13 +1,13 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Claude 3.5 Sonnet",
-  "active_goal": "Analyse et résolution de l'ensemble des erreurs d'environnement et d'authentification",
-  "current_phase": "Hito 1 — Résolution Totale des Erreurs et Authentification Universelle",
-  "action": "Analyse complète des erreurs (protocole file:// vs http://, INVALID_CONTINUE_URI, ServiceWorker, Manifest CORS, alertes DOM autocomplete). Implémentation d'une auto-migration transparente vers http://localhost:8080/, déclenchement direct OAuth, suppression des avertissements console et conformité totale des 19 suites de tests.",
+  "active_goal": "Correction du sélecteur de destinataire dans le modal message et résilience OAuth dans Comet/autres navigateurs",
+  "current_phase": "Hito 1 — CRM Andrés Pino & Compatibilité Navigateurs Universelle",
+  "action": "1) Ajout d'un sélecteur de client interactif dans le modal #modal-admin-message-client avec liste complète des prospects et clients, mise à jour temps réel de la fiche destinataire et option de saisie manuelle. 2) Ajout du fallback automatique signInWithRedirect pour Google et Apple en cas de blocage de popup dans Comet/Safari/Brave. 3) Validation intégrale des 19 suites de tests.",
   "files": [
     "index.html",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Commit git avec attribution Grok et confirmation détaillée pour le CEO"
+  "step": "Commit git avec attribution Grok et rapport clair pour le CEO"
 }

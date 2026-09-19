@@ -1178,10 +1178,40 @@
     </div>
 
     <form id="admin-message-client-form" onsubmit="handleSendAdminDirectMessage(event)" class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
+      <!-- Sélecteur interactif du Client Destinataire -->
+      <div class="space-y-1">
+        <label class="block text-xs font-bold text-slate-700" for="adm-msg-client-select">
+          <i class="fa-solid fa-user-check text-emerald-600 mr-1"></i> Client destinataire du message <span class="text-red-500">*</span>
+        </label>
+        <select id="adm-msg-client-select" onchange="handleAdminMessageClientSelection(this.value)"
+          class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-emerald-300 rounded-xl focus:border-emerald-600 focus:outline-none bg-emerald-50/50 font-semibold text-slate-800 shadow-2xs cursor-pointer">
+          <option value="">-- Choisir un client dans la liste des prospects & dossiers --</option>
+        </select>
+      </div>
+
+      <!-- Saisie Manuelle Optionnelle (affichée si saisie manuelle choisie) -->
+      <div id="adm-msg-manual-inputs" class="hidden p-3 bg-amber-50/80 rounded-xl border border-amber-200 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+        <div>
+          <label class="block font-bold text-amber-900 mb-0.5" for="adm-msg-manual-name">Nom complet du client</label>
+          <input type="text" id="adm-msg-manual-name" placeholder="Ex: Jean Dupont" oninput="handleManualRecipientInput()"
+            class="w-full px-3 py-1.5 bg-white border border-amber-300 rounded-lg focus:outline-none font-medium text-slate-800" />
+        </div>
+        <div>
+          <label class="block font-bold text-amber-900 mb-0.5" for="adm-msg-manual-email">Adresse e-mail du client *</label>
+          <input type="email" id="adm-msg-manual-email" placeholder="client@exemple.fr" oninput="handleManualRecipientInput()"
+            class="w-full px-3 py-1.5 bg-white border border-amber-300 rounded-lg focus:outline-none font-medium text-slate-800" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block font-bold text-amber-900 mb-0.5" for="adm-msg-manual-phone">Téléphone mobile (optionnel)</label>
+          <input type="tel" id="adm-msg-manual-phone" placeholder="06 12 34 56 78" oninput="handleManualRecipientInput()"
+            class="w-full px-3 py-1.5 bg-white border border-amber-300 rounded-lg focus:outline-none font-medium text-slate-800" />
+        </div>
+      </div>
+
       <!-- Fiche Récapitulative du Destinataire -->
       <div class="p-3.5 bg-emerald-50/70 rounded-2xl border border-emerald-200 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div>
-          <span class="text-[10px] font-bold text-emerald-800 uppercase block">Destinataire</span>
+          <span class="text-[10px] font-bold text-emerald-800 uppercase block">Fiche Destinataire Sélectionné</span>
           <span id="adm-msg-client-display-name" class="font-bold text-slate-900 text-sm">Nom du Client</span>
           <span id="adm-msg-client-display-email" class="text-slate-600 block font-mono text-xs">client@email.fr</span>
         </div>
@@ -2140,7 +2170,7 @@
         <button type="button" onclick="openNewInvoiceModal()" class="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl shadow-2xs flex items-center gap-1 transition-all cursor-pointer">
           <i class="fa-solid fa-plus text-[10px]"></i> Facture
         </button>
-        <button type="button" onclick="openAdminMessageClientModal('', 'Client Particulier', '')" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-800 font-bold border border-slate-300 rounded-xl shadow-2xs flex items-center gap-1 transition-all cursor-pointer">
+        <button type="button" onclick="openAdminMessageClientModal()" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-800 font-bold border border-slate-300 rounded-xl shadow-2xs flex items-center gap-1 transition-all cursor-pointer">
           <i class="fa-solid fa-paper-plane text-emerald-700 text-[10px]"></i> Message Client
         </button>
         <button type="button" onclick="switchAdminTab('leads')" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-800 font-bold border border-slate-300 rounded-xl shadow-2xs flex items-center gap-1 transition-all cursor-pointer">
@@ -6748,13 +6778,26 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
               return;
             }
           } catch (popupErr) {
-            console.warn('[pino-auth] Erreur popup Google:', popupErr.code, popupErr.message);
-            if (popupErr.code === 'auth/popup-blocked') {
-              showNotificationToast('Veuillez autoriser les fenêtres pop-up de votre navigateur pour vous connecter avec Google.', 'warning');
-            } else if (popupErr.code !== 'auth/popup-closed-by-user' && popupErr.code !== 'auth/cancelled-popup-request') {
-              showNotificationToast("Connexion Google temporairement indisponible. Vous pouvez vous connecter par e-mail ci-dessous.", 'warning');
+            console.warn('[pino-auth] Popup bloqué ou indisponible (ex: Comet / Safari / Brave):', popupErr.code, popupErr.message);
+            if (popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
+              return;
             }
-            throw popupErr;
+
+            // Fallback universel vers la redirection pleine page pour Comet, Safari ITP, Brave et navigateurs stricts
+            try {
+              showNotificationToast("Redirection vers la connexion Google sécurisée...", 'info');
+              try { sessionStorage.setItem('pino_auth_redirect_pending', 'google'); } catch(e){}
+              try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
+              const authService = firebase.auth();
+              await authService.signInWithRedirect(provider);
+              return;
+            } catch (redirectErr) {
+              console.warn('[pino-auth] Erreur fallback redirection Google:', redirectErr);
+              showNotificationToast("Veuillez saisir votre e-mail ci-dessous pour vous connecter directement.", 'info');
+              window.switchAuthTab('login');
+              const loginEmailInput = document.getElementById('login-email');
+              if (loginEmailInput) loginEmailInput.focus();
+            }
           }
         } else if (window.pinoSupabase) {
           try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
@@ -6987,14 +7030,27 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
             }
           } catch (appleErr) {
             console.warn('[pino-auth] Erreur popup Apple:', appleErr.code, appleErr.message);
-            if (appleErr.code === 'auth/operation-not-allowed' || appleErr.code === 'auth/configuration-not-found') {
-              showNotificationToast("La connexion directe avec Apple est en cours d'activation dans Firebase. Vous pouvez vous connecter avec Google ou par e-mail ci-dessous.", 'info');
-            } else if (appleErr.code === 'auth/popup-blocked') {
-              showNotificationToast('Veuillez autoriser les fenêtres pop-up de votre navigateur pour vous connecter avec Apple.', 'warning');
-            } else if (appleErr.code !== 'auth/popup-closed-by-user' && appleErr.code !== 'auth/cancelled-popup-request') {
-              showNotificationToast("Connexion Apple indisponible. Vous pouvez vous connecter par e-mail ci-dessous.", 'warning');
+            if (appleErr.code === 'auth/popup-closed-by-user' || appleErr.code === 'auth/cancelled-popup-request') {
+              return;
             }
-            throw appleErr;
+
+            if (appleErr.code !== 'auth/operation-not-allowed' && appleErr.code !== 'auth/configuration-not-found') {
+              try {
+                showNotificationToast("Redirection vers la connexion Apple sécurisée...", 'info');
+                try { sessionStorage.setItem('pino_auth_redirect_pending', 'apple'); } catch(e){}
+                const authService = firebase.auth();
+                await authService.signInWithRedirect(provider);
+                return;
+              } catch(e){}
+            }
+
+            showNotificationToast("Pour vous connecter avec votre identifiant Apple, saisissez votre e-mail ci-dessous.", 'info');
+            window.switchAuthTab('login');
+            const loginEmailInput = document.getElementById('login-email');
+            if (loginEmailInput) {
+              loginEmailInput.placeholder = "votre-compte@icloud.com";
+              loginEmailInput.focus();
+            }
           }
         } else if (window.pinoSupabase) {
           try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
@@ -12030,30 +12086,211 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     // ─────────────────────────────────────────────────────────
     // GESTION DU MODAL DE MESSAGERIE DIRECTE CLIENT (Andrés Pino)
     // ─────────────────────────────────────────────────────────
-    window.openAdminMessageClientModal = (email, name = '', phone = '', defaultSubject = '', defaultMsg = '', defaultTemplate = 'custom') => {
-      const modal = document.getElementById('modal-admin-message-client');
-      if (!modal) return;
+    window.populateAdminMessageClientSelect = (preferredEmail = '') => {
+      const select = document.getElementById('adm-msg-client-select');
+      if (!select) return;
 
-      const rawEmail = (email || '').trim();
-      const rawName = (name || '').trim() || 'Client Particulier';
-      const rawPhone = (phone || '').trim();
+      select.innerHTML = '<option value="">-- Choisir un client dans la liste des prospects & dossiers --</option>';
+
+      const clientMap = new Map();
+
+      // 1. Leads
+      let leads = [];
+      try {
+        leads = (window.PinoDB && typeof PinoDB.getLeads === 'function')
+          ? PinoDB.getLeads()
+          : JSON.parse(localStorage.getItem('pino_leads') || '[]');
+      } catch (e) { leads = []; }
+
+      leads.forEach(l => {
+        const email = (l.email || '').trim().toLowerCase();
+        if (email && email.includes('@') && !isPinoEmail(email) && email !== 'jomstudiovzla@gmail.com') {
+          if (!clientMap.has(email)) {
+            clientMap.set(email, {
+              email: (l.email || '').trim(),
+              name: (l.name || '').trim() || 'Client Prospect',
+              phone: (l.phone || '').trim(),
+              detail: l.service || l.commune || 'Prospect Devis'
+            });
+          }
+        }
+      });
+
+      // 2. Factures
+      let factures = [];
+      try { factures = JSON.parse(localStorage.getItem('pino_admin_factures') || '[]'); } catch (e) { factures = []; }
+      factures.forEach(f => {
+        const email = (f.client_email || '').trim().toLowerCase();
+        if (email && email.includes('@') && !isPinoEmail(email) && email !== 'jomstudiovzla@gmail.com') {
+          if (!clientMap.has(email)) {
+            clientMap.set(email, {
+              email: (f.client_email || '').trim(),
+              name: (f.client_name || '').trim() || 'Client Facturé',
+              phone: (f.client_phone || '').trim(),
+              detail: 'Client Facturé'
+            });
+          }
+        }
+      });
+
+      // 3. Utilisateurs locaux (pino_users)
+      let users = [];
+      try { users = JSON.parse(localStorage.getItem('pino_users') || '[]'); } catch (e) { users = []; }
+      users.forEach(u => {
+        const email = (u.email || '').trim().toLowerCase();
+        if (email && email.includes('@') && !isPinoEmail(email) && email !== 'jomstudiovzla@gmail.com') {
+          if (!clientMap.has(email)) {
+            clientMap.set(email, {
+              email: (u.email || '').trim(),
+              name: (u.fullName || u.name || '').trim() || 'Client Espace Membre',
+              phone: (u.phone || '').trim(),
+              detail: u.commune || 'Compte Client'
+            });
+          }
+        }
+      });
+
+      // Remplir les options
+      clientMap.forEach((c) => {
+        const opt = document.createElement('option');
+        opt.value = c.email;
+        opt.textContent = `👤 ${c.name} (${c.email})${c.detail ? ' — ' + c.detail : ''}`;
+        opt.setAttribute('data-name', c.name);
+        opt.setAttribute('data-phone', c.phone || '');
+        select.appendChild(opt);
+      });
+
+      const manualOpt = document.createElement('option');
+      manualOpt.value = '__manual__';
+      manualOpt.textContent = '✏️ Saisir un autre e-mail / client manuellement...';
+      select.appendChild(manualOpt);
+
+      let targetEmail = (preferredEmail || '').trim();
+      if (!targetEmail) {
+        if (window._activeFacturesClientFilter && window._activeFacturesClientFilter !== 'ALL') {
+          targetEmail = window._activeFacturesClientFilter;
+        } else if (clientMap.size > 0) {
+          targetEmail = clientMap.keys().next().value;
+        }
+      }
+
+      if (targetEmail && clientMap.has(targetEmail.toLowerCase())) {
+        select.value = clientMap.get(targetEmail.toLowerCase()).email;
+      } else if (targetEmail) {
+        select.value = '__manual__';
+        const manualEmailInput = document.getElementById('adm-msg-manual-email');
+        if (manualEmailInput) manualEmailInput.value = targetEmail;
+      }
+
+      handleAdminMessageClientSelection(select.value);
+    };
+
+    window.handleAdminMessageClientSelection = (val) => {
+      const select = document.getElementById('adm-msg-client-select');
+      const manualBox = document.getElementById('adm-msg-manual-inputs');
+      const emailInput = document.getElementById('adm-msg-client-email');
+      const nameInput = document.getElementById('adm-msg-client-name');
+      const phoneInput = document.getElementById('adm-msg-client-phone');
+      const nameDisplay = document.getElementById('adm-msg-client-display-name');
+      const emailDisplay = document.getElementById('adm-msg-client-display-email');
+      const phoneDisplay = document.getElementById('adm-msg-client-display-phone');
+
+      if (val === '__manual__') {
+        if (manualBox) manualBox.classList.remove('hidden');
+        handleManualRecipientInput();
+        return;
+      }
+
+      if (manualBox) manualBox.classList.add('hidden');
+
+      if (!val) {
+        if (emailInput) emailInput.value = '';
+        if (nameInput) nameInput.value = 'Client Particulier';
+        if (phoneInput) phoneInput.value = '';
+        if (nameDisplay) nameDisplay.textContent = 'Aucun client sélectionné';
+        if (emailDisplay) emailDisplay.textContent = 'Veuillez choisir un client ci-dessus';
+        if (phoneDisplay) phoneDisplay.innerHTML = '<span class="text-slate-400">—</span>';
+        updateAdminMessageGreeting('Client');
+        return;
+      }
+
+      const selectedOpt = select ? select.options[select.selectedIndex] : null;
+      const clientName = selectedOpt ? selectedOpt.getAttribute('data-name') || 'Client' : 'Client';
+      const clientPhone = selectedOpt ? selectedOpt.getAttribute('data-phone') || '' : '';
+      const clientEmail = val;
+
+      if (emailInput) emailInput.value = clientEmail;
+      if (nameInput) nameInput.value = clientName;
+      if (phoneInput) phoneInput.value = clientPhone;
+
+      if (nameDisplay) nameDisplay.textContent = clientName;
+      if (emailDisplay) emailDisplay.textContent = clientEmail;
+      if (phoneDisplay) {
+        phoneDisplay.innerHTML = clientPhone
+          ? `<i class="fa-solid fa-phone text-emerald-600 mr-1"></i> ${escapeHtml(clientPhone)}`
+          : '<span class="text-slate-400">Aucun téléphone</span>';
+      }
+
+      updateAdminMessageGreeting(clientName);
+    };
+
+    window.handleManualRecipientInput = () => {
+      const manualName = (document.getElementById('adm-msg-manual-name')?.value || '').trim() || 'Client';
+      const manualEmail = (document.getElementById('adm-msg-manual-email')?.value || '').trim();
+      const manualPhone = (document.getElementById('adm-msg-manual-phone')?.value || '').trim();
 
       const emailInput = document.getElementById('adm-msg-client-email');
       const nameInput = document.getElementById('adm-msg-client-name');
       const phoneInput = document.getElementById('adm-msg-client-phone');
-      if (emailInput) emailInput.value = rawEmail;
-      if (nameInput) nameInput.value = rawName;
-      if (phoneInput) phoneInput.value = rawPhone;
-
       const nameDisplay = document.getElementById('adm-msg-client-display-name');
       const emailDisplay = document.getElementById('adm-msg-client-display-email');
       const phoneDisplay = document.getElementById('adm-msg-client-display-phone');
-      if (nameDisplay) nameDisplay.textContent = rawName;
-      if (emailDisplay) emailDisplay.textContent = rawEmail || 'E-mail non renseigné';
+
+      if (emailInput) emailInput.value = manualEmail;
+      if (nameInput) nameInput.value = manualName;
+      if (phoneInput) phoneInput.value = manualPhone;
+
+      if (nameDisplay) nameDisplay.textContent = manualName;
+      if (emailDisplay) emailDisplay.textContent = manualEmail || 'Saisissez l\'e-mail ci-dessus';
       if (phoneDisplay) {
-        phoneDisplay.innerHTML = rawPhone
-          ? `<i class="fa-solid fa-phone text-emerald-600 mr-1"></i> ${escapeHtml(rawPhone)}`
+        phoneDisplay.innerHTML = manualPhone
+          ? `<i class="fa-solid fa-phone text-emerald-600 mr-1"></i> ${escapeHtml(manualPhone)}`
           : '<span class="text-slate-400">Aucun téléphone</span>';
+      }
+
+      updateAdminMessageGreeting(manualName);
+    };
+
+    window.updateAdminMessageGreeting = (clientName) => {
+      const bodyInput = document.getElementById('adm-msg-body');
+      if (bodyInput) {
+        const currentBody = bodyInput.value;
+        if (!currentBody || currentBody.startsWith('Bonjour ')) {
+          const lines = currentBody.split('\n');
+          lines[0] = `Bonjour ${clientName},`;
+          bodyInput.value = lines.join('\n');
+        }
+      }
+      updateAdminMessagePreview();
+    };
+
+    window.openAdminMessageClientModal = (email = '', name = '', phone = '', defaultSubject = '', defaultMsg = '', defaultTemplate = 'custom') => {
+      const modal = document.getElementById('modal-admin-message-client');
+      if (!modal) return;
+
+      populateAdminMessageClientSelect(email);
+
+      if (name) {
+        const nameInput = document.getElementById('adm-msg-client-name');
+        const nameDisplay = document.getElementById('adm-msg-client-display-name');
+        if (nameInput) nameInput.value = name;
+        if (nameDisplay) nameDisplay.textContent = name;
+      }
+      if (phone) {
+        const phoneInput = document.getElementById('adm-msg-client-phone');
+        const phoneDisplay = document.getElementById('adm-msg-client-display-phone');
+        if (phoneInput) phoneInput.value = phone;
+        if (phoneDisplay) phoneDisplay.innerHTML = `<i class="fa-solid fa-phone text-emerald-600 mr-1"></i> ${escapeHtml(phone)}`;
       }
 
       const selectTpl = document.getElementById('adm-msg-template-select');
@@ -12061,8 +12298,10 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
       const subjInput = document.getElementById('adm-msg-subject');
       const bodyInput = document.getElementById('adm-msg-body');
+      const resolvedName = document.getElementById('adm-msg-client-name')?.value || name || 'Client';
+
       if (subjInput) subjInput.value = defaultSubject || `Information concernant vos espaces verts — Pino Espaces Verts`;
-      if (bodyInput) bodyInput.value = defaultMsg || `Bonjour ${rawName},\n\n`;
+      if (bodyInput) bodyInput.value = defaultMsg || `Bonjour ${resolvedName},\n\n`;
 
       if (defaultTemplate !== 'custom') {
         handleAdminMessageTemplateChange();

@@ -10,6 +10,19 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
+## ✅ Sélecteur de Client Destinataire & Résilience Navigateurs Stricts (Comet, Safari, Brave) (100% OPÉRATIONNEL)
+- [x] **Sélecteur Dynamique de Client dans la Messagerie CRM (`#modal-admin-message-client`)** :
+  - **Diagnostic** : Le bouton d'action rapide *✉️ Message Client* de la barre d'administration ouvrait le modal avec des paramètres vides (`''`), affichant « Destinataire : Client Particulier - E-mail non renseigné » sans moyen de choisir le client.
+  - **Sélecteur Interactif Déployé** : Intégration d'un menu déroulant intelligent `#adm-msg-client-select` regroupant automatiquement tous les prospects (`PinoDB.getLeads()`), clients facturés et comptes clients enregistrés avec déduplication et affichage du nom, e-mail et service/ville.
+  - **Mise à Jour Dynamique en Temps Réel** : Lors de la sélection d'un client, la fiche destinataire (Nom, Email, Téléphone) s'actualise instantanément, les champs cachés sont renseignés et le message s'initialise avec une salutation personnalisée (`Bonjour [Nom],`).
+  - **Option de Saisie Manuelle** : Possibilité de choisir « ✏️ Saisir un autre e-mail / client manuellement... » dévoilant des champs dédiés pour contacter tout destinataire externe.
+- [x] **Résilience OAuth Universelle dans Comet, Safari ITP, Brave et Navigateurs Anti-Popup** :
+  - **Diagnostic** : Dans des navigateurs comme Comet ou Brave avec bloqueurs de popups et de cookies tiers stricts, `signInWithPopup` est intercepté et bloqué, levant une exception qui affichait un toast d'indisponibilité.
+  - **Fallback Automatique vers `signInWithRedirect`** : Désormais, si le popup est bloqué par Comet, Safari ou Brave, le système bascule immédiatement et de façon transparente vers `signInWithRedirect(provider)`, qui effectue une navigation directe de premier niveau insusceptible d'être bloquée par les filtres anti-fenêtres intrusives.
+  - **Prise en Charge Apple** : Si le popup Apple est bloqué, la redirection est tentée ; si le fournisseur n'est pas encore configuré côté Cloud, l'interface bascule en douceur vers la saisie directe d'e-mail avec pré-remplissage `@icloud.com` sans message d'erreur bloquant.
+- [x] **Validation Automatisée (19 Suites de Tests, 100% Réussite)** :
+  - Toutes les 19 suites de tests de non-régression validées avec succès.
+
 ## ✅ Résolution Globale des Erreurs d'Environnement & Redirection Locale Sécurisée (100% OPÉRATIONNEL)
 - [x] **Diagnostic Exhaustif de l'Environnement et des Erreurs du Navigateur** :
   - **Erreur Racine sous `file:///`** : Lorsqu'un utilisateur ouvre `index.html` par double-clic (protocole `file:///`), l'origine du navigateur est `null`. L'API Google Identity Toolkit (`createAuthUri`) renvoie immédiatement une erreur HTTP 400 `INVALID_CONTINUE_URI`, et Firebase lève `auth/operation-not-supported-in-this-environment`, provoquant l'affichage du message d'indisponibilité.
