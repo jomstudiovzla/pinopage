@@ -263,12 +263,23 @@
     (function purgeInitialHashHead() {
       if (typeof window !== 'undefined' && window.location && window.location.hash) {
         const h = window.location.hash;
-        const isAuthOrToken = h.includes('activate') || h.includes('access_token') || h.includes('id_token') || h.includes('apiKey') || h.includes('state') || h.includes('oauth') || h.includes('token');
+        const isAuthOrToken = h.includes('open-auth') || h.includes('activate') || h.includes('access_token') || h.includes('id_token') || h.includes('apiKey') || h.includes('state') || h.includes('oauth') || h.includes('token');
         if (!isAuthOrToken) {
           try {
             history.replaceState(null, '', window.location.pathname + window.location.search);
           } catch (e) {}
         }
+      }
+    })();
+
+    // ── DÉTECTION ET MIGRATION TRANSPARENTE DU PROTOCOLE FILE:// VERS HTTP://LOCALHOST ──
+    (function checkLocalFileProtocol() {
+      if (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:') {
+        fetch('http://localhost:8080/index.html', { method: 'HEAD', mode: 'no-cors' })
+          .then(() => {
+            window.location.replace('http://localhost:8080/' + (window.location.hash || ''));
+          })
+          .catch(() => {});
       }
     })();
   </script>
@@ -753,7 +764,7 @@
       <form onsubmit="handleLoginSubmit(event)" class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1" for="login-email">Adresse e-mail</label>
-          <input type="email" id="login-email" required placeholder="nom@exemple.com"
+          <input type="email" id="login-email" required autocomplete="username" placeholder="nom@exemple.com"
             class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
         </div>
         <div>
@@ -761,7 +772,7 @@
             <label class="text-xs font-bold text-slate-700" for="login-password">Mot de passe</label>
             <a href="#activate" onclick="document.getElementById('modal-window-auth').close(); window.openClientSetPasswordModal();" class="text-xxs text-emerald-700 font-bold hover:underline">Activer compte invité</a>
           </div>
-          <input type="password" id="login-password" required placeholder="••••••••"
+          <input type="password" id="login-password" required autocomplete="current-password" placeholder="••••••••"
             class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
         </div>
 
@@ -809,7 +820,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-email">Adresse e-mail *</label>
-            <input type="email" id="reg-email" required placeholder="nom@exemple.com"
+            <input type="email" id="reg-email" required autocomplete="username" placeholder="nom@exemple.com"
               class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
           </div>
           <div>
@@ -829,7 +840,7 @@
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-password">Mot de passe *</label>
             <div class="relative">
-              <input type="password" id="reg-password" minlength="6" required placeholder="Min. 6 caractères"
+              <input type="password" id="reg-password" minlength="6" required autocomplete="new-password" placeholder="Min. 6 caractères"
                 class="w-full px-3.5 py-2 pr-9 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
               <button type="button" onclick="togglePasswordVisibility('reg-password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 text-xs cursor-pointer" title="Afficher/Masquer">
                 <i class="fa-regular fa-eye"></i>
@@ -839,7 +850,7 @@
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-password-confirm">Confirmer mot de passe *</label>
             <div class="relative">
-              <input type="password" id="reg-password-confirm" minlength="6" required placeholder="Retapez le mot de passe"
+              <input type="password" id="reg-password-confirm" minlength="6" required autocomplete="new-password" placeholder="Retapez le mot de passe"
                 class="w-full px-3.5 py-2 pr-9 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
               <button type="button" onclick="togglePasswordVisibility('reg-password-confirm', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 text-xs cursor-pointer" title="Afficher/Masquer">
                 <i class="fa-regular fa-eye"></i>
@@ -1395,7 +1406,7 @@
         <label class="block text-xs font-bold text-slate-700 mb-1" for="client-act-password">
           Nouveau mot de passe <span class="text-red-500">*</span>
         </label>
-        <input type="password" id="client-act-password" required minlength="6" placeholder="Au moins 6 caractères"
+        <input type="password" id="client-act-password" required minlength="6" autocomplete="new-password" placeholder="Au moins 6 caractères"
           class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
       </div>
 
@@ -1403,7 +1414,7 @@
         <label class="block text-xs font-bold text-slate-700 mb-1" for="client-act-password-confirm">
           Confirmer le mot de passe <span class="text-red-500">*</span>
         </label>
-        <input type="password" id="client-act-password-confirm" required minlength="6" placeholder="Répétez votre mot de passe"
+        <input type="password" id="client-act-password-confirm" required minlength="6" autocomplete="new-password" placeholder="Répétez votre mot de passe"
           class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
       </div>
 
@@ -6444,7 +6455,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     };
 
     // ─── SERVICE WORKER REGISTRATION ───
-    if ('serviceWorker' in navigator) {
+    if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => {
           console.log('Service Worker registration failed:', err);
@@ -6718,6 +6729,13 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Connexion Google...';
 
       try {
+        if (window.location.protocol === 'file:') {
+          showNotificationToast("Ouverture de l'authentification Google sécurisée sur le serveur local...", 'info');
+          window.location.href = 'http://localhost:8080/#open-auth-google';
+          if (label) label.textContent = originalText;
+          return;
+        }
+
         if (typeof firebase !== 'undefined' && firebase.auth) {
           const provider = new firebase.auth.GoogleAuthProvider();
           provider.setCustomParameters({ prompt: 'select_account' });
@@ -6948,6 +6966,13 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Connexion Apple...';
 
       try {
+        if (window.location.protocol === 'file:') {
+          showNotificationToast("Ouverture de l'authentification Apple sécurisée sur le serveur local...", 'info');
+          window.location.href = 'http://localhost:8080/#open-auth-apple';
+          if (label) label.textContent = originalText;
+          return;
+        }
+
         if (typeof firebase !== 'undefined' && firebase.auth) {
           const provider = new firebase.auth.OAuthProvider('apple.com');
           provider.addScope('email');
@@ -7459,7 +7484,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       // 1. Firebase Auth listener
       if (typeof firebase !== 'undefined' && firebase.auth) {
         try {
-          if (firebase.auth().getRedirectResult) {
+          if (firebase.auth().getRedirectResult && window.location.protocol !== 'file:') {
             firebase.auth().getRedirectResult().then((res) => {
               if (res && res.user) {
                 try { sessionStorage.removeItem('pino_auth_redirect_pending'); } catch(e){}
@@ -13638,7 +13663,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       const cleanModalHash = () => {
         if (window.location.hash) {
           const h = window.location.hash;
-          const isAuthOrToken = h.includes('activate') || h.includes('access_token') || h.includes('id_token') || h.includes('apiKey') || h.includes('state') || h.includes('oauth') || h.includes('token');
+          const isAuthOrToken = h.includes('open-auth') || h.includes('activate') || h.includes('access_token') || h.includes('id_token') || h.includes('apiKey') || h.includes('state') || h.includes('oauth') || h.includes('token');
           if (!isAuthOrToken) {
             try {
               history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -13654,6 +13679,21 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       initDefaultLeads();
       updateAuthUI();
       initModalDragToClose();
+
+      // Déclenchement automatique de l'authentification sécurisée après redirection locale
+      if (window.location.hash === '#open-auth-google') {
+        setTimeout(() => {
+          try { history.replaceState(null, '', window.location.pathname); } catch(e){}
+          if (typeof openWindowModal === 'function') openWindowModal('auth');
+          if (typeof handleGoogleSignIn === 'function') handleGoogleSignIn();
+        }, 350);
+      } else if (window.location.hash === '#open-auth-apple') {
+        setTimeout(() => {
+          try { history.replaceState(null, '', window.location.pathname); } catch(e){}
+          if (typeof openWindowModal === 'function') openWindowModal('auth');
+          if (typeof handleAppleSignIn === 'function') handleAppleSignIn();
+        }, 350);
+      }
 
       // 3. Gestionnaire de clic extérieur et écouteur de fermeture sur tous les dialogues
       document.querySelectorAll('dialog').forEach(dialog => {
