@@ -10,6 +10,20 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
+## ✅ Accès Administrateur Total (jomstudiovzla@gmail.com) & Démarrage Propre Zéro-Flash (100% OPÉRATIONNEL)
+- [x] **Privilèges Administrateurs Complets pour `jomstudiovzla@gmail.com`** :
+  - **`index.html`** : Ajouté au tableau `ADMIN_EMAILS` et validation par `isPinoEmail()`.
+  - **Identité Admin** : Libellé dédié `"👑 JOM Studio (Admin)"` et `role: 'admin'`, `isAdmin: true` dans `processAuthenticatedUser` et `updateAuthUI`.
+  - **Gestion Facturation** : Accès complet d'annulation et réactivation des factures dans `cancelAdminFacture`.
+  - **`assets/js/pino-db.js`** : Détection automatique dans `upsertProfile` avec assignation de rôle administrateur et synchronisation RTDB / Firestore.
+  - **Règles de Sécurité** : Accès root complet configuré dans `firestore.rules` (fonction `isAdmin()`) et `database.rules.json` (17 règles de lecture/écriture pour leads, factures, chantiers, utilisateurs, logs d'audit et notifications).
+- [x] **Garantie Absolue Zéro-Flash & Zéro-Prévisualisation au Démarrage** :
+  - **CSS Précoce dans le `<head>`** : Règle prioritaire bloquante `dialog:not([open]), .section-window:not([open]), [id^="modal-"]:not([open]), [id$="-modal"]:not([open]) { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }` appliquée avant le moindre octet du corps de page.
+  - **Purge Immédiate de Hash dans le `<head>`** : Fonction IIFE `purgeInitialHashHead()` nettoyant l'URL avant le rendu pour bloquer l'ouverture ou la prévisualisation intempestive d'onglets lors des rafraîchissements ou navigations.
+  - **Zéro Modale Statique Ouverte** : Tous les dialogues `<dialog>` démarrent rigoureusement sans attribut `open`.
+- [x] **Validation Automatisée (16 Suites de Tests, 100% Réussite)** :
+  - Création de [`test_admin_jomstudio_and_zero_preview_startup.js`](file:///Users/macbook/Documents/Antigravity/PINO/new/test_admin_jomstudio_and_zero_preview_startup.js) validant tous les points.
+
 ## ✅ CRM Intuitif : Barre d'Actions Rapides, Pipeline Commercial Kanban & Synthèse Financière (100% OPÉRATIONNEL)
 - [x] **Barre d'Actions Rapides Intuitives (Accès 1-clic pour Andrés Pino)** :
   - Rangée d'accès direct placée immédiatement sous la navigation du panneau d'administration : `+ Facture`, `✉️ Message Client`, `📋 Traiter Devis`, `🎯 Prospection (84)` et `🔄 Actualiser Tout`.

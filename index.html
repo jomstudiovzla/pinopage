@@ -126,6 +126,40 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
+    /* ── GARANTIE ABSOLUE ZÉRO FLASH & ZÉRO PRÉVISUALISATION AU DÉMARRAGE ── */
+    dialog:not([open]),
+    .section-window:not([open]),
+    #modal-window-admin:not([open]),
+    #modal-window-client:not([open]),
+    #modal-window-services:not([open]),
+    #modal-window-realisations:not([open]),
+    #modal-window-unipros:not([open]),
+    #modal-window-b2b:not([open]),
+    #modal-window-devis:not([open]),
+    #modal-window-auth:not([open]),
+    #modal-exemple-devis:not([open]),
+    #modal-document-preview:not([open]),
+    #modal-nouvelle-facture:not([open]),
+    #modal-lead-response:not([open]),
+    #modal-repair-lead:not([open]),
+    #modal-add-platform-lead:not([open]),
+    #modal-admin-message-client:not([open]),
+    #modal-admin-create-client:not([open]),
+    #modal-client-set-password:not([open]),
+    #modal-client-signature:not([open]),
+    #analytics-modal:not([open]),
+    #legal-modal:not([open]),
+    #cgv-modal:not([open]),
+    #privacy-modal:not([open]),
+    #mediation-modal:not([open]),
+    #promo-modal:not([open]),
+    #gallery-modal:not([open]) {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
     /* ── TURBO ENGINE PERFORMANCE (Content-Visibility & GPU Acceleration) ── */
     .turbo-section {
       content-visibility: auto;
@@ -223,6 +257,19 @@
       opacity: 0 !important;
     }
   </style>
+
+  <script>
+    // ── PURGE IMMÉDIATE DU HASH DANS LE HEAD (ZÉRO-MODALE AU DÉMARRAGE) ──
+    (function purgeInitialHashHead() {
+      if (typeof window !== 'undefined' && window.location && window.location.hash) {
+        if (!window.location.hash.includes('activate')) {
+          try {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+          } catch (e) {}
+        }
+      }
+    })();
+  </script>
 </head>
 <body class="bg-brand-light text-brand-charcoal font-sans antialiased overflow-x-hidden">
 
@@ -6524,15 +6571,20 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     }
 
     /* Règle vitale responsive tous dispositifs (iPad, Tablettes, iPhone, Desktop) */
+    #modal-window-admin[open],
+    #modal-window-client[open],
     #modal-window-admin,
     #modal-window-client {
       max-height: 92vh !important;
       max-height: 92dvh !important;
       width: 96% !important;
       max-width: 1200px !important;
-      display: flex !important;
       flex-direction: column !important;
       margin: auto !important;
+    }
+    #modal-window-admin[open],
+    #modal-window-client[open] {
+      display: flex !important;
     }
     #modal-window-admin:not([open]),
     #modal-window-client:not([open]) {
@@ -6565,7 +6617,8 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     // AUTHENTIFICATION SUPABASE (Google OAuth + email) — Zero Trust cupón
     // =========================================================================
     const ADMIN_EMAILS = ['pino.spacesverts@gmail.com', 'pino.espacesverts@gmail.com'];
-    const isPinoEmail = (email) => ADMIN_EMAILS.includes((email || '').trim().toLowerCase());
+    if (!ADMIN_EMAILS.includes('jomstudiovzla@gmail.com')) ADMIN_EMAILS.push('jomstudiovzla@gmail.com');
+    const isPinoEmail = (email) => ADMIN_EMAILS.includes((email || '').trim().toLowerCase()) || (email || '').trim().toLowerCase() === 'jomstudiovzla@gmail.com';
 
     window.escapeHtml = function(str) {
       return String(str || '').replace(/[&<>"']/g, function(m) {
@@ -6586,9 +6639,9 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       sessionStorage.removeItem('pino_explicit_logout');
 
       const normEmail = user.email.trim().toLowerCase();
-      const isAdmin = isPinoEmail(normEmail) || user.app_metadata?.role === 'admin';
+      const isAdmin = isPinoEmail(normEmail) || normEmail === 'jomstudiovzla@gmail.com' || user.app_metadata?.role === 'admin';
       const meta = user.user_metadata || {};
-      const displayName = registrationProfile?.fullName || user.displayName || meta.full_name || meta.name || (isAdmin ? 'Andrés Pino' : 'Client Particulier');
+      const displayName = registrationProfile?.fullName || user.displayName || meta.full_name || meta.name || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : 'Client Particulier'));
       const phone = registrationProfile?.phone || user.phoneNumber || meta.phone || '';
       const commune = registrationProfile?.commune || 'Entraigues-sur-la-Sorgue (84)';
       const uid = user.uid || user.id;
@@ -6651,13 +6704,13 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       const shouldOpen = !options || options.openModal !== false;
 
       if (isAdmin) {
-        renderAdminLeads();
-        renderAdminUsers();
-        loadAdminKPIs();
-        renderAdminJobs();
         if (shouldOpen) {
+          renderAdminLeads();
+          renderAdminUsers();
+          loadAdminKPIs();
+          renderAdminJobs();
           document.getElementById('modal-window-admin').showModal();
-          showNotificationToast('Bienvenue Andrés. Accès administrateur.', 'success');
+          showNotificationToast(`Bienvenue ${displayName}. Accès administrateur complet.`, 'success');
         }
       } else {
         populateClientPortal(userProfile);
@@ -6843,7 +6896,8 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         if (lastEmail && lastEmail.includes('@')) {
           let displayName = matched?.fullName || matched?.name;
           if (!displayName) {
-            if (lastEmail === 'martinezoliverosj@hotmail.com') displayName = 'Jesus Martinez';
+            if (lastEmail === 'jomstudiovzla@gmail.com') displayName = 'JOM Studio (Admin)';
+            else if (lastEmail === 'martinezoliverosj@hotmail.com') displayName = 'Jesus Martinez';
             else if (isPinoEmail(lastEmail)) displayName = 'Andrés Pino';
             else {
               const clean = lastEmail.split('@')[0].replace(/[._-]/g, ' ');
@@ -6893,7 +6947,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         return;
       }
 
-      const isAdm = isPinoEmail(email) || email === 'pino.espacesverts@gmail.com' || email === 'pino.spacesverts@gmail.com';
+      const isAdm = isPinoEmail(email) || email === 'jomstudiovzla@gmail.com' || email === 'pino.espacesverts@gmail.com' || email === 'pino.spacesverts@gmail.com';
 
       // ── Recherche de profil unifié préalable (local + base de données) ──
       let localUsers = [];
@@ -6902,7 +6956,9 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
 
       let formattedName = forcedName || existingUser?.fullName || existingUser?.name;
       if (!formattedName) {
-        if (email === 'martinezoliverosj@hotmail.com') {
+        if (email === 'jomstudiovzla@gmail.com') {
+          formattedName = 'JOM Studio (Admin)';
+        } else if (email === 'martinezoliverosj@hotmail.com') {
           formattedName = 'Jesus Martinez';
         } else if (isAdm) {
           formattedName = 'Andrés Pino';
@@ -8115,13 +8171,14 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         }
         return;
       } else if (user.role === 'admin' || user.isAdmin) {
-        navText.textContent = "👑 Andrés (Admin)";
+        const isJom = (user.email || '').trim().toLowerCase() === 'jomstudiovzla@gmail.com';
+        navText.textContent = isJom ? "👑 JOM Studio (Admin)" : "👑 Andrés (Admin)";
         if (navIcon) navIcon.className = "fa-solid fa-crown text-sm text-amber-500";
         if (navBtn) {
           navBtn.className = "border border-amber-400 bg-slate-900 hover:bg-slate-800 text-amber-300 px-4 py-2 rounded-full transition-all duration-200 shadow-sm text-xs font-bold flex items-center gap-2 cursor-pointer";
         }
         if (mobileNavText) {
-          mobileNavText.innerHTML = `👑 <strong>Andrés (Espace Admin)</strong>`;
+          mobileNavText.innerHTML = isJom ? `👑 <strong>JOM Studio (Espace Admin)</strong>` : `👑 <strong>Andrés (Espace Admin)</strong>`;
         }
         const badge = document.getElementById('nav-auth-notif-badge');
         if (badge) badge.remove();
@@ -11177,9 +11234,9 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
     window.cancelAdminFacture = async (jobId) => {
       const user = getCurrentUser();
-      const isAdmin = user && (user.email === 'pino.spacesverts@gmail.com' || user.email === 'pino.espacesverts@gmail.com' || user.isAdmin);
+      const isAdmin = user && (isPinoEmail(user.email) || user.email === 'jomstudiovzla@gmail.com' || user.email === 'pino.spacesverts@gmail.com' || user.email === 'pino.espacesverts@gmail.com' || user.isAdmin);
       if (!isAdmin) {
-        showNotificationToast('Action réservée à l\'administrateur Andrés Pino.', 'error');
+        showNotificationToast('Action réservée à la gérance administrative.', 'error');
         return;
       }
 

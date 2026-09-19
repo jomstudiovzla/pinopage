@@ -1,16 +1,19 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "CRM Intuitif & Panel Administratif : Barre d'Actions Rapides, Pipeline Commercial Kanban et Synthèse Financière",
-  "current_phase": "CRM Ergonomie & Dashboard Financier Opérationnels (15/15 Suites de Tests)",
-  "action": "1) Barre d'Actions Rapides 1-clic : raccourcis directs + Facture, Message Client, Traiter Devis, Prospection (84), et Actualiser Tout avec fonction refreshAdminDashboardAll. 2) Pipeline Commercial Kanban : 6 cartes d'étapes (Tous, 1. Reçus, 2. Devis chiffrés, 3. Signés/Validés, 4. En chantier, 5. Facturés SAP) avec compteurs dynamiques en temps réel et filtrage instantané. 3) Synthèse Financière & Trésorerie KPIs : 4 cartes analytiques (Total Facturé, Encaissé, Reste à Percevoir, Part SAP 50%) avec calcul en temps réel. 4) Nouvelle suite test_crm_pipeline_kanban_and_kpis.js (15/15 suites réussies). 5) Localhost 8080 vérifié HTTP 200 OK.",
+  "active_goal": "Accès Administrateur Total jomstudiovzla@gmail.com & Zéro Prévisualisation au Démarrage",
+  "current_phase": "Administration CRM & Démarrage Zéro-Flash Opérationnels (16/16 Suites de Tests)",
+  "action": "1) Intégration complète de jomstudiovzla@gmail.com comme administrateur absolu avec affichage 👑 JOM Studio (Admin), privilèges factures, upsertProfile et règles de sécurité Cloud Firestore / Firebase RTDB. 2) Garantie Zéro-Flash & Zéro-Prévisualisation d'onglets au démarrage : règles critiques dans le <head>, purge immédiate du hash URL, interdiction de tout rendu anticipé. 3) Nouvelle suite de tests test_admin_jomstudio_and_zero_preview_startup.js validée à 100% (16/16 suites réussies). 4) Localhost 8080 vérifié HTTP 200 OK.",
   "files": [
     "index.html",
-    "test_crm_pipeline_kanban_and_kpis.js",
+    "assets/js/pino-db.js",
+    "firestore.rules",
+    "database.rules.json",
+    "test_admin_jomstudio_and_zero_preview_startup.js",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
   "step": "Prêt pour les prochaines instructions ou déploiement.",
   "last_commit": "71b6aa8",
-  "timestamp": "2026-09-19T15:38:50.000Z"
+  "timestamp": "2026-09-19T15:56:50.000Z"
 }
