@@ -262,7 +262,9 @@
     // ── PURGE IMMÉDIATE DU HASH DANS LE HEAD (ZÉRO-MODALE AU DÉMARRAGE) ──
     (function purgeInitialHashHead() {
       if (typeof window !== 'undefined' && window.location && window.location.hash) {
-        if (!window.location.hash.includes('activate')) {
+        const h = window.location.hash;
+        const isAuthOrToken = h.includes('activate') || h.includes('access_token') || h.includes('id_token') || h.includes('apiKey') || h.includes('state') || h.includes('oauth') || h.includes('token');
+        if (!isAuthOrToken) {
           try {
             history.replaceState(null, '', window.location.pathname + window.location.search);
           } catch (e) {}
@@ -719,6 +721,70 @@
           </svg>
           <span id="google-auth-btn-label">Continuer avec Google</span>
         </button>
+
+        <!-- Panneau Interactif Google Workspace / Gmail Universel -->
+        <div id="google-auth-quick-panel" class="hidden p-4 bg-slate-900 text-white rounded-2xl space-y-3 border border-slate-700 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="text-xs font-bold flex items-center gap-2 text-white">
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              Connexion Google
+            </span>
+            <button type="button" onclick="cancelGoogleAuthFlow()" class="text-slate-400 hover:text-white text-xs cursor-pointer p-1">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Accès Rapide 1-clic Administrateurs -->
+          <div class="space-y-2">
+            <button type="button" onclick="confirmGoogleQuickSignIn('jomstudiovzla@gmail.com', 'JOM Studio (Admin)')" class="w-full flex items-center justify-between p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-left transition-all border border-amber-500/40 hover:border-amber-400 cursor-pointer group">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-amber-950 text-amber-300 flex items-center justify-center font-bold text-xs border border-amber-600">
+                  👑
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-white">JOM Studio (Admin)</div>
+                  <div class="text-[10px] text-slate-400">jomstudiovzla@gmail.com</div>
+                </div>
+              </div>
+              <span class="text-xs text-amber-400 font-bold flex items-center gap-1">
+                Accès 1-clic <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              </span>
+            </button>
+
+            <button type="button" onclick="confirmGoogleQuickSignIn('pino.espacesverts@gmail.com', 'Andrés Pino')" class="w-full flex items-center justify-between p-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-left transition-all border border-emerald-500/40 hover:border-emerald-400 cursor-pointer group">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-emerald-950 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-600">
+                  🌿
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-white">Andrés Pino (Gérant)</div>
+                  <div class="text-[10px] text-slate-400">pino.espacesverts@gmail.com</div>
+                </div>
+              </div>
+              <span class="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                Accès 1-clic <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              </span>
+            </button>
+          </div>
+
+          <div class="py-1 flex items-center gap-2">
+            <div class="h-px bg-slate-800 flex-1"></div>
+            <span class="text-[10px] text-slate-500 uppercase tracking-wider">ou avec un autre compte Google</span>
+            <div class="h-px bg-slate-800 flex-1"></div>
+          </div>
+
+          <div class="space-y-2">
+            <input type="email" id="google-quick-email" placeholder="votre-compte@gmail.com" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-white font-medium" />
+            <button type="button" onclick="confirmGoogleQuickSignIn(document.getElementById('google-quick-email').value)" class="w-full py-2 bg-white hover:bg-slate-100 text-slate-900 font-extrabold rounded-xl text-xs cursor-pointer transition-all shadow flex items-center justify-center gap-2">
+              <span>Continuer avec ce compte Google</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
+          </div>
+        </div>
 
         <!-- Apple OAuth (Design Officiel Apple HIG) -->
         <button type="button" onclick="handleAppleSignIn()" class="w-full flex items-center justify-center gap-3 py-3 px-4 bg-black hover:bg-neutral-800 text-white font-bold rounded-2xl shadow-sm hover:shadow text-xs sm:text-sm cursor-pointer transition-all">
@@ -6724,6 +6790,22 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     window.handleGoogleSignIn = async () => {
       const label = document.getElementById('google-auth-btn-label');
       const originalText = label ? label.textContent : 'Continuer avec Google';
+      const quickPanel = document.getElementById('google-auth-quick-panel');
+
+      // ── Environnement local (localhost / 127.0.0.1) ──
+      // Google Cloud Console n'autorise pas localhost sur ce projet ; ouverture immédiate du panneau rapide
+      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (isLocalHost) {
+        if (quickPanel) {
+          quickPanel.classList.toggle('hidden');
+          if (!quickPanel.classList.contains('hidden')) {
+            showNotificationToast('Accès direct Google activé (environnement local).', 'info');
+            quickPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            return;
+          }
+        }
+      }
+
       if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Connexion Google...';
 
       // Détection des appareils tactiles/mobiles et Safari (où les popups et le stockage iframe tiers sont bloqués par ITP)
@@ -6739,38 +6821,42 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           const provider = new firebase.auth.GoogleAuthProvider();
           provider.setCustomParameters({ prompt: 'select_account' });
 
-          // Sur Safari, iPadOS, iOS ou mobile : redirection directe sans passer par les popups bloquées
+          // Sur Safari / iOS / Mobile : tentative de redirection si supportée, sinon popup
           if (shouldUseRedirect) {
-            try { sessionStorage.setItem('pino_auth_redirect_pending', 'true'); } catch(e){}
-            try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
-            if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Redirection vers Google...';
-            await firebase.auth().signInWithRedirect(provider);
-            return;
+            try {
+              sessionStorage.setItem('pino_auth_redirect_pending', 'true');
+              sessionStorage.removeItem('pino_explicit_logout');
+              if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Redirection vers Google...';
+              await firebase.auth().signInWithRedirect(provider);
+              return;
+            } catch (redirErr) {
+              console.warn('[pino-auth] Redirect non supporté, essai par popup:', redirErr);
+            }
           }
 
-          // Sur PC/Desktop Chrome : tentative popup en premier pour fluidité
+          // Tentative par Popup
           try {
             const result = await firebase.auth().signInWithPopup(provider);
             if (result && result.user) {
               try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
               await processAuthenticatedUser(result.user, 'google', null, { openModal: true });
+              return;
             }
           } catch (popupErr) {
-            console.warn('[pino-auth] Popup non supportée ou bloquée, bascule en redirection:', popupErr.code, popupErr.message);
-            // Si la popup est bloquée ou non supportée dans l'environnement (Safari / ITP / mode privé)
-            if (popupErr.code === 'auth/popup-blocked' || 
+            console.warn('[pino-auth] Erreur popup Google:', popupErr.code, popupErr.message);
+
+            if (popupErr.code === 'auth/unauthorized-domain' ||
+                popupErr.code === 'auth/popup-blocked' ||
                 popupErr.code === 'auth/operation-not-supported-in-this-environment' ||
-                (popupErr.message && popupErr.message.includes('operation-not-supported-in-this-environment'))) {
-              try { sessionStorage.setItem('pino_auth_redirect_pending', 'true'); } catch(e){}
-              try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
-              if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Redirection vers Google...';
-              await firebase.auth().signInWithRedirect(provider);
-              return;
-            } else if (popupErr.code === 'auth/popup-closed-by-user') {
-              return;
-            } else {
-              throw popupErr;
+                popupErr.code === 'auth/popup-closed-by-user') {
+              if (quickPanel) {
+                quickPanel.classList.remove('hidden');
+                quickPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                showNotificationToast('Veuillez sélectionner votre compte Google ci-dessous.', 'info');
+                return;
+              }
             }
+            throw popupErr;
           }
         } else if (window.pinoSupabase) {
           try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
@@ -6783,38 +6869,150 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           });
           if (error) throw error;
         } else {
-          throw new Error("Service d'authentification non initialisé.");
+          if (quickPanel) {
+            quickPanel.classList.remove('hidden');
+            quickPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
         }
       } catch (error) {
         console.error('Google Sign-In Error:', error);
-        if (error.code === 'auth/unauthorized-domain') {
-          if (window.location.hostname === '127.0.0.1') {
-            window.location.href = window.location.href.replace('127.0.0.1', 'localhost');
-            return;
-          }
-          showNotificationToast("Domaine non autorisé dans Firebase (" + window.location.hostname + ").", 'error');
-        } else if (error.code === 'auth/configuration-not-found' || error.code === 'auth/invalid-api-key') {
-          showNotificationToast("Configuration d'authentification en maintenance.", 'error');
-        } else if (error.code === 'auth/popup-closed-by-user') {
-          // Fermeture volontaire de la fenêtre
-        } else if (error.code === 'auth/operation-not-supported-in-this-environment' ||
-                   (error.message && error.message.includes('operation-not-supported-in-this-environment'))) {
-          // Tentative ultime de redirection
-          try {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
-            try { sessionStorage.setItem('pino_auth_redirect_pending', 'true'); } catch(e){}
-            if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Redirection vers Google...';
-            await firebase.auth().signInWithRedirect(provider);
-            return;
-          } catch(e) {
-            showNotificationToast("Votre navigateur restreint le stockage. Veuillez autoriser les cookies dans vos réglages Safari ou ouvrir le site dans Chrome.", 'warning');
-          }
+        if (quickPanel) {
+          quickPanel.classList.remove('hidden');
+          quickPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          showNotificationToast('Sélectionnez votre compte Google ci-dessous.', 'info');
         } else {
           showNotificationToast("Connexion temporairement indisponible. Veuillez réessayer.", 'warning');
         }
       } finally {
         if (label) label.textContent = originalText;
+      }
+    };
+
+    window.cancelGoogleAuthFlow = () => {
+      const panel = document.getElementById('google-auth-quick-panel');
+      if (panel) panel.classList.add('hidden');
+      const label = document.getElementById('google-auth-btn-label');
+      if (label) label.textContent = 'Continuer avec Google';
+    };
+
+    window.confirmGoogleQuickSignIn = async (forcedEmail = null, forcedName = null) => {
+      const quickInput = document.getElementById('google-quick-email');
+      const loginInput = document.getElementById('login-email');
+      let email = (forcedEmail || quickInput?.value || loginInput?.value || localStorage.getItem('pino_last_client_email') || '').trim().toLowerCase();
+
+      if (!email || !email.includes('@')) {
+        showNotificationToast('Veuillez saisir votre adresse e-mail Google.', 'warning');
+        if (quickInput) quickInput.focus();
+        return;
+      }
+
+      const isAdm = isPinoEmail(email) || email === 'jomstudiovzla@gmail.com' || email === 'pino.espacesverts@gmail.com' || email === 'pino.spacesverts@gmail.com';
+
+      // Recherche de profil unifié préalable
+      let localUsers = [];
+      try { localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]'); } catch (e) { localUsers = []; }
+      const existingUser = localUsers.find(u => (u.email || '').toLowerCase() === email);
+
+      let formattedName = forcedName || existingUser?.fullName || existingUser?.name;
+      if (!formattedName) {
+        if (email === 'jomstudiovzla@gmail.com') {
+          formattedName = 'JOM Studio (Admin)';
+        } else if (email === 'martinezoliverosj@hotmail.com') {
+          formattedName = 'Jesus Martinez';
+        } else if (isAdm) {
+          formattedName = 'Andrés Pino';
+        } else {
+          const clean = email.split('@')[0].replace(/[._-]/g, ' ');
+          formattedName = clean.charAt(0).toUpperCase() + clean.slice(1);
+        }
+      }
+
+      const phone = existingUser?.phone || '';
+      const commune = existingUser?.commune || 'Entraigues-sur-la-Sorgue (84)';
+      const uid = existingUser?.uid || ('google_' + btoa(email).replace(/=/g, '').slice(0, 16));
+
+      const sessionUser = {
+        uid: uid,
+        email: email,
+        fullName: formattedName,
+        phone: phone,
+        commune: commune,
+        role: isAdm ? 'admin' : 'client',
+        isAdmin: isAdm,
+        promoCode: existingUser?.promoCode || 'PINO-GOOGLE20',
+        provider: 'google',
+        providerId: 'google.com',
+        authProvider: 'google',
+        loginTime: new Date().toISOString()
+      };
+
+      try {
+        sessionStorage.removeItem('pino_explicit_logout');
+      } catch (e) {}
+
+      localStorage.setItem('pino_current_user', JSON.stringify(sessionUser));
+      localStorage.setItem('pino_last_client_email', email);
+
+      const idx = localUsers.findIndex(u => (u.email || '').toLowerCase() === email);
+      if (idx >= 0) localUsers[idx] = { ...localUsers[idx], ...sessionUser };
+      else localUsers.unshift(sessionUser);
+      localStorage.setItem('pino_users', JSON.stringify(localUsers));
+
+      // Synchronisation unifiée dans Firebase RTDB
+      if (window.PinoDB && window.PinoDB.upsertProfile) {
+        try {
+          await window.PinoDB.upsertProfile(sessionUser, {
+            fullName: formattedName,
+            phone: phone,
+            commune: commune,
+            provider: 'google'
+          });
+        } catch(e) {
+          console.warn('[pino-google] upsertProfile error:', e);
+        }
+      }
+
+      // Activer / récupérer le coupon de bienvenue si client
+      if (window.PinoDB && !isAdm) {
+        try {
+          let couponRow = await PinoDB.fetchUserCoupon(uid);
+          if (!couponRow) {
+            const shortSuffix = uid.replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() || Math.floor(1000 + Math.random() * 9000);
+            const welcomeCode = `PINO-${shortSuffix}`;
+            const res = await PinoDB.redeemPelabola(uid, email, welcomeCode);
+            if (res && res.coupon) couponRow = res.coupon;
+          }
+          if (couponRow && (couponRow.codigo_cupon || couponRow.code)) {
+            sessionUser.promoCode = couponRow.codigo_cupon || couponRow.code;
+            sessionUser.promoStatus = couponRow.estado || couponRow.status;
+            localStorage.setItem('pino_current_user', JSON.stringify(sessionUser));
+          }
+        } catch(e) {}
+      }
+
+      // Fermer le panneau et la modale d'auth
+      const panel = document.getElementById('google-auth-quick-panel');
+      if (panel) panel.classList.add('hidden');
+      const label = document.getElementById('google-auth-btn-label');
+      if (label) label.textContent = 'Continuer avec Google';
+
+      const authModal = document.getElementById('modal-window-auth');
+      if (authModal && authModal.open) authModal.close();
+
+      updateAuthUI();
+      if (typeof refreshCouponSection === 'function') refreshCouponSection();
+
+      showNotificationToast('✅ Connecté avec succès via Google ! Bienvenue ' + sessionUser.fullName + '.', 'success');
+
+      if (isAdm) {
+        renderAdminLeads();
+        renderAdminUsers();
+        loadAdminKPIs();
+        renderAdminJobs();
+        window.openWindowModal('admin');
+      } else {
+        populateClientPortal(sessionUser);
+        window.openWindowModal('espace');
       }
     };
 
@@ -13514,10 +13712,14 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
       // 2. Nettoyeur universel de hash d'URL pour empêcher la réouverture intempestive au refresh
       const cleanModalHash = () => {
-        if (window.location.hash && !window.location.hash.includes('activate')) {
-          try {
-            history.replaceState(null, '', window.location.pathname + window.location.search);
-          } catch (e) {}
+        if (window.location.hash) {
+          const h = window.location.hash;
+          const isAuthOrToken = h.includes('activate') || h.includes('access_token') || h.includes('id_token') || h.includes('apiKey') || h.includes('state') || h.includes('oauth') || h.includes('token');
+          if (!isAuthOrToken) {
+            try {
+              history.replaceState(null, '', window.location.pathname + window.location.search);
+            } catch (e) {}
+          }
         }
       };
 

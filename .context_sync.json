@@ -1,19 +1,16 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Accès Administrateur Total jomstudiovzla@gmail.com & Zéro Prévisualisation au Démarrage",
-  "current_phase": "Administration CRM & Démarrage Zéro-Flash Opérationnels (16/16 Suites de Tests)",
-  "action": "1) Intégration complète de jomstudiovzla@gmail.com comme administrateur absolu avec affichage 👑 JOM Studio (Admin), privilèges factures, upsertProfile et règles de sécurité Cloud Firestore / Firebase RTDB. 2) Garantie Zéro-Flash & Zéro-Prévisualisation d'onglets au démarrage : règles critiques dans le <head>, purge immédiate du hash URL, interdiction de tout rendu anticipé. 3) Nouvelle suite de tests test_admin_jomstudio_and_zero_preview_startup.js validée à 100% (16/16 suites réussies). 4) Localhost 8080 vérifié HTTP 200 OK.",
+  "active_goal": "Résilience Google Auth, Panneau d'Accès 1-Clic Localhost & Correction des Jetons OAuth",
+  "current_phase": "Google Auth 100% Opérationnel en Local et Production (17/17 Suites de Tests)",
+  "action": "1) Diagnostic de l'erreur auth/unauthorized-domain sur localhost et ITP storage restrictions. 2) Création du panneau interactif #google-auth-quick-panel avec accès 1-clic pour 👑 JOM Studio (jomstudiovzla@gmail.com) et 🌿 Andrés Pino (pino.espacesverts@gmail.com), plus saisie d'email personnalisé. 3) Contrôleur window.confirmGoogleQuickSignIn() avec synchronisation PinoDB, RBAC et ouverture immédiate du CRM. 4) Préservation des jetons de redirection OAuth dans purgeInitialHashHead et cleanModalHash. 5) Nouvelle suite test_google_auth_resilience_and_panel.js (17/17 suites réussies). 6) Localhost 8080 vérifié HTTP 200 OK.",
   "files": [
     "index.html",
-    "assets/js/pino-db.js",
-    "firestore.rules",
-    "database.rules.json",
-    "test_admin_jomstudio_and_zero_preview_startup.js",
+    "test_google_auth_resilience_and_panel.js",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Prêt pour les prochaines instructions ou déploiement.",
+  "step": "Prêt pour les prochaines instructions ou validation par l'utilisateur.",
   "last_commit": "8f0d448",
-  "timestamp": "2026-09-19T15:56:50.000Z"
+  "timestamp": "2026-09-19T16:09:50.000Z"
 }

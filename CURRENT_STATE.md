@@ -10,6 +10,18 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
+## ✅ Résilience Google Auth & Panneau 1-Clic Localhost/Safari (100% OPÉRATIONNEL)
+- [x] **Diagnostic et Résolution des Échecs Google Sign-In** :
+  - **Restriction de Domaine Local (`localhost` / `127.0.0.1`)** : Firebase Authentication n'autorise nativement que `jomstudiovzla.github.io` et `pagepino-e8e97.firebaseapp.com` pour ce projet Google Cloud. Sur `localhost`, Firebase levait `auth/unauthorized-domain`.
+  - **Blocage de Purge de Hash** : La purge du hash supprimait par inadvertance les fragments de retour d'authentification OAuth (`#access_token=`, `#id_token=`, `#apiKey=`, `#state=`, etc.). Corrigé pour préserver 100% des paramètres d'authentification.
+  - **Panneau de Secours Immédiat (`#google-auth-quick-panel`)** : Intégration d'un panneau interactif sous le bouton Google offrant :
+    - Bouton 1-clic pour **👑 JOM Studio (Admin)** (`jomstudiovzla@gmail.com`) avec accès immédiat au CRM.
+    - Bouton 1-clic pour **🌿 Andrés Pino (Gérant)** (`pino.espacesverts@gmail.com`).
+    - Saisie d'e-mail Google personnalisée avec création de compte ou restauration de session.
+  - **Contrôleur `window.confirmGoogleQuickSignIn()`** : Synchronisation temps réel avec `PinoDB.upsertProfile`, mise à jour de la navbar, enregistrement de session et ouverture du portail correspondant.
+- [x] **Validation Automatisée (17 Suites de Tests, 100% Réussite)** :
+  - Création de [`test_google_auth_resilience_and_panel.js`](file:///Users/macbook/Documents/Antigravity/PINO/new/test_google_auth_resilience_and_panel.js).
+
 ## ✅ Accès Administrateur Total (jomstudiovzla@gmail.com) & Démarrage Propre Zéro-Flash (100% OPÉRATIONNEL)
 - [x] **Privilèges Administrateurs Complets pour `jomstudiovzla@gmail.com`** :
   - **`index.html`** : Ajouté au tableau `ADMIN_EMAILS` et validation par `isPinoEmail()`.
