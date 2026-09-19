@@ -37,9 +37,8 @@
   - **Diagnostic du Bug de Reconnexion / Reset** : L'écouteur `firebase.auth().onAuthStateChanged` supprimait inconditionnellement `pino_current_user` du stockage local dès que `user === null`. Lors d'une connexion via Apple, d'un accès Google rapide, d'une connexion invité par mot de passe ou d'un rafraîchissement sur Safari/mobile, la session était instantanément détruite et ramenait l'utilisateur à l'état déconnecté.
   - **Protection Intelligente de Session Active** : `onAuthStateChanged` vérifie désormais si une session locale active existe (`cur && cur.email`). Si l'utilisateur ne s'est pas explicitement déconnecté via `handleLogout()`, la session est rigoureusement maintenue, la navbar reste synchronisée (`👑 JOM Studio (Admin)` / `👑 Andrés (Admin)`) et le CRM s'ouvre sans fermeture intempestive.
   - **Suppression du Redirect Destructif Google** : Remplacement de `signInWithRedirect` par un flux in-place `signInWithPopup` sécurisé avec repli instantané vers le panneau `#google-auth-quick-panel` en cas d'erreur ou d'environnement restreint (zéro rechargement de page).
-- [x] **Panneau Interactif Apple ID avec Accès 1-Clic Administrateurs** :
-  - **Bouton 1-Clic 👑 JOM Studio (Admin)** : `confirmAppleQuickSignIn('jomstudiovzla@gmail.com', 'JOM Studio (Admin)')` avec ouverture directe du CRM.
-  - **Bouton 1-Clic 🌿 Andrés Pino (Gérant)** : `confirmAppleQuickSignIn('pino.espacesverts@gmail.com', 'Andrés Pino')`.
+- [x] **Panneau Interactif Apple ID & Google Épurés (Client Only)** :
+  - **Interface Neutre & Confidentielle** : Retrait des raccourcis admin dans `#google-auth-quick-panel` et `#apple-auth-quick-panel`. Seuls les champs de saisie d'identifiants standard et le compte mémorisé local de l'utilisateur sont proposés.
   - **Support Touche Entrée** : Soumission directe au clavier sur `#apple-quick-email` et `#google-quick-email`.
   - **Protection contre InvalidStateError** : Vérification `if (!targetModal.open)` avant tout `showModal()` dans `openWindowModal`.
   - **Contrôle Unifié de Navigation** : `handleAuthNavClick()` délègue désormais proprement vers `openWindowModal('admin')` pour les administrateurs et `openWindowModal('espace')` pour les clients.

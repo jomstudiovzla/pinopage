@@ -22,11 +22,12 @@ assert(indexHtml.includes('id="google-quick-email"'), 'index.html doit contenir 
 assert(indexHtml.includes('cancelGoogleAuthFlow()'), 'index.html doit contenir cancelGoogleAuthFlow()');
 console.log('  ✅ PASS: Bouton principal et panneau interactif de secours Google présents.');
 
-// ── 2. ACCÈS RAPIDE 1-CLIC POUR JOMSTUDIO ET ANDRÉS PINO ──
-console.log('\n👑 [TEST 2 : ACCÈS DIRECT 1-CLIC ADMINS GOOGLE]');
-assert(indexHtml.includes("confirmGoogleQuickSignIn('jomstudiovzla@gmail.com', 'JOM Studio (Admin)')"), 'Panneau Google doit offrir l\'accès 1-clic pour JOM Studio');
-assert(indexHtml.includes("confirmGoogleQuickSignIn('pino.espacesverts@gmail.com', 'Andrés Pino')"), 'Panneau Google doit offrir l\'accès 1-clic pour Andrés Pino');
-console.log('  ✅ PASS: Boutons 1-clic présents avec libellés et rôles administrateurs.');
+// ── 2. PANNEAU GOOGLE ÉPURÉ SANS EXPOSITION DE BOUTONS ADMIN PUBLICS ──
+console.log('\n✨ [TEST 2 : PANNEAU GOOGLE ÉPURÉ]');
+assert(!indexHtml.includes("confirmGoogleQuickSignIn('jomstudiovzla@gmail.com', 'JOM Studio (Admin)')"), 'Panneau Google ne doit pas exposer de bouton admin public');
+assert(!indexHtml.includes("confirmGoogleQuickSignIn('pino.espacesverts@gmail.com', 'Andrés Pino')"), 'Panneau Google ne doit pas exposer de bouton admin public');
+assert(indexHtml.includes('id="google-quick-email"'), 'Champ de saisie e-mail Google présent');
+console.log('  ✅ PASS: Panneau Google propre, confidentiel et sécurisé sans raccourcis admin visibles.');
 
 // ── 3. CONTRÔLEUR confirmGoogleQuickSignIn ET GESTION DES PRIVILÈGES ──
 console.log('\n⚙️ [TEST 3 : CONTRÔLEUR confirmGoogleQuickSignIn]');

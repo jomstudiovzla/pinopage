@@ -20,13 +20,13 @@ assert(indexHtml.includes('cur && cur.email && !isExplicitLogout'), 'onAuthState
 assert(indexHtml.includes('Session active maintenue'), 'onAuthStateChanged doit documenter la conservation de session');
 console.log('  ✅ PASS: onAuthStateChanged ne supprime JAMAIS une session active locale (Google/Apple/invité).');
 
-// ── 2. PANNEAU 1-CLIC ADMIN APPLE (JOM STUDIO & ANDRÉS PINO) ──
-console.log('\n🍏 [TEST 2 : ACCÈS DIRECT 1-CLIC ADMIN APPLE]');
-assert(indexHtml.includes("confirmAppleQuickSignIn('jomstudiovzla@gmail.com', 'JOM Studio (Admin)')"), 'Panneau Apple doit offrir l\'accès 1-clic pour JOM Studio');
-assert(indexHtml.includes("confirmAppleQuickSignIn('pino.espacesverts@gmail.com', 'Andrés Pino')"), 'Panneau Apple doit offrir l\'accès 1-clic pour Andrés Pino');
+// ── 2. PANNEAU APPLE ÉPURÉ SANS EXPOSITION DE BOUTONS ADMIN PUBLICS ──
+console.log('\n🍏 [TEST 2 : PANNEAU APPLE ÉPURÉ]');
+assert(!indexHtml.includes("confirmAppleQuickSignIn('jomstudiovzla@gmail.com', 'JOM Studio (Admin)')"), 'Panneau Apple ne doit pas exposer de bouton admin public');
+assert(!indexHtml.includes("confirmAppleQuickSignIn('pino.espacesverts@gmail.com', 'Andrés Pino')"), 'Panneau Apple ne doit pas exposer de bouton admin public');
 assert(indexHtml.includes("id=\"apple-quick-email\" onkeydown=\"if(event.key==='Enter')"), 'Champ e-mail Apple doit supporter la touche Entrée');
 assert(indexHtml.includes("id=\"google-quick-email\" onkeydown=\"if(event.key==='Enter')"), 'Champ e-mail Google doit supporter la touche Entrée');
-console.log('  ✅ PASS: Panneau Apple enrichi avec les boutons 1-clic administrateurs et touche Entrée.');
+console.log('  ✅ PASS: Panneau Apple épuré, confidentiel avec support de la touche Entrée.');
 
 // ── 3. GOOGLE SIGN-IN PAR POPUP SANS REDIRECTION INTRUSIVE ──
 console.log('\n🔍 [TEST 3 : GOOGLE SIGN-IN EN PLACE SANS REDIRECT DISRUPTIF]');
