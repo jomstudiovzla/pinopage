@@ -1,15 +1,15 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Auditoría integral SSO (Google y Apple), resolución de errores de callback, servidor CORS y ciclo de vida de toasts",
+  "active_goal": "Fase 2: Configuración y Resolución de Errores de Sign in with Apple (Error A a E)",
   "current_phase": "Hito 1 — Authentification Universelle Multi-Terminaux & OAuth",
-  "action": "Interception universelle des erreurs OAuth (?error=access_denied), implémentation de dismissNotificationToast et auto-destruction garantie, gestion robuste try/catch/finally dans handleGoogleSignIn/handleAppleSignIn, création du serveur local serve.py avec en-têtes CORS et preflight OPTIONS, validation des 20 suites de tests à 100%",
+  "action": "Résolution de l'Error A (Subject ID/null name recovery), implémentation de do_POST dans serve.py (résolution Error E 405/501), support form_post apple_user dans bindAuthSessions, capture additionalUserInfo.profile dans popup, 21/21 suites de tests passées à 100%",
   "files": [
     "index.html",
     "serve.py",
-    "test_sso_oauth_error_handling_and_cors.js",
+    "test_apple_sso_resilience_and_post_handling.js",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Commit avec attribution Grok 4.6 et push sur origin main, transmission du rapport d'audit exhaustif"
+  "step": "Commit avec attribution Grok 4.6 et push sur origin main, transmission du rapport technique Apple SSO Fase 2"
 }
