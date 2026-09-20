@@ -1352,21 +1352,19 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     if (!fbUser?.uid) return { ok: false };
 
     const normEmail = (fbUser.email || '').trim().toLowerCase();
-    const isJom = normEmail === 'jomstudiovzla@gmail.com' || normEmail === 'martinezoliverosj@gmail.com' || normEmail === 'martinezoliverosj@hotmail.com';
+    const isJom = normEmail === 'jomstudiovzla@gmail.com';
     const isAdmin = normEmail === 'pino.spacesverts@gmail.com' ||
                     normEmail === 'pino.espacesverts@gmail.com' ||
-                    normEmail === 'jomstudiovzla@gmail.com' ||
-                    normEmail === 'martinezoliverosj@gmail.com' ||
-                    normEmail === 'martinezoliverosj@hotmail.com';
+                    normEmail === 'jomstudiovzla@gmail.com';
     const sanitizedEmail = normEmail ? normEmail.replace(/[.#$[\]]/g, '_') : null;
 
     const payload = {
       id:            fbUser.uid,
       uid:           fbUser.uid,
       email:         normEmail,
-      full_name:     extra.fullName || fbUser.displayName || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isJom ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : 'Client Particulier'))),
+      full_name:     extra.fullName || fbUser.displayName || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : (normEmail.includes('martinezoliverosj') ? 'Jesus Martinez' : 'Client Particulier'))),
       phone:         extra.phone    || fbUser.phoneNumber || null,
-      commune:       extra.commune  || 'Bordeaux',
+      commune:       extra.commune  || 'Entraigues-sur-la-Sorgue (84)',
       role:          isAdmin ? 'admin' : 'client',
       isAdmin:       isAdmin,
       auth_provider: extra.provider || 'google',

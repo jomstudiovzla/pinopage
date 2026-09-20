@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v25-turbo-europe-vaucluse-clean-syntax'; // pino-ev-v24 migration
+const CACHE_NAME = 'pino-ev-v26-turbo-europe-vaucluse-admin-exclusivity'; // pino-ev-v24 migration
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',

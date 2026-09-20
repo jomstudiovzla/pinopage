@@ -4,40 +4,40 @@
       ".read": "auth != null",
       ".indexOn": ["email", "status", "created_at"],
       "$leadId": {
-        ".write": "!data.exists() || (auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com' || data.child('email').val() === auth.token.email))"
+        ".write": "!data.exists() || (auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || data.child('email').val() === auth.token.email))"
       }
     },
     "users": {
       "$uid": {
-        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com')",
-        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com' || (auth.uid === $uid && (!newData.child('isAdmin').exists() || newData.child('isAdmin').val() === false || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com')))"
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || (auth.uid === $uid && (!newData.child('isAdmin').exists() || newData.child('isAdmin').val() === false || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')))"
       },
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com')",
-      ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com')"
+      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+      ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')"
     },
     "jobs": {
       ".read": "auth != null",
       ".indexOn": ["client_email", "payment_status", "created_at"],
       "$jobId": {
-        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com')"
+        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')"
       }
     },
     "coupons": {
       "$uid": {
-        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com')",
-        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com' || (auth.uid === $uid && !data.exists() && newData.child('descuento_pct').val() == 20))"
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || (auth.uid === $uid && !data.exists() && newData.child('descuento_pct').val() == 20))"
       },
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com')",
-      ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com')"
+      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+      ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')"
     },
     "audit_logs": {
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com')",
+      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
       ".write": "auth != null"
     },
     "quotes_responses": {
       ".read": "auth != null",
       "$leadId": {
-        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com' || data.child('client_email').val() === auth.token.email)"
+        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || data.child('client_email').val() === auth.token.email)"
       }
     },
     "client_notifications": {
@@ -47,17 +47,17 @@
       }
     },
     "admin_notifications": {
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com')",
+      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
       ".write": "auth != null"
     },
     "platform_leads": {
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com')",
+      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
       "$pltId": {
-        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com')"
+        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')"
       }
     },
     "clients_records": {
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || auth.token.email === 'martinezoliverosj@gmail.com' || auth.token.email === 'martinezoliverosj@hotmail.com')",
+      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
       "$sanitizedEmail": {
         ".read": "auth != null",
         ".write": "auth != null"

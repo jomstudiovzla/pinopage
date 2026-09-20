@@ -47,15 +47,18 @@ assert(indexHtml.includes('if (cur && cur.email && !isExplicitLogout)'), 'Sessio
 assert(indexHtml.includes('if (isExplicitLogout) {\n                try {\n                  localStorage.removeItem(\'pino_current_user\');'), 'La session n\'est supprimée que lors d\'une déconnexion volontaire');
 console.log('  ✅ PASS: Session active préservée entre rechargements, rafraîchissements et changements de page.');
 
-// ── 6. ATTRIBUTION AUTOMATIQUE ADMIN POUR martinezoliverosj@gmail.com ──
-console.log('\n👑 [TEST 6 : RECONNAISSANCE ADMIN martinezoliverosj@gmail.com]');
-assert(indexHtml.includes("ADMIN_EMAILS.push('martinezoliverosj@gmail.com')"), 'martinezoliverosj@gmail.com doit être dans ADMIN_EMAILS');
-assert(indexHtml.includes("normEmail === 'martinezoliverosj@gmail.com'"), 'martinezoliverosj@gmail.com doit être reconnu comme admin JOM Studio');
+// ── 6. RESTRICTION STRICTE DES PRIVILÈGES ADMIN (PINO + JOM STUDIO EXCLUSIVEMENT) ──
+console.log('\n👑 [TEST 6 : RESTRICTION STRICTE DES PRIVILÈGES ADMIN (PINO + JOM STUDIO)]');
+assert(indexHtml.includes("if (!ADMIN_EMAILS.includes('jomstudiovzla@gmail.com')) ADMIN_EMAILS.push('jomstudiovzla@gmail.com');"), 'ADMIN_EMAILS doit inclure jomstudiovzla@gmail.com');
+assert(!indexHtml.includes("ADMIN_EMAILS.push('martinezoliverosj@gmail.com')"), 'martinezoliverosj ne doit PAS être dans ADMIN_EMAILS');
+assert(!indexHtml.includes("ADMIN_EMAILS.push('martinezoliverosj@hotmail.com')"), 'martinezoliverosj ne doit PAS être dans ADMIN_EMAILS');
 const dbRules = fs.readFileSync(path.join(__dirname, 'database.rules.json'), 'utf8');
 const fsRules = fs.readFileSync(path.join(__dirname, 'firestore.rules'), 'utf8');
-assert(dbRules.includes("auth.token.email === 'martinezoliverosj@gmail.com'"), 'database.rules.json doit autoriser martinezoliverosj@gmail.com');
-assert(fsRules.includes("request.auth.token.email == 'martinezoliverosj@gmail.com'"), 'firestore.rules doit autoriser martinezoliverosj@gmail.com');
-console.log('  ✅ PASS: martinezoliverosj@gmail.com dispose des pleins pouvoirs administratifs.');
+assert(!dbRules.includes('martinezoliverosj'), 'database.rules.json ne doit pas contenir martinezoliverosj');
+assert(!fsRules.includes('martinezoliverosj'), 'firestore.rules ne doit pas contenir martinezoliverosj');
+assert(dbRules.includes("auth.token.email === 'jomstudiovzla@gmail.com'"), 'database.rules.json doit autoriser jomstudiovzla@gmail.com');
+assert(fsRules.includes("request.auth.token.email == 'jomstudiovzla@gmail.com'"), 'firestore.rules doit autoriser jomstudiovzla@gmail.com');
+console.log('  ✅ PASS: Seuls Pino et JOM Studio disposent des pleins pouvoirs administratifs.');
 
 // ── 7. ZÉRO DIALOGUE PROMPT() DISGRACIEUX DANS LE FLUX DE CONNEXION ──
 console.log('\n🚫 [TEST 7 : ZÉRO PROMPT() DANS L\'EXPÉRIENCE UTILISATEUR]');

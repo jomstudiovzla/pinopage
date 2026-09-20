@@ -6671,8 +6671,6 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     // =========================================================================
     const ADMIN_EMAILS = ['pino.spacesverts@gmail.com', 'pino.espacesverts@gmail.com'];
     if (!ADMIN_EMAILS.includes('jomstudiovzla@gmail.com')) ADMIN_EMAILS.push('jomstudiovzla@gmail.com');
-    if (!ADMIN_EMAILS.includes('martinezoliverosj@gmail.com')) ADMIN_EMAILS.push('martinezoliverosj@gmail.com');
-    if (!ADMIN_EMAILS.includes('martinezoliverosj@hotmail.com')) ADMIN_EMAILS.push('martinezoliverosj@hotmail.com');
     const isPinoEmail = (email) => ADMIN_EMAILS.includes((email || '').trim().toLowerCase()) || (email || '').trim().toLowerCase() === 'jomstudiovzla@gmail.com';
 
     function getCurrentUser() {
@@ -6724,7 +6722,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         }
       }
 
-      const isJom = normEmail === 'jomstudiovzla@gmail.com' || normEmail === 'martinezoliverosj@gmail.com' || normEmail === 'martinezoliverosj@hotmail.com';
+      const isJom = normEmail === 'jomstudiovzla@gmail.com';
       const isAdmin = isPinoEmail(normEmail) || isJom || user.app_metadata?.role === 'admin';
       const meta = user.user_metadata || {};
       const savedName = matchedUser?.fullName || matchedUser?.name;
@@ -6733,7 +6731,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         || meta.full_name 
         || meta.name 
         || savedName 
-        || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isJom ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : (normEmail.includes('@') ? normEmail.split('@')[0] : 'Client Apple'))));
+        || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : (normEmail.includes('martinezoliverosj') ? 'Jesus Martinez' : (normEmail.includes('@') ? normEmail.split('@')[0] : 'Client Apple'))));
       const phone = registrationProfile?.phone || user.phoneNumber || meta.phone || matchedUser?.phone || '';
       const commune = registrationProfile?.commune || matchedUser?.commune || 'Entraigues-sur-la-Sorgue (84)';
 
@@ -6927,9 +6925,9 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
 
       let formattedName = forcedName || existingUser?.fullName || existingUser?.name;
       if (!formattedName) {
-        if (email === 'jomstudiovzla@gmail.com' || email === 'martinezoliverosj@gmail.com') {
+        if (email === 'jomstudiovzla@gmail.com') {
           formattedName = 'JOM Studio (Admin)';
-        } else if (email === 'martinezoliverosj@hotmail.com') {
+        } else if (email === 'martinezoliverosj@gmail.com' || email === 'martinezoliverosj@hotmail.com') {
           formattedName = 'Jesus Martinez';
         } else if (isAdm) {
           formattedName = 'Andrés Pino';
@@ -7185,9 +7183,9 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
 
       let formattedName = forcedName || existingUser?.fullName || existingUser?.name;
       if (!formattedName) {
-        if (email === 'jomstudiovzla@gmail.com' || email === 'martinezoliverosj@gmail.com') {
+        if (email === 'jomstudiovzla@gmail.com') {
           formattedName = 'JOM Studio (Admin)';
-        } else if (email === 'martinezoliverosj@hotmail.com') {
+        } else if (email === 'martinezoliverosj@gmail.com' || email === 'martinezoliverosj@hotmail.com') {
           formattedName = 'Jesus Martinez';
         } else if (isAdm) {
           formattedName = 'Andrés Pino';
@@ -7344,8 +7342,8 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         if (!authOk) {
           // Fallback universel pour administrateurs (JOM Studio ou Andrés) sans dépendance réseau
           if (isPinoEmail(email) || (isPinoEmail(email) && (pass === 'Pino2026!' || pass.length >= 4))) {
-            const isJom = email === 'jomstudiovzla@gmail.com' || email === 'martinezoliverosj@gmail.com' || email === 'martinezoliverosj@hotmail.com';
-            const fullName = (email === 'jomstudiovzla@gmail.com' || email === 'martinezoliverosj@gmail.com') ? 'JOM Studio (Admin)' : (email === 'martinezoliverosj@hotmail.com' ? 'Jesus Martinez' : 'Andrés Pino');
+            const isJom = email === 'jomstudiovzla@gmail.com';
+            const fullName = isJom ? 'JOM Studio (Admin)' : 'Andrés Pino';
             const sessionUser = {
               uid: isJom ? 'admin_jomstudio' : 'admin_andrespino',
               email: email,
@@ -7692,8 +7690,8 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
                   const isAppleToken = Boolean((payload.iss && payload.iss.includes('apple')) || parsedAppleUser);
                   const method = isAppleToken ? 'apple' : 'google';
                   const normEmail = (payload.email || (parsedAppleUser && parsedAppleUser.email) || '').trim().toLowerCase();
-                  const isJom = normEmail === 'jomstudiovzla@gmail.com' || normEmail === 'martinezoliverosj@gmail.com' || normEmail === 'martinezoliverosj@hotmail.com';
-                  const isAdm = isPinoEmail(normEmail) || isJom || normEmail === 'jomstudiovzla@gmail.com';
+                  const isJom = normEmail === 'jomstudiovzla@gmail.com';
+                  const isAdm = isPinoEmail(normEmail) || isJom;
 
                   let appleFullName = '';
                   if (parsedAppleUser && parsedAppleUser.name) {
@@ -7705,7 +7703,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
                   const authUser = {
                     uid: payload.sub || (method + '_' + normEmail.replace(/[^a-zA-Z0-9]/g, '')),
                     email: normEmail,
-                    displayName: appleFullName || payload.name || (isAdm ? (normEmail === 'jomstudiovzla@gmail.com' || isJom ? 'JOM Studio (Admin)' : 'Andrés Pino') : (normEmail ? normEmail.split('@')[0] : (isAppleToken ? 'Client Apple' : 'Utilisateur'))),
+                    displayName: appleFullName || payload.name || (isAdm ? (isJom ? 'JOM Studio (Admin)' : 'Andrés Pino') : (normEmail.includes('martinezoliverosj') ? 'Jesus Martinez' : (normEmail ? normEmail.split('@')[0] : (isAppleToken ? 'Client Apple' : 'Utilisateur')))),
                     photoURL: payload.picture || null,
                     emailVerified: payload.email_verified === true || payload.email_verified === 'true'
                   };
@@ -8579,7 +8577,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         return;
       } else if (user.role === 'admin' || user.isAdmin) {
         const userEmail = (user.email || '').trim().toLowerCase();
-        const isJom = userEmail === 'jomstudiovzla@gmail.com' || userEmail === 'martinezoliverosj@gmail.com' || userEmail === 'martinezoliverosj@hotmail.com';
+        const isJom = userEmail === 'jomstudiovzla@gmail.com';
         navText.textContent = isJom ? "👑 JOM Studio (Admin)" : "👑 Andrés (Admin)";
         if (navIcon) navIcon.className = "fa-solid fa-crown text-sm text-amber-500";
         if (navBtn) {
