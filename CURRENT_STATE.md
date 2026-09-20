@@ -9,6 +9,16 @@
   - Realtime Database: `https://pagepino-e8e97-default-rtdb.europe-west1.firebasedatabase.app`
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
+## ✅ Éradication du SyntaxError (Double déclaration 'uid' / 'localUsers'), Restauration de handleAuthNavClick et Service Worker v25 Anti-Extension (100% OPÉRATIONNEL)
+- [x] **Élimination de la Double Déclaration `uid` et `localUsers` dans `processAuthenticatedUser`** :
+  - **Diagnostic** : Une double déclaration `const uid` et `let localUsers` dans la portée de `processAuthenticatedUser` provoquait une erreur fatale `Uncaught SyntaxError: Identifier 'uid' has already been declared`. Ce blocage de compilation JavaScript empêchait l'exécution de l'intégralité du script principal (380 000+ caractères), rendant `window.handleAuthNavClick` indéfinie et bloquant le clic sur le bouton de connexion.
+  - **Correction Déployée** : Suppression chirurgicale de la redéclaration redondante. Compilation complète vérifiée par le moteur Node.js VM sur 100% des blocs `<script>` de `index.html`.
+- [x] **Mise à Jour Service Worker v25 (`sw.js`) & Immunité Extensions Chrome** :
+  - **Diagnostic** : L'injection de requêtes par des extensions Chrome (ex: gestionnaires de mots de passe ou bloqueurs) vers des URLs `chrome-extension://` provoquait `Uncaught (in promise) TypeError: Failed to execute 'put' on 'Cache': Request scheme 'chrome-extension' is unsupported`.
+  - **Correction Déployée** : Filtrage strict `if (e.request.method !== 'GET' || (!e.request.url.startsWith('http://') && !e.request.url.startsWith('https://'))) return;` et capture silencieuse `.catch(() => {})` sur `cache.put()`. Montée de version du cache en `pino-ev-v25`.
+- [x] **Validation Automatisée (21 Suites de Tests, 100% Réussite)** :
+  - Toutes les 21 suites de tests exécutées avec succès sans aucune régression.
+
 ## ✅ Résilience Totale Apple SSO : Récupération du Sub-ID (Error A), Support POST Form_Post (Error E), et Gestion Private Relay (100% OPÉRATIONNEL)
 - [x] **Résolution de l'Error A (Nom/Email arrivant à `null` aux connexions ultérieures)** :
   - **Diagnostic** : Apple n'envoie le nom et l'e-mail qu'une seule et unique fois lors de la première autorisation. Aux connexions ultérieures, Apple ne renvoie que le Subject ID (`sub`).

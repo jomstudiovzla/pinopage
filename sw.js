@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v24-turbo-europe-vaucluse-universal-auth';
+const CACHE_NAME = 'pino-ev-v25-turbo-europe-vaucluse-clean-syntax'; // pino-ev-v24 migration
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',
@@ -37,13 +37,20 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
+  // Ignorer toute requête non-GET ou provenant d'extensions de navigateur (chrome-extension://, moz-extension://, etc.)
+  if (e.request.method !== 'GET' || (!e.request.url.startsWith('http://') && !e.request.url.startsWith('https://'))) {
+    return;
+  }
+
   // Network-first pour navigation HTML et scripts JS afin d'assurer les mises à jour immédiates sur mobile
   if (e.request.mode === 'navigate' || e.request.url.includes('index.html') || e.request.url.includes('.js')) {
     e.respondWith(
       fetch(e.request)
         .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+          if (response && response.status === 200 && (response.type === 'basic' || response.type === 'cors')) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone)).catch(() => {});
+          }
           return response;
         })
         .catch(() => caches.match(e.request))

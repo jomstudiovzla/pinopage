@@ -6699,7 +6699,6 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isJom ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : (normEmail.includes('@') ? normEmail.split('@')[0] : 'Client Apple'))));
       const phone = registrationProfile?.phone || user.phoneNumber || meta.phone || matchedUser?.phone || '';
       const commune = registrationProfile?.commune || matchedUser?.commune || 'Entraigues-sur-la-Sorgue (84)';
-      const uid = user.uid || user.id;
 
       let userProfile = {
         uid: uid,
@@ -6721,7 +6720,6 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       recordSessionAudit(userProfile);
 
       // 2. Mise à jour de la mémoire cache des utilisateurs
-      let localUsers = [];
       try { localUsers = JSON.parse(localStorage.getItem('pino_users')) || []; } catch (e) { localUsers = []; }
       const uIdx = localUsers.findIndex(u => u.email && u.email.toLowerCase() === normEmail);
       if (uIdx >= 0) localUsers[uIdx] = { ...localUsers[uIdx], ...userProfile };
