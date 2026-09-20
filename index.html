@@ -7541,7 +7541,57 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     };
 
     (function bindAuthSessions() {
-      // 0. Détection du retour direct Google OAuth OpenID (#id_token=...)
+      // 0a. Interception universelle des erreurs et retours d'annulation OAuth (Google, Apple, Supabase)
+      try {
+        const rawSearch = (typeof window !== 'undefined' && window.location && window.location.search) ? window.location.search : '';
+        const rawHash = (typeof window !== 'undefined' && window.location && window.location.hash) ? window.location.hash : '';
+        const fullQuery = rawSearch + (rawHash.startsWith('#') ? '&' + rawHash.slice(1) : '');
+
+        if (fullQuery.includes('error=') || fullQuery.includes('error_description=') || fullQuery.includes('error_code=')) {
+          const params = new URLSearchParams(rawSearch || (rawHash.includes('?') ? rawHash.split('?')[1] : rawHash.replace(/^#/, '')));
+          const errCode = params.get('error') || params.get('error_code') || (fullQuery.match(/error=([^&]+)/) || [])[1] || 'auth_error';
+          const errDesc = params.get('error_description') || params.get('error_subtype') || '';
+
+          // 1. Nettoyer les drapeaux d'attente
+          try { sessionStorage.removeItem('pino_auth_redirect_pending'); } catch(e){}
+
+          // 2. Nettoyer l'URL sans recharger la page
+          try {
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState(null, document.title, cleanUrl);
+          } catch(e){}
+
+          // 3. Masquer tout toast de chargement résiduel
+          if (typeof window.dismissNotificationToast === 'function') {
+            window.dismissNotificationToast();
+          }
+
+          // 4. Afficher un message propre et convivial
+          let friendlyMessage = "L'authentification a été interrompue. Vous pouvez vous connecter par e-mail ci-dessous.";
+          if (errCode === 'access_denied' || errCode === 'user_cancelled') {
+            friendlyMessage = "Connexion annulée par l'utilisateur. Vous pouvez réessayer ou vous connecter par e-mail.";
+          } else if (errCode === 'redirect_uri_mismatch') {
+            friendlyMessage = "Configuration OAuth en cours de synchronisation. Connectez-vous directement par e-mail ci-dessous.";
+          } else if (errDesc) {
+            friendlyMessage = `Authentification : ${decodeURIComponent(errDesc.replace(/\+/g, ' '))}`;
+          }
+
+          if (typeof window.showNotificationToast === 'function') {
+            window.showNotificationToast(friendlyMessage, 'warning', 5000);
+          }
+
+          // 5. Basculer vers l'onglet login et donner le focus
+          if (typeof window.switchAuthTab === 'function') {
+            window.switchAuthTab('login');
+          }
+          const loginInp = document.getElementById('login-email');
+          if (loginInp) loginInp.focus();
+        }
+      } catch(e) {
+        console.warn('[pino-auth] Note interception callback:', e);
+      }
+
+      // 0b. Détection du retour direct Google OAuth OpenID (#id_token=...)
       if (typeof window !== 'undefined' && window.location && window.location.hash) {
         const h = window.location.hash;
         if (h.includes('id_token=')) {
@@ -10268,23 +10318,33 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     })();
 
     // Toast notification utility
-    window.showNotificationToast = (message, type = 'info') => {
+    window.dismissNotificationToast = () => {
+      const existing = document.getElementById('app-notification-toast');
+      if (existing) {
+        existing.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => { try { existing.remove(); } catch(e){} }, 250);
+      }
+    };
+
+    window.showNotificationToast = (message, type = 'info', duration = 4000) => {
       const existing = document.getElementById('app-notification-toast');
       if (existing) existing.remove();
 
       const toast = document.createElement('div');
       toast.id = 'app-notification-toast';
-      const bgColor = type === 'success' ? 'bg-emerald-800' : (type === 'error' ? 'bg-red-800' : 'bg-slate-900');
-      toast.className = `fixed bottom-24 right-4 sm:right-6 z-[60] max-w-sm ${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-white/20 text-xs sm:text-sm font-semibold flex items-center gap-3`;
+      const bgColor = type === 'success' ? 'bg-emerald-800' : (type === 'error' ? 'bg-red-800' : (type === 'warning' ? 'bg-amber-800' : 'bg-slate-900'));
+      toast.className = `fixed bottom-24 right-4 sm:right-6 z-[60] max-w-sm ${bgColor} text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-white/20 text-xs sm:text-sm font-semibold flex items-center gap-3 transition-all duration-300`;
       toast.innerHTML = `<span>${message}</span> <button onclick="this.parentElement.remove()" class="text-white/60 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button>`;
       document.body.appendChild(toast);
-      setTimeout(() => {
-        if (toast && toast.parentElement) {
-          toast.classList.remove('animate-bounce');
-          toast.classList.add('opacity-0', 'translate-y-2');
-          setTimeout(() => toast.remove(), 400);
-        }
-      }, 4000);
+      if (duration > 0) {
+        setTimeout(() => {
+          if (toast && toast.parentElement) {
+            toast.classList.remove('animate-bounce');
+            toast.classList.add('opacity-0', 'translate-y-2');
+            setTimeout(() => { try { toast.remove(); } catch(e){} }, 350);
+          }
+        }, duration);
+      }
     };
 
     // Record session — localStorage + Supabase audit_logs

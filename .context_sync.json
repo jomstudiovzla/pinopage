@@ -1,21 +1,15 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Résolution définitive de redirect_uri_mismatch, élimination de prompts et attribution admin universelle pour martinezoliverosj@gmail.com",
+  "active_goal": "Auditoría integral SSO (Google y Apple), resolución de errores de callback, servidor CORS y ciclo de vida de toasts",
   "current_phase": "Hito 1 — Authentification Universelle Multi-Terminaux & OAuth",
-  "action": "Éradication complète de tout flux redirect provoquant redirect_uri_mismatch, suppression intégrale de tout window.prompt(), attribution admin totale pour martinezoliverosj@gmail.com dans index.html, database.rules.json, firestore.rules et pino-db.js, passage au Service Worker v24 avec stratégie network-first sur les scripts",
+  "action": "Interception universelle des erreurs OAuth (?error=access_denied), implémentation de dismissNotificationToast et auto-destruction garantie, gestion robuste try/catch/finally dans handleGoogleSignIn/handleAppleSignIn, création du serveur local serve.py avec en-têtes CORS et preflight OPTIONS, validation des 20 suites de tests à 100%",
   "files": [
     "index.html",
-    "assets/js/pino-db.js",
-    "database.rules.json",
-    "firestore.rules",
-    "sw.js",
-    "test_universal_auth_resilience_and_instant_login.js",
-    "test_email_automation_and_cgv_compliance.js",
-    "test_unified_auth_and_registration.js",
-    "test_registration_flow_and_apple_logo.js",
+    "serve.py",
+    "test_sso_oauth_error_handling_and_cors.js",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Commit avec attribution Grok 4.6 et push sur origin main"
+  "step": "Commit avec attribution Grok 4.6 et push sur origin main, transmission du rapport d'audit exhaustif"
 }

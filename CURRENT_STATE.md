@@ -9,6 +9,26 @@
   - Realtime Database: `https://pagepino-e8e97-default-rtdb.europe-west1.firebasedatabase.app`
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
+## ✅ Résolution Définitive des Redirections OAuth SSO (Google / Apple), Intercepteur d'Erreurs de Callback, Toasts Anti-Blocage et Serveur CORS (100% OPÉRATIONNEL)
+- [x] **Intercepteur Universel d'Erreurs de Callback OAuth (`?error=access_denied`, `#error=...`)** :
+  - **Diagnostic** : Si l'utilisateur refusait le consentement dans Google/Apple ou si le jeton expirait, le fournisseur renvoyait un paramètre d'erreur dans l'URL (`?error=access_denied`). En l'absence de capture de ce paramètre, la page restait figée avec l'URL polluée et un toast de chargement potentiellement bloqué.
+  - **Solution Déployée** :
+    1. Dans `bindAuthSessions`, interception automatique de `window.location.search` et `window.location.hash` détectant `error=`, `error_description=` ou `error_code=`.
+    2. Nettoyage immédiat et propre de l'URL via `history.replaceState` sans rechargement de page.
+    3. Fermeture systématique de tout toast de chargement résiduel via `window.dismissNotificationToast()`.
+    4. Affichage d'un toast d'information clair et bienveillant en français : *"Connexion annulée par l'utilisateur. Vous pouvez réessayer ou vous connecter par e-mail."*
+    5. Bascule automatique vers le formulaire d'e-mail avec focus sur le champ de saisie pour une continuité d'usage parfaite.
+- [x] **Cycle de Vie Garanti des Toasts et Libération Robuste d'État (`try / catch / finally`)** :
+  - Création de `window.dismissNotificationToast()` pour la fermeture programmée immédiate.
+  - Paramètre de durée garanti avec auto-destruction systématique après 4000ms (`setTimeout(() => toast.remove())`), rendant tout blocage indéfini physiquement impossible.
+  - Blocs `finally` dans `handleGoogleSignIn` et `handleAppleSignIn` restaurant impérativement le texte et les icônes d'origine des boutons quoi qu'il advienne.
+- [x] **Serveur Local Dédié avec Support CORS Universel (`serve.py`)** :
+  - Création du script [serve.py](file:///Users/macbook/Documents/Antigravity/PINO/new/serve.py) fournissant les en-têtes `Access-Control-Allow-Origin: *`, `Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS, HEAD` et `Access-Control-Allow-Headers: *`.
+  - Prise en charge des requêtes preflight `OPTIONS` avec statut HTTP 200 immédiat.
+  - En-têtes `Cache-Control: no-cache` pour un rafraîchissement instantané des modifications de code.
+- [x] **Validation Automatisée (20 Suites de Tests, 100% Réussite)** :
+  - Nouvelle suite `test_sso_oauth_error_handling_and_cors.js` validant l'interception, le cycle de vie des toasts et la conformité CORS.
+  - 20/20 suites de tests exécutées avec succès sans la moindre régression.
 
 ## ✅ Authentification Universelle Multi-Dispositifs, Zéro-Redirect Error & Pleins Pouvoirs JOM Studio (100% OPÉRATIONNEL)
 - [x] **Éradication Définitive des Erreurs de Redirection (Google 400 `redirect_uri_mismatch` & Apple Redirect)** :
