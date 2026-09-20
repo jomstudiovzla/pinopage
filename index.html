@@ -17,7 +17,9 @@
   <meta property="og:type" content="website" />
   <meta property="og:image" content="assets/logo/Logo completo.png" />
   
-  <!-- PWA Support -->
+  <!-- Favicon & PWA Support -->
+  <link rel="icon" type="image/png" href="assets/logo/Logo pino.png" />
+  <link rel="shortcut icon" href="assets/logo/Logo pino.png" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#2d6a4f" />
   
@@ -282,6 +284,41 @@
           .catch(() => {});
       }
     })();
+
+    // ── STUBS IMMÉDIATS DANS LE HEAD (RÉSOLUTION 0MS TOUT REFERENCEERROR) ──
+    window.handleAuthNavClick = window.handleAuthNavClick || function() {
+      const cur = (function() { try { return JSON.parse(localStorage.getItem('pino_current_user')); } catch(e){ return null; } })();
+      if (cur && cur.email) {
+        if (cur.role === 'admin') {
+          const admModal = document.getElementById('modal-window-admin');
+          if (admModal && typeof admModal.showModal === 'function') admModal.showModal();
+          return;
+        } else {
+          const cliModal = document.getElementById('modal-window-client');
+          if (cliModal && typeof cliModal.showModal === 'function') cliModal.showModal();
+          return;
+        }
+      }
+      const modal = document.getElementById('modal-window-auth');
+      if (modal) {
+        if (typeof modal.showModal === 'function') modal.showModal();
+        else modal.setAttribute('open', 'true');
+      }
+    };
+    window.openWindowModal = window.openWindowModal || function(id) {
+      const modal = document.getElementById('modal-window-' + id);
+      if (modal) {
+        if (typeof modal.showModal === 'function') modal.showModal();
+        else modal.setAttribute('open', 'true');
+      }
+    };
+
+    // ── FORÇAGE DE MISE À JOUR IMMÉDIATE DU SERVICE WORKER ET PURGE CACHE ──
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(r => r.update().catch(() => {}));
+      }).catch(() => {});
+    }
   </script>
 </head>
 <body class="bg-brand-light text-brand-charcoal font-sans antialiased overflow-x-hidden">
