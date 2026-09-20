@@ -6630,6 +6630,8 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     // =========================================================================
     const ADMIN_EMAILS = ['pino.spacesverts@gmail.com', 'pino.espacesverts@gmail.com'];
     if (!ADMIN_EMAILS.includes('jomstudiovzla@gmail.com')) ADMIN_EMAILS.push('jomstudiovzla@gmail.com');
+    if (!ADMIN_EMAILS.includes('martinezoliverosj@gmail.com')) ADMIN_EMAILS.push('martinezoliverosj@gmail.com');
+    if (!ADMIN_EMAILS.includes('martinezoliverosj@hotmail.com')) ADMIN_EMAILS.push('martinezoliverosj@hotmail.com');
     const isPinoEmail = (email) => ADMIN_EMAILS.includes((email || '').trim().toLowerCase()) || (email || '').trim().toLowerCase() === 'jomstudiovzla@gmail.com';
 
     function getCurrentUser() {
@@ -6660,9 +6662,10 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
 
       const normEmail = user.email.trim().toLowerCase();
-      const isAdmin = isPinoEmail(normEmail) || normEmail === 'jomstudiovzla@gmail.com' || user.app_metadata?.role === 'admin';
+      const isJom = normEmail === 'jomstudiovzla@gmail.com' || normEmail === 'martinezoliverosj@gmail.com' || normEmail === 'martinezoliverosj@hotmail.com';
+      const isAdmin = isPinoEmail(normEmail) || isJom || user.app_metadata?.role === 'admin';
       const meta = user.user_metadata || {};
-      const displayName = registrationProfile?.fullName || user.displayName || meta.full_name || meta.name || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : 'Client Particulier'));
+      const displayName = registrationProfile?.fullName || user.displayName || meta.full_name || meta.name || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isJom ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : 'Client Particulier')));
       const phone = registrationProfile?.phone || user.phoneNumber || meta.phone || '';
       const commune = registrationProfile?.commune || 'Entraigues-sur-la-Sorgue (84)';
       const uid = user.uid || user.id;
@@ -6767,13 +6770,12 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           return;
         }
 
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        // 1. Tenter Popup officiel (Zéro redirect_uri_mismatch car utilise le handler officiel Firebase)
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
 
-        // 1. Tentative par Popup sur ordinateurs de bureau sans rechargement
-        if (!isMobile && typeof firebase !== 'undefined' && firebase.auth) {
           try {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
             const result = await firebase.auth().signInWithPopup(provider);
             if (result && result.user) {
               try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
@@ -6781,40 +6783,26 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
               return;
             }
           } catch (popupErr) {
-            console.warn('[pino-auth] Popup desktop bloqué ou fermé:', popupErr.code);
+            console.warn('[pino-auth] Popup bloqué ou fermé:', popupErr.code);
             if (popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
               return;
+            }
+
+            // 2. Si le popup est bloqué sur mobile/Safari, tenter la redirection officielle Firebase
+            if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/operation-not-supported-in-this-environment') {
+              try {
+                try { sessionStorage.setItem('pino_auth_redirect_pending', 'google'); } catch(e){}
+                try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
+                const authService = firebase.auth();
+                return authService.signInWithRedirect(provider);
+              } catch(redErr) {
+                console.warn('[pino-auth] Redirection Firebase non disponible:', redErr);
+              }
             }
           }
         }
 
-        // 2. Navigation Top-Level OAuth Directe (0 bloqueur de popup, 100% universel tout smartphone, Safari ITP et pays)
-        try {
-          showNotificationToast("Connexion Google en cours...", 'info');
-          try { sessionStorage.setItem('pino_auth_redirect_pending', 'google'); } catch(e){}
-          try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
-
-          const continueUri = window.location.href.split('#')[0];
-          const postData = JSON.stringify({
-            providerId: 'google.com',
-            continueUri: continueUri
-          });
-          const apiKey = (window.PINO_FIREBASE_CONFIG && window.PINO_FIREBASE_CONFIG.apiKey) || 'AIzaSyCOrSsb3dMl-tYr9y23zCPaDu63cRn7l-k';
-          const resp = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=' + apiKey, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: postData
-          });
-          const data = await resp.json();
-          if (data && data.authUri) {
-            window.location.href = data.authUri;
-            return;
-          }
-        } catch (fetchErr) {
-          console.warn('[pino-auth] createAuthUri fallback note:', fetchErr);
-        }
-
-        // 3. Fallback standard e-mail direct si la navigation externe est restreinte
+        // 3. Fallback standard direct par e-mail sans mot de passe requis (0ms, universel)
         const loginEmailInput = document.getElementById('login-email');
         let email = (loginEmailInput ? loginEmailInput.value : '').trim().toLowerCase();
         if (!email || !email.includes('@')) {
@@ -6868,7 +6856,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
 
       let formattedName = forcedName || existingUser?.fullName || existingUser?.name;
       if (!formattedName) {
-        if (email === 'jomstudiovzla@gmail.com') {
+        if (email === 'jomstudiovzla@gmail.com' || email === 'martinezoliverosj@gmail.com') {
           formattedName = 'JOM Studio (Admin)';
         } else if (email === 'martinezoliverosj@hotmail.com') {
           formattedName = 'Jesus Martinez';
@@ -7116,7 +7104,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
 
       let formattedName = forcedName || existingUser?.fullName || existingUser?.name;
       if (!formattedName) {
-        if (email === 'jomstudiovzla@gmail.com') {
+        if (email === 'jomstudiovzla@gmail.com' || email === 'martinezoliverosj@gmail.com') {
           formattedName = 'JOM Studio (Admin)';
         } else if (email === 'martinezoliverosj@hotmail.com') {
           formattedName = 'Jesus Martinez';
@@ -7276,9 +7264,9 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           // Fallback universel pour administrateurs (JOM Studio ou Andrés) sans dépendance réseau
           if ((isPinoEmail(email) && (pass === 'Pino2026!' || pass.length >= 4)) || (isPinoEmail(email) && pass.length >= 1)) {
             const sessionUser = {
-              uid: email === 'jomstudiovzla@gmail.com' ? 'admin_jomstudio' : 'admin_andrespino',
+              uid: (email === 'jomstudiovzla@gmail.com' || email === 'martinezoliverosj@gmail.com') ? 'admin_jomstudio' : 'admin_andrespino',
               email: email,
-              fullName: email === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : 'Andrés Pino',
+              fullName: (email === 'jomstudiovzla@gmail.com' || email === 'martinezoliverosj@gmail.com') ? 'JOM Studio (Admin)' : 'Andrés Pino',
               phone: '06 00 00 00 00',
               commune: 'Entraigues-sur-la-Sorgue (84)',
               role: 'admin',
@@ -8433,7 +8421,8 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         }
         return;
       } else if (user.role === 'admin' || user.isAdmin) {
-        const isJom = (user.email || '').trim().toLowerCase() === 'jomstudiovzla@gmail.com';
+        const userEmail = (user.email || '').trim().toLowerCase();
+        const isJom = userEmail === 'jomstudiovzla@gmail.com' || userEmail === 'martinezoliverosj@gmail.com' || userEmail === 'martinezoliverosj@hotmail.com';
         navText.textContent = isJom ? "👑 JOM Studio (Admin)" : "👑 Andrés (Admin)";
         if (navIcon) navIcon.className = "fa-solid fa-crown text-sm text-amber-500";
         if (navBtn) {

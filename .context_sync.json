@@ -1,14 +1,14 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Résolution définitive des blocages de redirection et d'authentification universelle (Google, Apple, E-mail)",
-  "current_phase": "Hito 1 — Authentification Universelle Multi-Terminaux & Top-Level OAuth",
-  "action": "Déploiement du flux direct Top-Level OAuth Google via createAuthUri (contournement 100% efficace d'ITP Safari et bloqueurs mobiles), analyseur direct OpenID id_token hash, flux Apple direct avec invite fluide sans mot de passe ni échec redirect, et fallback admin inconditionnel dans handleLoginSubmit",
+  "active_goal": "Résolution définitive de redirect_uri_mismatch et attribution admin pour martinezoliverosj@gmail.com",
+  "current_phase": "Hito 1 — Authentification Universelle Multi-Terminaux & OAuth",
+  "action": "Suppression définitive de createAuthUri continueUri personnalisé (cause de Error 400 redirect_uri_mismatch), rétablissement du flux officiel Firebase popup/redirect avec repli immédiat, reconnaissance admin automatique de martinezoliverosj@gmail.com comme JOM Studio (Admin) et ouverture directe du CRM",
   "files": [
     "index.html",
     "test_universal_auth_resilience_and_instant_login.js",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Commit avec attribution Grok 4.6 et déploiement sur origin main"
+  "step": "Commit avec attribution Grok 4.6 et push sur origin main"
 }
