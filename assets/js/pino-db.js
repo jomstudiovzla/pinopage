@@ -1055,7 +1055,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       email: normEmail,
       fullName: String(data.fullName).trim(),
       phone: data.phone ? String(data.phone).trim() : '',
-      commune: data.commune ? String(data.commune).trim() : 'Bordeaux Métropole (33)',
+      commune: data.commune ? String(data.commune).trim() : 'Entraigues-sur-la-Sorgue (84)',
       role: 'client',
       isAdmin: false,
       status: 'pending_activation',
@@ -1136,7 +1136,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     try {
       const emailBody = `Bonjour ${clientProfile.fullName},
 
-Andrés Pino (fondateur de Pino Espaces Verts à Bordeaux) a créé votre Espace Client personnel et sécurisé.
+Andrés Pino (fondateur de Pino Espaces Verts dans le Vaucluse) a créé votre Espace Client personnel et sécurisé.
 
 Grâce à cet espace, vous pouvez en 1 clic :
 • Consulter et valider vos propositions de devis chiffrées en direct
@@ -1153,7 +1153,7 @@ Nous restons à votre entière disposition pour tout renseignement.
 
 Bien cordialement,
 Andrés Pino — Pino Espaces Verts
-Artisan Paysagiste • Bordeaux Métropole & Gironde
+Artisan Paysagiste • Entraigues-sur-la-Sorgue & Vaucluse (84)
 Tél / WhatsApp : +33 6 51 59 40 34
 Site web : https://jomstudiovzla.github.io/pinopage/`;
 
@@ -2183,7 +2183,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
             dateStr,
             l.name || 'Client',
             contact,
-            l.commune || 'Gironde',
+            l.commune || 'Vaucluse (84)',
             l.service_type || l.service || '',
             budget > 0 ? `${budget.toFixed(0)} €` : '—',
             net > 0 ? `${net.toFixed(0)} €` : '—',
@@ -2429,7 +2429,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     const payload = {
       platform:    data.platform || 'leboncoin', // leboncoin, facebook, nextdoor, yoojo, needhelp, allovoisins
       name:        data.name     || 'Prospect Anonyme',
-      commune:     data.commune  || 'Bordeaux',
+      commune:     data.commune  || 'Entraigues-sur-la-Sorgue (84)',
       service:     data.service  || 'Entretien jardin',
       phone:       data.phone    || '',
       email:       data.email    || '',
@@ -2492,10 +2492,10 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           id: 'plt_seed_1',
           platform: 'leboncoin',
           name: 'Marc Delmas',
-          commune: '33700 Mérignac',
+          commune: '84000 Avignon',
           service: 'Taille de haie de lauriers (40m)',
           phone: '06 12 45 78 90',
-          email: 'marc.delmas33@gmail.com',
+          email: 'marc.delmas84@gmail.com',
           url: 'https://www.leboncoin.fr',
           budget: 350,
           notes: 'Recherche artisan déclaré SAP pour déduction 50% immédiate.',
@@ -2506,7 +2506,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           id: 'plt_seed_2',
           platform: 'allovoisins',
           name: 'Sophie V.',
-          commune: '33000 Bordeaux Caudéran',
+          commune: '84200 Carpentras',
           service: 'Tonte pelouse 300m² + désherbage',
           phone: '06 98 76 54 32',
           email: '',
@@ -2520,13 +2520,13 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           id: 'plt_seed_3',
           platform: 'nextdoor',
           name: 'Laurent B.',
-          commune: '33600 Pessac',
+          commune: '84700 Sorgues',
           service: 'Débroussaillage grand terrain en friche',
           phone: '',
           email: '',
           url: 'https://nextdoor.fr',
           budget: 500,
-          notes: 'Posté sur le groupe de quartier Alouette Pessac.',
+          notes: 'Posté sur le groupe de quartier Sorgues Centre.',
           status: 'en_discussion',
           created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
         },
@@ -2534,10 +2534,10 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           id: 'plt_seed_4',
           platform: 'yoojo',
           name: 'Claire M.',
-          commune: '33400 Talence',
+          commune: '84270 Vedène',
           service: 'Entretien régulier pelouse & massifs',
           phone: '07 65 43 21 09',
-          email: 'claire.talence@laposte.net',
+          email: 'claire.vedene@laposte.net',
           url: 'https://yoojo.fr',
           budget: 240,
           notes: 'Cherche jardinier mensuel avec avance immédiate Unipros.',
@@ -2548,13 +2548,13 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           id: 'plt_seed_5',
           platform: 'facebook',
           name: 'Julien Morel',
-          commune: '33130 Bègles',
+          commune: '84130 Le Pontet',
           service: 'Remise en état jardin de printemps',
           phone: '06 44 33 22 11',
           email: '',
           url: 'https://www.facebook.com/marketplace',
           budget: 300,
-          notes: 'Vu sur le groupe Entraide Bègles / Villenave.',
+          notes: 'Vu sur le groupe Entraide Grand Avignon / Le Pontet.',
           status: 'rdv_pris',
           created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
         },
@@ -2562,13 +2562,13 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           id: 'plt_seed_6',
           platform: 'needhelp',
           name: 'David R.',
-          commune: '33200 Bordeaux',
+          commune: '84320 Entraigues-sur-la-Sorgue',
           service: 'Élagage branches basses chêne',
           phone: '',
           email: '',
           url: 'https://www.needhelp.com',
           budget: 420,
-          notes: 'Demande NeedHelp liée à un achat chez Castorama Mérignac.',
+          notes: 'Demande NeedHelp liée à un achat chez Leroy Merlin Avignon.',
           status: 'a_contacter',
           created_at: new Date(Date.now() - 3600000 * 50).toISOString(),
         }
@@ -2633,7 +2633,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       name: lead.name,
       email: lead.email || '',
       phone: lead.phone || '',
-      commune: lead.commune || 'Bordeaux',
+      commune: lead.commune || 'Entraigues-sur-la-Sorgue (84)',
       service: lead.service || 'Entretien jardin',
       budget: lead.budget || 0,
       surface: '',
@@ -2891,7 +2891,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         const anonymizedPayload = {
           fullName: "Client Anonymisé (RGPD)",
           phone: "00 00 00 00 00",
-          commune: "33000 Bordeaux (Anonymisé)",
+          commune: "84320 Entraigues-sur-la-Sorgue (Anonymisé)",
           status: "anonymise",
           rgpd_anonymized_at: timestamp,
           rgpd_erasure_requested: true
@@ -2930,7 +2930,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
             ...u,
             fullName: "Client Anonymisé (RGPD)",
             phone: "00 00 00 00 00",
-            commune: "33000 Bordeaux (Anonymisé)",
+            commune: "84320 Entraigues-sur-la-Sorgue (Anonymisé)",
             status: "anonymise"
           };
         }

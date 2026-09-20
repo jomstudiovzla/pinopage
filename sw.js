@@ -16,7 +16,9 @@ const ASSETS = [
   './assets/images/quiero_que_me_hagas_una_202605171317.jpeg',
   './assets/js/pino-db.js',
   './assets/js/firebase-config.js',
-  './assets/js/chatbot_knowledge_base.js'
+  './assets/js/chatbot_knowledge_base.js',
+  './favicon.ico',
+  './apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (e) => {

@@ -18,8 +18,10 @@
   <meta property="og:image" content="assets/logo/Logo completo.png" />
   
   <!-- Favicon & PWA Support -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="icon" type="image/png" href="assets/logo/Logo pino.png" />
-  <link rel="shortcut icon" href="assets/logo/Logo pino.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="shortcut icon" href="favicon.ico" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#2d6a4f" />
   
@@ -306,7 +308,22 @@
       }
     };
     window.openWindowModal = window.openWindowModal || function(id) {
-      const modal = document.getElementById('modal-window-' + id);
+      const aliasMap = {
+        'connexion': 'modal-window-auth',
+        'auth': 'modal-window-auth',
+        'login': 'modal-window-auth',
+        'espace': 'modal-window-client',
+        'client': 'modal-window-client',
+        'admin': 'modal-window-admin',
+        'devis': 'modal-window-devis',
+        'services': 'modal-window-services',
+        'b2b': 'modal-window-b2b',
+        'realisations': 'modal-window-realisations',
+        'unipros': 'modal-window-unipros',
+        'exemple-devis': 'modal-exemple-devis'
+      };
+      const targetId = aliasMap[id] || ('modal-window-' + id);
+      const modal = document.getElementById(targetId) || document.getElementById('modal-' + id);
       if (modal) {
         if (typeof modal.showModal === 'function') modal.showModal();
         else modal.setAttribute('open', 'true');
@@ -2052,7 +2069,7 @@
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-1">Commune / Secteur *</label>
-          <input type="text" id="plt-new-commune" required placeholder="Ex: Mérignac, Pessac..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-emerald-600 focus:outline-hidden">
+          <input type="text" id="plt-new-commune" required placeholder="Ex: Avignon, Carpentras, Sorgues..." class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-slate-800 focus:ring-2 focus:ring-emerald-600 focus:outline-hidden">
         </div>
       </div>
       <div>
@@ -7852,7 +7869,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
             name: 'Jean-Christophe Bernard',
             phone: '06 14 22 90 18',
             email: 'jc.bernard@gmail.com',
-            commune: '33700 Mérignac',
+            commune: '84000 Avignon',
             service: 'Taille de haie & Tonte',
             surface: '450 m²',
             budget: '400',
@@ -7880,7 +7897,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
             name: 'Claire Villeneuve',
             phone: '06 77 41 09 88',
             email: 'claire.v@orange.fr',
-            commune: '33400 Talence',
+            commune: '84200 Carpentras',
             service: 'Remise en état',
             surface: '250 m²',
             budget: '350',
@@ -7894,7 +7911,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
             name: 'Alain Rougier',
             phone: '06 31 09 87 65',
             email: 'alain.rougier@bbox.fr',
-            commune: '33130 Bègles',
+            commune: '84700 Sorgues',
             service: 'Débroussaillage',
             surface: '600 m²',
             budget: '600',
@@ -8460,6 +8477,32 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       }
       const badge = document.getElementById('nav-auth-notif-badge');
       if (badge) badge.remove();
+    };
+
+    window.copyClientCouponCode = () => {
+      const codeEl = document.getElementById('client-promo-code');
+      const code = (codeEl ? codeEl.textContent : '').trim();
+      if (!code || code === '—' || code === '-') {
+        if (typeof showNotificationToast === 'function') {
+          showNotificationToast("Aucun code promo actif à copier.", 'info');
+        }
+        return;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(() => {
+          if (typeof showNotificationToast === 'function') {
+            showNotificationToast('Code promo ' + code + ' copié dans le presse-papiers !', 'success');
+          }
+        }).catch(() => {
+          if (typeof showNotificationToast === 'function') {
+            showNotificationToast('Code promo : ' + code, 'info');
+          }
+        });
+      } else {
+        if (typeof showNotificationToast === 'function') {
+          showNotificationToast('Code promo : ' + code, 'info');
+        }
+      }
     };
 
     // Logout
@@ -9616,7 +9659,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           try {
             new Notification(title || 'Pino Espaces Verts', {
               body: body || 'Nouvelle interaction client reçue !',
-              icon: 'assets/img/pino-icon-192.png'
+              icon: 'assets/logo/Logo pino.png'
             });
           } catch (e) {}
         }
@@ -10889,7 +10932,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
             client_name: 'Mme. Valérie Mercier',
             client_email: 'valerie.mercier@orange.fr',
             client_phone: '06 12 45 78 90',
-            client_commune: 'Mérignac',
+            client_commune: 'Avignon (84)',
             service_type: 'Taille haies',
             description: 'Taille de haie de lauriers (40m linéaires) + évacuation des déchets verts.',
             date_start: '2026-09-10',
