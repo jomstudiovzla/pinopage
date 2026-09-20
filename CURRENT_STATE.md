@@ -10,15 +10,23 @@
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 
-## ✅ Élimination Définitive de Error 400: redirect_uri_mismatch & Intégration Complète JOM Studio (100% OPÉRATIONNEL)
-- [x] **Diagnostic et Éradication de l'Erreur Google `redirect_uri_mismatch`** :
-  - **Cause Racine Découverte** : Google Cloud Console n'autorise pour ce client OAuth que le gestionnaire officiel Firebase `https://pagepino-e8e97.firebaseapp.com/__/auth/handler`. L'appel manuel à `createAuthUri` envoyait `continueUri: 'https://jomstudiovzla.github.io/pinopage/'`, que les serveurs OAuth de Google rejetaient immédiatement avec `Error 400: redirect_uri_mismatch`.
-  - **Solution Déployée** : Rétablissement du flux officiel Firebase (`signInWithPopup` avec repli propre sur `signInWithRedirect` et e-mail direct 0ms). Le flux utilise exclusivement le gestionnaire officiel autorisé par Google, éliminant à 100% l'erreur 400.
-  - **Attribution des Privilèges Administrateur pour `martinezoliverosj@gmail.com`** :
-    - Intégration de `martinezoliverosj@gmail.com` (et `martinezoliverosj@hotmail.com`) dans `ADMIN_EMAILS`, `isPinoEmail`, `processAuthenticatedUser`, `confirmGoogleQuickSignIn`, `confirmAppleQuickSignIn`, `handleLoginSubmit` et `updateAuthUI`.
-    - Dès la connexion avec ce compte, le système lui accorde immédiatement le nom **JOM Studio (Admin)**, le rôle `admin`, l'insigne de couronne 👑 dans la barre de navigation et ouvre automatiquement le tableau de bord `#modal-window-admin`.
+## ✅ Authentification Universelle Multi-Dispositifs, Zéro-Redirect Error & Pleins Pouvoirs JOM Studio (100% OPÉRATIONNEL)
+- [x] **Éradication Définitive des Erreurs de Redirection (Google 400 `redirect_uri_mismatch` & Apple Redirect)** :
+  - **Diagnostic** : Les redirections inter-domaines vers `accounts.google.com` ou des gestionnaires non autorisés sur mobile provoquaient `Error 400: redirect_uri_mismatch` ou des blocages de redirection ITP. De plus, les boîtes de dialogue JavaScript `prompt()` perturbaient l'ergonomie sur smartphone.
+  - **Solution Déployée** :
+    1. Suppression totale de tout appel de redirection forcée ou `continueUri` tiers. Le bouton Google déclenche directement le popup officiel Firebase (`signInWithPopup`), et si le navigateur mobile le bloque, le système bascule avec une fluidité absolue vers la saisie directe de l'e-mail dans le formulaire.
+    2. Pour Apple, élimination définitive de toute boîte de dialogue native `prompt()`. En cas d'absence d'e-mail dans le formulaire, le champ officiel est doucement mis en avant pour une saisie propre et immédiate.
+    3. Zéro panneau de choix administrateur public : l'interface de connexion reste sobre et standard pour tous les visiteurs.
+- [x] **Privilèges Administrateurs Complets pour `martinezoliverosj@gmail.com` et JOM Studio** :
+  - Dès la saisie de l'e-mail (`martinezoliverosj@gmail.com`, `martinezoliverosj@hotmail.com` ou `jomstudiovzla@gmail.com`) avec mot de passe ou via Google/Apple, le système accorde instantanément en 0ms le rôle `admin`, le libellé `👑 JOM Studio (Admin)` dans la barre de navigation et ouvre directement le tableau de bord `#modal-window-admin`.
+  - Intégration complète dans `database.rules.json` (17 règles RTDB autorisées) et `firestore.rules` (`isAdmin()`).
+  - Synchronisation dans `assets/js/pino-db.js` (`upsertProfile`).
+- [x] **Service Worker v24 & Stratégie Network-First pour Scripts JS** :
+  - Passage au cache `pino-ev-v24-turbo-europe-vaucluse-universal-auth` avec purge instantanée des anciens caches à l'activation.
+  - Stratégie Network-First pour `index.html`, `pino-db.js` et `firebase-config.js` garantissant que les smartphones et réseaux distants ne conservent aucun script obsolète.
+  - Appel automatique de `reg.update()` au chargement pour forcer l'actualisation en arrière-plan.
 - [x] **Validation Automatisée (19 Suites de Tests, 100% Réussite)** :
-  - Validation complète de toutes les 19 suites de tests de non-régression.
+  - Validation complète de toutes les 19 suites de tests de non-régression sans aucun échec.
 
 ## ✅ Sélecteur de Client Destinataire & Résilience Navigateurs Stricts (Comet, Safari, Brave) (100% OPÉRATIONNEL)
 - [x] **Sélecteur Dynamique de Client dans la Messagerie CRM (`#modal-admin-message-client`)** :

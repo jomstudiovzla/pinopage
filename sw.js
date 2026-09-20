@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v23-turbo-europe-vaucluse-email-automation';
+const CACHE_NAME = 'pino-ev-v24-turbo-europe-vaucluse-universal-auth';
 const ASSETS = [
   './manifest.json',
   './assets/logo/Logo pino.png',
@@ -37,8 +37,8 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Network-first para navegación / index.html para ver actualizaciones inmediatamente
-  if (e.request.mode === 'navigate' || e.request.url.includes('index.html')) {
+  // Network-first pour navigation HTML et scripts JS afin d'assurer les mises à jour immédiates sur mobile
+  if (e.request.mode === 'navigate' || e.request.url.includes('index.html') || e.request.url.includes('.js')) {
     e.respondWith(
       fetch(e.request)
         .then((response) => {
@@ -51,7 +51,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Cache-first con fallback a red para assets estáticos
+  // Cache-first avec repli réseau pour assets graphiques lourds (images, polices)
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
       return cachedResponse || fetch(e.request);

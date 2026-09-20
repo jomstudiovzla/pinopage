@@ -1352,16 +1352,19 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     if (!fbUser?.uid) return { ok: false };
 
     const normEmail = (fbUser.email || '').trim().toLowerCase();
+    const isJom = normEmail === 'jomstudiovzla@gmail.com' || normEmail === 'martinezoliverosj@gmail.com' || normEmail === 'martinezoliverosj@hotmail.com';
     const isAdmin = normEmail === 'pino.spacesverts@gmail.com' ||
                     normEmail === 'pino.espacesverts@gmail.com' ||
-                    normEmail === 'jomstudiovzla@gmail.com';
+                    normEmail === 'jomstudiovzla@gmail.com' ||
+                    normEmail === 'martinezoliverosj@gmail.com' ||
+                    normEmail === 'martinezoliverosj@hotmail.com';
     const sanitizedEmail = normEmail ? normEmail.replace(/[.#$[\]]/g, '_') : null;
 
     const payload = {
       id:            fbUser.uid,
       uid:           fbUser.uid,
       email:         normEmail,
-      full_name:     extra.fullName || fbUser.displayName || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : 'Client Particulier')),
+      full_name:     extra.fullName || fbUser.displayName || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isJom ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : 'Client Particulier'))),
       phone:         extra.phone    || fbUser.phoneNumber || null,
       commune:       extra.commune  || 'Bordeaux',
       role:          isAdmin ? 'admin' : 'client',

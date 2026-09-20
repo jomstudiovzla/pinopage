@@ -55,7 +55,7 @@ console.log('  ✅ PASS: Unification multicanale (Apple, Google, E-mail/Mot de p
 
 // TEST 5 : VERSIONNEMENT DU SERVICE WORKER
 console.log('\n🚀 [TEST 5 : SERVICE WORKER VERSIONNÉ V21]');
-assert(/pino-ev-v(19|20|21|22|23)/.test(swJs), 'sw.js utilise le cache versionné v21 ou supérieur');
+assert(/pino-ev-v(19|20|21|22|23|24)/.test(swJs), 'sw.js utilise le cache versionné v21 ou supérieur');
 console.log('  ✅ PASS: Service Worker versionné prêt pour le déploiement.');
 
 console.log('\n===============================================================');

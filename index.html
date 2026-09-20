@@ -6487,7 +6487,11 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     // ─── SERVICE WORKER REGISTRATION ───
     if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          if (reg && typeof reg.update === 'function') {
+            reg.update().catch(() => {});
+          }
+        }).catch(err => {
           console.log('Service Worker registration failed:', err);
         });
       });
@@ -6770,7 +6774,15 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           return;
         }
 
-        // 1. Tenter Popup officiel (Zéro redirect_uri_mismatch car utilise le handler officiel Firebase)
+        // Si l'utilisateur a déjà renseigné son e-mail dans le formulaire
+        const loginEmailInput = document.getElementById('login-email');
+        const typedEmail = (loginEmailInput ? loginEmailInput.value : '').trim().toLowerCase();
+        if (typedEmail && typedEmail.includes('@')) {
+          await confirmGoogleQuickSignIn(typedEmail);
+          return;
+        }
+
+        // 1. Tenter Popup officiel Firebase (utilise exclusivement le gestionnaire officiel Firebase)
         if (typeof firebase !== 'undefined' && firebase.auth) {
           const provider = new firebase.auth.GoogleAuthProvider();
           provider.setCustomParameters({ prompt: 'select_account' });
@@ -6788,42 +6800,33 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
               return;
             }
 
-            // 2. Si le popup est bloqué sur mobile/Safari, tenter la redirection officielle Firebase
-            if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/operation-not-supported-in-this-environment') {
-              try {
-                try { sessionStorage.setItem('pino_auth_redirect_pending', 'google'); } catch(e){}
-                try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
-                const authService = firebase.auth();
-                return authService.signInWithRedirect(provider);
-              } catch(redErr) {
-                console.warn('[pino-auth] Redirection Firebase non disponible:', redErr);
-              }
+            // Si le popup est bloqué sur mobile/Safari/Comet:
+            // Ne pas rediriger vers une URL externe incompatible (Error 400 redirect_uri_mismatch)
+            // Ne pas afficher de boite de dialogue native disgracieuse
+            // Orienter doucement l'utilisateur vers la saisie directe d'e-mail dans le formulaire
+            if (loginEmailInput) {
+              const last = (localStorage.getItem('pino_last_client_email') || '').trim();
+              if (last && !loginEmailInput.value) loginEmailInput.value = last;
+              loginEmailInput.focus();
+              showNotificationToast("Veuillez renseigner votre adresse e-mail ci-dessous pour vous connecter.", 'info');
+              return;
             }
           }
         }
 
-        // 3. Fallback standard direct par e-mail sans mot de passe requis (0ms, universel)
-        const loginEmailInput = document.getElementById('login-email');
-        let email = (loginEmailInput ? loginEmailInput.value : '').trim().toLowerCase();
-        if (!email || !email.includes('@')) {
+        // 2. Repli doux par saisie directe d'e-mail dans le formulaire
+        if (loginEmailInput) {
           const last = (localStorage.getItem('pino_last_client_email') || '').trim();
-          email = (prompt("Connexion avec Google :\n\nVeuillez saisir votre adresse e-mail Google / Gmail :", last) || '').trim().toLowerCase();
-        }
-        if (email && email.includes('@')) {
-          await confirmGoogleQuickSignIn(email);
-          return;
-        }
-
-        showNotificationToast("Veuillez saisir votre e-mail pour vous connecter.", 'warning');
-        if (quickPanel) {
-          quickPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          if (last && !loginEmailInput.value) loginEmailInput.value = last;
+          loginEmailInput.focus();
+          showNotificationToast("Veuillez renseigner votre adresse e-mail ci-dessous pour vous connecter.", 'info');
         }
       } catch (error) {
         console.error('Google Sign-In Error:', error);
-        if (quickPanel) {
-          quickPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (loginEmailInput) {
+          loginEmailInput.focus();
         }
-        showNotificationToast("Connexion Google temporairement indisponible. Veuillez réessayer.", 'warning');
+        showNotificationToast("Veuillez saisir votre e-mail ci-dessous pour vous connecter.", 'warning');
       } finally {
         if (label) label.textContent = originalText;
       }
@@ -7026,6 +7029,21 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           return;
         }
 
+        // Si l'utilisateur a déjà renseigné son e-mail dans le formulaire
+        const loginEmailInput = document.getElementById('login-email');
+        const typedEmail = (loginEmailInput ? loginEmailInput.value : '').trim().toLowerCase();
+        if (typedEmail && typedEmail.includes('@')) {
+          await confirmAppleQuickSignIn(typedEmail);
+          return;
+        }
+
+        // Vérifier si un compte Apple/client a été mémorisé localement
+        const rememberedEmail = (localStorage.getItem('pino_last_client_email') || '').trim().toLowerCase();
+        if (rememberedEmail && rememberedEmail.includes('@')) {
+          await confirmAppleQuickSignIn(rememberedEmail);
+          return;
+        }
+
         // 1. Tenter silencieusement Apple OAuth si configuré côté Cloud
         if (typeof firebase !== 'undefined' && firebase.auth) {
           try {
@@ -7043,20 +7061,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           }
         }
 
-        // 2. Connexion directe par e-mail Apple / iCloud (0ms, universel tout navigateur/smartphone/pays)
-        const loginEmailInput = document.getElementById('login-email');
-        let email = (loginEmailInput ? loginEmailInput.value : '').trim().toLowerCase();
-
-        if (!email || !email.includes('@')) {
-          const last = (localStorage.getItem('pino_last_client_email') || '').trim();
-          email = (prompt("Connexion Identifiant Apple :\n\nVeuillez saisir votre adresse e-mail Apple / iCloud :", last) || '').trim().toLowerCase();
-        }
-
-        if (email && email.includes('@')) {
-          await confirmAppleQuickSignIn(email);
-          return;
-        }
-
+        // 2. Connexion par e-mail Apple / iCloud sans dialogue natif ni redirection rompue
         showNotificationToast("Pour vous connecter avec votre identifiant Apple, saisissez votre e-mail ci-dessous.", 'info');
         window.switchAuthTab('login');
         if (loginEmailInput) {
@@ -7551,11 +7556,12 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
                 const payload = JSON.parse(jsonPayload);
                 if (payload && payload.email) {
                   const normEmail = payload.email.trim().toLowerCase();
-                  const isAdm = isPinoEmail(normEmail) || normEmail === 'jomstudiovzla@gmail.com';
+                  const isJom = normEmail === 'jomstudiovzla@gmail.com' || normEmail === 'martinezoliverosj@gmail.com' || normEmail === 'martinezoliverosj@hotmail.com';
+                  const isAdm = isPinoEmail(normEmail) || isJom || normEmail === 'jomstudiovzla@gmail.com';
                   const googleUser = {
                     uid: payload.sub || ('google_' + normEmail.replace(/[^a-zA-Z0-9]/g, '')),
                     email: normEmail,
-                    displayName: payload.name || (isAdm ? (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : 'Andrés Pino') : normEmail.split('@')[0]),
+                    displayName: payload.name || (isAdm ? (normEmail === 'jomstudiovzla@gmail.com' || isJom ? 'JOM Studio (Admin)' : 'Andrés Pino') : normEmail.split('@')[0]),
                     photoURL: payload.picture || null,
                     emailVerified: payload.email_verified
                   };

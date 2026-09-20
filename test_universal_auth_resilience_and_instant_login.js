@@ -47,6 +47,28 @@ assert(indexHtml.includes('if (cur && cur.email && !isExplicitLogout)'), 'Sessio
 assert(indexHtml.includes('if (isExplicitLogout) {\n                try {\n                  localStorage.removeItem(\'pino_current_user\');'), 'La session n\'est supprimée que lors d\'une déconnexion volontaire');
 console.log('  ✅ PASS: Session active préservée entre rechargements, rafraîchissements et changements de page.');
 
+// ── 6. ATTRIBUTION AUTOMATIQUE ADMIN POUR martinezoliverosj@gmail.com ──
+console.log('\n👑 [TEST 6 : RECONNAISSANCE ADMIN martinezoliverosj@gmail.com]');
+assert(indexHtml.includes("ADMIN_EMAILS.push('martinezoliverosj@gmail.com')"), 'martinezoliverosj@gmail.com doit être dans ADMIN_EMAILS');
+assert(indexHtml.includes("normEmail === 'martinezoliverosj@gmail.com'"), 'martinezoliverosj@gmail.com doit être reconnu comme admin JOM Studio');
+const dbRules = fs.readFileSync(path.join(__dirname, 'database.rules.json'), 'utf8');
+const fsRules = fs.readFileSync(path.join(__dirname, 'firestore.rules'), 'utf8');
+assert(dbRules.includes("auth.token.email === 'martinezoliverosj@gmail.com'"), 'database.rules.json doit autoriser martinezoliverosj@gmail.com');
+assert(fsRules.includes("request.auth.token.email == 'martinezoliverosj@gmail.com'"), 'firestore.rules doit autoriser martinezoliverosj@gmail.com');
+console.log('  ✅ PASS: martinezoliverosj@gmail.com dispose des pleins pouvoirs administratifs.');
+
+// ── 7. ZÉRO DIALOGUE PROMPT() DISGRACIEUX DANS LE FLUX DE CONNEXION ──
+console.log('\n🚫 [TEST 7 : ZÉRO PROMPT() DANS L\'EXPÉRIENCE UTILISATEUR]');
+assert(!indexHtml.includes('prompt('), 'index.html ne doit contenir aucun appel à window.prompt()');
+console.log('  ✅ PASS: Aucun prompt() natif disgracieux dans l\'interface.');
+
+// ── 8. SERVICE WORKER V24 SCRIPT NETWORK-FIRST ──
+console.log('\n📦 [TEST 8 : SERVICE WORKER V24 & SCRIPT NETWORK-FIRST]');
+const swContent = fs.readFileSync(path.join(__dirname, 'sw.js'), 'utf8');
+assert(swContent.includes('pino-ev-v24'), 'sw.js doit être versionné en v24');
+assert(swContent.includes(".includes('.js')"), 'sw.js doit servir les scripts JS en network-first');
+console.log('  ✅ PASS: Service Worker v24 avec stratégie network-first active.');
+
 console.log('\n===============================================================');
 console.log('🎉 TOUS LES TESTS D\'AUTHENTIFICATION UNIVERSELLE SONT VALIDÉS (100%) !');
 console.log('===============================================================');

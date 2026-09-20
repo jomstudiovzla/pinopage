@@ -5,7 +5,9 @@ service cloud.firestore {
       return request.auth != null && (
         request.auth.token.email == 'pino.spacesverts@gmail.com' ||
         request.auth.token.email == 'pino.espacesverts@gmail.com' ||
-        request.auth.token.email == 'jomstudiovzla@gmail.com'
+        request.auth.token.email == 'jomstudiovzla@gmail.com' ||
+        request.auth.token.email == 'martinezoliverosj@gmail.com' ||
+        request.auth.token.email == 'martinezoliverosj@hotmail.com'
       );
     }
 
