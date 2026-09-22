@@ -50,6 +50,12 @@
       ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
       ".write": "auth != null"
     },
+    "mail_outbox": {
+      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+      "$id": {
+        ".write": "!data.exists() || (auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com'))"
+      }
+    },
     "platform_leads": {
       ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
       "$pltId": {

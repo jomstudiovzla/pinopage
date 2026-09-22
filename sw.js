@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v32-gmail-delivery'; // pino-ev-v31 migration
+const CACHE_NAME = 'pino-ev-v33-andres-gmail'; // pino-ev-v32 migration
 const ASSETS = [
   './index.html',
   './manifest.json',

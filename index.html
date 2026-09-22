@@ -1177,6 +1177,17 @@
 
       <!-- Section Actions Rapides -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="p-5 bg-white rounded-2xl border border-emerald-200 space-y-2">
+          <h5 class="font-bold text-brand-green text-sm flex items-center gap-2">
+            <i class="fa-solid fa-envelope-open-text text-emerald-700"></i> Écrire à Andrés Pino
+          </h5>
+          <p class="text-xs text-slate-600">Votre message arrive dans son portail et dans sa boîte Gmail, comme un e-mail normal.</p>
+          <textarea id="client-write-andres" rows="3" maxlength="2000" placeholder="Bonjour Andrés, je souhaite…" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden"></textarea>
+          <button type="button" onclick="sendClientNoteToAndres()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2 rounded-xl text-xs cursor-pointer">
+            Envoyer le message
+          </button>
+        </div>
+
         <div class="p-5 bg-brand-light rounded-2xl border border-brand-accent/20 space-y-2">
           <h5 class="font-bold text-brand-green text-sm flex items-center gap-2">
             <i class="fa-solid fa-calendar-plus text-emerald-700"></i> Planifier mon prochain passage
@@ -2303,6 +2314,13 @@
           </button>
         </div>
       </div>
+    </div>
+
+    <div id="admin-gmail-strip" class="px-4 sm:px-6 py-2 bg-emerald-50 border-b border-emerald-100 text-[11px] text-emerald-950 flex flex-wrap items-center justify-between gap-2 shrink-0">
+      <span><i class="fa-solid fa-envelope mr-1"></i> Les e-mails du portail partent comme Andrés Pino. Copie : pino.espacesverts@gmail.com et jomstudiovzla@gmail.com.</span>
+      <button type="button" onclick="linkAndresGmail()" class="px-3 py-1.5 rounded-lg bg-white border border-emerald-300 font-bold cursor-pointer">
+        Relier Gmail Andrés Pino
+      </button>
     </div>
 
     <!-- Admin Sub-Navigation Tabs (Wrap so no tabs are cut off on desktop) -->
@@ -5834,11 +5852,11 @@
         if ((emailMatch || phoneMatch) && window.PinoDB && typeof PinoDB.notifyAdminByEmail === 'function') {
           PinoDB.notifyAdminByEmail({
             type: 'chatbot_lead',
+            subject: '[Portail] Contact via le chatbot',
             clientName: 'Prospect Chatbot',
             clientEmail: emailMatch ? emailMatch[0] : '',
             clientPhone: phoneMatch ? phoneMatch[0] : '',
-            service: 'Prise de contact via Assistant Chatbot',
-            notes: questionText
+            message: questionText
           }).catch(() => {});
         }
       } catch(e) {}
@@ -7020,6 +7038,19 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           }
           showNotificationToast(`Bienvenue ${displayName}. Accès administrateur complet.`, 'success');
         }
+        setTimeout(async () => {
+          try {
+            if (typeof window.pinoObtainGmailToken === 'function') {
+              const tok = await window.pinoObtainGmailToken({ preferPino: true });
+              if (tok && window.PinoDB && typeof PinoDB.drainMailOutbox === 'function') {
+                const drained = await PinoDB.drainMailOutbox();
+                if (drained && drained.sent) {
+                  showNotificationToast(drained.sent + ' e-mail(s) du portail envoyés depuis Gmail Andrés Pino.', 'success');
+                }
+              }
+            }
+          } catch (e) {}
+        }, 900);
       } else {
         populateClientPortal(userProfile);
         if (shouldOpen) {
@@ -7057,6 +7088,20 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       }
     };
 
+    window.linkAndresGmail = async function () {
+      const tok = await window.pinoObtainGmailToken({ force: true, preferPino: true });
+      if (!tok) {
+        showNotificationToast('Autorisation Gmail refusée ou incomplète. Choisissez pino.espacesverts@gmail.com.', 'warning');
+        return;
+      }
+      let extra = '';
+      if (window.PinoDB && typeof PinoDB.drainMailOutbox === 'function') {
+        const d = await PinoDB.drainMailOutbox();
+        if (d && d.sent) extra = ' ' + d.sent + ' e-mail(s) en attente expédiés.';
+      }
+      showNotificationToast('Gmail Andrés Pino lié.' + extra, 'success');
+    };
+
     window.pinoObtainGmailToken = async function (opts = {}) {
       const force = !!(opts && opts.force);
       try {
@@ -7073,10 +7118,12 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       provider.addScope('https://www.googleapis.com/auth/gmail.send');
       provider.addScope('email');
       provider.addScope('profile');
-      const hint = (typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().email) || '';
+      const preferPino = !!(opts && opts.preferPino !== false);
+      const sessionEmail = (typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().email) || '';
+      const hint = preferPino ? 'pino.espacesverts@gmail.com' : (sessionEmail || 'pino.espacesverts@gmail.com');
       provider.setCustomParameters({
         prompt: 'select_account',
-        ...(hint ? { login_hint: hint } : {})
+        login_hint: hint
       });
 
       try {
@@ -13024,6 +13071,36 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           break;
       }
       updateAdminMessagePreview();
+    };
+
+    window.sendClientNoteToAndres = async function () {
+      const ta = document.getElementById('client-write-andres');
+      const text = (ta && ta.value ? ta.value : '').trim();
+      if (!text) {
+        showNotificationToast('Écrivez votre message pour Andrés Pino.', 'warning');
+        return;
+      }
+      const u = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (!u || !u.email) {
+        showNotificationToast('Connectez-vous pour écrire à Andrés.', 'warning');
+        return;
+      }
+      try {
+        if (window.PinoDB && typeof PinoDB.notifyAdminByEmail === 'function') {
+          await PinoDB.notifyAdminByEmail({
+            subject: 'Message depuis l\'Espace Client',
+            type: 'client_portal_message',
+            clientName: u.fullName || 'Client',
+            clientEmail: u.email,
+            clientPhone: u.phone || '',
+            message: text
+          });
+        }
+        if (ta) ta.value = '';
+        showNotificationToast('Message transmis à Andrés Pino (portail + Gmail).', 'success');
+      } catch (e) {
+        showNotificationToast('Impossible d\'envoyer le message. Réessayez.', 'error');
+      }
     };
 
     window.handleSendAdminDirectMessage = async (e) => {

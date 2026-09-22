@@ -88,7 +88,25 @@
     return '=?UTF-8?B?' + btoa(bin) + '?=';
   }
 
-  async function sendViaGmailApi({ to, cc, subject, text, replyTo }) {
+  function wrapAndresHtml(plain, title) {
+    const safe = String(plain || '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>');
+    const h = title || 'Pino Espaces Verts';
+    return `<!DOCTYPE html><html lang="fr"><body style="margin:0;background:#faf8f2;font-family:Georgia,serif;color:#222820;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#faf8f2;padding:24px 12px;">
+<tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border:1px solid #d5e0cc;border-radius:16px;overflow:hidden;">
+<tr><td style="background:#1e5138;color:#faf8f2;padding:18px 24px;font-size:18px;font-weight:bold;">Andrés Pino — Pino Espaces Verts</td></tr>
+<tr><td style="padding:8px 24px 0;font-size:12px;color:#2d4d36;">${h.replace(/</g,'')}</td></tr>
+<tr><td style="padding:16px 24px 24px;font-size:15px;line-height:1.55;color:#222820;">${safe}</td></tr>
+<tr><td style="padding:12px 24px 20px;font-size:12px;color:#5b6654;border-top:1px solid #e6efe0;">
+Andrés Pino · 1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue · 06 51 59 40 34<br>
+pino.espacesverts@gmail.com · SIRET 105 075 006 00012
+</td></tr></table></td></tr></table></body></html>`;
+  }
+
+  async function sendViaGmailApi({ to, cc, bcc, subject, text, html, replyTo }) {
     let token = '';
     try {
       if (typeof global.pinoObtainGmailToken === 'function') {
@@ -104,17 +122,33 @@
 
     const toList = (Array.isArray(to) ? to : [to]).filter(Boolean).join(', ');
     const ccList = (cc || []).filter(Boolean).join(', ');
+    const bccList = (bcc || []).filter(Boolean).join(', ');
     if (!toList) return { ok: false, reason: 'no_recipient' };
 
+    let fromEmail = PINO_ADMIN_EMAIL;
+    try { fromEmail = sessionStorage.getItem('pino_gmail_from') || fromEmail; } catch (e) {}
+    const fromHeader = 'Andrés Pino — Pino Espaces Verts <' + fromEmail + '>';
+    const boundary = 'pino_ev_alt';
+    const htmlBody = html || wrapAndresHtml(text, subject);
     const rfc = [
       'MIME-Version: 1.0',
-      'Content-Type: text/plain; charset=UTF-8',
+      'From: ' + fromHeader,
       'To: ' + toList,
       ...(ccList ? ['Cc: ' + ccList] : []),
+      ...(bccList ? ['Bcc: ' + bccList] : []),
       ...(replyTo ? ['Reply-To: ' + replyTo] : []),
       'Subject: ' + encodeRfc2047(subject || 'Pino Espaces Verts'),
+      'Content-Type: multipart/alternative; boundary="' + boundary + '"',
       '',
-      String(text || '')
+      '--' + boundary,
+      'Content-Type: text/plain; charset=UTF-8',
+      '',
+      String(text || ''),
+      '--' + boundary,
+      'Content-Type: text/html; charset=UTF-8',
+      '',
+      htmlBody,
+      '--' + boundary + '--'
     ].join('\r\n');
 
     try {
@@ -155,6 +189,75 @@
       log('web3forms', err);
       return { ok: false, data: null };
     }
+  }
+
+  async function enqueueMailJob(job) {
+    const payload = {
+      to: job.to,
+      cc: job.cc || [],
+      bcc: job.bcc || [],
+      subject: job.subject || '',
+      text: job.text || '',
+      replyTo: job.replyTo || PINO_ADMIN_EMAIL,
+      kind: job.kind || 'general',
+      status: 'pending',
+      attempts: 0,
+      created_at: new Date().toISOString()
+    };
+    const immediate = await sendViaGmailApi(payload);
+    if (immediate.ok) return { ok: true, via: 'gmail', queued: false };
+
+    const db = rtdb();
+    if (db) {
+      try {
+        const ref = db.ref('mail_outbox').push();
+        await ref.set({ ...payload, id: ref.key, last_error: immediate.reason || 'queued' });
+      } catch (err) {
+        log('mail_outbox:write', err);
+      }
+    }
+    try {
+      const q = JSON.parse(localStorage.getItem('pino_mail_outbox') || '[]');
+      q.push(payload);
+      localStorage.setItem('pino_mail_outbox', JSON.stringify(q.slice(-80)));
+    } catch (e) {}
+    return { ok: false, queued: true, reason: immediate.reason };
+  }
+
+  async function drainMailOutbox() {
+    let sent = 0;
+    try {
+      const local = JSON.parse(localStorage.getItem('pino_mail_outbox') || '[]');
+      const remain = [];
+      for (const job of local) {
+        const r = await sendViaGmailApi(job);
+        if (r.ok) sent++;
+        else remain.push(job);
+      }
+      localStorage.setItem('pino_mail_outbox', JSON.stringify(remain));
+    } catch (e) {}
+
+    const db = rtdb();
+    if (db) {
+      try {
+        const snap = await db.ref('mail_outbox').limitToLast(40).once('value');
+        const val = snap && snap.val ? snap.val() : null;
+        if (val) {
+          for (const key of Object.keys(val)) {
+            const job = val[key];
+            if (job && job.status === 'sent') continue;
+            const r = await sendViaGmailApi(job);
+            if (r.ok) {
+              sent++;
+              await db.ref('mail_outbox/' + key).update({ status: 'sent', sent_at: new Date().toISOString() }).catch(() => {});
+            }
+          }
+        }
+      } catch (err) {
+        log('mail_outbox:drain', err);
+      }
+    }
+    return { ok: true, sent };
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -598,20 +701,32 @@ https://jomstudiovzla.github.io/pinopage/#admin
 =====================================================`;
 
     let emailSent = false;
-    const gmailRes = await sendViaGmailApi({
-      to: PINO_ADMIN_EMAIL,
-      cc: [STUDIO_ADMIN_EMAIL],
-      subject: subject,
-      text: mailBody,
-      replyTo: (clientEmail && isValidEmail(clientEmail)) ? clientEmail : PINO_ADMIN_EMAIL
+    const replyTo = (clientEmail && isValidEmail(clientEmail)) ? clientEmail : PINO_ADMIN_EMAIL;
+    const alertText = `Andrés, une activité vient d'arriver sur votre portail Pino Espaces Verts.\n\n${mailBody}`;
+    const messageText = `Message reçu via le portail — à traiter comme un e-mail client.\n\nDe : ${clientName}${clientEmail ? ' <' + clientEmail + '>' : ''}\n${clientPhone ? 'Tél : ' + clientPhone + '\n' : ''}\n${message || '(aucun texte)'}\n\nRépondez à cet e-mail pour écrire directement au client.`;
+
+    const alertJob = await enqueueMailJob({
+      to: ADMIN_INBOXES,
+      subject: '[Portail Pino] ' + subject,
+      text: alertText,
+      replyTo: replyTo,
+      kind: 'admin_alert'
     });
-    if (gmailRes.ok) emailSent = true;
+    const msgJob = await enqueueMailJob({
+      to: ADMIN_INBOXES,
+      subject: clientEmail ? ('Message de ' + clientName + ' — ' + (type || 'portail')) : subject,
+      text: messageText,
+      replyTo: replyTo,
+      kind: 'admin_message'
+    });
+    if (alertJob.ok || msgJob.ok) emailSent = true;
 
     const w3 = await postWeb3Forms({
-      from_name: 'Pino Espaces Verts — CRM Alerte',
+      from_name: 'Andrés Pino — Pino Espaces Verts',
       subject: subject,
-      email: (clientEmail && isValidEmail(clientEmail)) ? clientEmail : PINO_ADMIN_EMAIL,
-      replyto: (clientEmail && isValidEmail(clientEmail)) ? clientEmail : PINO_ADMIN_EMAIL,
+      to: PINO_ADMIN_EMAIL,
+      email: replyTo,
+      replyto: replyTo,
       cc: STUDIO_ADMIN_EMAIL,
       message: mailBody + '\n\nCopie studio : ' + STUDIO_ADMIN_EMAIL,
       client_name: clientName,
@@ -705,12 +820,13 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     let via = '';
     let activationRequired = false;
 
-    const gmailRes = await sendViaGmailApi({
+    const gmailRes = await enqueueMailJob({
       to: rawEmail,
-      cc: ADMIN_INBOXES,
+      bcc: ADMIN_INBOXES,
       subject: subject,
       text: mailBody,
-      replyTo: PINO_ADMIN_EMAIL
+      replyTo: PINO_ADMIN_EMAIL,
+      kind: 'client_mail'
     });
     if (gmailRes.ok) {
       clientEmailSent = true;
@@ -3091,6 +3207,8 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     convertPlatformLeadToCRM,
     notifyAdminByEmail,
     notifyClientByEmail,
+    drainMailOutbox,
+    enqueueMailJob,
     sendClientDirectMessage,
     notifyClientStatusChange,
     fetchClientMessages,

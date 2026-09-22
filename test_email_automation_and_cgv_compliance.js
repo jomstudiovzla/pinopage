@@ -73,7 +73,7 @@ console.log('  ✅ PASS: Tunnel complet de devis sans compte avec e-mails et sig
 
 // 7. VERSION DE CACHE SERVICE WORKER
 console.log('\n📦 [TEST 7 : CACHE SERVICE WORKER VERSIONNÉ]');
-assert(/pino-ev-v(23|24|27|28|29|30|31|32)/.test(swJs), 'Cache Service Worker versionné actif');
+assert(/pino-ev-v(23|24|27|28|29|30|31|32|33)/.test(swJs), 'Cache Service Worker versionné actif');
 console.log('  ✅ PASS: Service Worker v23 déployé.');
 
 console.log('\n===============================================================');
