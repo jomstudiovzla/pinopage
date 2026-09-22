@@ -32,6 +32,8 @@
   }
 
   const PINO_ADMIN_EMAIL = 'pino.espacesverts@gmail.com';
+  const STUDIO_ADMIN_EMAIL = 'jomstudiovzla@gmail.com';
+  const ADMIN_INBOXES = [PINO_ADMIN_EMAIL, STUDIO_ADMIN_EMAIL];
   const WEB3FORMS_ACCESS_KEY = '646876c1-a20d-48d6-953e-8c3b7a5a4c9b';
 
   async function safePushAudit(db, payload) {
@@ -69,6 +71,89 @@
     } catch (err) {
       clearTimeout(timeoutId);
       throw err;
+    }
+  }
+
+  function utf8ToB64Url(str) {
+    const bytes = new TextEncoder().encode(str);
+    let bin = '';
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function encodeRfc2047(str) {
+    const bytes = new TextEncoder().encode(String(str || ''));
+    let bin = '';
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return '=?UTF-8?B?' + btoa(bin) + '?=';
+  }
+
+  async function sendViaGmailApi({ to, cc, subject, text, replyTo }) {
+    let token = '';
+    try {
+      if (typeof global.pinoObtainGmailToken === 'function') {
+        token = await global.pinoObtainGmailToken() || '';
+      }
+    } catch (e) {
+      log('gmail:token', e);
+    }
+    if (!token) {
+      try { token = sessionStorage.getItem('pino_gmail_token') || ''; } catch (e) {}
+    }
+    if (!token) return { ok: false, reason: 'no_gmail_token' };
+
+    const toList = (Array.isArray(to) ? to : [to]).filter(Boolean).join(', ');
+    const ccList = (cc || []).filter(Boolean).join(', ');
+    if (!toList) return { ok: false, reason: 'no_recipient' };
+
+    const rfc = [
+      'MIME-Version: 1.0',
+      'Content-Type: text/plain; charset=UTF-8',
+      'To: ' + toList,
+      ...(ccList ? ['Cc: ' + ccList] : []),
+      ...(replyTo ? ['Reply-To: ' + replyTo] : []),
+      'Subject: ' + encodeRfc2047(subject || 'Pino Espaces Verts'),
+      '',
+      String(text || '')
+    ].join('\r\n');
+
+    try {
+      const res = await fetchWithTimeout('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ raw: utf8ToB64Url(rfc) })
+      }, 15000);
+      if (!res || !res.ok) {
+        let detail = '';
+        try { detail = JSON.stringify(await res.json()); } catch (e) {}
+        log('gmail:send', detail || (res && res.status));
+        if (res && res.status === 401) {
+          try { sessionStorage.removeItem('pino_gmail_token'); } catch (e) {}
+        }
+        return { ok: false, reason: 'gmail_http', status: res && res.status, detail };
+      }
+      return { ok: true, via: 'gmail' };
+    } catch (err) {
+      log('gmail:send', err);
+      return { ok: false, reason: 'gmail_network' };
+    }
+  }
+
+  async function postWeb3Forms(fields) {
+    try {
+      const res = await fetchWithTimeout('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ access_key: WEB3FORMS_ACCESS_KEY, botcheck: '', ...fields })
+      }, 10000);
+      const data = res && typeof res.json === 'function' ? await res.json().catch(() => ({})) : {};
+      return { ok: Boolean(data && data.success === true), data };
+    } catch (err) {
+      log('web3forms', err);
+      return { ok: false, data: null };
     }
   }
 
@@ -513,33 +598,29 @@ https://jomstudiovzla.github.io/pinopage/#admin
 =====================================================`;
 
     let emailSent = false;
-    if (typeof fetch === 'function') {
-      try {
-        const res = await fetchWithTimeout('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({
-            access_key: WEB3FORMS_ACCESS_KEY,
-            to: PINO_ADMIN_EMAIL,
-            from_name: 'Pino Espaces Verts — CRM Alerte',
-            subject: subject,
-            replyto: (clientEmail && isValidEmail(clientEmail)) ? clientEmail : PINO_ADMIN_EMAIL,
-            message: mailBody,
-            client_name: clientName,
-            client_email: clientEmail,
-            client_phone: clientPhone,
-            event_type: type,
-            lead_id: leadId
-          })
-        }, 8000);
-        const data = await res.json().catch(() => ({ success: true }));
-        emailSent = Boolean(data && data.success);
-      } catch (err) {
-        log('notifyAdminByEmail:fetch', err);
-      }
-    } else {
-      emailSent = true;
-    }
+    const gmailRes = await sendViaGmailApi({
+      to: PINO_ADMIN_EMAIL,
+      cc: [STUDIO_ADMIN_EMAIL],
+      subject: subject,
+      text: mailBody,
+      replyTo: (clientEmail && isValidEmail(clientEmail)) ? clientEmail : PINO_ADMIN_EMAIL
+    });
+    if (gmailRes.ok) emailSent = true;
+
+    const w3 = await postWeb3Forms({
+      from_name: 'Pino Espaces Verts — CRM Alerte',
+      subject: subject,
+      email: (clientEmail && isValidEmail(clientEmail)) ? clientEmail : PINO_ADMIN_EMAIL,
+      replyto: (clientEmail && isValidEmail(clientEmail)) ? clientEmail : PINO_ADMIN_EMAIL,
+      cc: STUDIO_ADMIN_EMAIL,
+      message: mailBody + '\n\nCopie studio : ' + STUDIO_ADMIN_EMAIL,
+      client_name: clientName,
+      client_email: clientEmail,
+      client_phone: clientPhone,
+      event_type: type,
+      lead_id: leadId
+    });
+    if (w3.ok) emailSent = true;
 
     const db = rtdb();
     if (db) {
@@ -621,8 +702,22 @@ Règlements autorisés SAP : Chèque à l'ordre exact de PINO ANDRES, Virement b
 Site web : https://jomstudiovzla.github.io/pinopage/`;
 
     let clientEmailSent = false;
+    let via = '';
+    let activationRequired = false;
 
-    if (typeof fetch === 'function') {
+    const gmailRes = await sendViaGmailApi({
+      to: rawEmail,
+      cc: ADMIN_INBOXES,
+      subject: subject,
+      text: mailBody,
+      replyTo: PINO_ADMIN_EMAIL
+    });
+    if (gmailRes.ok) {
+      clientEmailSent = true;
+      via = 'gmail';
+    }
+
+    if (!clientEmailSent && typeof fetch === 'function') {
       try {
         const res = await fetchWithTimeout(`https://formsubmit.co/ajax/${encodeURIComponent(rawEmail)}`, {
           method: 'POST',
@@ -630,34 +725,34 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           body: JSON.stringify({
             _subject: subject,
             _replyto: PINO_ADMIN_EMAIL,
+            _cc: ADMIN_INBOXES.join(','),
             _template: 'box',
+            _captcha: 'false',
             name: 'Andrés Pino — Pino Espaces Verts',
             message: mailBody
           })
-        }, 8000);
-        const data = await res.json().catch(() => ({ success: true }));
-        clientEmailSent = Boolean(data && (data.success || data.ok !== false));
+        }, 10000);
+        const data = res && typeof res.json === 'function' ? await res.json().catch(() => ({})) : {};
+        const msg = String((data && (data.message || data.error)) || '');
+        if (data && (data.success === true || data.success === 'true')) {
+          clientEmailSent = true;
+          via = via || 'formsubmit';
+        } else if (/activ/i.test(msg)) {
+          activationRequired = true;
+        }
       } catch (err) {
         log('notifyClientByEmail:formsubmit', err);
       }
-
-      try {
-        fetchWithTimeout('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({
-            access_key: WEB3FORMS_ACCESS_KEY,
-            to: PINO_ADMIN_EMAIL,
-            from_name: 'Pino Espaces Verts — Copie E-mail Client',
-            subject: `[COPIE AUDIT] ${subject} (Envoyé à ${clientName})`,
-            replyto: rawEmail,
-            message: `Copie conforme de l'e-mail transmis au client ${clientName} (${rawEmail}) le ${timestamp} :\n\n${mailBody}`
-          })
-        }, 8000).catch(() => {});
-      } catch (err) {}
-    } else {
-      clientEmailSent = true;
     }
+
+    await postWeb3Forms({
+      from_name: 'Pino Espaces Verts — Copie E-mail Client',
+      subject: `[COPIE] ${subject} → ${clientName} <${rawEmail}>`,
+      email: PINO_ADMIN_EMAIL,
+      cc: STUDIO_ADMIN_EMAIL,
+      replyto: rawEmail,
+      message: `Copie de l'e-mail destiné au client ${clientName} (${rawEmail}) le ${timestamp}.\nCanal principal : ${via || (activationRequired ? 'formsubmit_activation' : 'en_attente')}.\n\n${mailBody}`
+    });
 
     const db = rtdb();
     if (db) {
@@ -700,7 +795,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       }
     }
 
-    return { ok: true, clientEmailSent, timestamp };
+    return { ok: clientEmailSent || activationRequired, clientEmailSent, via, activationRequired, timestamp };
   }
 
   /**
@@ -1158,17 +1253,12 @@ Artisan Paysagiste • Entraigues-sur-la-Sorgue & Vaucluse (84)
 Tél / WhatsApp : +33 6 51 59 40 34
 Site web : https://jomstudiovzla.github.io/pinopage/`;
 
-      await fetchWithTimeout('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({
-          access_key: WEB3FORMS_ACCESS_KEY,
-          name: 'Andrés Pino — Pino Espaces Verts',
-          email: normEmail,
-          from_name: 'Pino Espaces Verts',
-          subject: `🌲 [ESPACE CLIENT] Votre accès personnel Pino Espaces Verts vous attend`,
-          message: emailBody
-        })
+      await notifyClientByEmail({
+        clientEmail: normEmail,
+        clientName: clientProfile.fullName,
+        subject: 'Votre accès personnel Pino Espaces Verts vous attend',
+        message: emailBody,
+        type: 'client_invite'
       });
     } catch (mailErr) {
       log('inviteClientByAdmin:web3forms', mailErr);

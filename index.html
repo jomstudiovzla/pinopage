@@ -1449,6 +1449,12 @@
 
       <!-- Options d'envoi -->
       <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs">
+        <p class="text-[11px] text-emerald-900 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 leading-relaxed">
+          Les e-mails partent depuis <strong>Gmail</strong> (compte Pino <span class="font-mono">pino.espacesverts@gmail.com</span> ou studio <span class="font-mono">jomstudiovzla@gmail.com</span>). Une copie arrive aussi dans les deux boîtes admin.
+        </p>
+        <button type="button" onclick="pinoObtainGmailToken({force:true}).then(function(t){ if(t) showNotificationToast('Gmail autorisé. Vous pouvez envoyer.', 'success'); })" class="w-full py-2 px-3 rounded-xl border border-emerald-300 bg-white hover:bg-emerald-50 text-emerald-900 font-bold text-xs cursor-pointer">
+          <i class="fa-brands fa-google mr-1"></i> Autoriser Gmail (Pino ou JOM Studio)
+        </button>
         <label class="flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
           <input type="checkbox" id="adm-msg-send-email" checked class="rounded text-emerald-600 focus:ring-emerald-500" />
           <span><i class="fa-solid fa-envelope text-emerald-600 mr-1"></i> Envoyer un e-mail direct dans la boîte de réception du client</span>
@@ -7049,6 +7055,61 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           }).catch((err) => console.warn('[pino] fetchUserCoupon background:', err));
         }
       }
+    };
+
+    window.pinoObtainGmailToken = async function (opts = {}) {
+      const force = !!(opts && opts.force);
+      try {
+        const cached = sessionStorage.getItem('pino_gmail_token') || '';
+        const exp = parseInt(sessionStorage.getItem('pino_gmail_token_exp') || '0', 10);
+        if (!force && cached && exp > Date.now() + 60000) return cached;
+      } catch (e) {}
+
+      if (typeof firebase === 'undefined' || !firebase.auth) {
+        return '';
+      }
+
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.addScope('https://www.googleapis.com/auth/gmail.send');
+      provider.addScope('email');
+      provider.addScope('profile');
+      const hint = (typeof getCurrentUser === 'function' && getCurrentUser() && getCurrentUser().email) || '';
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        ...(hint ? { login_hint: hint } : {})
+      });
+
+      try {
+        const current = firebase.auth().currentUser;
+        let result = null;
+        if (current) {
+          try {
+            result = await current.reauthenticateWithPopup(provider);
+          } catch (reauthErr) {
+            result = await firebase.auth().signInWithPopup(provider);
+          }
+        } else {
+          result = await firebase.auth().signInWithPopup(provider);
+        }
+        const token = result && result.credential && result.credential.accessToken;
+        if (token) {
+          try {
+            sessionStorage.setItem('pino_gmail_token', token);
+            sessionStorage.setItem('pino_gmail_token_exp', String(Date.now() + 45 * 60 * 1000));
+            sessionStorage.setItem('pino_gmail_from', (result.user && result.user.email) || hint || '');
+          } catch (e) {}
+          return token;
+        }
+      } catch (err) {
+        console.warn('[pino-mail] Gmail OAuth:', err && err.code, err && err.message);
+        if (typeof showNotificationToast === 'function') {
+          const msg = (err && err.code) === 'auth/popup-closed-by-user'
+            ? ''
+            : 'Autorisez Gmail (compte Pino ou JOM Studio) pour envoyer les e-mails dans les boîtes de réception.';
+          if (msg) showNotificationToast(msg, 'warning');
+        }
+      }
+      return '';
     };
 
     window.explainAuthError = function(err, provider) {
@@ -12994,9 +13055,12 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       }
 
       try {
-        let sentOk = false;
+        if (sendEmail && typeof window.pinoObtainGmailToken === 'function') {
+          await window.pinoObtainGmailToken();
+        }
+        let res = { ok: false };
         if (window.PinoDB && typeof PinoDB.sendClientDirectMessage === 'function') {
-          const res = await PinoDB.sendClientDirectMessage({
+          res = await PinoDB.sendClientDirectMessage({
             clientEmail: email,
             clientName: name,
             clientPhone: phone,
@@ -13004,12 +13068,20 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
             message: message,
             templateType: templateType,
             notifyEmail: sendEmail
-          });
-          sentOk = res && res.ok;
+          }) || { ok: false };
         }
 
         document.getElementById('modal-admin-message-client').close();
-        showNotificationToast(`✅ Message transmis à ${name}${sendEmail ? ' par e-mail et ' : ''} dans son Espace Client.`, 'success');
+        if (!sendEmail) {
+          showNotificationToast('Notification publiée dans l\'Espace Client de ' + name + '.', 'success');
+        } else if (res.clientEmailSent) {
+          const fromHint = sessionStorage.getItem('pino_gmail_from') || 'Gmail';
+          showNotificationToast('E-mail envoyé à ' + email + ' depuis ' + fromHint + '. Copie admin Pino + JOM Studio.', 'success');
+        } else if (res.activationRequired) {
+          showNotificationToast('Le client doit confirmer un premier e-mail FormSubmit (dossier Spam). Copie admin envoyée.', 'warning');
+        } else {
+          showNotificationToast('Espace Client notifié. L\'e-mail Gmail n\'est pas parti : cliquez « Autoriser Gmail » avec le compte Pino ou JOM Studio, puis renvoyez.', 'warning');
+        }
 
         try {
           let localMsgs = JSON.parse(localStorage.getItem('pino_admin_messages') || '[]');
