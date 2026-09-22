@@ -1,19 +1,15 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Audit global du site, élimination des erreurs console et cohérence intégrale services / comptes",
-  "current_phase": "Hito 1 — Audit Global, Cohérence Fonctionnelle & Zero Bug",
-  "action": "Audit complet des 308 gestionnaires d'événements HTML, création de copyClientCouponCode(), fiabilisation du stub précoce openWindowModal avec table d'alias exhaustive, génération de favicon.ico et apple-touch-icon.png (éradication du 404), suppression intégrale des résidus Gironde/Bordeaux dans pino-db.js et manifest.json avec ancrage Vaucluse (84), étanchéité absolue Admin vs Client et séparation rigoureuse des services SAP 50% vs Direct B2B. 23/23 suites de tests automatisées validées à 100%.",
+  "active_goal": "Correction affichage complet Espace Client sur iPhone iOS Safari",
+  "current_phase": "Phase Production & Pulido Mobile / Cross-Device",
+  "action": "Résolution du bug d'effondrement de hauteur (flex basis 0% collapse) de la modale client sur Safari iOS / iPhone. Ajout de height: 90dvh sur mobile, height: 88dvh sur desktop, style flex: 1 1 auto; -webkit-overflow-scrolling: touch; sur le conteneur scrollable et bump Service Worker v34.",
   "files": [
     "index.html",
-    "assets/js/pino-db.js",
-    "manifest.json",
     "sw.js",
-    "favicon.ico",
-    "apple-touch-icon.png",
-    "test_global_audit_and_functional_coherence.js",
-    "CURRENT_STATE.md",
+    "test_admin_appearance_and_audio_notifications.js",
+    "test_ios_client_panel_appearance.js",
     ".context_sync.json"
   ],
-  "step": "Commit avec attribution Grok 4.6 et push sur origin main, rapport détaillé pour l'utilisateur"
+  "step": "Tester sur iPhone Safari en rechargeant la page pour constater l'Espace Client complet."
 }
