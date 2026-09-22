@@ -2,7 +2,11 @@
 <html lang="fr" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="format-detection" content="telephone=yes" />
   
   <!-- SEO & Cimientos -->
   <title>Pino Espaces Verts – Entretien de Jardins Entraigues-sur-la-Sorgue & Vaucluse (84)</title>
@@ -115,6 +119,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <script src="assets/js/firebase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
 
   <!-- Capa de datos centralizada -->
   <script src="assets/js/pino-db.js"></script>
@@ -167,7 +173,34 @@
     /* ── TURBO ENGINE PERFORMANCE (Content-Visibility & GPU Acceleration) ── */
     .turbo-section {
       content-visibility: auto;
-      contain-intrinsic-size: 1px 600px;
+      contain-intrinsic-size: auto 800px;
+    }
+    dialog .turbo-section,
+    .section-window .turbo-section {
+      content-visibility: visible;
+      contain-intrinsic-size: auto;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .modal-dragging, .modal-dismissing, .modal-snap-back,
+      dialog[open].section-window { animation: none !important; }
+    }
+    .modal-dragging, .modal-dismissing { animation: none !important; }
+    :focus-visible {
+      outline: 3px solid #1e5138;
+      outline-offset: 2px;
+    }
+    #app-notification-toast {
+      top: calc(5.5rem + env(safe-area-inset-top));
+      bottom: auto !important;
+    }
+    #cookie-banner {
+      z-index: 55;
+      max-width: min(24rem, calc(100vw - 6.5rem));
+    }
+    #chatbot-window {
+      max-width: calc(100vw - 2rem);
+      max-height: calc(100dvh - 8.5rem);
     }
 
     /* Custom Before/After Slider Styles */
@@ -248,6 +281,46 @@
     .modal-drag-header:hover .modal-drag-pill {
       background-color: rgba(255, 255, 255, 0.7);
     }
+
+    /* Mobile / iOS: no zoom on focus, safe areas, 44px tap targets */
+    html { -webkit-text-size-adjust: 100%; }
+    input, select, textarea {
+      font-size: 16px !important;
+      min-height: 44px;
+    }
+    @media (min-width: 640px) {
+      input, select, textarea { min-height: 0; }
+    }
+    body { padding-bottom: env(safe-area-inset-bottom); }
+    #mobile-sticky-cta {
+      padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+      padding-left: max(1rem, env(safe-area-inset-left));
+      padding-right: max(1rem, env(safe-area-inset-right));
+    }
+    #chatbot-toggle { bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+    @media (min-width: 768px) {
+      #chatbot-toggle { bottom: 1.5rem; }
+    }
+    /* Session chrome — gagne contre Tailwind .hidden */
+    #nav-session-chip:not(.pino-on),
+    #mobile-session-chip:not(.pino-on),
+    #mobile-session-hint:not(.pino-on),
+    #mobile-session-logout:not(.pino-on) { display: none !important; }
+    #nav-session-chip.pino-on { display: flex !important; align-items: center; }
+    #nav-session-chip.pino-on #nav-session-open { display: none !important; }
+    #mobile-session-chip.pino-on { display: inline-flex !important; align-items: center; }
+    #mobile-session-hint.pino-on,
+    #mobile-session-logout.pino-on { display: block !important; }
+    .pino-session-dot {
+      width: 8px; height: 8px; border-radius: 999px; background: #bbf7d0;
+      box-shadow: 0 0 0 3px rgba(187, 247, 208, 0.35);
+      animation: pinoPulse 1.6s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pinoPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+    @media (prefers-reduced-motion: reduce) {
+      .pino-session-dot { animation: none; }
+    }
     .modal-dragging {
       transition: none !important;
       will-change: transform, opacity;
@@ -288,8 +361,23 @@
     })();
 
     // ── STUBS IMMÉDIATS DANS LE HEAD (RÉSOLUTION 0MS TOUT REFERENCEERROR) ──
+    window.updateAuthUI = window.updateAuthUI || function() {
+      try {
+        const u = JSON.parse(localStorage.getItem('pino_current_user') || 'null');
+        const btn = document.getElementById('nav-auth-btn');
+        const txt = document.getElementById('nav-auth-text');
+        const on = !!(u && u.email);
+        if (!btn || !txt) return;
+        if (on) {
+          const shortName = String(u.fullName || u.email).split(' ')[0];
+          txt.textContent = shortName + ' · Connecté';
+          btn.setAttribute('aria-label', 'Session active');
+        }
+      } catch (e) {}
+    };
     window.handleAuthNavClick = window.handleAuthNavClick || function() {
       const cur = (function() { try { return JSON.parse(localStorage.getItem('pino_current_user')); } catch(e){ return null; } })();
+      if (typeof window.updateAuthUI === 'function') window.updateAuthUI();
       if (cur && cur.email) {
         if (cur.role === 'admin') {
           const admModal = document.getElementById('modal-window-admin');
@@ -338,16 +426,19 @@
     }
   </script>
 </head>
-<body class="bg-brand-light text-brand-charcoal font-sans antialiased overflow-x-hidden">
+<body class="bg-brand-light text-brand-charcoal font-sans antialiased overflow-x-hidden pb-24 md:pb-0">
 
   <!-- Floating Sticky Call-To-Action (Mobile Only) -->
-  <div class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-brand-accent/20 px-4 py-3 flex gap-2 md:hidden shadow-lg">
-    <a href="tel:+33651594034" onclick="trackConversion('phone_click')" class="flex-1 bg-brand-green text-white text-center py-3 rounded-xl font-bold flex items-center justify-center gap-2 text-sm">
-      <i class="fa-solid fa-phone"></i> Appeler Andrés
+  <div id="mobile-sticky-cta" class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t border-brand-accent/20 px-3 py-3 flex gap-2 md:hidden shadow-lg">
+    <a href="tel:+33651594034" onclick="trackConversion('phone_click')" class="flex-1 bg-brand-green text-white text-center py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 text-xs sm:text-sm min-h-11">
+      <i class="fa-solid fa-phone"></i> Appeler
     </a>
-    <a href="https://wa.me/33651594034" onclick="trackConversion('whatsapp_click')" target="_blank" rel="noopener noreferrer" class="flex-1 bg-brand-vivid text-white text-center py-3 rounded-xl font-bold flex items-center justify-center gap-2 text-sm">
+    <a href="https://wa.me/33651594034" onclick="trackConversion('whatsapp_click')" target="_blank" rel="noopener noreferrer" class="flex-1 bg-brand-vivid text-white text-center py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 text-xs sm:text-sm min-h-11">
       <i class="fa-brands fa-whatsapp text-base"></i> WhatsApp
     </a>
+    <button type="button" onclick="openWindowModal('devis')" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-center py-3 rounded-xl font-bold flex items-center justify-center gap-1.5 text-xs sm:text-sm min-h-11 cursor-pointer">
+      <i class="fa-solid fa-file-signature"></i> Devis
+    </button>
   </div>
 
   <!-- Simulated Admin Analytics Modal (Alt + A shortcut or link in footer) -->
@@ -454,44 +545,54 @@
     </div>
 
     <div class="space-y-4 text-xs text-brand-charcoal/80 leading-relaxed">
+      <p class="text-[11px] text-slate-500 italic">Prestations de Services à la Personne (SAP) — Petits Travaux de Jardinage. Texte conforme au document client.</p>
       <div class="space-y-1">
         <p class="font-bold text-slate-900 text-sm">Article 1 – Objet et Champ d'Application</p>
-        <p>Les présentes CGV s'appliquent de plein droit à toutes les prestations de petits travaux de jardinage réalisées par l'entreprise individuelle Andres Pino (nom commercial : Pino Espaces Verts), immatriculée sous le numéro SIRET 105 075 006 00012, dont le siège social est situé au 1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue, France (rayon d'intervention : Entraigues-sur-la-Sorgue et 35 à 40 km, Vaucluse). Tout client faisant appel aux services de l'entreprise accepte sans réserve l'intégralité des présentes conditions.</p>
+        <p>Les présentes Conditions Générales de Vente (CGV) s'appliquent de plein droit à toutes les prestations de petits travaux de jardinage réalisées par l'entreprise individuelle Andres Pino (nom commercial : Pino Espaces Verts), immatriculée sous le numéro SIRET 105 075 006 00012, dont le siège social est situé au 1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue, France. Rayon d'intervention habituel : 40 à 45 km autour d'Entraigues-sur-la-Sorgue (Vaucluse). Tout client faisant appel aux services de l'entreprise accepte sans réserve l'intégralité des présentes conditions.</p>
       </div>
-
       <div class="space-y-1">
-        <p class="font-bold text-slate-900 text-sm">Article 2 – Devis Gratuit & Conclusion du Contrat</p>
-        <p>Tout engagement fait l'objet d'un <strong>devis préalable écrit, gratuit et sans engagement</strong>, valable pendant une durée de <strong>30 jours</strong> à compter de sa date d'émission. Le contrat est définitivement conclu dès la réception du devis signé portant la mention manuscrite « Bon pour accord » ou par validation électronique sécurisée.</p>
+        <p class="font-bold text-slate-900 text-sm">Article 2 – Spécificité « Services à la Personne » (SAP) & Crédit d'Impôt</p>
+        <p>L'entreprise a déposé une demande de déclaration d'activité de Services à la Personne (SAP) le 26/06/2026. Les prestations exclusives de petits travaux de jardinage à domicile (notamment la tonte de pelouse, la taille de haies, le désherbage et le ramassage de feuilles) ouvrent droit à un crédit d'impôt de 50 % au titre de l'article 199 sexdecies du Code Général des Impôts, sous réserve du respect des plafonds annuels fixés par la loi et de la réglementation SAP en vigueur.</p>
       </div>
-
       <div class="space-y-1">
-        <p class="font-bold text-slate-900 text-sm">Article 3 – Exécution des Travaux, Accès & Météo</p>
-        <p>Le client s'engage à assurer l'accès aux zones de travail à la date convenue et à sécuriser les lieux (notamment les animaux domestiques). En cas de conditions météorologiques défavorables (pluies torrentielles, tempête, gel ou canicule extrême rendant les travaux dangereux ou inefficaces), Pino Espaces Verts se réserve le droit de reporter l'intervention en concertation immédiate avec le client, sans indemnité de part ni d'autre.</p>
+        <p class="font-bold text-slate-900 text-sm">Article 3 – Modalités de Règlement Obligatoires</p>
+        <p>Conformément à la réglementation stricte des Services à la Personne, le paiement doit impérativement être effectué par un moyen traçable pour ouvrir droit aux avantages fiscaux. Les moyens de paiement acceptés sont :</p>
+        <p><strong>• Chèque bancaire dûment libellé à l'ordre exact de : PINO ANDRES.</strong></p>
+        <p><strong>• Virement bancaire direct sur le compte de l'entreprise.</strong></p>
+        <p><strong>• Titres CESU / e-CESU préfinancés (Edenred, Chèque Domicile, Pluxee, Up).</strong></p>
+        <p><strong>• Prélèvement URSSAF — Avance Immédiate 50 % — lorsque le dossier SAP le permet.</strong></p>
+        <p><em>Attention : en application de la loi fiscale SAP (art. 199 sexdecies du CGI), les paiements effectués en espèces n'ouvrent PAS droit au crédit d'impôt de 50 %. La carte bancaire n'est pas proposée pour les prestations SAP de Pino Espaces Verts.</em></p>
+        <p>Pour les prestations directes hors SAP ou professionnelles : mention « TVA non applicable, art. 293 B du CGI ».</p>
       </div>
-
       <div class="space-y-1">
-        <p class="font-bold text-slate-900 text-sm">Article 4 – Modalités de Règlement Obligatoires & Crédit d'Impôt 50% SAP</p>
-        <p>• Conformément à la réglementation stricte des Services à la Personne (déclaration déposée le 26/06/2026, art. 199 sexdecies du CGI), le paiement doit impérativement être effectué par un moyen traçable pour ouvrir droit aux avantages fiscaux de 50%. Les moyens de paiement acceptés sont exclusivement :</p>
-        <p><strong>- Chèque bancaire dûment libellé à l'ordre exact de : PINO ANDRES.</strong></p>
-        <p><strong>- Virement bancaire direct sur le compte de l'entreprise.</strong></p>
-        <p><strong>- Titres CESU préfinancés.</strong></p>
-        <p><em>Attention : En application de la loi fiscale SAP, les paiements effectués en espèces n'ouvrent PAS droit au crédit d'impôt de 50%.</em></p>
-        <p>• Pour les prestations directes hors SAP ou professionnelles : mention légale « TVA non applicable, art. 293 B du CGI ».</p>
+        <p class="font-bold text-slate-900 text-sm">Article 4 – Délais de Paiement et Retard</p>
+        <p>Sauf accord contraire écrit, le règlement est dû immédiatement à réception de la facture. Aucun escompte n'est accordé pour paiement anticipé. En cas de retard de paiement par rapport à l'échéance, des pénalités calculées sur la base du taux d'intérêt légal en vigueur seront exigibles de plein droit, ainsi qu'une indemnité forfaitaire de 40 € pour frais de recouvrement (article L. 441-10 du Code de commerce).</p>
       </div>
-
       <div class="space-y-1">
-        <p class="font-bold text-slate-900 text-sm">Article 5 – Droit de Rétractation de 14 Jours (Particuliers)</p>
-        <p>Conformément à l'article L. 221-18 du Code de la consommation, le client particulier concluant un contrat à distance ou hors établissement dispose d'un <strong>délai de 14 jours francs</strong> pour exercer son droit de rétractation sans motif ni pénalité. Si le client demande expressément l'exécution immédiate des travaux avant l'expiration de ce délai (ex: jardin urgent), il renonce expressément à son droit de rétractation pour les prestations pleinement exécutées (art. L. 221-28, 1° du Code de la consommation).</p>
+        <p class="font-bold text-slate-900 text-sm">Article 5 – Réclamations et Prestations</p>
+        <p>L'entreprise s'engage à exécuter les travaux conformément aux règles de l'art et au descriptif détaillé sur la facture. Toute contestation ou réclamation relative à la conformité des travaux effectués doit être notifiée par écrit (par courriel à <a href="mailto:pino.espacesverts@gmail.com" class="text-emerald-700 underline font-bold">pino.espacesverts@gmail.com</a> ou par lettre recommandée) dans un délai maximum de 48 heures suivant la fin de la réalisation de la prestation. À défaut de réclamation dans ce délai, les travaux sont réputés définitivement acceptés et validés sans réserve par le client.</p>
       </div>
-
       <div class="space-y-1">
-        <p class="font-bold text-slate-900 text-sm">Article 6 – Évacuation Écologique des Déchets Verts</p>
-        <p>Conformément à la circulaire ministérielle du 18 novembre 2011 et au Code de l'environnement, le brûlage des déchets verts à l'air libre est strictement interdit. Les résidus de tonte et de taille sont soit broyés sur site en paillage écologique, soit acheminés vers des plateformes de compostage agréées.</p>
+        <p class="font-bold text-slate-900 text-sm">Article 6 – Force Majeure et Conditions Climatiques</p>
+        <p>La responsabilité de l'entreprise ne pourra pas être mise en œuvre si la non-exécution ou le retard dans l'exécution de l'une de ses obligations découle d'un cas de force majeure ou de conditions climatiques exceptionnelles rendant impossible, impraticable ou dangereuse la réalisation des travaux de jardinage (tempête, fortes précipitations, gel sévère, etc.). Dans ce cas, les prestations seront reportées d'un commun accord.</p>
       </div>
-
       <div class="space-y-1">
-        <p class="font-bold text-slate-900 text-sm">Article 7 – Droit Applicable, Médiation & Juridiction Compétente</p>
-        <p>Les présentes CGV sont soumises au droit français. En cas de réclamation, le client s'adressera en priorité par écrit à Andrés Pino par courriel à <a href="mailto:pino.espacesverts@gmail.com" class="text-emerald-700 underline font-bold">pino.espacesverts@gmail.com</a> dans un délai maximum de 48 heures suivant la prestation. À défaut d'accord amiable, le client consommateur a le droit de recourir gratuitement au médiateur désigné : <strong>CM2C (Centre de la Médiation de la Consommation de Conciliateurs de Justice) — <a href="https://www.cm2c.net/" target="_blank" class="text-emerald-700 underline font-bold">https://www.cm2c.net/</a></strong>. En cas de litige persistant, la juridiction désignée est le <strong>Tribunal d'Avignon (Vaucluse)</strong>.</p>
+        <p class="font-bold text-slate-900 text-sm">Article 7 – Litiges, Médiation et Juridiction Compétente</p>
+        <p>Les présentes CGV sont soumises au droit français. En cas de litige, de désaccord sur l'interprétation ou l'exécution des prestations, les parties s'engagent à rechercher en premier lieu une solution amiable. Le client consommateur a le droit de recourir gratuitement à un médiateur de la consommation conformément à l'article L. 612-1 du Code de la consommation.</p>
+        <p><strong>Médiateur de la consommation désigné :</strong> CM2C (Centre de la Médiation de la Consommation de Conciliateurs de Justice) — <a href="https://www.cm2c.net/" target="_blank" rel="noopener noreferrer" class="text-emerald-700 underline font-bold">https://www.cm2c.net/</a></p>
+        <p>À défaut d'accord amiable ou de médiation fructueuse, la juridiction désignée est le <strong>Tribunal d'Avignon (Vaucluse)</strong>, situé à proximité du siège d'Entraigues-sur-la-Sorgue.</p>
+      </div>
+      <div class="space-y-1">
+        <p class="font-bold text-slate-900 text-sm">Article 8 – Devis Gratuit & Conclusion du Contrat</p>
+        <p>Tout engagement fait l'objet d'un <strong>devis préalable écrit, gratuit et sans engagement</strong>, valable 30 jours. Le contrat est conclu dès la réception du devis signé (« Bon pour accord ») ou par signature électronique (art. 1367 du Code civil). Aucun acompte n'est exigé à la signature.</p>
+      </div>
+      <div class="space-y-1">
+        <p class="font-bold text-slate-900 text-sm">Article 9 – Droit de Rétractation de 14 Jours (Particuliers)</p>
+        <p>Conformément à l'article L. 221-18 du Code de la consommation, le client particulier concluant un contrat à distance ou hors établissement dispose d'un délai de 14 jours francs pour se rétracter. Si le client demande l'exécution immédiate avant l'expiration de ce délai, il renonce à ce droit pour les prestations pleinement exécutées (art. L. 221-28, 1°).</p>
+      </div>
+      <div class="space-y-1">
+        <p class="font-bold text-slate-900 text-sm">Article 10 – Évacuation Écologique des Déchets Verts</p>
+        <p>Le brûlage des déchets verts à l'air libre est interdit. Les résidus de tonte et de taille sont broyés sur site ou acheminés vers des plateformes de compostage agréées du Vaucluse.</p>
       </div>
     </div>
   </dialog>
@@ -521,8 +622,8 @@
 
       <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
         <p class="font-bold text-slate-900 text-sm">2. Données Collectées & Finalités :</p>
-        <p>• <strong>Formulaire de devis :</strong> Nom, prénom, téléphone, e-mail, commune et description du jardin (finalité : étude technique et proposition de chiffrage).</p>
-        <p>• <strong>Formulaire de code promo PELABOLA :</strong> Adresse e-mail (finalité : attribution de la remise de 20% et suivi commercial personnalisé).</p>
+        <p>• <strong>Formulaire de devis (sans compte) :</strong> Nom, téléphone, e-mail, commune, adresse complémentaire optionnelle, photos et description du jardin (finalité : étude technique et proposition de chiffrage).</p>
+        <p>• <strong>Compte client et coupon de bienvenue :</strong> Identité, e-mail vérifié, commune et adresse complémentaire (finalité : création de compte, attribution d'un code unique −20 % et suivi commercial). Aucun code n'est délivré sans compte vérifié.</p>
         <p>• <strong>Facturation Services à la Personne :</strong> Données transmises de façon sécurisée à la coopérative Unipros et à l'URSSAF aux seules fins de l'émission des factures et attestations fiscales.</p>
       </div>
 
@@ -599,7 +700,7 @@
     <div class="space-y-3 text-xs text-brand-charcoal/80 leading-relaxed">
       <p>• <strong>Code officiel :</strong> <span class="font-mono font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">PELABOLA</span></p>
       <p>• <strong>Objet :</strong> Remise de 20% applicable sur la première prestation d'entretien de jardin (tonte de pelouse, taille de haies ou débroussaillage) réalisée par Pino Espaces Verts.</p>
-      <p>• <strong>Zone géographique :</strong> Valable sur Entraigues-sur-la-Sorgue et tout le département du Vaucluse (84) (zone d'intervention habituelle sans frais kilométriques jusqu'à 35-40 km).</p>
+      <p>• <strong>Zone géographique :</strong> Valable sur Entraigues-sur-la-Sorgue et tout le département du Vaucluse (84) (zone d'intervention habituelle sans frais kilométriques jusqu'à 40-45 km).</p>
       <p>• <strong>Cumul fiscal exceptionnel :</strong> L'offre est <strong>100% cumulable</strong> avec le crédit d'impôt de 50% Unipros (le reste à charge final après déduction des 20% est encore divisé par deux !).</p>
       <p>• <strong>Validité :</strong> Un seul code par foyer fiscal et par adresse postale lors de la première commande.</p>
     </div>
@@ -620,7 +721,7 @@
             Catégorie
           </span>
           <span id="lightbox-loc" class="text-xs font-bold text-brand-vivid flex items-center gap-1">
-            <i class="fa-solid fa-location-dot"></i> Talence
+            <i class="fa-solid fa-location-dot"></i> Sorgues
           </span>
         </div>
         <h3 id="lightbox-title" class="font-serif text-2xl sm:text-3xl font-extrabold text-brand-green">
@@ -798,6 +899,9 @@
           <i class="fa-brands fa-apple text-xl text-white shrink-0" aria-hidden="true"></i>
           <span id="apple-auth-btn-label">Continuer avec Apple</span>
         </button>
+        <p class="text-[10px] text-slate-500 leading-relaxed px-1">
+          Google et Apple ouvrent le consentement officiel du fournisseur. Aucun e-mail n'est prédéfini. Un message clair s'affiche si le domaine ou le fournisseur n'est pas encore activé.
+        </p>
 
         <!-- Panneau Interactif Apple ID Universel (Compatible tout appareil & navigateur) -->
         <div id="apple-auth-quick-panel" class="hidden" style="display: none !important;">
@@ -826,7 +930,7 @@
             <label class="text-xs font-bold text-slate-700" for="login-password">Mot de passe</label>
             <a href="#activate" onclick="document.getElementById('modal-window-auth').close(); window.openClientSetPasswordModal();" class="text-xxs text-emerald-700 font-bold hover:underline">Activer compte invité</a>
           </div>
-          <input type="password" id="login-password" autocomplete="current-password" placeholder="•••••••• (ou vide pour accès direct)"
+          <input type="password" id="login-password" autocomplete="current-password" placeholder="Votre mot de passe"
             class="w-full px-3.5 py-2.5 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
         </div>
 
@@ -868,26 +972,31 @@
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-fullname">Nom et Prénom *</label>
           <input type="text" id="reg-fullname" required placeholder="Ex : Jesus Martinez ou Jean Dupont"
-            class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+            class="w-full px-3.5 py-2.5 text-base border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-email">Adresse e-mail *</label>
-            <input type="email" id="reg-email" required autocomplete="username" placeholder="nom@exemple.com"
-              class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+            <input type="email" id="reg-email" required autocomplete="username" placeholder="nom@exemple.com" inputmode="email"
+              class="w-full px-3.5 py-2.5 text-base border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-phone">Téléphone mobile <span class="text-slate-400 font-normal text-xxs">(optionnel)</span></label>
-            <input type="tel" id="reg-phone" placeholder="06 12 34 56 78" oninput="formatEuropeanPhone(this)"
-              class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+            <input type="tel" id="reg-phone" placeholder="06 12 34 56 78" oninput="formatEuropeanPhone(this)" inputmode="tel" autocomplete="tel"
+              class="w-full px-3.5 py-2.5 text-base border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
           </div>
         </div>
 
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-commune">Commune / Ville d'intervention <span class="text-slate-400 font-normal text-xxs">(optionnel)</span></label>
           <input type="text" id="reg-commune" placeholder="Ex : Entraigues-sur-la-Sorgue, Avignon, Carpentras..."
-            class="w-full px-3.5 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+            class="w-full px-3.5 py-2 text-base sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-address-extra">Adresse complémentaire <span class="text-slate-400 font-normal text-xxs">(résidence secondaire, chantier, optionnel)</span></label>
+          <input type="text" id="reg-address-extra" placeholder="Lieu-dit, résidence, 2e adresse d'intervention..."
+            class="w-full px-3.5 py-2 text-base sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -895,7 +1004,7 @@
             <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-password">Mot de passe *</label>
             <div class="relative">
               <input type="password" id="reg-password" minlength="6" required autocomplete="new-password" placeholder="Min. 6 caractères"
-                class="w-full px-3.5 py-2 pr-9 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+                class="w-full px-3.5 py-2.5 pr-9 text-base border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
               <button type="button" onclick="togglePasswordVisibility('reg-password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 text-xs cursor-pointer" title="Afficher/Masquer">
                 <i class="fa-regular fa-eye"></i>
               </button>
@@ -905,7 +1014,7 @@
             <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-password-confirm">Confirmer mot de passe *</label>
             <div class="relative">
               <input type="password" id="reg-password-confirm" minlength="6" required autocomplete="new-password" placeholder="Retapez le mot de passe"
-                class="w-full px-3.5 py-2 pr-9 text-xs sm:text-sm border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
+                class="w-full px-3.5 py-2.5 pr-9 text-base border border-slate-300 rounded-xl focus:border-emerald-600 focus:outline-hidden font-medium" />
               <button type="button" onclick="togglePasswordVisibility('reg-password-confirm', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 text-xs cursor-pointer" title="Afficher/Masquer">
                 <i class="fa-regular fa-eye"></i>
               </button>
@@ -951,16 +1060,20 @@
     <div class="modal-drag-header bg-gradient-to-r from-[#2d4d36] to-[#1e5138] px-6 sm:px-8 pt-3 pb-6 sm:pb-8 text-white select-none shrink-0">
       <div class="w-12 h-1 bg-white/35 hover:bg-white/60 rounded-full mx-auto mb-3 cursor-grab active:cursor-grabbing transition-colors" title="Glisser vers le bas pour fermer"></div>
       <div class="flex flex-wrap justify-between items-center gap-4">
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center font-bold text-2xl">
+        <div class="flex items-center gap-4 min-w-0">
+          <div id="client-avatar-wrap" class="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center font-bold text-2xl overflow-hidden shrink-0">
             👤
           </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h3 class="font-serif text-2xl font-bold" id="client-display-name">Client</h3>
-              <span class="bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">Compte Google</span>
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <h3 class="font-serif text-2xl font-bold truncate" id="client-display-name">Client</h3>
+              <span id="client-session-live" class="inline-flex items-center gap-1.5 bg-emerald-400 text-emerald-950 border border-emerald-200 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-950 animate-pulse"></span> Session active
+              </span>
+              <span id="client-auth-provider-badge" class="bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 text-[10px] font-bold px-2 py-0.5 rounded-full">Compte</span>
             </div>
-            <p class="text-xs text-white/75" id="client-display-email">— • <span id="client-display-commune">—</span></p>
+            <p class="text-xs text-white/75 truncate" id="client-display-email">— • <span id="client-display-commune">Entraigues-sur-la-Sorgue (84)</span></p>
+            <p class="text-[10px] text-emerald-200/90 mt-0.5" id="client-session-meta">Connecté à votre espace personnel</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -975,7 +1088,7 @@
     </div>
 
     <!-- Client Scrollable Container -->
-    <div class="flex-1 overflow-y-auto">
+    <div class="flex-1 min-h-0 overflow-y-auto">
       <!-- 3 Key Metric Hero Counters -->
       <div class="p-4 sm:p-6 bg-[#faf8f2] border-b border-brand-accent/20">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -1076,11 +1189,11 @@
 
         <div class="p-5 bg-amber-50/60 rounded-2xl border border-amber-200/50 space-y-2">
           <h5 class="font-bold text-amber-900 text-sm flex items-center gap-2">
-            <i class="fa-solid fa-credit-card text-amber-700"></i> Avance Immédiate Unipros
+            <i class="fa-solid fa-percent text-amber-700"></i> Avance Immédiate URSSAF
           </h5>
-          <p class="text-xs text-slate-600">Réglez vos factures en ligne en direct sur le portail sécurisé de la coopérative Unipros sans avance de trésorerie.</p>
-          <a href="https://paiement.unipros.coop" target="_blank" rel="noopener" class="inline-block mt-2 bg-amber-700 hover:bg-amber-800 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors">
-            Accéder à paiement.unipros.coop <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-xxs"></i>
+          <p class="text-xs text-slate-600">Réglez uniquement 50&nbsp;% via prélèvement URSSAF, CESU, chèque ou virement. Aucune carte bancaire n'est demandée par Pino Espaces Verts.</p>
+          <a href="https://app.unipros.coop" target="_blank" rel="noopener" class="inline-block mt-2 bg-amber-700 hover:bg-amber-800 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors">
+            Espace Unipros (attestation 7DB) <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-xxs"></i>
           </a>
         </div>
       </div>
@@ -1739,8 +1852,6 @@
               <option value="virement">Virement bancaire</option>
               <option value="cheque">Chèque</option>
               <option value="cesu">CESU Déclaratif / Préfinancé</option>
-              <option value="carte">Carte bancaire</option>
-              <option value="especes">Espèces</option>
             </select>
           </div>
         </div>
@@ -2110,16 +2221,20 @@
     <!-- Admin Header (Stable CRM Panel - Non-draggable to prevent accidental closure) -->
     <div class="bg-gradient-to-r from-slate-900 via-[#1e5138] to-slate-900 px-6 sm:px-8 pt-5 pb-6 sm:pb-8 text-white select-none shrink-0">
       <div class="flex flex-wrap justify-between items-center gap-4">
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-2xl shadow-lg">
+        <div class="flex items-center gap-4 min-w-0">
+          <div class="w-14 h-14 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center font-bold text-2xl shadow-lg shrink-0">
             👑
           </div>
-          <div>
-            <div class="flex items-center gap-2">
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
               <h3 class="font-serif text-2xl font-bold">Panneau d'Administration</h3>
-              <span class="bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">God Mode</span>
+              <span id="admin-session-live" class="inline-flex items-center gap-1.5 bg-amber-300 text-emerald-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-950 animate-pulse"></span> Session active
+              </span>
+              <span class="bg-amber-400/20 text-amber-200 border border-amber-400/40 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Admin</span>
             </div>
-            <p class="text-xs text-white/70">Gérant : Andrés Pino • <code class="text-emerald-300">pino.espacesverts@gmail.com</code></p>
+            <p class="text-xs text-white/80 truncate">Connecté : <strong id="admin-display-name">Andrés Pino</strong> • <code class="text-emerald-200" id="admin-display-email">pino.espacesverts@gmail.com</code></p>
+            <p class="text-[10px] text-emerald-200/90 mt-0.5" id="admin-session-meta">Espace gérant — session ouverte</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -2280,7 +2395,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div class="p-3 bg-white rounded-xl border border-emerald-200">
               <span class="font-bold text-emerald-800">Raíl A : Coopérative Unipros (Services à la Personne)</span>
-              <p class="text-slate-600 mt-1">Particuliers uniquement. Tonte, taille, désherbage. Facture émise par Unipros, 50% crédit fiscal, paiement CB/CESU/Virement.</p>
+              <p class="text-slate-600 mt-1">Particuliers uniquement. Tonte, taille, désherbage. Facture SAP : chèque PINO ANDRES, virement, CESU / e-CESU, prélèvement URSSAF. La carte bancaire n'est pas proposée.</p>
             </div>
             <div class="p-3 bg-white rounded-xl border border-slate-200">
               <span class="font-bold text-slate-800">Raíl B : Facturation Directe (Pino Espaces Verts)</span>
@@ -3132,12 +3247,12 @@
                     <select id="job-pay-method" name="paymentMethod"
                       class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-emerald-500">
                       <option value="">— Choisir —</option>
-                      <option value="unipros">Unipros</option>
+                      <option value="cheque">Chèque (PINO ANDRES)</option>
                       <option value="virement">Virement bancaire</option>
-                      <option value="cheque">Chèque</option>
-                      <option value="cesu">CESU</option>
-                      <option value="especes">Espèces</option>
-                      <option value="autre">Autre</option>
+                      <option value="cesu">CESU / e-CESU</option>
+                      <option value="urssaf">Prélèvement URSSAF</option>
+                      <option value="unipros">Unipros (Avance Immédiate)</option>
+                      <option value="autre">Autre (hors crédit 50%)</option>
                     </select>
                   </div>
                   <div class="sm:col-span-4">
@@ -3373,17 +3488,37 @@
         <button type="button" onclick="openWindowModal('devis')" class="bg-brand-vivid hover:bg-brand-green text-white px-4 py-2 rounded-full transition-colors shadow-md font-bold flex items-center gap-2 cursor-pointer">
           <i class="fa-solid fa-file-invoice"></i> Devis Gratuit
         </button>
-        <div id="desktop-auth-container" class="pl-2 border-l border-brand-accent/20">
-          <button type="button" id="nav-auth-btn" onclick="handleAuthNavClick()" class="border border-emerald-700/30 hover:border-emerald-700 bg-white hover:bg-emerald-50 text-emerald-900 px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 cursor-pointer">
+        <div id="desktop-auth-container" class="pl-2 border-l border-brand-accent/20 flex items-center gap-2">
+          <button type="button" id="nav-auth-btn" onclick="handleAuthNavClick()" aria-label="Connexion" class="border border-emerald-700/30 hover:border-emerald-700 bg-white hover:bg-emerald-50 text-emerald-900 px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 cursor-pointer">
             <i class="fa-solid fa-user-circle text-sm text-emerald-700" id="nav-auth-icon"></i>
-            <span id="nav-auth-text">Connexion</span>
+            <span id="nav-auth-text" class="inline-flex items-center gap-1.5">Connexion</span>
           </button>
+          <div id="nav-session-chip" class="hidden items-center gap-1.5">
+            <button type="button" id="nav-session-open" onclick="handleAuthNavClick()" title="Ouvrir votre espace" class="max-w-[240px] bg-emerald-700 hover:bg-emerald-800 text-white pl-1.5 pr-3 py-1 rounded-full text-xs font-bold flex items-center gap-2 cursor-pointer shadow-md border border-emerald-600">
+              <span id="nav-session-avatar" class="w-7 h-7 rounded-full bg-white text-emerald-800 flex items-center justify-center text-[11px] font-black overflow-hidden shrink-0">P</span>
+              <span class="text-left leading-tight min-w-0">
+                <span class="flex items-center gap-1 text-[9px] font-extrabold uppercase tracking-wide text-emerald-100">
+                  <span class="w-1.5 h-1.5 rounded-full bg-lime-300 animate-pulse"></span> Session active
+                </span>
+                <span id="nav-session-name" class="block truncate text-[12px] font-extrabold">Mon espace</span>
+              </span>
+            </button>
+            <button type="button" id="nav-session-logout" onclick="handleLogout()" title="Se déconnecter" class="w-8 h-8 rounded-full bg-white border border-emerald-200 text-emerald-800 hover:bg-emerald-50 flex items-center justify-center cursor-pointer" aria-label="Déconnexion">
+              <i class="fa-solid fa-arrow-right-from-bracket text-[11px]"></i>
+            </button>
+          </div>
         </div>
       </nav>
       
-      <button id="mobile-menu-btn" class="lg:hidden text-brand-green focus:outline-none p-2" aria-label="Menu principal">
-        <i class="fa-solid fa-bars text-2xl"></i>
-      </button>
+      <div class="lg:hidden flex items-center gap-2">
+        <button type="button" id="mobile-session-chip" onclick="handleAuthNavClick()" class="hidden items-center gap-1.5 bg-emerald-700 text-white pl-1.5 pr-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-md">
+          <span class="w-1.5 h-1.5 rounded-full bg-lime-300 animate-pulse"></span>
+          <span id="mobile-session-chip-name">Connecté</span>
+        </button>
+        <button id="mobile-menu-btn" class="text-brand-green focus:outline-none p-2" aria-label="Menu principal">
+          <i class="fa-solid fa-bars text-2xl"></i>
+        </button>
+      </div>
     </div>
     
     <!-- Mobile / tablet drawer -->
@@ -3409,10 +3544,17 @@
       </button>
 
       <!-- Mobile Auth Button -->
-      <div id="mobile-auth-container" class="pt-2 border-t border-brand-accent/20">
+      <div id="mobile-auth-container" class="pt-2 border-t border-brand-accent/20 space-y-2">
         <button type="button" id="mobile-nav-auth-btn" onclick="handleAuthNavClick(); document.getElementById('mobile-menu').classList.add('hidden');" class="w-full text-left py-2.5 px-3 rounded-xl font-bold text-emerald-950 bg-emerald-50/80 border border-emerald-200 flex items-center justify-between">
           <span id="mobile-nav-auth-text"><i class="fa-solid fa-user-circle text-emerald-700 mr-2"></i> Connexion</span>
-          <i class="fa-solid fa-arrow-right-to-bracket text-xs text-emerald-700"></i>
+          <i id="mobile-nav-auth-arrow" class="fa-solid fa-arrow-right-to-bracket text-xs text-emerald-700"></i>
+        </button>
+        <p id="mobile-session-hint" class="hidden text-[11px] text-emerald-800 px-1">
+          <span class="inline-flex items-center gap-1 font-extrabold uppercase tracking-wide"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span> Session active</span>
+          — vous pouvez fermer le panneau, vous restez connecté.
+        </p>
+        <button type="button" id="mobile-session-logout" onclick="handleLogout(); document.getElementById('mobile-menu').classList.add('hidden');" class="hidden w-full py-2 px-3 rounded-xl text-xs font-bold text-emerald-900 bg-white border border-emerald-200">
+          <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Se déconnecter
         </button>
       </div>
     </div>
@@ -3465,8 +3607,8 @@
           <!-- Accepted Payment Methods (PDF Página 2) -->
           <div class="mt-4 pt-3.5 border-t border-slate-200">
             <div class="flex items-center gap-2 mb-2">
-              <i class="fa-solid fa-credit-card text-[#00D2D3] text-xs"></i>
-              <span class="text-[11px] font-extrabold text-[#1F3A8A] uppercase tracking-wider">Paiement facile et sécurisé via différents modes :</span>
+              <i class="fa-solid fa-wallet text-[#00D2D3] text-xs"></i>
+              <span class="text-[11px] font-extrabold text-[#1F3A8A] uppercase tracking-wider">Règlement SAP traçable (sans carte bancaire) :</span>
             </div>
             <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
               <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-sm font-bold text-slate-800">
@@ -3474,9 +3616,6 @@
               </span>
               <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-sm font-bold text-slate-800">
                 <i class="fa-solid fa-building-columns text-emerald-600"></i> Virement bancaire
-              </span>
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-sm font-bold text-slate-800">
-                <i class="fa-solid fa-credit-card text-purple-600"></i> Carte bancaire (en ligne)
               </span>
               <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-sm font-bold text-slate-800">
                 <i class="fa-solid fa-ticket text-amber-600"></i> Chèques CESU
@@ -3641,8 +3780,7 @@
             Connectez-vous et recevez votre coupon unique de 20%
           </h2>
           <p class="text-white/85 text-sm sm:text-base max-w-lg mx-auto lg:mx-0 leading-relaxed">
-            Le code de bienvenue n'est délivré qu'après une connexion validée (Google). Un seul coupon par compte — cumulable avec les 50&nbsp;% Unipros.
-            <button type="button" onclick="document.getElementById('promo-modal').showModal()" class="underline text-emerald-200 font-bold block mt-1 hover:text-white">Voir conditions de l'offre</button>
+            Le code de bienvenue n'est délivré qu'après une connexion validée. Un seul coupon par compte — cumulable avec les 50&nbsp;% Unipros.
           </p>
           
           <!-- CTA Google : aucun email public (Zero Trust cupón) -->
@@ -4038,11 +4176,11 @@
         <!-- Gallery Grid of Real Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
-          <!-- Project 1: Taille de Haie (Talence) -->
+          <!-- Project 1: Taille de Haie (Sorgues) -->
           <div class="gallery-item haie bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-slate-100 flex flex-col justify-between group cursor-pointer" onclick="openLightbox(0)">
             <div>
               <div class="aspect-[4/3] overflow-hidden relative bg-slate-100">
-                <img src="assets/images/hedge_trimming_real.jpg" alt="Taille de haie rectiligne à Talence" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src="assets/images/hedge_trimming_real.jpg" alt="Taille de haie rectiligne à Sorgues" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <span class="absolute top-3 left-3 bg-brand-green/90 text-white font-extrabold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider shadow">
                   ✂️ Taille de Haies
                 </span>
@@ -4052,7 +4190,7 @@
               </div>
               <div class="p-6 space-y-3">
                 <div class="flex justify-between items-center text-xs">
-                  <span class="font-extrabold text-brand-vivid"><i class="fa-solid fa-location-dot mr-1"></i> Talence (33400)</span>
+                  <span class="font-extrabold text-brand-vivid"><i class="fa-solid fa-location-dot mr-1"></i> Sorgues (84700)</span>
                   <span class="text-slate-500 font-bold">Durée : 4h</span>
                 </div>
                 <h4 class="font-serif text-xl font-extrabold text-brand-green leading-snug">
@@ -4083,11 +4221,11 @@
             </div>
           </div>
 
-          <!-- Project 2: Création de Jardin (Pessac) -->
+          <!-- Project 2: Création de Jardin (Vedène) -->
           <div class="gallery-item creation bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-slate-100 flex flex-col justify-between group cursor-pointer" onclick="openLightbox(1)">
             <div>
               <div class="aspect-[4/3] overflow-hidden relative bg-slate-100">
-                <img src="assets/images/garden_creation_real.jpg" alt="Création de jardin paysager à Pessac" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src="assets/images/garden_creation_real.jpg" alt="Création de jardin paysager à Vedène" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <span class="absolute top-3 left-3 bg-brand-vivid text-white font-extrabold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider shadow">
                   🏡 Création Paysagère
                 </span>
@@ -4097,7 +4235,7 @@
               </div>
               <div class="p-6 space-y-3">
                 <div class="flex justify-between items-center text-xs">
-                  <span class="font-extrabold text-brand-vivid"><i class="fa-solid fa-location-dot mr-1"></i> Pessac (33600)</span>
+                  <span class="font-extrabold text-brand-vivid"><i class="fa-solid fa-location-dot mr-1"></i> Vedène (84270)</span>
                   <span class="text-slate-500 font-bold">Surface : 120 m²</span>
                 </div>
                 <h4 class="font-serif text-xl font-extrabold text-brand-green leading-snug">
@@ -4128,11 +4266,11 @@
             </div>
           </div>
 
-          <!-- Project 3: Débroussaillage & Remise en État (Bègles) -->
+          <!-- Project 3: Débroussaillage & Remise en État (Le Pontet) -->
           <div class="gallery-item debroussaillage bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-slate-100 flex flex-col justify-between group cursor-pointer" onclick="openLightbox(2)">
             <div>
               <div class="aspect-[4/3] overflow-hidden relative bg-slate-100">
-                <img src="assets/images/brush_clearing_real.jpg" alt="Débroussaillage et remise en état à Bègles" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src="assets/images/brush_clearing_real.jpg" alt="Débroussaillage et remise en état au Pontet" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <span class="absolute top-3 left-3 bg-amber-700 text-white font-extrabold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider shadow">
                   🚜 Débroussaillage
                 </span>
@@ -4142,7 +4280,7 @@
               </div>
               <div class="p-6 space-y-3">
                 <div class="flex justify-between items-center text-xs">
-                  <span class="font-extrabold text-brand-vivid"><i class="fa-solid fa-location-dot mr-1"></i> Bègles (33130)</span>
+                  <span class="font-extrabold text-brand-vivid"><i class="fa-solid fa-location-dot mr-1"></i> Le Pontet (84130)</span>
                   <span class="text-slate-500 font-bold">Surface : 300 m²</span>
                 </div>
                 <h4 class="font-serif text-xl font-extrabold text-brand-green leading-snug">
@@ -4173,11 +4311,11 @@
             </div>
           </div>
 
-          <!-- Project 4: Tonte Résidentielle & Verger (Mérignac) -->
+          <!-- Project 4: Tonte Résidentielle & Verger (Entraigues-sur-la-Sorgue) -->
           <div class="gallery-item tonte bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-slate-100 flex flex-col justify-between group cursor-pointer" onclick="openLightbox(3)">
             <div>
               <div class="aspect-[4/3] overflow-hidden relative bg-slate-100">
-                <img src="assets/images/gallery_real_orchard_mowing.jpg" alt="Tonte et entretien d'oliveraie et pelouse à Mérignac" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src="assets/images/gallery_real_orchard_mowing.jpg" alt="Tonte et entretien d'oliveraie et pelouse à Entraigues-sur-la-Sorgue" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <span class="absolute top-3 left-3 bg-green-700 text-white font-extrabold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider shadow">
                   🌿 Tonte Pelouse
                 </span>
@@ -4187,7 +4325,7 @@
               </div>
               <div class="p-6 space-y-3">
                 <div class="flex justify-between items-center text-xs">
-                  <span class="font-extrabold text-brand-vivid"><i class="fa-solid fa-location-dot mr-1"></i> Mérignac (33700)</span>
+                  <span class="font-extrabold text-brand-vivid"><i class="fa-solid fa-location-dot mr-1"></i> Entraigues-sur-la-Sorgue (84320)</span>
                   <span class="text-slate-500 font-bold">Surface : 850 m²</span>
                 </div>
                 <h4 class="font-serif text-xl font-extrabold text-brand-green leading-snug">
@@ -4263,11 +4401,11 @@
             </div>
           </div>
 
-          <!-- Project 6: Végétalisation Tour de Piscine (Gradignan) -->
+          <!-- Project 6: Végétalisation Tour de Piscine (L'Isle-sur-la-Sorgue) -->
           <div class="gallery-item creation bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-slate-100 flex flex-col justify-between group cursor-pointer" onclick="openLightbox(5)">
             <div>
               <div class="aspect-[4/3] overflow-hidden relative bg-slate-100">
-                <img src="assets/images/gallery_real_pool_planters.jpg" alt="Végétalisation et bacs contemporains tour de piscine à Gradignan" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img src="assets/images/gallery_real_pool_planters.jpg" alt="Végétalisation et bacs contemporains tour de piscine à L'Isle-sur-la-Sorgue" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <span class="absolute top-3 left-3 bg-teal-700 text-white font-extrabold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider shadow">
                   🏡 Aménagement Végétal
                 </span>
@@ -4277,7 +4415,7 @@
               </div>
               <div class="p-6 space-y-3">
                 <div class="flex justify-between items-center text-xs">
-                  <span class="font-extrabold text-brand-vivid"><i class="fa-solid fa-location-dot mr-1"></i> Gradignan (33170)</span>
+                  <span class="font-extrabold text-brand-vivid"><i class="fa-solid fa-location-dot mr-1"></i> L'Isle-sur-la-Sorgue (84800)</span>
                   <span class="text-slate-500 font-bold">Terrasse : 40 m²</span>
                 </div>
                 <h4 class="font-serif text-xl font-extrabold text-brand-green leading-snug">
@@ -4500,7 +4638,7 @@
             <div class="w-8 h-8 rounded-full bg-brand-vivid text-white flex items-center justify-center flex-shrink-0 font-bold">2</div>
             <div>
               <h4 class="font-bold text-brand-green">Méthodes de Paiement Souples</h4>
-              <p class="text-xs text-brand-charcoal/70">Nous acceptons les règlements par carte, virement bancaire et Chèques Emploi Service Universels (CESU préfinancés).</p>
+              <p class="text-xs text-brand-charcoal/70">Chèque à l'ordre exact de <strong>PINO ANDRES</strong>, virement bancaire, CESU / e-CESU et prélèvement URSSAF (Avance Immédiate). Les espèces n'ouvrent pas droit au crédit d'impôt 50&nbsp;%. La carte bancaire n'est pas proposée pour les prestations SAP.</p>
             </div>
           </div>
           <div class="flex gap-4">
@@ -4962,7 +5100,7 @@
               <input type="text" id="postal-code" placeholder="Entrez votre code postal ou commune (ex: 84320 Entraigues-sur-la-Sorgue)" required class="w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-slate-300 focus:outline-none focus:border-brand-vivid text-sm font-extrabold text-brand-green" />
             </div>
 
-            <!-- Quick Postal Code Chips (Vaucluse 84 - Rayon 35-40 km Entraigues-sur-la-Sorgue) -->
+            <!-- Quick Postal Code Chips (Vaucluse 84 - Rayon 40-45 km Entraigues-sur-la-Sorgue) -->
             <div class="space-y-1.5 pt-1">
               <span class="text-[11px] text-brand-charcoal/70 font-bold block">Sélection directe Vaucluse (84) :</span>
               <div class="flex flex-wrap gap-1.5">
@@ -4980,7 +5118,7 @@
             <!-- Dynamic Map connection indicator -->
             <div id="postal-feedback" class="flex items-center gap-2 p-2 bg-white rounded-xl border border-emerald-300 text-xs text-brand-green font-extrabold">
               <i class="fa-solid fa-circle-check text-green-600"></i>
-              <span id="postal-feedback-text">Zone couverte : Entraigues-sur-la-Sorgue & rayon 35-40 km (Vaucluse 84) — Déplacement & Devis 100% Gratuits</span>
+              <span id="postal-feedback-text">Zone couverte : Entraigues-sur-la-Sorgue & rayon 40-45 km (Vaucluse 84) — Déplacement & Devis 100% Gratuits</span>
             </div>
           </div>
 
@@ -5144,6 +5282,10 @@
             </div>
 
             <div>
+              <label class="block text-xs font-bold text-brand-green uppercase mb-1" for="address-extra">Adresse complémentaire (optionnel)</label>
+              <input type="text" id="address-extra" placeholder="Lieu-dit, résidence secondaire, accès chantier..." class="w-full px-4 py-2.5 bg-brand-light rounded-xl border border-slate-200 focus:outline-none focus:border-brand-vivid text-base sm:text-sm" />
+            </div>
+            <div>
               <label class="block text-xs font-bold text-brand-green uppercase mb-1" for="details">Détails ou remarques (Optionnel)</label>
               <textarea id="details" rows="2" placeholder="Précisez un détail particulier (hauteur de haies, accès terrain...)" class="w-full px-4 py-2.5 bg-brand-light rounded-xl border border-slate-200 focus:outline-none focus:border-brand-vivid text-sm"></textarea>
             </div>
@@ -5256,14 +5398,14 @@
             </div>
           </div>
 
-          <!-- ÉTAPE 3 : Planification de la Visite Technique Gratuite à Domicile -->
-          <div class="p-4 bg-amber-50/70 rounded-2xl border-2 border-yellow-400/60 space-y-3">
+          <!-- ÉTAPE 3 : Planification — visible uniquement après signature électronique -->
+          <div id="devis-rdv-panel" class="hidden p-4 bg-amber-50/70 rounded-2xl border-2 border-yellow-400/60 space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-xs font-black text-amber-950 uppercase tracking-wide flex items-center gap-1.5">
                 <i class="fa-solid fa-calendar-days text-amber-600"></i> Réserver votre Visite Technique Gratuite
               </span>
               <span class="text-[10px] font-extrabold text-amber-900 bg-yellow-200 px-2.5 py-0.5 rounded-full uppercase">
-                Rayon 35-40 km
+                Rayon 40-45 km
               </span>
             </div>
             <p class="text-xs text-slate-600">
@@ -5329,7 +5471,7 @@
         </div>
         <div>
           <h4 class="font-extrabold text-brand-green text-base" id="map-locality-title">Zone d'intervention directe</h4>
-          <span class="text-[10px] text-brand-vivid font-bold uppercase tracking-wider">Vaucluse (84) — Rayon 35-40 km</span>
+          <span class="text-[10px] text-brand-vivid font-bold uppercase tracking-wider">Vaucluse (84) — Rayon 40-45 km</span>
         </div>
       </div>
       <p class="text-xs text-brand-charcoal/80 font-medium leading-relaxed" id="map-locality-desc">
@@ -5410,14 +5552,14 @@
         <div class="bg-white/80 backdrop-blur-xs p-5 rounded-2xl border border-brand-accent/20 shadow-xs hover:shadow-md transition-all space-y-2">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
-              <i class="fa-solid fa-credit-card text-sm"></i>
+              <i class="fa-solid fa-wallet text-sm"></i>
             </div>
             <h3 class="font-bold text-brand-green text-sm sm:text-base leading-snug">
               Quels moyens de paiement acceptez-vous ?
             </h3>
           </div>
           <p class="text-xs sm:text-sm text-slate-600 leading-relaxed pl-12">
-            Carte bancaire, prélèvement Urssaf, chèque ou <strong class="text-emerald-800">chèques CESU préfinancés</strong>. Paiements 100% sécurisés et tracés.
+            Chèque à l'ordre de <strong class="text-emerald-800">PINO ANDRES</strong>, virement bancaire, CESU / e-CESU et prélèvement URSSAF. La carte bancaire n'est pas proposée pour les prestations SAP. Les espèces n'ouvrent pas droit au crédit d'impôt 50&nbsp;%.
           </p>
         </div>
 
@@ -5434,7 +5576,7 @@
           <h3 class="font-serif text-2xl font-bold tracking-tight">Pino Espaces Verts</h3>
         </div>
         <p class="text-white/60 text-xs leading-relaxed">
-          Entreprise de proximité spécialisée dans la tonte, la taille, l'élagage et l'entretien général de jardins pour les particuliers et professionnels.
+          Entreprise individuelle Andres Pino — SIRET 105 075 006 00012 — 1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue (Vaucluse). Rayon 40-45 km. Tonte, taille, élagage et entretien de jardins. Règlement SAP : chèque PINO ANDRES, virement, CESU, URSSAF.
         </p>
       </div>
       <div class="space-y-4">
@@ -5617,11 +5759,16 @@
     window.applyCouponToQuote = () => {
       const code = window.getActiveCouponCode();
       if (!code) return;
+      if (typeof openWindowModal === 'function') openWindowModal('devis');
+      const couponInput = document.getElementById('devis-coupon-input');
+      if (couponInput) {
+        couponInput.value = code;
+        if (typeof applyDevisCoupon === 'function') applyDevisCoupon();
+      }
       const detailsArea = document.getElementById('details');
       if (detailsArea) {
         detailsArea.value = (detailsArea.value ? detailsArea.value + '\n' : '') + `[Code Réduction 20% : ${code}]`;
       }
-      document.getElementById('devis').scrollIntoView({ behavior: 'smooth' });
       const formContainer = document.getElementById('devis-form');
       if (formContainer) {
         formContainer.classList.add('ring-4', 'ring-emerald-400', 'transition-all', 'duration-500');
@@ -5741,7 +5888,7 @@
         title: "Taille Rectiligne de Haie de Lauriers",
         img: "assets/images/hedge_trimming_real.jpg",
         badge: "✂️ Taille de Haies",
-        loc: "Talence (33400)",
+        loc: "Sorgues (84700)",
         duration: "4h d'intervention",
         work: "Taille double-face et égalisation du sommet sur 42 mètres linéaires de haie de laurier (hauteur 2,40m). Ramassage des branches au souffleur et évacuation complète de 3,5 m³ de déchets verts.",
         price: "260 € TTC",
@@ -5753,7 +5900,7 @@
         title: "Aménagement de Massifs & Allée Minérale",
         img: "assets/images/garden_creation_real.jpg",
         badge: "🏡 Création de Jardin",
-        loc: "Pessac (33600)",
+        loc: "Vedène (84270)",
         duration: "Surface 120 m²",
         work: "Décapage du sol, pose d'un géotextile anti-mauvaises herbes, création d'une allée en calcaire compacté, bordures acier galvanisé, plantations de lavandes, hortensias blancs, graminées et paillage en écorces de pin.",
         price: "1 850 € TTC",
@@ -5765,7 +5912,7 @@
         title: "Débroussaillage de Friches & Évacuation",
         img: "assets/images/brush_clearing_real.jpg",
         badge: "🚜 Débroussaillage",
-        loc: "Bègles (33130)",
+        loc: "Le Pontet (84130)",
         duration: "Surface 300 m²",
         work: "Débroussaillage mécanique intensif de ronces géantes et herbes hautes (300 m² de parcelle délaissée), coupe au ras du sol, mise en sacs biodégradables et évacuation en centre de compostage vert.",
         price: "380 € TTC",
@@ -5777,7 +5924,7 @@
         title: "Tonte Soignée de Pelouse & Espace Arboré",
         img: "assets/images/gallery_real_orchard_mowing.jpg",
         badge: "🌿 Tonte Pelouse",
-        loc: "Mérignac (33700)",
+        loc: "Entraigues-sur-la-Sorgue (84320)",
         duration: "Surface 850 m²",
         work: "Tonte régulière entre les arbres et oliveraie, passage minutieux du coupe-bordure autour des troncs, soufflage et finitions soignées.",
         price: "160 € TTC",
@@ -5801,7 +5948,7 @@
         title: "Végétalisation & Bacs Déco Plage de Piscine",
         img: "assets/images/gallery_real_pool_planters.jpg",
         badge: "🏡 Aménagement Végétal",
-        loc: "Gradignan (33170)",
+        loc: "L'Isle-sur-la-Sorgue (84800)",
         duration: "Terrasse 40 m²",
         work: "Installation et empotage de Phormiums et végétaux graphiques dans des bacs contemporains sur terrasse piscine en bois.",
         price: "340 € TTC",
@@ -5847,9 +5994,9 @@
         detailsArea.value = `Bonjour Andrés, j'ai vu votre réalisation "${proj.title}" à ${proj.loc}. Je souhaite un devis pour des travaux similaires chez moi.`;
       }
       
+      if (typeof openWindowModal === 'function') openWindowModal('devis');
       const devisSection = document.getElementById('devis');
       if (devisSection) {
-        devisSection.scrollIntoView({ behavior: 'smooth' });
         const formContainer = devisSection.querySelector('.bg-white');
         if (formContainer) {
           formContainer.classList.add('ring-4', 'ring-brand-vivid', 'transition-all', 'duration-500');
@@ -5895,7 +6042,11 @@
       }
       
       if (postalFeedbackText) {
-        postalFeedbackText.innerHTML = `📍 Commune détectée : <strong>${cleanQuery}</strong> • Rayon 35-40 km Entraigues-sur-la-Sorgue • Déplacement & Devis 100% Gratuits !`;
+        postalFeedbackText.textContent = '';
+        postalFeedbackText.append('📍 Commune détectée : ');
+        const strong = document.createElement('strong');
+        strong.textContent = cleanQuery;
+        postalFeedbackText.append(strong, ' • Rayon 40-45 km Entraigues-sur-la-Sorgue • Déplacement & Devis 100% Gratuits !');
       }
       if (mapLocalityTitle) {
         mapLocalityTitle.textContent = `Intervention directe : ${cleanQuery}`;
@@ -5936,25 +6087,31 @@
         return;
       }
 
-      if (code === 'PELABOLA' || code.startsWith('PINO-')) {
+      const sessionUser = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+      const owned = sessionUser && sessionUser.promoCode && String(sessionUser.promoCode).toUpperCase() === code;
+      if (owned) {
         window._activeDevisCoupon = { code: code, discountPct: 20 };
         if (feedback) {
           feedback.className = 'text-xs text-emerald-800 font-extrabold flex items-center gap-1.5 pt-0.5';
-          feedback.innerHTML = `<i class="fa-solid fa-circle-check text-green-600"></i> Coupon <strong>${code}</strong> validé (-20% appliqués !)`;
+          feedback.textContent = '';
+          feedback.insertAdjacentHTML('afterbegin', '<i class="fa-solid fa-circle-check text-green-600"></i> ');
+          feedback.append(document.createTextNode('Coupon ' + code + ' validé (−20 %).'));
           feedback.classList.remove('hidden');
         }
         if (typeof showNotificationToast === 'function') {
-          showNotificationToast(`🎉 Code promo ${code} validé : -20% sur la prestation !`, 'success');
+          showNotificationToast('Code promo validé : −20 % sur la prestation.', 'success');
         }
       } else {
         window._activeDevisCoupon = null;
         if (feedback) {
           feedback.className = 'text-xs text-red-600 font-bold flex items-center gap-1.5 pt-0.5';
-          feedback.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Code non reconnu. Utilisez PELABOLA (-20%).`;
+          feedback.textContent = sessionUser
+            ? 'Ce code ne correspond pas à votre compte.'
+            : 'Connectez-vous pour activer votre code unique de bienvenue.';
           feedback.classList.remove('hidden');
         }
         if (typeof showNotificationToast === 'function') {
-          showNotificationToast('Code promo non reconnu. Utilisez PELABOLA ou connectez-vous pour votre code de bienvenue.', 'warning');
+          showNotificationToast('Le code promo est lié à un compte vérifié. Connectez-vous, puis réessayez.', 'warning');
         }
       }
       updateBudgetPreview(budgetInput ? budgetInput.value : 350);
@@ -6128,7 +6285,7 @@
       const phoneInput = document.getElementById('phone');
       const emailInput = document.getElementById('email');
       const phoneVal = phoneInput ? phoneInput.value.trim() : '';
-      const emailVal = emailInput ? emailInput.value.trim() : '';
+      let emailVal = emailInput ? emailInput.value.trim() : '';
 
       // Validate that AT LEAST phone OR email is provided
       if (!phoneVal && !emailVal) {
@@ -6165,6 +6322,7 @@
       const frequencyVal = document.getElementById('frequency') ? document.getElementById('frequency').value : '';
       const wasteVal = document.getElementById('waste') ? document.getElementById('waste').value : '';
       const detailsVal = document.getElementById('details') ? document.getElementById('details').value.trim() : '';
+      const addressExtraVal = document.getElementById('address-extra') ? document.getElementById('address-extra').value.trim() : '';
       const couponCode = window._activeDevisCoupon ? window._activeDevisCoupon.code : null;
 
       // Generate Reference Code
@@ -6179,6 +6337,7 @@
         email: emailVal,
         phone: phoneVal,
         postal: postalVal,
+        addressExtra: addressExtraVal,
         budget: budgetVal,
         service: serviceVal,
         coupon: couponCode,
@@ -6208,7 +6367,8 @@ Destinataire officiel : ${TARGET_EMAIL}
 
 2. LOCALISATION & BUDGET :
 - Commune / Code Postal : ${postalVal}
-- Rayon : Entraigues-sur-la-Sorgue (Vaucluse 84) et alentours
+- Adresse complémentaire : ${addressExtraVal || 'Non renseignée'}
+- Rayon : 40-45 km autour d'Entraigues-sur-la-Sorgue (Vaucluse 84)
 - Budget estimé : ${budgetVal} € (Reste net URSSAF: ~${Math.round(parseFloat(budgetVal)/2 || 0)} €)
 ${couponCode ? `- Code Promo Appliqué : ${couponCode} (-20%)\n` : ''}
 3. DÉTAILS DU CHANTIER :
@@ -6280,6 +6440,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         budget: budgetVal,
         coupon: couponCode,
         details: detailsVal || 'Aucun',
+        address_extra: addressExtraVal || '',
         status: 'Nouveau',
         regime: regimeVal,
         photos: photosList
@@ -6298,6 +6459,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           coupon:   couponCode,
           frequency: frequencyVal,
           details:  detailsVal,
+          address_extra: addressExtraVal || '',
           refCode:  refCode,
           source:   'landing_v1',
           userId:   (currentUser || {}).uid || null,
@@ -6436,6 +6598,26 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         }).catch(() => {});
       }
 
+      try {
+        if (quote) {
+          quote.rdv_date = chosenDate;
+          quote.rdv_slot = slotLabel;
+          quote.status = 'RDV demandé';
+          window._lastSubmittedQuote = quote;
+        }
+        const leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
+        const idx = leads.findIndex((l) => l && (l.id === quoteRef || l.ref_code === quoteRef));
+        if (idx >= 0) {
+          leads[idx].rdv_date = chosenDate;
+          leads[idx].rdv_slot = slotLabel;
+          leads[idx].status = 'RDV demandé';
+          localStorage.setItem('pino_leads', JSON.stringify(leads));
+        }
+        if (window.PinoDB && typeof PinoDB.updateLeadStatus === 'function' && quoteRef) {
+          PinoDB.updateLeadStatus(quoteRef, 'RDV demandé').catch(() => {});
+        }
+      } catch (e) {}
+
       if (feedback) {
         feedback.innerHTML = `<i class="fa-solid fa-circle-check text-green-600"></i> Rendez-vous demandé pour le <strong>${chosenDate} (${slotLabel})</strong> ! Andrés a été notifié et vous confirmera le passage.`;
         feedback.classList.remove('hidden');
@@ -6451,20 +6633,9 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
 
     // ─── HERO UNIPROS LINK SMOOTH SCROLL & PULSE HIGHLIGHT ───
     const heroUniprosBtn = document.getElementById('hero-unipros-box');
-    if (heroUniprosBtn) {
-      heroUniprosBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const uniprosSection = document.getElementById('unipros');
-        if (uniprosSection) {
-          uniprosSection.scrollIntoView({ behavior: 'smooth' });
-          const simCard = uniprosSection.querySelector('.bg-white');
-          if (simCard) {
-            simCard.classList.add('ring-4', 'ring-[#00D2D3]', 'shadow-2xl', 'transition-all', 'duration-500');
-            setTimeout(() => {
-              simCard.classList.remove('ring-4', 'ring-[#00D2D3]');
-            }, 3000);
-          }
-        }
+    if (heroUniprosBtn && !heroUniprosBtn.getAttribute('onclick')) {
+      heroUniprosBtn.addEventListener('click', () => {
+        if (typeof openWindowModal === 'function') openWindowModal('unipros');
       });
     }
 
@@ -6485,10 +6656,10 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     };
 
     window.bookSeason = (packageName) => {
+      if (typeof openWindowModal === 'function') openWindowModal('devis');
       const detailsTextarea = document.getElementById('details');
       if (detailsTextarea) {
         detailsTextarea.value = `Bonjour, je souhaiterais réserver le "${packageName}" pour mon jardin.`;
-        document.getElementById('devis').scrollIntoView({ behavior: 'smooth' });
         const formContainer = detailsTextarea.closest('.bg-white');
         if (formContainer) {
           formContainer.classList.add('ring-4', 'ring-brand-vivid', 'transition-all', 'duration-500');
@@ -6527,7 +6698,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         serviceSelect.value = 'b2b-syndic';
         if (frequencySelect) frequencySelect.value = 'annuel';
         detailsTextarea.value = "Bonjour Andrés, je vous contacte concernant l'entretien des espaces verts de notre entreprise/copropriété. Merci de nous transmettre un devis B2B et votre planning d'intervention.";
-        document.getElementById('devis').scrollIntoView({ behavior: 'smooth' });
+        if (typeof openWindowModal === 'function') openWindowModal('devis');
         const formContainer = detailsTextarea.closest('.bg-white');
         if (formContainer) {
           formContainer.classList.add('ring-4', 'ring-brand-green', 'transition-all', 'duration-500');
@@ -6584,24 +6755,24 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
   </script>
 
   <!-- Bandeau Cookies CNIL / RGPD -->
-  <aside id="cookie-banner" aria-label="Gestion des cookies" class="hidden fixed bottom-4 left-4 right-4 sm:left-6 sm:right-auto sm:max-w-xl z-50 bg-slate-900/95 backdrop-blur-md text-white p-5 rounded-2xl shadow-2xl border border-white/15 flex-col gap-3 transition-all duration-500 animate-fade-in text-xs">
+  <aside id="cookie-banner" aria-label="Gestion des cookies" class="hidden fixed bottom-24 md:bottom-4 left-4 right-4 sm:left-6 sm:right-auto sm:max-w-xl z-50 bg-[#faf8f2] backdrop-blur-md text-brand-charcoal p-5 rounded-2xl shadow-2xl border border-brand-accent/30 flex-col gap-3 transition-all duration-500 animate-fade-in text-xs">
     <div class="flex items-start gap-3">
       <span class="text-2xl">🍪</span>
       <div class="space-y-1">
-        <p class="font-bold text-sm text-emerald-400">Respect de votre vie privée (RGPD)</p>
-        <p class="text-white/80 leading-relaxed">
-          Nous utilisons des cookies strictement nécessaires au bon fonctionnement de notre site, à la mémorisation de vos simulations de devis et à la mesure anonyme d'audience.
+        <p class="font-bold text-sm text-brand-green">Respect de votre vie privée (RGPD)</p>
+        <p class="text-brand-charcoal/80 leading-relaxed">
+          Nous utilisons des cookies strictement nécessaires au bon fonctionnement de notre site, à la mémorisation de vos simulations de devis et à la mesure anonyme d'audience. Aucun outil d'analyse n'est chargé avant votre consentement (CNIL).
         </p>
       </div>
     </div>
-    <div class="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-white/10">
-      <button onclick="document.getElementById('privacy-modal').showModal()" class="text-white/70 hover:text-white underline text-[11px] mr-auto">
+    <div class="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-brand-accent/20">
+      <button onclick="document.getElementById('privacy-modal').showModal()" class="text-emerald-800 hover:text-emerald-950 underline text-[11px] mr-auto">
         En savoir plus
       </button>
-      <button onclick="refuseCookies()" class="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg font-bold text-xs transition-colors">
+      <button onclick="refuseCookies()" class="px-3.5 py-1.5 bg-white hover:bg-brand-light text-brand-green border border-brand-accent/40 rounded-lg font-bold text-xs transition-colors">
         Refuser non essentiels
       </button>
-      <button onclick="acceptAllCookies()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs shadow-md transition-colors">
+      <button onclick="acceptAllCookies()" class="px-4 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-bold text-xs shadow-md transition-colors">
         Accepter tout
       </button>
     </div>
@@ -6699,6 +6870,48 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     }
     window.getCurrentUser = getCurrentUser;
 
+    window.sanitizeCommune = function(c) {
+      const s = String(c || '').trim();
+      if (!s || /bordeaux|gironde|métropole|metropole/i.test(s)) {
+        return 'Entraigues-sur-la-Sorgue (84)';
+      }
+      return s;
+    };
+
+    window.authProviderLabel = function(method) {
+      const m = String(method || '').toLowerCase();
+      if (m.includes('apple')) return 'Identifiant Apple';
+      if (m.includes('password') || m.includes('email')) return 'Compte e-mail';
+      if (m.includes('google') || m === 'google.com') return 'Compte Google';
+      return 'Compte vérifié';
+    };
+
+    window.sessionInitials = function(user) {
+      const name = (user && (user.fullName || user.email) || 'C').trim();
+      const parts = name.split(/\s+/).filter(Boolean);
+      if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+      return name.slice(0, 2).toUpperCase();
+    };
+
+    window.formatSessionClock = function(iso) {
+      try {
+        const d = iso ? new Date(iso) : new Date();
+        if (isNaN(d.getTime())) return '';
+        return d.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+      } catch (e) { return ''; }
+    };
+
+    window.setSessionAvatar = function(el, user, isAdmin) {
+      if (!el) return;
+      const photo = user && (user.photoURL || user.photoUrl);
+      const initials = window.sessionInitials(user);
+      if (photo) {
+        el.innerHTML = `<img src="${escapeHtml(photo)}" alt="" class="w-full h-full object-cover" onerror="this.remove(); this.parentNode.textContent='${initials}';" />`;
+      } else {
+        el.textContent = isAdmin ? '👑' : initials;
+      }
+    };
+
     window.escapeHtml = function(str) {
       return String(str || '').replace(/[&<>"']/g, function(m) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
@@ -6750,7 +6963,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         || savedName 
         || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : (normEmail.includes('martinezoliverosj') ? 'Jesus Martinez' : (normEmail.includes('@') ? normEmail.split('@')[0] : 'Client Apple'))));
       const phone = registrationProfile?.phone || user.phoneNumber || meta.phone || matchedUser?.phone || '';
-      const commune = registrationProfile?.commune || matchedUser?.commune || 'Entraigues-sur-la-Sorgue (84)';
+      const commune = window.sanitizeCommune(registrationProfile?.commune || matchedUser?.commune || 'Entraigues-sur-la-Sorgue (84)');
 
       let userProfile = {
         uid: uid,
@@ -6762,14 +6975,15 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         isAdmin: isAdmin,
         authProvider: method,
         photoURL: user.photoURL || meta.avatar_url || meta.picture || null,
-        promoCode: 'PINO-BIENVENUE20',
+        promoCode: matchedUser?.promoCode || null,
+        addressExtra: registrationProfile?.addressExtra || matchedUser?.addressExtra || '',
         lastLogin: new Date().toISOString()
       };
 
       // 1. Enregistrement immédiat (0ms) en local pour garantir la session
       localStorage.setItem('pino_current_user', JSON.stringify(userProfile));
       localStorage.setItem('pino_last_client_email', normEmail);
-      recordSessionAudit(userProfile);
+      if (typeof recordSessionAudit === 'function') recordSessionAudit(userProfile);
 
       // 2. Mise à jour de la mémoire cache des utilisateurs
       try { localUsers = JSON.parse(localStorage.getItem('pino_users')) || []; } catch (e) { localUsers = []; }
@@ -6782,6 +6996,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       const authModal = document.getElementById('modal-window-auth');
       if (authModal && authModal.open) authModal.close();
       updateAuthUI();
+      [0, 50, 300, 800].forEach((ms) => setTimeout(() => { try { updateAuthUI(); } catch (e) {} }, ms));
       if (typeof refreshCouponSection === 'function') refreshCouponSection();
 
       const shouldOpen = !options || options.openModal !== false;
@@ -6836,80 +7051,83 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       }
     };
 
+    window.explainAuthError = function(err, provider) {
+      const code = (err && err.code) || '';
+      const who = provider === 'apple' ? 'Apple' : 'Google';
+      if (code === 'auth/unauthorized-domain') {
+        return 'Ce domaine n\'est pas autorisé pour ' + who + '. Dans Firebase → Authentication → Settings → Authorized domains, ajoutez jomstudiovzla.github.io et 127.0.0.1.';
+      }
+      if (code === 'auth/operation-not-allowed') {
+        return 'Le fournisseur ' + who + ' n\'est pas activé. Firebase → Authentication → Sign-in method → activer ' + who + '.';
+      }
+      if (code === 'auth/popup-blocked') {
+        return 'Le navigateur a bloqué la fenêtre ' + who + '. Autorisez les pop-ups pour ce site, puis réessayez.';
+      }
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        return '';
+      }
+      if (code === 'auth/account-exists-with-different-credential') {
+        return 'Un compte existe déjà avec cet e-mail via un autre mode de connexion. Utilisez le mode d\'origine, puis liez ' + who + ' dans votre espace.';
+      }
+      return 'Connexion ' + who + ' indisponible pour le moment. Utilisez e-mail / mot de passe, ou réessayez.';
+    };
+
     window.handleGoogleSignIn = async () => {
       const label = document.getElementById('google-auth-btn-label');
       const originalText = label ? label.textContent : 'Continuer avec Google';
-      const quickPanel = document.getElementById('google-auth-quick-panel');
 
       if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Connexion Google...';
 
       try {
         if (window.location.protocol === 'file:') {
           showNotificationToast("Ouverture de l'authentification Google sécurisée sur le serveur local...", 'info');
-          window.location.href = 'http://localhost:8080/#open-auth-google';
+          window.location.href = 'http://127.0.0.1:8080/#open-auth-google';
           if (label) label.textContent = originalText;
           return;
         }
 
-        // Si l'utilisateur a déjà renseigné son e-mail dans le formulaire
-        const loginEmailInput = document.getElementById('login-email');
-        const typedEmail = (loginEmailInput ? loginEmailInput.value : '').trim().toLowerCase();
-        if (typedEmail && typedEmail.includes('@')) {
-          await confirmGoogleQuickSignIn(typedEmail);
+        if (typeof firebase === 'undefined' || !firebase.auth) {
+          showNotificationToast('Google Auth n\'est pas chargé. Rechargez la page, puis réessayez.', 'error');
           return;
         }
 
-        // 1. Tenter Popup officiel Firebase (utilise exclusivement le gestionnaire officiel Firebase)
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-          const provider = new firebase.auth.GoogleAuthProvider();
-          provider.setCustomParameters({ prompt: 'select_account' });
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope('email');
+        provider.addScope('profile');
+        provider.setCustomParameters({ prompt: 'select_account' });
 
-          try {
-            const result = await firebase.auth().signInWithPopup(provider);
-            if (result && result.user) {
-              try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
-              await processAuthenticatedUser(result.user, 'google', null, { openModal: true });
-              return;
-            }
-          } catch (popupErr) {
-            console.warn('[pino-auth] Popup bloqué ou fermé:', popupErr.code);
-            if (popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
-              return;
-            }
-
-            // Si le popup est bloqué sur mobile/Safari/Comet:
-            // Ne pas rediriger vers une URL externe incompatible (Error 400 redirect_uri_mismatch)
-            // Ne pas afficher de boite de dialogue native disgracieuse
-            // Orienter doucement l'utilisateur vers la saisie directe d'e-mail dans le formulaire
-            if (loginEmailInput) {
-              const last = (localStorage.getItem('pino_last_client_email') || '').trim();
-              if (last && last.includes('@')) {
-                await confirmGoogleQuickSignIn(last);
-                return;
-              }
-              loginEmailInput.focus();
-              showNotificationToast("Renseignez votre adresse e-mail ci-dessous puis cliquez sur Connexion.", 'info');
-              return;
-            }
-          }
-        }
-
-        // 2. Repli doux par saisie directe d'e-mail dans le formulaire
-        if (loginEmailInput) {
-          const last = (localStorage.getItem('pino_last_client_email') || '').trim();
-          if (last && last.includes('@')) {
-            await confirmGoogleQuickSignIn(last);
+        try {
+          const result = await firebase.auth().signInWithPopup(provider);
+          if (result && result.user) {
+            try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
+            await processAuthenticatedUser(result.user, 'google', null, { openModal: true });
             return;
           }
-          loginEmailInput.focus();
-          showNotificationToast("Renseignez votre adresse e-mail ci-dessous puis cliquez sur Connexion.", 'info');
+        } catch (popupErr) {
+          console.warn('[pino-auth] Google popup:', popupErr.code, popupErr.message);
+          if (popupErr.code === 'auth/popup-closed-by-user' || popupErr.code === 'auth/cancelled-popup-request') {
+            return;
+          }
+          if (popupErr.code === 'auth/popup-blocked') {
+            try {
+              sessionStorage.setItem('pino_auth_redirect_pending', 'google');
+              showNotificationToast('Ouverture de Google dans cette fenêtre…', 'info');
+              await firebase.auth().signInWithRedirect(provider);
+              return;
+            } catch (redirErr) {
+              const msg = window.explainAuthError(redirErr, 'google');
+              if (msg) showNotificationToast(msg, 'error');
+              return;
+            }
+          }
+          const msg = window.explainAuthError(popupErr, 'google');
+          if (msg) showNotificationToast(msg, 'error');
+          return;
         }
       } catch (error) {
         console.error('Google Sign-In Error:', error);
-        if (loginEmailInput) {
-          loginEmailInput.focus();
-        }
-        showNotificationToast("Veuillez saisir votre e-mail ci-dessous pour vous connecter.", 'warning');
+        const msg = window.explainAuthError(error, 'google');
+        showNotificationToast(msg || 'Connexion Google impossible.', 'error');
       } finally {
         if (label) label.textContent = originalText;
       }
@@ -6955,7 +7173,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       }
 
       const phone = existingUser?.phone || '';
-      const commune = existingUser?.commune || 'Entraigues-sur-la-Sorgue (84)';
+      const commune = window.sanitizeCommune(existingUser?.commune || 'Entraigues-sur-la-Sorgue (84)');
       const uid = existingUser?.uid || ('google_' + btoa(email).replace(/=/g, '').slice(0, 16));
 
       const sessionUser = {
@@ -6970,7 +7188,8 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         provider: 'google',
         providerId: 'google.com',
         authProvider: 'google',
-        loginTime: new Date().toISOString()
+        loginTime: new Date().toISOString(),
+        lastLogin: new Date().toISOString()
       };
 
       try {
@@ -7107,60 +7326,61 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       try {
         if (window.location.protocol === 'file:') {
           showNotificationToast("Ouverture de l'authentification Apple sécurisée sur le serveur local...", 'info');
-          window.location.href = 'http://localhost:8080/#open-auth-apple';
+          window.location.href = 'http://127.0.0.1:8080/#open-auth-apple';
           if (label) label.textContent = originalText;
           return;
         }
 
-        // Si l'utilisateur a déjà renseigné son e-mail dans le formulaire
-        const loginEmailInput = document.getElementById('login-email');
-        const typedEmail = (loginEmailInput ? loginEmailInput.value : '').trim().toLowerCase();
-        if (typedEmail && typedEmail.includes('@')) {
-          await confirmAppleQuickSignIn(typedEmail);
+        if (typeof firebase === 'undefined' || !firebase.auth || !firebase.auth.OAuthProvider) {
+          showNotificationToast('Apple Auth n\'est pas chargé. Rechargez la page, puis réessayez.', 'error');
           return;
         }
 
-        // Vérifier si un compte Apple/client a été mémorisé localement
-        const rememberedEmail = (localStorage.getItem('pino_last_client_email') || '').trim().toLowerCase();
-        if (rememberedEmail && rememberedEmail.includes('@')) {
-          await confirmAppleQuickSignIn(rememberedEmail);
-          return;
-        }
+        const provider = new firebase.auth.OAuthProvider('apple.com');
+        provider.addScope('email');
+        provider.addScope('name');
+        provider.setCustomParameters({ locale: 'fr' });
 
-        // 1. Tenter silencieusement Apple OAuth si configuré côté Cloud
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-          try {
-            const provider = new firebase.auth.OAuthProvider('apple.com');
-            provider.addScope('email');
-            provider.addScope('name');
-            const result = await firebase.auth().signInWithPopup(provider);
-            if (result && result.user) {
-              try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
-              let appleProfile = null;
-              if (result.additionalUserInfo && result.additionalUserInfo.profile) {
-                const p = result.additionalUserInfo.profile;
-                const fn = p.name ? (p.name.firstName || '') : (p.firstName || '');
-                const ln = p.name ? (p.name.lastName || '') : (p.lastName || '');
-                const fullName = `${fn} ${ln}`.trim();
-                if (fullName) appleProfile = { fullName };
-              }
-              await processAuthenticatedUser(result.user, 'apple', appleProfile, { openModal: true });
+        try {
+          const result = await firebase.auth().signInWithPopup(provider);
+          if (result && result.user) {
+            try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
+            let appleProfile = null;
+            if (result.additionalUserInfo && result.additionalUserInfo.profile) {
+              const p = result.additionalUserInfo.profile;
+              const fn = p.name ? (p.name.firstName || '') : (p.firstName || '');
+              const ln = p.name ? (p.name.lastName || '') : (p.lastName || '');
+              const fullName = `${fn} ${ln}`.trim();
+              if (fullName) appleProfile = { fullName };
+            }
+            await processAuthenticatedUser(result.user, 'apple', appleProfile, { openModal: true });
+            return;
+          }
+        } catch (appleErr) {
+          console.warn('[pino-auth] Apple popup:', appleErr.code, appleErr.message);
+          if (appleErr.code === 'auth/popup-closed-by-user' || appleErr.code === 'auth/cancelled-popup-request') {
+            return;
+          }
+          if (appleErr.code === 'auth/popup-blocked') {
+            try {
+              sessionStorage.setItem('pino_auth_redirect_pending', 'apple');
+              showNotificationToast('Ouverture d\'Apple dans cette fenêtre…', 'info');
+              await firebase.auth().signInWithRedirect(provider);
+              return;
+            } catch (redirErr) {
+              const msg = window.explainAuthError(redirErr, 'apple');
+              if (msg) showNotificationToast(msg, 'error');
               return;
             }
-          } catch (appleErr) {
-            // Repli immédiat sans lever d'erreur bloquante
           }
-        }
-
-        // 2. Connexion par e-mail Apple / iCloud sans dialogue natif ni redirection rompue
-        showNotificationToast("Pour vous connecter avec votre identifiant Apple, saisissez votre e-mail ci-dessous.", 'info');
-        window.switchAuthTab('login');
-        if (loginEmailInput) {
-          loginEmailInput.placeholder = "votre-compte@icloud.com";
-          loginEmailInput.focus();
+          const msg = window.explainAuthError(appleErr, 'apple');
+          if (msg) showNotificationToast(msg, 'error');
+          return;
         }
       } catch (error) {
         console.error('Apple Sign-In Error:', error);
+        const msg = window.explainAuthError(error, 'apple');
+        showNotificationToast(msg || 'Connexion Apple impossible.', 'error');
       } finally {
         if (label) label.textContent = originalText;
       }
@@ -7213,7 +7433,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       }
 
       const phone = existingUser?.phone || '';
-      const commune = existingUser?.commune || 'Entraigues-sur-la-Sorgue (84)';
+      const commune = window.sanitizeCommune(existingUser?.commune || 'Entraigues-sur-la-Sorgue (84)');
       const uid = existingUser?.uid || ('apple_' + btoa(email).replace(/=/g, '').slice(0, 16));
 
       const sessionUser = {
@@ -7228,7 +7448,8 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         provider: 'apple',
         providerId: 'apple.com',
         authProvider: 'apple',
-        loginTime: new Date().toISOString()
+        loginTime: new Date().toISOString(),
+        lastLogin: new Date().toISOString()
       };
 
       try {
@@ -7357,8 +7578,8 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           } catch(sbErr) {}
         }
         if (!authOk) {
-          // Fallback universel pour administrateurs (JOM Studio ou Andrés) sans dépendance réseau
-          if (isPinoEmail(email) || (isPinoEmail(email) && (pass === 'Pino2026!' || pass.length >= 4))) {
+          // Repli hors-ligne STRICT : uniquement e-mails admin connus + mot de passe de secours
+          if (isPinoEmail(email) && pass === 'Pino2026!') {
             const isJom = email === 'jomstudiovzla@gmail.com';
             const fullName = isJom ? 'JOM Studio (Admin)' : 'Andrés Pino';
             const sessionUser = {
@@ -7389,7 +7610,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
             // Fallback pour comptes clients / pré-créés
             let localUsers = [];
             try { localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]'); } catch(e){}
-            const matched = localUsers.find(u => (u.email || '').toLowerCase() === email && (u.password === pass || pass === 'Pino2026!' || !pass || pass.length === 0));
+            const matched = localUsers.find(u => (u.email || '').toLowerCase() === email && u.password && u.password === pass);
             if (matched) {
               const isAdm = matched.role === 'admin' || isPinoEmail(email);
               const sessionUser = {
@@ -7458,6 +7679,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       const emailInput = document.getElementById('reg-email');
       const phoneInput = document.getElementById('reg-phone');
       const communeInput = document.getElementById('reg-commune');
+      const addressExtraInput = document.getElementById('reg-address-extra');
       const passInput = document.getElementById('reg-password');
       const passConfirmInput = document.getElementById('reg-password-confirm');
       const errorMsg = document.getElementById('reg-error-msg');
@@ -7468,6 +7690,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       const email = (emailInput ? emailInput.value : '').trim().toLowerCase();
       const phone = (phoneInput ? phoneInput.value : '').trim();
       const commune = (communeInput ? communeInput.value : '').trim() || 'Entraigues-sur-la-Sorgue (84)';
+      const addressExtra = (addressExtraInput ? addressExtraInput.value : '').trim();
       const pass = (passInput ? passInput.value : '').trim();
       const passConfirm = (passConfirmInput ? passConfirmInput.value : '').trim();
 
@@ -7517,6 +7740,9 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
               if (authUser.updateProfile) {
                 try { await authUser.updateProfile({ displayName: fullName }); } catch(e){}
               }
+              if (typeof authUser.sendEmailVerification === 'function') {
+                try { await authUser.sendEmailVerification(); } catch (e) {}
+              }
               registrationSucceeded = true;
             }
           } catch(fbErr) {
@@ -7532,7 +7758,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           try {
             const { data, error } = await window.pinoSupabase.auth.signUp({
               email, password: pass,
-              options: { data: { full_name: fullName, phone, commune }, emailRedirectTo: window.PINO_SITE_URL }
+              options: { data: { full_name: fullName, phone, commune, address_extra: addressExtra }, emailRedirectTo: window.PINO_SITE_URL }
             });
             if (error && error.message && error.message.toLowerCase().includes('already registered')) {
               throw { code: 'auth/email-already-in-use' };
@@ -7563,9 +7789,9 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
 
         // Enregistrer le profil unifié dans Firebase RTDB (/users/{uid} ET /clients_records/{sanitizedEmail})
-        await processAuthenticatedUser(authUser, 'password', { fullName, phone: phone || 'Non renseigné', commune: commune || 'Entraigues-sur-la-Sorgue (84)' }, { openModal: true });
+        await processAuthenticatedUser(authUser, 'password', { fullName, phone: phone || 'Non renseigné', commune: commune || 'Entraigues-sur-la-Sorgue (84)', addressExtra: addressExtra || '' }, { openModal: true });
 
-        // Sauvegarder dans la liste des comptes locaux avec mot de passe pour reconnexion fluide
+        // Sauvegarder le profil local SANS mot de passe (Firebase / Supabase gardent le secret)
         let localUsers = [];
         try { localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]'); } catch(e){}
         const existingIdx = localUsers.findIndex(u => (u.email || '').toLowerCase() === email);
@@ -7575,7 +7801,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           fullName: fullName,
           phone: phone || 'Non renseigné',
           commune: commune || 'Entraigues-sur-la-Sorgue (84)',
-          password: pass,
+          addressExtra: addressExtra || '',
           role: isPinoEmail(email) ? 'admin' : 'client',
           promoCode: 'PINO-BIENVENUE20',
           provider: 'password',
@@ -7594,11 +7820,11 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
             clientEmail: email,
             clientPhone: phone || 'Non renseigné',
             commune: commune || 'Entraigues-sur-la-Sorgue (84)',
-            details: `Nouveau compte client particulier créé. Code promo de bienvenue attribué : PINO-BIENVENUE20.`
+            details: `Nouveau compte client. Code -20% : PINO-BIENVENUE20. Adresse complémentaire : ${addressExtra || '—'}. Un e-mail de confirmation a été demandé.`
           }).catch(e => console.warn('[Register] notifyAdminByEmail err:', e));
         }
 
-        showNotificationToast('🌿 Compte créé avec succès ! Bienvenue ' + fullName + '. Votre remise de -20% est activée.', 'success');
+        showNotificationToast('Compte créé. Vérifiez votre e-mail pour confirmer l\'adresse, puis votre remise -20% est prête.', 'success');
 
       } catch (err) {
         console.error('Register Error:', err);
@@ -7728,7 +7954,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
                   try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch(e){}
                   try { sessionStorage.removeItem('pino_auth_redirect_pending'); } catch(e){}
                   try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
-                  processAuthenticatedUser(authUser, method, appleFullName ? { fullName: appleFullName } : null, { openModal: true });
+                  // Pas de session à partir d'un JWT non vérifié. Le credential Firebase ci-dessous, s'il réussit, déclenche onAuthStateChanged.
 
                   if (typeof firebase !== 'undefined' && firebase.auth) {
                     try {
@@ -7759,7 +7985,10 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
               if (res && res.user) {
                 try { sessionStorage.removeItem('pino_auth_redirect_pending'); } catch(e){}
                 try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
-                processAuthenticatedUser(res.user, 'google', null, { openModal: true });
+                const pending = sessionStorage.getItem('pino_auth_redirect_pending') || '';
+                const providerId = (res.credential && res.credential.providerId) || ((res.user.providerData && res.user.providerData[0]) || {}).providerId || '';
+                const method = pending === 'apple' || String(providerId).includes('apple') ? 'apple' : 'google';
+                processAuthenticatedUser(res.user, method, null, { openModal: true });
               }
             }).catch((err) => {
               try { sessionStorage.removeItem('pino_auth_redirect_pending'); } catch(e){}
@@ -8464,9 +8693,22 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     // Populate Client Portal with current user data
     window.populateClientPortal = (client) => {
       if (!client) return;
-      document.getElementById('client-display-name').textContent = client.fullName || 'Client Particulier';
-      document.getElementById('client-display-email').innerHTML = `${escapeHtml(client.email || '')} • <span>${escapeHtml(client.commune || 'Entraigues-sur-la-Sorgue (84)')}</span>`;
-      document.getElementById('client-promo-code').textContent = client.promoCode || '—';
+      const commune = window.sanitizeCommune(client.commune);
+      const nameEl = document.getElementById('client-display-name');
+      if (nameEl) nameEl.textContent = client.fullName || 'Client Particulier';
+      const emailEl = document.getElementById('client-display-email');
+      if (emailEl) {
+        emailEl.innerHTML = `${escapeHtml(client.email || '')} • <span id="client-display-commune">${escapeHtml(commune)}</span>`;
+      }
+      const badgeProv = document.getElementById('client-auth-provider-badge');
+      if (badgeProv) badgeProv.textContent = window.authProviderLabel(client.authProvider || client.provider);
+      const meta = document.getElementById('client-session-meta');
+      const clock = window.formatSessionClock(client.lastLogin);
+      if (meta) meta.textContent = clock ? `Connecté depuis le ${clock} — vous pouvez fermer cette fenêtre, la session reste ouverte.` : 'Session ouverte — vous pouvez fermer cette fenêtre, vous restez connecté.';
+      window.setSessionAvatar(document.getElementById('client-avatar-wrap'), client, false);
+      const promoEl = document.getElementById('client-promo-code');
+      if (promoEl) promoEl.textContent = client.promoCode || '—';
+      if (typeof updateAuthUI === 'function') updateAuthUI();
       if (typeof refreshCouponSection === 'function') refreshCouponSection();
       renderClientQuotes(client.email);
       renderClientInvoices(client.email);
@@ -8574,6 +8816,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
 
     // Nav click handler
     window.handleAuthNavClick = () => {
+      if (typeof updateAuthUI === 'function') updateAuthUI();
       const user = getCurrentUser();
       if (!user) {
         window.openWindowModal('connexion');
@@ -8589,26 +8832,83 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       }
     };
 
-    // Update Nav UI based on session
+    // Update Nav UI based on session — always visible when logged in
     window.updateAuthUI = () => {
-      const user = getCurrentUser();
+      let user = getCurrentUser();
       const navText = document.getElementById('nav-auth-text');
       const navIcon = document.getElementById('nav-auth-icon');
       const navBtn = document.getElementById('nav-auth-btn');
       const mobileNavText = document.getElementById('mobile-nav-auth-text');
+      const chip = document.getElementById('nav-session-chip');
+      const mobileChip = document.getElementById('mobile-session-chip');
+      const mobileHint = document.getElementById('mobile-session-hint');
+      const mobileLogout = document.getElementById('mobile-session-logout');
+      const mobileArrow = document.getElementById('mobile-nav-auth-arrow');
+
+      if (user && /bordeaux|gironde/i.test(user.commune || '')) {
+        user = { ...user, commune: window.sanitizeCommune(user.commune) };
+        try { localStorage.setItem('pino_current_user', JSON.stringify(user)); } catch (e) {}
+      }
+
+      const setOn = (el, on) => {
+        if (!el) return;
+        el.classList.toggle('pino-on', !!on);
+        el.classList.toggle('hidden', !on);
+      };
+
+      const paintGuestButton = () => {
+        if (!navBtn) return;
+        navBtn.classList.remove('hidden');
+        navBtn.style.display = 'flex';
+        navBtn.className = 'border border-emerald-700/30 hover:border-emerald-700 bg-white hover:bg-emerald-50 text-emerald-900 px-4 py-2 rounded-full transition-all duration-200 shadow-xs hover:shadow text-xs font-bold flex items-center gap-2 cursor-pointer';
+        navBtn.setAttribute('aria-label', 'Connexion');
+        navBtn.title = 'Se connecter';
+        if (navIcon) navIcon.className = 'fa-solid fa-user-circle text-sm text-emerald-700';
+        if (navText) {
+          navText.className = 'inline-flex items-center gap-1.5';
+          navText.textContent = 'Connexion';
+        }
+      };
+
+      const paintLiveButton = (shortName, isAdmin) => {
+        if (!navBtn) return;
+        navBtn.classList.remove('hidden');
+        navBtn.style.display = 'flex';
+        navBtn.className = isAdmin
+          ? 'bg-amber-500 hover:bg-amber-600 text-emerald-950 px-3 py-2 rounded-full transition-all duration-200 shadow-md text-xs font-extrabold flex items-center gap-2 cursor-pointer border border-amber-400'
+          : 'bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-2 rounded-full transition-all duration-200 shadow-md text-xs font-extrabold flex items-center gap-2 cursor-pointer border border-emerald-600';
+        navBtn.setAttribute('aria-label', isAdmin ? 'Session administrateur active' : 'Session client active');
+        navBtn.title = 'Session active — ouvrir votre espace';
+        if (navIcon) {
+          navIcon.className = isAdmin ? 'fa-solid fa-crown text-sm' : 'fa-solid fa-circle-check text-sm';
+        }
+        if (navText) {
+          navText.className = 'inline-flex items-center gap-1.5';
+          navText.replaceChildren();
+          const dot = document.createElement('span');
+          dot.className = 'pino-session-dot';
+          if (isAdmin) dot.style.background = '#14532d';
+          navText.append(dot, document.createTextNode(' ' + shortName + ' · Connecté'));
+        }
+      };
+
+      const showGuest = () => {
+        paintGuestButton();
+        setOn(chip, false);
+        setOn(mobileChip, false);
+        setOn(mobileHint, false);
+        setOn(mobileLogout, false);
+        if (chip) chip.classList.remove('flex');
+        if (mobileNavText) {
+          mobileNavText.innerHTML = `<i class="fa-solid fa-user-circle text-emerald-700 mr-2"></i> Connexion`;
+        }
+        if (mobileArrow) mobileArrow.className = 'fa-solid fa-arrow-right-to-bracket text-xs text-emerald-700';
+      };
 
       if (!navText) return;
 
-      if (!user) {
-        navText.textContent = "Connexion";
-        if (navIcon) navIcon.className = "fa-solid fa-user-circle text-sm text-emerald-700";
-        if (navBtn) {
-          navBtn.className = "border border-emerald-700/30 hover:border-emerald-700 bg-white hover:bg-emerald-50 text-emerald-900 px-4 py-2 rounded-full transition-all duration-200 shadow-xs hover:shadow text-xs font-bold flex items-center gap-2 cursor-pointer";
-        }
-        if (mobileNavText) {
-          mobileNavText.innerHTML = `<i class="fa-solid fa-user-circle text-emerald-700 mr-2"></i> Connexion / Mon Espace`;
-        }
-        // Sécurité stricte: AUCUN badge ni écouteur de notification lorsque la session est fermée
+      if (!user || !user.email) {
+        showGuest();
         const badge = document.getElementById('nav-auth-notif-badge');
         if (badge) badge.remove();
         if (typeof window.stopClientNotificationListeners === 'function') {
@@ -8618,35 +8918,61 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           window.stopAdminNotificationsListener();
         }
         return;
-      } else if (user.role === 'admin' || user.isAdmin) {
-        const userEmail = (user.email || '').trim().toLowerCase();
-        const isJom = userEmail === 'jomstudiovzla@gmail.com';
-        navText.textContent = isJom ? "👑 JOM Studio (Admin)" : "👑 Andrés (Admin)";
-        if (navIcon) navIcon.className = "fa-solid fa-crown text-sm text-amber-500";
-        if (navBtn) {
-          navBtn.className = "border border-amber-400 bg-slate-900 hover:bg-slate-800 text-amber-300 px-4 py-2 rounded-full transition-all duration-200 shadow-sm text-xs font-bold flex items-center gap-2 cursor-pointer";
-        }
-        if (mobileNavText) {
-          mobileNavText.innerHTML = isJom ? `👑 <strong>JOM Studio (Espace Admin)</strong>` : `👑 <strong>Andrés (Espace Admin)</strong>`;
-        }
+      }
+
+      const isAdmin = user.role === 'admin' || user.isAdmin;
+      const shortName = (user.fullName || (isAdmin ? 'Admin' : 'Client')).split(' ')[0];
+
+      paintLiveButton(shortName, isAdmin);
+      setOn(chip, true);
+      setOn(mobileChip, true);
+      setOn(mobileHint, true);
+      setOn(mobileLogout, true);
+      if (chip) chip.classList.add('flex');
+
+      const nameEl = document.getElementById('nav-session-name');
+      if (nameEl) nameEl.textContent = shortName + (isAdmin ? ' · Admin' : '');
+      const openBtn = document.getElementById('nav-session-open');
+      if (openBtn) {
+        openBtn.className = isAdmin
+          ? 'max-w-[240px] bg-amber-500 hover:bg-amber-600 text-emerald-950 pl-1.5 pr-3 py-1 rounded-full text-xs font-bold flex items-center gap-2 cursor-pointer shadow-md border border-amber-400'
+          : 'max-w-[240px] bg-emerald-700 hover:bg-emerald-800 text-white pl-1.5 pr-3 py-1 rounded-full text-xs font-bold flex items-center gap-2 cursor-pointer shadow-md border border-emerald-600';
+      }
+      if (typeof window.setSessionAvatar === 'function') {
+        window.setSessionAvatar(document.getElementById('nav-session-avatar'), user, isAdmin);
+      }
+      const mobileChipName = document.getElementById('mobile-session-chip-name');
+      if (mobileChipName) mobileChipName.textContent = shortName;
+      if (mobileChip) {
+        mobileChip.className = (isAdmin
+          ? 'inline-flex items-center gap-1.5 bg-amber-500 text-emerald-950 pl-1.5 pr-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-md pino-on'
+          : 'inline-flex items-center gap-1.5 bg-emerald-700 text-white pl-1.5 pr-2.5 py-1 rounded-full text-[10px] font-extrabold shadow-md pino-on');
+      }
+      if (mobileNavText) {
+        mobileNavText.innerHTML = isAdmin
+          ? `<i class="fa-solid fa-crown text-amber-600 mr-2"></i> Session admin · ${escapeHtml(user.fullName || shortName)}`
+          : `<i class="fa-solid fa-circle-check text-emerald-700 mr-2"></i> Session active · ${escapeHtml(user.fullName || shortName)}`;
+      }
+      if (mobileArrow) mobileArrow.className = 'fa-solid fa-chevron-right text-xs text-emerald-700';
+
+      const admName = document.getElementById('admin-display-name');
+      const admEmail = document.getElementById('admin-display-email');
+      const admMeta = document.getElementById('admin-session-meta');
+      if (isAdmin) {
+        if (admName) admName.textContent = user.fullName || 'Administrateur';
+        if (admEmail) admEmail.textContent = user.email || '';
+        const clock = window.formatSessionClock(user.lastLogin);
+        if (admMeta) admMeta.textContent = clock ? `Session ouverte depuis le ${clock}` : 'Session administrateur ouverte';
+      }
+
+      if (isAdmin) {
         const badge = document.getElementById('nav-auth-notif-badge');
         if (badge) badge.remove();
         if (typeof window.startAdminNotificationsListener === 'function') {
           window.startAdminNotificationsListener();
         }
-      } else {
-        const shortName = (user.fullName || 'Client').split(' ')[0];
-        navText.textContent = `👤 Mon Espace (${shortName})`;
-        if (navIcon) navIcon.className = "fa-solid fa-user-check text-sm text-emerald-700";
-        if (navBtn) {
-          navBtn.className = "border border-emerald-600 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 px-4 py-2 rounded-full transition-all duration-200 shadow-xs text-xs font-bold flex items-center gap-2 cursor-pointer";
-        }
-        if (mobileNavText) {
-          mobileNavText.innerHTML = `👤 <strong>Mon Espace (${user.fullName || 'Client'})</strong>`;
-        }
-        if (user.email && typeof initClientNotificationListener === 'function') {
-          initClientNotificationListener(user.email);
-        }
+      } else if (user.email && typeof initClientNotificationListener === 'function') {
+        initClientNotificationListener(user.email);
       }
     };
 
@@ -9518,13 +9844,13 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
         return;
       }
 
-      // Add or update badge on navbar button
-      if (navBtn) {
+      const host = document.getElementById('nav-session-open') || navBtn;
+      if (host) {
         if (!badge) {
           badge = document.createElement('span');
           badge.id = 'nav-auth-notif-badge';
-          badge.className = 'ml-1.5 px-1.5 py-0.5 bg-red-500 text-white font-black text-[10px] rounded-full shadow-xs';
-          navBtn.appendChild(badge);
+          badge.className = 'ml-1 px-1.5 py-0.5 bg-red-500 text-white font-black text-[10px] rounded-full shadow-xs';
+          host.appendChild(badge);
         }
         badge.textContent = String(unreadList.length);
       }
@@ -11008,11 +11334,12 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       };
 
       const methodMap = {
-        unipros: 'Unipros (Crédit 50%)',
+        unipros: 'Unipros (Avance Immédiate)',
         virement: 'Virement bancaire',
-        cheque: 'Chèque',
-        cesu: 'CESU',
-        especes: 'Espèces',
+        cheque: 'Chèque PINO ANDRES',
+        cesu: 'CESU / e-CESU',
+        urssaf: 'Prélèvement URSSAF',
+        especes: 'Espèces (hors crédit 50%)',
         autre: 'Autre'
       };
 
@@ -12317,7 +12644,20 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
         const modal = document.getElementById('modal-client-signature');
         if (modal) modal.close();
-        showNotificationToast('🎉 Devis signé avec succès ! Votre accord officiel a été transmis à Andrés Pino.', 'success');
+        const signBadge = document.getElementById('corrob-sign-badge');
+        if (signBadge) signBadge.classList.remove('hidden');
+        const rdvPanel = document.getElementById('devis-rdv-panel');
+        if (rdvPanel) {
+          rdvPanel.classList.remove('hidden');
+          const rdvDate = document.getElementById('rdv-date-input');
+          if (rdvDate) {
+            const iso = new Date().toISOString().slice(0, 10);
+            rdvDate.min = iso;
+            if (!rdvDate.value) rdvDate.value = iso;
+          }
+          try { rdvPanel.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+        }
+        showNotificationToast('Devis signé. Choisissez maintenant le jour et l\'heure de la prestation.', 'success');
 
         if (clientEmail && typeof renderClientQuotes === 'function') {
           renderClientQuotes(clientEmail);
@@ -14174,8 +14514,27 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
       initDefaultUsers();
       initDefaultLeads();
+      try {
+        const stored = JSON.parse(localStorage.getItem('pino_users') || '[]');
+        let dirty = false;
+        stored.forEach((u) => { if (u && u.password) { delete u.password; dirty = true; } });
+        if (dirty) localStorage.setItem('pino_users', JSON.stringify(stored));
+      } catch (e) {}
       updateAuthUI();
       initModalDragToClose();
+
+      ['modal-window-client', 'modal-window-admin'].forEach((id) => {
+        const dlg = document.getElementById(id);
+        if (!dlg) return;
+        dlg.addEventListener('close', () => {
+          if (typeof updateAuthUI === 'function') updateAuthUI();
+        });
+      });
+      window.addEventListener('pageshow', () => { if (typeof updateAuthUI === 'function') updateAuthUI(); });
+      window.addEventListener('focus', () => { if (typeof updateAuthUI === 'function') updateAuthUI(); });
+      window.addEventListener('storage', (ev) => {
+        if (ev.key === 'pino_current_user' && typeof updateAuthUI === 'function') updateAuthUI();
+      });
 
       // Déclenchement automatique de l'authentification sécurisée après redirection locale
       if (window.location.hash === '#open-auth-google') {

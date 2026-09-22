@@ -40,6 +40,7 @@ assert(indexHtml.includes('id="reg-fullname"'), 'Champ Nom et Prénom présent')
 assert(indexHtml.includes('id="reg-email"'), 'Champ E-mail présent');
 assert(indexHtml.includes('id="reg-phone"'), 'Champ Téléphone mobile présent');
 assert(indexHtml.includes('id="reg-commune"'), 'Champ Commune d\'intervention présent');
+assert(indexHtml.includes('id="reg-address-extra"'), 'Champ Adresse complémentaire présent');
 assert(indexHtml.includes('id="reg-password"'), 'Champ Mot de passe présent');
 assert(indexHtml.includes('id="reg-password-confirm"'), 'Champ Confirmation mot de passe présent');
 assert(indexHtml.includes('id="reg-error-msg"'), 'Conteneur d\'erreur d\'inscription présent');
@@ -55,7 +56,7 @@ console.log('  ✅ PASS: Unification multicanale (Apple, Google, E-mail/Mot de p
 
 // TEST 5 : VERSIONNEMENT DU SERVICE WORKER
 console.log('\n🚀 [TEST 5 : SERVICE WORKER VERSIONNÉ V21]');
-assert(/pino-ev-v(19|20|21|22|23|24)/.test(swJs), 'sw.js utilise le cache versionné v21 ou supérieur');
+assert(/pino-ev-v(19|20|21|22|23|24|27|28|29|30|31)/.test(swJs), 'sw.js utilise le cache versionné v21 ou supérieur');
 console.log('  ✅ PASS: Service Worker versionné prêt pour le déploiement.');
 
 console.log('\n===============================================================');

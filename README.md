@@ -1,6 +1,6 @@
 # Pino Espaces Verts – Maison digitale
 
-Site et future plateforme de **Pino Espaces Verts** (Andrés Pino) — entretien et aménagement de jardins à Bordeaux et en Gironde, partenaire **Unipros** (50 % de crédit d’impôt SAP).
+Site et plateforme de **Pino Espaces Verts** (Andrés Pino, SIRET 105 075 006 00012) — entretien et aménagement de jardins à Entraigues-sur-la-Sorgue et dans un rayon de 40-45 km en Vaucluse (84), partenaire **Unipros** (crédit d’impôt SAP 50 %).
 
 ## Deux états du projet
 
@@ -26,12 +26,12 @@ La v1 **reste en production** jusqu’au hito 6 (coupure DNS). Ne pas la démant
 
 ## v1 — fonctionnalités déjà livrées
 
-1. SEO local JSON-LD (Bordeaux / Gironde)
+1. SEO local JSON-LD (Entraigues-sur-la-Sorgue / Vaucluse 84)
 2. Galerie avant/après et chantiers réels
-3. Coupon **PELABOLA** −20 % (cumulable avec Unipros)
-4. Chatbot (services, Unipros, devis) — n’affiche jamais le code en clair
-5. Mentions, CGV, RGPD, médiation CNPM
-6. PWA, CTA téléphone / WhatsApp
+3. Coupon de bienvenue −20 % (cumulable avec Unipros)
+4. Chatbot (services, Unipros, devis)
+5. Mentions, CGV officielles, RGPD, médiation CM2C, Tribunal d’Avignon
+6. PWA, CTA téléphone / WhatsApp, devis sans compte, signature tactile, prise de RDV
 
 ## Interdits produit
 

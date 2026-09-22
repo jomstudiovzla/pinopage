@@ -2,7 +2,10 @@
 
 **Producto:** Pino Espaces Verts  
 **Titular:** Andrés Pino (Entrepreneur Individuel / Micro-entreprise)  
-**Territorio:** Bordeaux Métropole y Gironde (33), France  
+**Territorio:** Entraigues-sur-la-Sorgue y Vaucluse (84), rayon 40-45 km, France  
+**SIRET:** 105 075 006 00012 — Siège : 1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue  
+**Médiation:** CM2C (https://www.cm2c.net/) — Tribunal d'Avignon  
+**Paiements SAP:** chèque PINO ANDRES, virement, CESU, URSSAF — pas de carte bancaire SAP
 **Versión:** 2.0 — 15 septiembre 2026  
 **Remediación viva:** [`DOCUMENTO_REMEDIACION_V2.md`](./DOCUMENTO_REMEDIACION_V2.md) (auditoría OAuth / Unipros / chat / cupones).  
 **Estado:** Especificación viva (fuente de verdad). Toda implementación futura debe alinearse aquí.  

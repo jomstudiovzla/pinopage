@@ -31,9 +31,9 @@ console.log('  ✅ PASS: Panneau Apple épuré, confidentiel avec support de la 
 // ── 3. GOOGLE SIGN-IN PAR POPUP SANS REDIRECTION INTRUSIVE ──
 console.log('\n🔍 [TEST 3 : GOOGLE SIGN-IN EN PLACE SANS REDIRECT DISRUPTIF]');
 assert(indexHtml.includes('await firebase.auth().signInWithPopup(provider)'), 'handleGoogleSignIn doit privilégier signInWithPopup');
-assert(!indexHtml.includes('await firebase.auth().signInWithRedirect(provider)'), 'signInWithRedirect ne doit plus être forcé pour éviter les rechargements complets');
+assert(indexHtml.includes('explainAuthError'), 'Erreurs OAuth expliquées (domaine, provider, popup)');
 assert(indexHtml.includes("google-auth-btn-label"), 'Libellé d\'état dynamique du bouton Google présent');
-console.log('  ✅ PASS: Flux Google popup officiel optimisé sans panneau intrusif.');
+console.log('  ✅ PASS: Flux Google popup officiel, redirect seulement si popup bloqué.');
 
 // ── 4. CONTRÔLE DE MODALE UNIFIÉ DANS processAuthenticatedUser & handleAuthNavClick ──
 console.log('\n🎛️ [TEST 4 : CONTRÔLE DE MODALE SÉCURISÉ & ANTI-INVALIDSTATE]');
@@ -41,6 +41,18 @@ assert(indexHtml.includes("window.openWindowModal('admin')"), 'processAuthentica
 assert(indexHtml.includes("window.openWindowModal('espace')"), 'processAuthenticatedUser et authNav doivent utiliser openWindowModal(espace)');
 assert(indexHtml.includes("if (!targetModal.open) {\n          targetModal.showModal();"), 'openWindowModal doit vérifier !targetModal.open avant showModal()');
 console.log('  ✅ PASS: Modales ouvertes de façon unifiée sans risque de crash InvalidStateError.');
+
+console.log('\n🟢 [TEST 5 : SESSION VISIBLE HEADER + PANNEAUX]');
+assert(indexHtml.includes('id="nav-session-chip"'), 'Chip de session dans le header desktop');
+assert(indexHtml.includes('id="mobile-session-chip"'), 'Chip de session visible sur mobile sans ouvrir le menu');
+assert(indexHtml.includes('id="client-session-live"'), 'Badge Session active dans le panneau client');
+assert(indexHtml.includes('id="admin-session-live"'), 'Badge Session active dans le panneau admin');
+assert(indexHtml.includes('id="admin-display-name"'), 'Identité admin dynamique');
+assert(indexHtml.includes('window.sanitizeCommune'), 'Commune Bordeaux/Gironde normalisée vers Vaucluse');
+assert(indexHtml.includes('paintLiveButton'), 'Le bouton Connexion est repeint en Session active');
+assert(indexHtml.includes('pino-session-dot'), 'Pastille Session active sur le bouton header');
+assert(indexHtml.includes('explainAuthError'), 'Messages d\'erreur OAuth métier');
+console.log('  ✅ PASS: Session active visible dans le header, mobile, panneau client et panneau admin.');
 
 console.log('\n===============================================================');
 console.log('🎉 TOUS LES TESTS DE PERSISTANCE & AUTH RESILIENCE SONT VALIDÉS !');

@@ -12,7 +12,8 @@ En France, tout site internet professionnel proposant des services ou collectant
 L'article 6 de la LCEN impose la publication des mentions légales accessibles en permanence depuis toutes les pages du site :
 - **Identité de l'exploitant :** Andrés Pino (Pino Espaces Verts).
 - **Statut juridique :** Entrepreneur Individuel (EI) / Micro-entreprise immatriculée au Répertoire National des Entreprises (RNE).
-- **Coordonnées :** Téléphone (+33 6 51 59 40 34), E-mail (pino.spacesverts@gmail.com), Siège à Bordeaux Métropole (Gironde, 33).
+- **Coordonnées :** Téléphone (+33 6 51 59 40 34), E-mail (pino.espacesverts@gmail.com), Siège : 1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue (Vaucluse, 84).
+- **SIRET :** 105 075 006 00012.
 - **Code APE/NAF :** `81.30Z - Services d'aménagement paysager`.
 - **Directeur de la publication :** Andrés Pino.
 - **Hébergement :** Identification complète de l'hébergeur avec raison sociale, adresse et contact.
@@ -24,7 +25,7 @@ L'article 6 de la LCEN impose la publication des mentions légales accessibles e
 - **Durées de conservation légales :**
   - Données prospects : 3 ans à compter du dernier contact.
   - Données clients et facturation : 10 ans (obligation légale selon l'article L. 123-22 du Code de commerce).
-- **Droits des utilisateurs :** Droit d'accès, de rectification, d'effacement, de limitation, de portabilité et d'opposition (exercice par mail à `pino.spacesverts@gmail.com`).
+- **Droits des utilisateurs :** Droit d'accès, de rectification, d'effacement, de limitation, de portabilité et d'opposition (exercice par mail à `pino.espacesverts@gmail.com`).
 - **Autorité de contrôle :** Mention expresse de la CNIL (Commission Nationale de l'Informatique et des Libertés - 3 Place de Fontenoy, 75007 Paris - www.cnil.fr).
 
 ---
@@ -36,7 +37,8 @@ L'article 6 de la LCEN impose la publication des mentions légales accessibles e
 - **Plafond spécifique Petit Jardinage :** Plafonné à **5 000 € TTC par an et par foyer fiscal** (soit une réduction/crédit d'impôt effectif de **2 500 € net par an**).
 - **Avance Immédiate du crédit d'impôt (URSSAF) :** Dispositif dématérialisé permettant au client de ne régler immédiatement que 50% de la facture (déduction automatique).
 - **Déclaration annuelle de revenus :** Montant attesté à reporter en **Case 7DB** de la déclaration n° 2042. L'attestation fiscale annuelle émise par Unipros doit être conservée en justificatif.
-- **Interdiction formelle des espèces :** L'article 199 sexdecies, 6 du CGI dispose que **les paiements en espèces sont strictement exclus du bénéfice du crédit d'impôt**. Tout paiement doit être tracé (CB, virement, chèque, CESU).
+- **Moyens de paiement SAP de Pino Espaces Verts :** chèque à l'ordre exact de **PINO ANDRES**, virement bancaire, CESU / e-CESU, prélèvement URSSAF (Avance Immédiate). **La carte bancaire n'est pas proposée** pour les prestations SAP.
+- **Espèces :** L'article 199 sexdecies du CGI dispose que **les paiements en espèces n'ouvrent pas droit au crédit d'impôt de 50 %**.
 
 ### B. Régime de TVA & Facturation (Article 293 B du CGI)
 - **Prestations d'entretien via Unipros (SAP) :** Facturées directement par la SCIC Unipros détentrice de l'agrément Services à la Personne.
@@ -63,9 +65,11 @@ Avant toute conclusion de vente, le professionnel doit fournir au consommateur d
 ### C. Médiation Obligatoire de la Consommation (Articles L. 612-1 et L. 616-1)
 Tout professionnel a l'obligation légale de garantir au consommateur le recours effectif à un dispositif de médiation de la consommation gratuit pour le client en cas de litige non résolu à l'amiable :
 - **Médiateur référent désigné :**  
-  **CNPM MÉDIATION CONSOMMATION**  
-  27, avenue de la Libération – 42400 Saint-Chamond  
-  Site web : [https://cnpm-mediation-consommation.eu](https://cnpm-mediation-consommation.eu)
+  **CM2C** (Centre de la Médiation de la Consommation de Conciliateurs de Justice)  
+  14 rue Saint Jean – 75017 Paris  
+  Site web : [https://www.cm2c.net/](https://www.cm2c.net/)
+- **Juridiction :** Tribunal d'Avignon (Vaucluse).
+- **Retard de paiement :** indemnité forfaitaire de 40 € (article L. 441-10 du Code de commerce).
 - **Plateforme Européenne de Règlement en Ligne des Litiges (RLL) :** [https://ec.europa.eu/consumers/odr](https://ec.europa.eu/consumers/odr)
 
 ---
@@ -83,6 +87,6 @@ Tout professionnel a l'obligation légale de garantir au consommateur le recours
 
 - **Évacuation des déchets verts (Circulaire du 18 novembre 2011) :**
   - **Le brûlage à l'air libre des déchets verts de jardinage est strictement interdit par la loi** (amende de 3e classe jusqu'à 450 € selon l'art. 131-13 du Code pénal).
-  - Tous les déchets végétaux issus des chantiers de Pino Espaces Verts sont soit broyés sur place en paillage écologique (mulching), soit acheminés vers des centres de compostage agréés de Gironde.
-- **Matériel et nuisances sonores (Arrêté préfectoral de la Gironde) :**
-  - Respect scrupuleux des plages horaires d'utilisation d'outils thermiques et bruyants (tondeuses, tronçonneuses, souffleurs) fixées par la préfecture et les arrêtés municipaux de Bordeaux Métropole.
+  - Tous les déchets végétaux issus des chantiers de Pino Espaces Verts sont soit broyés sur place en paillage écologique (mulching), soit acheminés vers des centres de compostage agréés du Vaucluse.
+- **Matériel et nuisances sonores (arrêtés préfectoraux et municipaux du Vaucluse) :**
+  - Respect scrupuleux des plages horaires d'utilisation d'outils thermiques et bruyants (tondeuses, tronçonneuses, souffleurs) fixées par la préfecture et les arrêtés municipaux d'Entraigues-sur-la-Sorgue et communes du rayon 40-45 km.

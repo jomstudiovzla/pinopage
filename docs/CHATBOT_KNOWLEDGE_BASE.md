@@ -12,9 +12,11 @@ Ce document constitue la base de données de référence et la mémoire centrale
 | **Nom Commercial** | Pino Espaces Verts |
 | **Fondateur / Paysagiste Référent** | Andrés Pino |
 | **Téléphone Direct / WhatsApp** | `+33 6 51 59 40 34` |
-| **E-mail Professionnel** | `pino.spacesverts@gmail.com` |
+| **E-mail Professionnel** | `pino.espacesverts@gmail.com` |
 | **Instagram Officiel** | `@pino.espacesverts` (photos et vidéos de chantiers réels) |
-| **Localisation / Siège** | Bordeaux Métropole (Gironde, 33) |
+| **Localisation / Siège** | 1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue (Vaucluse, 84) |
+| **SIRET** | 105 075 006 00012 |
+| **Rayon** | 40-45 km autour d'Entraigues-sur-la-Sorgue |
 | **Horaires de contact** | Lundi au Samedi : 08h00 - 19h00 (Urgences & Devis traités sous 24h) |
 | **Assurance** | Assurance Responsabilité Civile Professionnelle (RC Pro) complète |
 | **Garanties** | Devis gratuit 100%, Déplacement offert sur toute la zone, Matériel professionnel thermique et sur batterie |
@@ -32,25 +34,26 @@ Pino Espaces Verts est adhérent et artisan paysagiste partenaire de la coopéra
 - **Aucune avance de trésorerie** : le client n'a plus besoin d'attendre sa déclaration de revenus de l'année suivante pour être remboursé.
 - Plafond annuel légal pour le petit jardinage à domicile : jusqu'à **5 000 € TTC de dépenses par an et par foyer fiscal** (soit jusqu'à **2 500 € d'économie d'impôt réelle** par an).
 
-### Moyens de paiement acceptés via Unipros :
-1. **Carte Bancaire (CB / Visa / Mastercard)** : Paiement sécurisé en ligne via l'espace client Unipros.
-2. **Prélèvement automatique SEPA** : Directement opéré après validation de la facture par le client.
-3. **Chèques CESU préfinancés** : Titres Chèque Emploi Service Universel (Ticket CESU, Chèque Domicile, Edenred, Pluxee / ex-Sodexo, Up Chèque Domicile).
-4. **Virement bancaire** : Vers le compte séquestre dédié de la coopérative Unipros.
+### Moyens de paiement SAP (Pino Espaces Verts) :
+1. **Chèque bancaire** à l'ordre exact de **PINO ANDRES**.
+2. **Virement bancaire** direct sur le compte de l'entreprise.
+3. **CESU / e-CESU** préfinancés (Edenred, Chèque Domicile, Pluxee, Up).
+4. **Prélèvement URSSAF — Avance Immédiate 50 %**.
+5. **Carte bancaire :** non proposée pour les prestations SAP.
+6. **Espèces :** n'ouvrent pas droit au crédit d'impôt 50 % (art. 199 sexdecies CGI).
 
 ### Résolution des Problèmes de Paiement / Litiges Unipros :
 Andrés Pino possède un **accès direct et privilégié avec les gestionnaires de compte d'Unipros** pour assister ses clients.
 
 **En cas de problème (rejet de prélèvement, blocage de compte URSSAF, modification de moyen de paiement, question sur une attestation fiscale) :**
 - **Option 1 (Recommandée - Accompagnement direct par Pino) :**  
-  Le client contacte directement Andrés Pino au **+33 6 51 59 40 34** ou par mail à **pino.spacesverts@gmail.com**. Andrés intervient immédiatement auprès du support dédié artisans d'Unipros pour débloquer la situation.
+  Le client contacte directement Andrés Pino au **+33 6 51 59 40 34** ou par mail à **pino.espacesverts@gmail.com**. Andrés intervient immédiatement auprès du support dédié artisans d'Unipros pour débloquer la situation.
 - **Option 2 (Support officiel Unipros) :**  
   - **Téléphone vert gratuit Unipros :** `01 89 71 48 25` (ouvert du lundi au samedi de 8h à 20h)
   - **Ligne client secondaire :** `08 05 38 11 61`
   - **E-mail Support Unipros :** `contact@unipros.coop`
   - **Site Web Officiel :** `https://unipros.coop`
-  - **Portail de Paiement CB :** `https://paiement.unipros.coop/payment/step1`
-  - **Espace Personnel Client :** `https://app.unipros.coop`
+  - **Espace Personnel Client Unipros :** `https://app.unipros.coop`
   - *(Rappel : se munir du numéro de facture ou du nom de l'artisan "Pino Espaces Verts")*
 
 ---
@@ -85,7 +88,7 @@ Andrés Pino possède un **accès direct et privilégié avec les gestionnaires 
 
 ### 5. Évacuation & Recyclage des Déchets Verts (Éligible 50% Unipros)
 - Broyage sur place ou chargement en camion benne / remorque.
-- Évacuation conforme vers les filières locales de compostage et revalorisation écologique de Gironde.
+- Évacuation conforme vers les filières locales de compostage et revalorisation écologique du Vaucluse.
 
 ### 6. Contrats Annuels d'Entretien (Particuliers & B2B / Copropriétés / Syndics)
 - Passages programmés à l'année (mensuels, bimensuels ou saisonniers).
@@ -100,18 +103,16 @@ Andrés Pino possède un **accès direct et privilégié avec les gestionnaires 
 - **Règle stricte de conversion :** Le chatbot **ne divulgue JAMAIS le code texte brut directement** dans la conversation.
 - **Comportement :** Il présente une fiche avantage attrayante (*-20% de remise immédiate, 100% cumulable avec les 50% de crédit d'impôt Unipros*) et propose un bouton d'action :
   👉 `Débloquer mon coupon de -20%`
-- **Redirection automatique :** Au clic sur ce bouton, la fenêtre du chatbot se ferme automatiquement, la page défile de manière fluide jusqu'au formulaire d'inscription e-mail (`#coupon`) et met en surbrillance le champ e-mail (`#coupon-email`) pour inciter le visiteur à saisir son adresse et capturer le lead dans Firebase.
+- **Redirection automatique :** Au clic, la fenêtre du chatbot se ferme et la page défile jusqu'à `#coupon`. Le code n'est délivré qu'après connexion / création de compte vérifiée (Google ou e-mail confirmé). Aucun champ e-mail public.
 - **Pillule d'accès rapide :** Nommée `🎁 Coupon Promo -20%` (et non `Code PELABOLA`).
 
 ---
 
 ## 5. ZONE GÉOGRAPHIQUE D'INTERVENTION
 
-Pino Espaces Verts intervient sur l'ensemble de **Bordeaux Métropole et le département de la Gironde (33)** :
-- **Bordeaux Centre** (Caudéran, Saint-Augustin, Chartrons, Nansouty, etc.)
-- **Rive Gauche :** Talence, Pessac, Mérignac, Gradignan, Villenave-d'Ornon, Bègles, Le Bouscat, Bruges, Eysines, Blanquefort, Saint-Médard-en-Jalles, Le Haillan, Parempuyre.
-- **Rive Droite :** Cenon, Floirac, Lormont, Artigues-près-Bordeaux, Bouliac.
-- **Déplacement :** 100% gratuit, aucun frais kilométrique supplémentaire sur la métropole.
+Pino Espaces Verts intervient depuis **Entraigues-sur-la-Sorgue (84320)** dans un **rayon de 40-45 km** en Vaucluse (84) :
+- Entraigues-sur-la-Sorgue, Avignon, Carpentras, Cavaillon, Sorgues, Vedène, Le Pontet, L'Isle-sur-la-Sorgue, Orange, Châteauneuf-du-Pape et communes limitrophes.
+- **Déplacement :** 100% gratuit, aucun frais kilométrique supplémentaire dans ce rayon.
 
 ---
 

@@ -20,7 +20,7 @@ window.PINO_CHATBOT_KB = {
     instagramUrl: "https://www.instagram.com/pino.espacesverts",
     address: "1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue",
     siret: "105 075 006 00012",
-    zone: "Entraigues-sur-la-Sorgue & Vaucluse (84) — Rayon de 35 à 40 km",
+    zone: "Entraigues-sur-la-Sorgue & Vaucluse (84) — Rayon de 40 à 45 km",
     hours: "Lundi au Samedi, 8h00 - 19h00 (Urgences & Devis sous 24h)",
     insurance: "Responsabilité Civile Professionnelle (RC Pro) complète",
     quoteNotice: "Déplacement & Devis 100% Gratuits sous 24h"
@@ -37,12 +37,12 @@ window.PINO_CHATBOT_KB = {
     attestationFiscale: "Délivrée chaque début d'année (courant janvier) pour toutes les factures réglées et encaissées l'année N-1. Téléchargeable dans votre espace personnel.",
     secondaryHome: "Les résidences secondaires situées en France sont 100% éligibles au crédit d'impôt de 50%. En revanche, les terrains nus sans habitation ne sont pas éligibles.",
     paymentMethods: {
-      avanceImmediate: "Prélèvement direct des 50% par l'URSSAF (compte activé au préalable)",
-      carteBancaire: "Paiement en ligne sécurisé 24/7 sur https://paiement.unipros.coop/payment/step1",
-      virement: "Vers le compte Unipros avec numéro de facture obligatoire dans l'intitulé",
-      cheque: "À l'ordre strict d'UNIPROS à remettre au professionnel ou à envoyer à la coopérative",
-      cesu: "Titres CESU & e-CESU préfinancés (Edenred, Chèque Domicile, Pluxee/Sodexo, Up) jusqu'à 2 540 €/an par bénéficiaire. Panachage possible (ex: CESU + CB).",
-      especesInterdites: "Les espèces ne sont strictement pas autorisées dans le cadre légal du crédit d'impôt SAP."
+      avanceImmediate: "Prélèvement URSSAF Avance Immédiate : vous ne réglez que 50 % du montant TTC.",
+      cheque: "Chèque bancaire dûment libellé à l'ordre exact de PINO ANDRES (facture Unipros : ordre UNIPROS).",
+      virement: "Virement bancaire direct avec le numéro de facture dans l'intitulé.",
+      cesu: "Titres CESU & e-CESU préfinancés (Edenred, Chèque Domicile, Pluxee/Sodexo, Up) jusqu'à 2 540 €/an par bénéficiaire.",
+      carteBancaire: "La carte bancaire n'est pas proposée pour les prestations SAP de Pino Espaces Verts.",
+      especesInterdites: "Les paiements en espèces n'ouvrent PAS droit au crédit d'impôt de 50 % (art. 199 sexdecies du CGI)."
     },
     contacts: {
       phone: "01 89 71 48 25",
@@ -106,7 +106,7 @@ window.PINO_CHATBOT_KB = {
       eligibleUnipros: true,
       priceFrom: "Inclus ou dès 50 €",
       creditPrice: "25 € après crédit d'impôt 50%",
-      details: "Broyage sur place ou chargement en camion et acheminement vers les centres de compostage écologique agréés de Gironde."
+      details: "Broyage sur place ou chargement en camion et acheminement vers les centres de compostage écologique agréés du Vaucluse."
     },
     {
       id: "b2b",
@@ -125,7 +125,7 @@ window.PINO_CHATBOT_KB = {
     "Vedène (84270)", "Le Pontet (84130)", "L'Isle-sur-la-Sorgue (84800)",
     "Althen-des-Paluds (84210)", "Monteux (84170)", "Pernes-les-Fontaines (84210)",
     "Morières-lès-Avignon (84310)", "Bédarrides (84370)", "Courthézon (84350)",
-    "Châteauneuf-du-Pape (84230)", "Orange (84100)", "Vaucluse & Rayon 35-40 km"
+    "Châteauneuf-du-Pape (84230)", "Orange (84100)", "Vaucluse & Rayon 40-45 km"
   ]
 };
 
@@ -208,27 +208,26 @@ window.resolveChatbotQuery = function(userText) {
     `;
   }
 
-  // 3. Moyens de paiement chez Unipros (CB, Chèque, CESU, Espèces)
+  // 3. Moyens de paiement SAP (chèque PINO ANDRES, virement, CESU, URSSAF — pas de CB)
   if (
-    q.includes("moyen de paiement") || q.includes("moyens de paiement") || q.includes("comment payer") || 
-    q.includes("carte") || q.includes("cb") || q.includes("cesu") || q.includes("cheque") || 
+    q.includes("moyen de paiement") || q.includes("moyens de paiement") || q.includes("comment payer") ||
+    q.includes("carte bancaire") || /\bcb\b/.test(q) || q.includes("cesu") || q.includes("cheque") ||
     q.includes("chèque") || q.includes("espece") || q.includes("espèce") || q.includes("especes") || q.includes("espèces") || q.includes("liquide")
   ) {
     return `
       <div class="space-y-2">
         <p class="font-bold text-emerald-800 flex items-center gap-1.5">
-          <i class="fa-solid fa-credit-card text-base text-emerald-600"></i>
-          Modes de Paiement Acceptés par Unipros
+          <i class="fa-solid fa-wallet text-base text-emerald-600"></i>
+          Modes de Paiement SAP acceptés
         </p>
         <div class="text-xs text-slate-700 space-y-1.5">
-          <p>• <strong>Avance Immédiate :</strong> Prélèvement automatique direct des 50% restants.</p>
-          <p>• <strong>Carte Bancaire (CB) :</strong> En ligne sur le portail sécurisé <a href="${kb.unipros.contacts.paymentPortal}" target="_blank" class="text-emerald-700 underline font-bold">paiement.unipros.coop</a>.</p>
-          <p>• <strong>Virement bancaire :</strong> Vers le RIB Unipros (indiquer obligatoirement le n° de facture en intitulé).</p>
-          <p>• <strong>Chèque bancaire :</strong> À l'ordre impératif d'<strong>UNIPROS</strong>.</p>
-          <p>• <strong>Titres CESU & e-CESU :</strong> Acceptés (Edenred, Chèque Domicile, Sodexo/Pluxee, Up) jusqu'à 2 540 €/an. Possibilité de panachage (CESU + CB).</p>
+          <p>• <strong>Chèque bancaire :</strong> dûment libellé à l'ordre exact de <strong>PINO ANDRES</strong>.</p>
+          <p>• <strong>Virement bancaire :</strong> direct sur le compte de l'entreprise (n° de facture dans l'intitulé).</p>
+          <p>• <strong>CESU / e-CESU :</strong> titres préfinancés (Edenred, Chèque Domicile, Pluxee, Up).</p>
+          <p>• <strong>Prélèvement URSSAF :</strong> Avance Immédiate — vous ne réglez que 50&nbsp;%.</p>
         </div>
-        <div class="p-2 bg-red-50 rounded-xl border border-red-200 text-xs text-red-800 font-semibold">
-          ⚠️ Attention : Les règlements en espèces sont strictement interdits par la loi dans le cadre des Services à la Personne.
+        <div class="p-2 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-950 font-semibold">
+          La carte bancaire n'est pas proposée pour les prestations SAP. Les espèces n'ouvrent PAS droit au crédit d'impôt de 50&nbsp;%.
         </div>
       </div>
     `;
@@ -484,9 +483,9 @@ window.resolveChatbotQuery = function(userText) {
           <p class="text-slate-700">• E-mail : <a href="${kb.pino.emailUrl}" class="font-bold text-emerald-800 underline">${kb.pino.email}</a></p>
         </div>
         <div class="pt-1">
-          <a href="#devis" class="inline-block w-full text-center py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow transition-colors">
+          <button type="button" onclick="if(typeof openWindowModal==='function')openWindowModal('devis')" class="inline-block w-full text-center py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow transition-colors">
             Remplir le formulaire de devis en ligne
-          </a>
+          </button>
         </div>
       </div>
     `;
@@ -501,7 +500,7 @@ window.resolveChatbotQuery = function(userText) {
           Zone d'Intervention : Entraigues-sur-la-Sorgue & Vaucluse (84)
         </p>
         <p class="text-xs text-slate-700 leading-relaxed">
-          Pino Espaces Verts se déplace gratuitement sur <strong>Entraigues-sur-la-Sorgue, Avignon et tout le Vaucluse (rayon 35-40 km)</strong> :
+          Pino Espaces Verts se déplace gratuitement sur <strong>Entraigues-sur-la-Sorgue, Avignon et tout le Vaucluse (rayon 40-45 km)</strong> :
         </p>
         <div class="p-2 bg-slate-100 rounded-xl text-[11px] text-slate-700 leading-relaxed">
           ${kb.localities.join(" • ")}

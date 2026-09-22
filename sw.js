@@ -1,6 +1,8 @@
-const CACHE_NAME = 'pino-ev-v26-turbo-europe-vaucluse-admin-exclusivity'; // pino-ev-v24 migration
+const CACHE_NAME = 'pino-ev-v31-client-ready'; // pino-ev-v30 migration
 const ASSETS = [
+  './index.html',
   './manifest.json',
+  './assets/js/supabase-config.js',
   './assets/logo/Logo pino.png',
   './assets/logo/Logo completo.png',
   './assets/images/tiro.png',

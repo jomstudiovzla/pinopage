@@ -86,6 +86,7 @@
       budget_eur:   data.budget   ? (parseFloat(data.budget)   || null) : null,
       frequency:    data.frequency|| null,
       details:      data.details  || null,
+      address_extra: data.address_extra || data.addressExtra || null,
       ref_code:     data.refCode  || null,
       source:       'web_devis',
       status:       'new',
@@ -615,8 +616,8 @@ Artisan Paysagiste — Entraigues-sur-la-Sorgue (Vaucluse 84)
 Services à la Personne (SAP) — Déclaration 26/06/2026 — Crédit d'Impôt 50%
 SIRET : 105 075 006 00012 | Siège : 1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue
 Téléphone : 06 51 59 40 34 | E-mail : pino.espacesverts@gmail.com
-Rayon d'intervention : Entraigues-sur-la-Sorgue et 35-40 km (Avignon, Carpentras, Cavaillon, Sorgues, Vedène)
-Règlements autorisés SAP : Chèque à l'ordre exact de PINO ANDRES, Virement bancaire, CESU
+Rayon d'intervention : Entraigues-sur-la-Sorgue et 40-45 km (Avignon, Carpentras, Cavaillon, Sorgues, Vedène)
+Règlements autorisés SAP : Chèque à l'ordre exact de PINO ANDRES, Virement bancaire, CESU / e-CESU, Prélèvement URSSAF. Carte bancaire non proposée. Espèces : pas de crédit d'impôt 50 %.
 Site web : https://jomstudiovzla.github.io/pinopage/`;
 
     let clientEmailSent = false;
