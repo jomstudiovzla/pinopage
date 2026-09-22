@@ -630,7 +630,7 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
       const shortLeadId = String(leadId).slice(-6);
 
       // 6a. Notifier Andrés Pino par e-mail direct (Web3Forms + RTDB admin_notifications)
-      notifyAdminByEmail({
+      await notifyAdminByEmail({
         subject: `🎉 [DEVIS ACCEPTÉ] Proposition chiffrée validée par ${clientName}`,
         type: 'quote_accepted',
         clientName: clientName,
@@ -642,7 +642,7 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
 
       // 6b. Confirmation automatique transmise au client par e-mail direct
       if (rawEmail) {
-        notifyClientByEmail({
+        await notifyClientByEmail({
           clientEmail: rawEmail,
           clientName: clientName,
           subject: `✅ [CONFIRMATION] Devis #${shortLeadId} validé — Pino Espaces Verts`,
@@ -864,6 +864,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     await postWeb3Forms({
       from_name: 'Pino Espaces Verts — Copie E-mail Client',
       subject: `[COPIE] ${subject} → ${clientName} <${rawEmail}>`,
+      to: PINO_ADMIN_EMAIL,
       email: PINO_ADMIN_EMAIL,
       cc: STUDIO_ADMIN_EMAIL,
       replyto: rawEmail,
@@ -886,18 +887,20 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
           read: false
         }).catch(() => {});
 
-        const msgId = 'msg_' + Date.now();
-        await db.ref(`clients_records/${sanitizedEmail}/messages/${msgId}`).set({
-          id: msgId,
-          subject: subject,
-          message: message,
-          from: 'Andrés Pino — Pino Espaces Verts',
-          to: rawEmail,
-          client_name: clientName,
-          type: type,
-          email_sent: clientEmailSent,
-          created_at: timestamp
-        }).catch(() => {});
+        if (type !== 'quote_confirmed') {
+          const msgId = 'msg_' + Date.now();
+          await db.ref(`clients_records/${sanitizedEmail}/messages/${msgId}`).set({
+            id: msgId,
+            subject: subject,
+            message: message,
+            from: 'Andrés Pino — Pino Espaces Verts',
+            to: rawEmail,
+            client_name: clientName,
+            type: type,
+            email_sent: clientEmailSent,
+            created_at: timestamp
+          }).catch(() => {});
+        }
 
         await safePushAudit(db, {
           sessionUser: 'andres_pino',

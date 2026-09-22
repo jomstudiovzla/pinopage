@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v35-document-preview-ios-fix'; // pino-ev-v32 migration
+const CACHE_NAME = 'pino-ev-v36-ios-preview-smooth-scroll'; // pino-ev-v35 pino-ev-v33 pino-ev-v32 pino-ev-v31 pino-ev-v30 pino-ev-v29 pino-ev-v28 pino-ev-v27 pino-ev-v24 pino-ev-v23 pino-ev-v22 pino-ev-v21 pino-ev-v20-turbo-europe pino-ev-v19
 const ASSETS = [
   './index.html',
   './manifest.json',
