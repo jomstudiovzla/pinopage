@@ -95,6 +95,6 @@ assert(indexHtml.includes('stopAdminNotificationsListener();'), 'stopAdminNotifi
 
 // Test 10: Service Worker bumped to v22+
 console.log('👉 Test 10: Service Worker v22/v23 cache update');
-assert(/pino-ev-v2[2-9]/.test(swJs), 'sw.js must have CACHE_NAME v22 or v23');
+assert(/pino-ev-v(?:2[2-9]|3[0-9])/.test(swJs), 'sw.js must have CACHE_NAME v22 or v23');
 
 console.log('✅ ALL 10 TESTS PASSED SUCCESFULLY! The Admin panel appearance is preserved with majestic proportions, wrapping tabs, natural content fitting, and full audio bell notifications.');

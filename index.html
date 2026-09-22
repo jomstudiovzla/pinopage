@@ -1088,7 +1088,7 @@
     </div>
 
     <!-- Client Scrollable Container -->
-    <div class="flex-1 min-h-0 overflow-y-auto">
+    <div id="client-scroll-container" class="flex-1 min-h-0 overflow-y-auto w-full overscroll-contain" style="flex: 1 1 auto; min-height: 0; -webkit-overflow-scrolling: touch;">
       <!-- 3 Key Metric Hero Counters -->
       <div class="p-4 sm:p-6 bg-[#faf8f2] border-b border-brand-accent/20">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -2381,7 +2381,7 @@
     </div>
 
     <!-- Admin Tab Content Body -->
-    <div class="p-3 sm:p-6 lg:p-8 overflow-y-auto flex-1 min-h-0 space-y-6">
+    <div class="p-3 sm:p-6 lg:p-8 overflow-y-auto flex-1 min-h-0 space-y-6" style="flex: 1 1 auto; min-height: 0; -webkit-overflow-scrolling: touch;">
       <!-- 1. Tab KPIs -->
       <div id="adm-content-kpis" class="adm-content space-y-6">
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -6847,8 +6847,12 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       flex-direction: column !important;
       margin: auto !important;
     }
-    #modal-window-admin[open],
     #modal-window-client[open] {
+      height: 88dvh !important;
+      min-height: min(480px, 85dvh) !important;
+      display: flex !important;
+    }
+    #modal-window-admin[open] {
       display: flex !important;
     }
     #modal-window-admin:not([open]),
@@ -6862,6 +6866,12 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         max-height: 96dvh !important;
         width: 98% !important;
         border-radius: 1.25rem !important;
+      }
+      #modal-window-client[open],
+      #modal-window-admin[open] {
+        height: 90dvh !important;
+        height: 90vh !important;
+        min-height: min(480px, 88dvh) !important;
       }
     }
   </style>
