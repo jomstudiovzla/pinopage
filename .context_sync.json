@@ -1,15 +1,14 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Correction affichage complet Espace Client sur iPhone iOS Safari",
+  "active_goal": "Correction universelle des modales administratives & prévisualisation de documents sur iPhone iOS Safari",
   "current_phase": "Phase Production & Pulido Mobile / Cross-Device",
-  "action": "Résolution du bug d'effondrement de hauteur (flex basis 0% collapse) de la modale client sur Safari iOS / iPhone. Ajout de height: 90dvh sur mobile, height: 88dvh sur desktop, style flex: 1 1 auto; -webkit-overflow-scrolling: touch; sur le conteneur scrollable et bump Service Worker v34.",
+  "action": "Correction intégrale de l'effondrement de hauteur (flex basis 0%) sur TOUTES les fenêtres modales de l'application : modal-document-preview, modal-lead-response, modal-nouvelle-facture, modal-admin-message-client, modal-admin-create-client, modal-client-signature, modal-repair-lead, modal-add-platform-lead. Application de height: 90dvh sur mobile, style flex: 1 1 auto; -webkit-overflow-scrolling: touch; sur les corps scrolleables et incrément Service Worker v35. 17/17 tests validés.",
   "files": [
     "index.html",
     "sw.js",
-    "test_admin_appearance_and_audio_notifications.js",
     "test_ios_client_panel_appearance.js",
     ".context_sync.json"
   ],
-  "step": "Tester sur iPhone Safari en rechargeant la page pour constater l'Espace Client complet."
+  "step": "Tester la prévisualisation de devis/facture dans le panneau admin sur iPhone."
 }

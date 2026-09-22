@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pino-ev-v34-ios-client-panel-fix'; // pino-ev-v32 migration
+const CACHE_NAME = 'pino-ev-v35-document-preview-ios-fix'; // pino-ev-v32 migration
 const ASSETS = [
   './index.html',
   './manifest.json',
