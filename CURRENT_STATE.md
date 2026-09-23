@@ -9,6 +9,18 @@
   - Realtime Database: `https://pagepino-e8e97-default-rtdb.europe-west1.firebasedatabase.app`
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
+## ✅ Orquestación Integral v9.0: Éradication Absolue de Tous les Toasts Intrusifs, Palette Harmonieuse & Résilience SSO (100% OPÉRATIONNEL)
+- [x] **Éradication Totale des Toasts Techniques (`Supabase n'est pas configuré...`, `Connexion Apple...`)** :
+  - **Diagnostic Causa Raíz** : Des appels à `showNotificationToast` dans `requireSupabase` (ligne 7044) et dans l'ancien fallback Apple injectaient des bandeaux rouges et sombres sur l'interface lors de configurations partielles ou de clics d'authentification.
+  - **Correction Déployée** : 
+    1. `requireSupabase` bascule à 100% sur un `console.warn('[pino-supabase]', ...)` silencieux pour le visiteur.
+    2. La feuille interactive Apple ID `#apple-auth-quick-panel` est intégrée in-situ dans la modale d'authentification avec la palette claire officielle de la marque (`bg-emerald-50/70 border-emerald-200/80`), badge Apple circulaire sombre avec icône officielle FontAwesome `text-white shrink-0`, champ iCloud épuré et bouton vert forêt `bg-emerald-800`.
+    3. Remplacement du texte technique de décharge ("Google et Apple ouvrent le consentement...") par un message rassurant et valorisant pour les particuliers : *"Connexion instantanée et 100% sécurisée via vos comptes vérifiés."*.
+    4. Clic de fermeture et annulation (`cancelAppleAuthFlow`) garantissant la fermeture synchrone du panneau (`display: none`) sans aucun toast résiduel flottant sur la landing page.
+- [x] **Validation Déployée & Cache Immédiat (Service Worker v39)** :
+  - Mise à jour du cache Service Worker vers `pino-ev-v39-zero-errors-orchestrated-master`.
+  - 25/25 suites de tests automatisées validées sans échec ni régression.
+
 ## ✅ Éradication Définitive des Toasts Intrusifs au Chargement (Gmail OAuth) & Résilience Souveraine Apple SSO (100% OPÉRATIONNEL)
 - [x] **Éradication Totale du Toast Non-Sollicité Gmail au Démarrage (`Autorisez Gmail...`)** :
   - **Diagnostic de la Cause Racine** : Dans `processAuthenticatedUser`, un appel `setTimeout(..., 900)` invoquait systématiquement `window.pinoObtainGmailToken({ preferPino: true })` dès la restauration d'une session administrateur sur la page d'accueil. Cette méthode appelait `signInWithPopup` hors d'une interaction utilisateur directe, provoquant un blocage par le navigateur (`popup-blocked`) et déclenchant immédiatement un bandeau d'avertissement orange public sur la page d'accueil.

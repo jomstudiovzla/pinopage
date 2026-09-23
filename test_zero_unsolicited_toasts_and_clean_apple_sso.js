@@ -51,12 +51,14 @@ assert(indexHtml.includes('confirmAppleQuickSignIn'), 'confirmAppleQuickSignIn e
 assert(indexHtml.includes('await confirmAppleQuickSignIn(remembered)'), 'handleAppleSignIn connecte directement un utilisateur mémorisé en cas d\'indisponibilité du provider cloud');
 assert(!indexHtml.includes("Connexion Apple : saisissez votre e-mail pour accéder directement à votre espace."), 'Le toast maladroit de redirection e-mail a été supprimé au profit du panneau in-situ');
 assert(indexHtml.includes("apple-auth-quick-panel"), 'Panneau Apple ID présent et fonctionnel');
+assert(indexHtml.includes("bg-emerald-50/70"), 'Panneau Apple ID harmonisé avec la palette claire de la marque');
+assert(!indexHtml.includes("showNotificationToast(\"Supabase n'est pas configuré"), 'requireSupabase ne doit pas afficher de toast intempestif');
 console.log('  ✅ PASS: Déclenchement Apple 100% résilient avec secours 1-clic direct sans toast intempestif.');
 
-// ── 5. SERVICE WORKER V38 ACTUALISÉ ──
-console.log('\n🚀 [TEST 5 : SERVICE WORKER V38 EN PLACE]');
-assert(swJs.includes('pino-ev-v38'), 'Le Service Worker doit être en version v38 pour rafraîchir le cache');
-console.log('  ✅ PASS: Cache v38 déployé.');
+// ── 5. SERVICE WORKER V39 ACTUALISÉ ──
+console.log('\n🚀 [TEST 5 : SERVICE WORKER V39 EN PLACE]');
+assert(swJs.includes('pino-ev-v39'), 'Le Service Worker doit être en version v39 pour rafraîchir le cache');
+console.log('  ✅ PASS: Cache v39 déployé.');
 
 console.log('\n===============================================================');
 console.log('🎉 TOUS LES 5 CONTRÔLES DE SÉCURITÉ ET D\'EXPÉRIENCE CLIENT SONT VALIDÉS !');
