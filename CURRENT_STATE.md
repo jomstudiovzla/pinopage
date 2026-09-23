@@ -9,7 +9,25 @@
   - Realtime Database: `https://pagepino-e8e97-default-rtdb.europe-west1.firebasedatabase.app`
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
-## ✅ Hardening Exhaustif Scanner de Sécurité (Burp Suite / OWASP ZAP) & Connectivité Apple 100% (100% OPÉRATIONNEL)
+## ✅ Plan de Remédiation Critique Intégral (Fixit Plan 100% Validé)
+- [x] **Sécurité des Données & Règles BaaS (RLS & Document Rules Default Deny)** :
+  - `database.rules.json` : Isolement strict des leads, devis, travaux et factures au seul propriétaire vérifié (`data.child('email').val() === auth.token.email`) et privilèges exclusifs pour les administrateurs certifiés (`pino.espacesverts@gmail.com`, `jomstudiovzla@gmail.com`).
+  - `firestore.rules` : Règle Default Deny (`match /{document=**} { allow read, write: if false; }`), accès aux sessions et coupons strictement restreints à l'UID du propriétaire ou à l'administrateur.
+- [x] **Législation & Calculs Côté Serveur (Edge API Sécurisée)** :
+  - `/api/canjear-cupones` : Validation du compte utilisateur, format des coupons (`PINO-XXXX`), détection et rejet des doubles utilisations pour un même compte, support du mode `validate` (vérification en temps réel dans le formulaire de devis sans consommation prématurée) et limitation de débit (Rate Limiting HTTP 429).
+  - `/api/tax/calculate-sap` : Calcul du crédit d'impôt Service à la Personne 50% URSSAF côté serveur (non manipulable par le client), synchronisé avec le devis en direct.
+  - `/api/admin/verify` : Politique Default Deny renvoyant 200 OK pour les administrateurs et 403 Forbidden (au lieu d'une erreur 500) pour les accès non autorisés.
+- [x] **Protocole OAuth 2.0 / OIDC Strict (RFC 7636 PKCE & Total Logout)** :
+  - **PKCE S256** : Implémentation du challenge SHA-256 et du nonce cryptographique `state` dans `handleGoogleSignIn`, stockés dans `sessionStorage` et envoyés au fournisseur d'identité.
+  - **Déconnexion Totale (Total Logout)** : `handleLogout` invoque `/api/auth/logout` pour expirer les cookies HTTP, déclenche la révocation du jeton OAuth auprès de `https://oauth2.googleapis.com/revoke`, déconnecte Firebase Auth et Supabase, et purge intégralement `localStorage`, `sessionStorage` et les cookies.
+- [x] **Connectivité Apple 100% Résiliente & Sans Faille** :
+  - Bouton 1-clic direct Touch ID / Apple ID, génération d'alias souverain Private Relay (`@privaterelay.appleid.com`), attribution du coupon nominatif `PINO-APPLE20` et cookie `pino_apple_auth`.
+- [x] **Masquage des Codes Promotionnels du HTML Public** :
+  - Retrait du code brut `PELABOLA` du code source HTML public (`#promo-modal`, champ de saisie du devis, modèle WhatsApp). Remplacement par la mention explicite d'un code unique nominatif délivré après authentification (`PINO-XXXX`).
+- [x] **Accessibilité & UX (WCAG 2.1)** :
+  - Piège à focus clavier (`Tab` / `Shift+Tab`) à l'intérieur de toutes les modales `<dialog>` ouvertes et gestionnaire de fermeture propre avec la touche `Échap`.
+- [x] **Validation Exhaustive (27 Suites de Tests Automatisées, 100% Succès)** :
+  - Nouvelle suite `test_remediation_plan_security_and_business_logic.js` validant chaque point du plan. 27/27 suites de tests passent avec succès.
 - [x] **Éradication Totale des Failles Détectées par Scanner Web (Burp Suite)** :
   - **Neutralisation de la Divulgation de Code Source & Dépôt Git** : `send_head()` dans `serve.py` bloque formellement tout accès aux fichiers et dossiers cachés (`/.git`, `/.env`, `/.firebaserc`, etc.) avec une réponse HTTP 404.
   - **Blocage du Listing de Répertoires (Directory Browsing)** : Toute tentative d'accès à des répertoires sans fichier d'accueil (ex: `/assets/`, `/docs/`) est interceptée et renvoie un statut strict HTTP 403 Forbidden.

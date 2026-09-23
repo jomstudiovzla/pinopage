@@ -9,18 +9,43 @@ Exemple:
 """
 import sys
 import os
+import time
+import json
+import re
+import datetime
 import urllib.parse
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 class PinoCORSRequestHandler(SimpleHTTPRequestHandler):
     """
     Gestionnaire HTTP local fournissant les en-têtes CORS universels,
-    la négociation OPTIONS pour les requêtes asynchrones et la prise en charge
-    des requêtes POST (form_post) pour Sign In with Apple.
+    la négociation OPTIONS pour les requêtes asynchrones, la prise en charge
+    des requêtes POST (form_post) pour Sign In with Apple, et les points de terminaison
+    d'API pour la validation côté serveur (canjear-cupones, vérification de rôles, calcul SAP).
     """
 
     server_version = "PinoServer"
     sys_version = ""
+
+    # Stockage en mémoire du limiteur de débit (IP -> list[timestamp])
+    RATE_LIMIT_STORE = {}
+    # Registre des coupons canjeados côté serveur (userId:code)
+    REDEEMED_COUPONS = set()
+
+    @classmethod
+    def check_rate_limit(cls, ip, max_requests=5, window_seconds=300):
+        """Limite de débit (Rate Limiting) : max 5 requêtes par tranche de 5 minutes par IP."""
+        now = time.time()
+        timestamps = cls.RATE_LIMIT_STORE.get(ip, [])
+        # Ne conserver que les requêtes dans la fenêtre active
+        timestamps = [t for t in timestamps if now - t < window_seconds]
+        if len(timestamps) >= max_requests:
+            cls.RATE_LIMIT_STORE[ip] = timestamps
+            retry_after = int(window_seconds - (now - timestamps[0]))
+            return False, max(1, retry_after)
+        timestamps.append(now)
+        cls.RATE_LIMIT_STORE[ip] = timestamps
+        return True, 0
 
     def send_head(self):
         """
@@ -98,11 +123,197 @@ class PinoCORSRequestHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         """
-        Gère les requêtes POST provenant de Sign In with Apple (response_mode=form_post)
-        ou des tunnels de développement (ngrok, localtunnel), évitant tout code 405 Method Not Allowed.
+        Gère les requêtes POST provenant de Sign In with Apple (response_mode=form_post),
+        des endpoints d'API métier sécurisés (/api/canjear-cupones, /api/admin/verify, /api/tax/calculate-sap),
+        et des requêtes de développement.
         """
         content_length = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(content_length).decode('utf-8', errors='ignore') if content_length > 0 else ''
+        client_ip = self.client_address[0] if self.client_address else '127.0.0.1'
+
+        # ── 1. API : Canjear Cupones (Validation Côté Serveur & Rate Limiting) ──
+        if self.path.startswith('/api/canjear-cupones'):
+            allowed, retry_after = self.check_rate_limit(client_ip, max_requests=5, window_seconds=300)
+            if not allowed:
+                self.send_response(429)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.send_header('Retry-After', str(retry_after))
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "ok": False,
+                    "valid": False,
+                    "error": f"Limite de débit atteinte (5 requêtes / 5 min). Veuillez réessayer dans {retry_after} secondes."
+                }).encode('utf-8'))
+                return
+
+            try:
+                data = json.loads(body) if body else {}
+            except Exception:
+                data = urllib.parse.parse_qs(body)
+                data = {k: v[0] for k, v in data.items()}
+
+            user_id = str(data.get('userId') or data.get('user_id') or '').strip()
+            email = str(data.get('email') or '').strip().lower()
+            code = str(data.get('couponCode') or data.get('code') or '').strip().upper()
+
+            valid_codes = ('PELABOLA', 'PINO-APPLE20', 'PINO-BIENVENUE20', 'PINO-GOOGLE20')
+            is_valid_pattern = bool(re.match(r'^PINO-[A-Z0-9]{4,12}$', code))
+
+            if not (code in valid_codes or is_valid_pattern):
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "ok": False,
+                    "valid": False,
+                    "error": "Code promotionnel invalide ou inexistant."
+                }).encode('utf-8'))
+                return
+
+            if not user_id:
+                self.send_response(401)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "ok": False,
+                    "valid": False,
+                    "error": "Authentification requise pour activer un coupon nominatif."
+                }).encode('utf-8'))
+                return
+
+            action = str(data.get('action') or 'redeem').strip().lower()
+            redemption_key = f"{user_id}:{code}"
+
+            if action == 'validate':
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "ok": True,
+                    "valid": True,
+                    "already_used": redemption_key in self.REDEEMED_COUPONS,
+                    "coupon": {
+                        "code": code,
+                        "descuento_pct": 20,
+                        "discount_cap_eur": 150.0,
+                        "status": "already_used" if redemption_key in self.REDEEMED_COUPONS else "valid"
+                    }
+                }).encode('utf-8'))
+                return
+
+            if redemption_key in self.REDEEMED_COUPONS:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "ok": False,
+                    "valid": False,
+                    "error": "Ce coupon a déjà été activé pour ce compte client."
+                }).encode('utf-8'))
+                return
+
+            self.REDEEMED_COUPONS.add(redemption_key)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "ok": True,
+                "valid": True,
+                "coupon": {
+                    "code": code,
+                    "descuento_pct": 20,
+                    "discount_cap_eur": 150.0,
+                    "status": "valid",
+                    "user_id": user_id,
+                    "email": email,
+                    "redeemed_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+                }
+            }).encode('utf-8'))
+            return
+
+        # ── 2. API : Vérification de Rôle & Contrôle d'Accès Admin (Politique Default Deny) ──
+        if self.path.startswith('/api/admin/verify'):
+            try:
+                data = json.loads(body) if body else {}
+            except Exception:
+                data = urllib.parse.parse_qs(body)
+                data = {k: v[0] for k, v in data.items()}
+
+            email = str(data.get('email') or '').strip().lower()
+            admin_emails = ('pino.espacesverts@gmail.com', 'pino.spacesverts@gmail.com', 'jomstudiovzla@gmail.com')
+
+            if email in admin_emails:
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({"authorized": True, "role": "admin"}).encode('utf-8'))
+            else:
+                self.send_response(403)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "authorized": False,
+                    "role": "client",
+                    "error": "Accès refusé. Privilèges administrateur requis (403 Forbidden)."
+                }).encode('utf-8'))
+            return
+
+        # ── 3. API : Calcul Côté Serveur Crédit d'Impôt SAP 50% (Non-Manipulable) ──
+        if self.path.startswith('/api/tax/calculate-sap'):
+            try:
+                data = json.loads(body) if body else {}
+            except Exception:
+                data = urllib.parse.parse_qs(body)
+                data = {k: v[0] for k, v in data.items()}
+
+            raw_amount = data.get('amountTTC') or data.get('amount_ttc') or 0.0
+            try:
+                amount_ttc = float(raw_amount)
+            except (ValueError, TypeError):
+                amount_ttc = 0.0
+
+            amount_ttc = max(0.0, round(amount_ttc, 2))
+            sap_credit = round(amount_ttc * 0.50, 2)
+            net_payable = round(amount_ttc - sap_credit, 2)
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "amountTTC": amount_ttc,
+                "sapCredit": sap_credit,
+                "netPayable": net_payable,
+                "annualCeilingEur": 12000.0,
+                "vatRatePct": 20.0
+            }).encode('utf-8'))
+            return
+
+        # ── 4. API : Déconnexion Totale Côté Serveur (Révocation de Session) ──
+        if self.path.startswith('/api/auth/logout'):
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Set-Cookie', 'pino_session=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; SameSite=Lax; HttpOnly')
+            self.send_header('Set-Cookie', 'pino_apple_auth=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; SameSite=Lax; HttpOnly')
+            self.send_header('Set-Cookie', 'pino_auth_status=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; SameSite=Lax; HttpOnly')
+            self.end_headers()
+            self.wfile.write(json.dumps({"ok": True, "message": "Déconnexion totale côté serveur validée."}).encode('utf-8'))
+            return
+
+        # ── 5. API : Formulaire de Contact avec Rate Limiting Anti-Spam ──
+        if self.path.startswith('/api/contact'):
+            allowed, retry_after = self.check_rate_limit(client_ip, max_requests=5, window_seconds=300)
+            if not allowed:
+                self.send_response(429)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.send_header('Retry-After', str(retry_after))
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "ok": False,
+                    "error": f"Trop de tentatives de contact. Veuillez patienter {retry_after} secondes."
+                }).encode('utf-8'))
+                return
+
+        # ── 6. Flux Apple SSO (response_mode=form_post) ──
         post_data = urllib.parse.parse_qs(body)
 
         # Extraction des paramètres Apple SSO

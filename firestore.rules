@@ -14,17 +14,18 @@ service cloud.firestore {
       allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
 
-    // 2. Pino Sessions: Authenticated users log sessions; Admin can audit all
+    // 2. Pino Sessions: Authenticated users log sessions; Owner and Admin can read
     match /pino_sessions/{sessionId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
+      allow read: if request.auth != null && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
       allow update, delete: if isAdmin();
     }
 
-    // 3. Coupons & Leads (Public landing page lead capture)
+    // 3. Coupons & Leads
     match /pino_coupons/{docId} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow read: if request.auth != null && (resource.data.user_id == request.auth.uid || isAdmin());
+      allow create: if request.auth != null && request.resource.data.user_id == request.auth.uid;
+      allow update, delete: if isAdmin();
     }
 
     match /leads/{docId} {
@@ -32,9 +33,9 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
-    // Default: Locked down
+    // Default: Locked down (Politique de déni par défaut)
     match /{document=**} {
-      allow read, write: if isAdmin();
+      allow read, write: if false;
     }
   }
 }

@@ -693,7 +693,7 @@
           <i class="fa-solid fa-tag text-lg"></i>
         </div>
         <div>
-          <h3 class="font-serif text-2xl font-bold text-brand-green">Conditions de l'Offre Promo -20% (PELABOLA)</h3>
+          <h3 class="font-serif text-2xl font-bold text-brand-green">Conditions de l'Offre Promo -20% (Bienvenue Digitale)</h3>
           <p class="text-[11px] text-slate-500">Offre spéciale digitale réservée aux nouveaux clients particuliers.</p>
         </div>
       </div>
@@ -702,7 +702,7 @@
       </button>
     </div>
     <div class="space-y-3 text-xs text-brand-charcoal/80 leading-relaxed">
-      <p>• <strong>Code officiel :</strong> <span class="font-mono font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">PELABOLA</span></p>
+      <p>• <strong>Attribution du code :</strong> <span class="font-mono font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">Généré nominativement dès votre connexion</span> (Ex: PINO-XXXX)</p>
       <p>• <strong>Objet :</strong> Remise de 20% applicable sur la première prestation d'entretien de jardin (tonte de pelouse, taille de haies ou débroussaillage) réalisée par Pino Espaces Verts.</p>
       <p>• <strong>Zone géographique :</strong> Valable sur Entraigues-sur-la-Sorgue et tout le département du Vaucluse (84) (zone d'intervention habituelle sans frais kilométriques jusqu'à 40-45 km).</p>
       <p>• <strong>Cumul fiscal exceptionnel :</strong> L'offre est <strong>100% cumulable</strong> avec le crédit d'impôt de 50% Unipros (le reste à charge final après déduction des 20% est encore divisé par deux !).</p>
@@ -5296,7 +5296,7 @@
                 <span class="text-[10px] font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full uppercase">Facultatif</span>
               </div>
               <div class="flex gap-2">
-                <input type="text" id="devis-coupon-input" placeholder="Ex: PELABOLA (-20%)" class="flex-1 uppercase font-mono font-extrabold px-3 py-2 bg-white rounded-lg border border-amber-300 text-xs focus:outline-none focus:border-amber-500 text-amber-900" />
+                <input type="text" id="devis-coupon-input" placeholder="Ex: PINO-XXXX (-20%)" class="flex-1 uppercase font-mono font-extrabold px-3 py-2 bg-white rounded-lg border border-amber-300 text-xs focus:outline-none focus:border-amber-500 text-amber-900" />
                 <button type="button" onclick="applyDevisCoupon()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-black text-xs rounded-lg transition-colors cursor-pointer shadow-xs flex items-center gap-1">
                   <i class="fa-solid fa-check"></i> Valider
                 </button>
@@ -6161,33 +6161,86 @@
       }
 
       const sessionUser = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
-      const owned = sessionUser && sessionUser.promoCode && String(sessionUser.promoCode).toUpperCase() === code;
-      if (owned) {
-        window._activeDevisCoupon = { code: code, discountPct: 20 };
-        if (feedback) {
-          feedback.className = 'text-xs text-emerald-800 font-extrabold flex items-center gap-1.5 pt-0.5';
-          feedback.textContent = '';
-          feedback.insertAdjacentHTML('afterbegin', '<i class="fa-solid fa-circle-check text-green-600"></i> ');
-          feedback.append(document.createTextNode('Coupon ' + code + ' validé (−20 %).'));
-          feedback.classList.remove('hidden');
-        }
-        if (typeof showNotificationToast === 'function') {
-          showNotificationToast('Code promo validé : −20 % sur la prestation.', 'success');
-        }
-      } else {
+      if (!sessionUser) {
         window._activeDevisCoupon = null;
         if (feedback) {
           feedback.className = 'text-xs text-red-600 font-bold flex items-center gap-1.5 pt-0.5';
-          feedback.textContent = sessionUser
-            ? 'Ce code ne correspond pas à votre compte.'
-            : 'Connectez-vous pour activer votre code unique de bienvenue.';
+          feedback.textContent = 'Connectez-vous pour activer votre code unique de bienvenue.';
           feedback.classList.remove('hidden');
         }
         if (typeof showNotificationToast === 'function') {
           showNotificationToast('Le code promo est lié à un compte vérifié. Connectez-vous, puis réessayez.', 'warning');
         }
+        updateBudgetPreview(budgetInput ? budgetInput.value : 350);
+        return;
       }
-      updateBudgetPreview(budgetInput ? budgetInput.value : 350);
+
+      function handleLocalFallback() {
+        const owned = sessionUser && sessionUser.promoCode && String(sessionUser.promoCode).toUpperCase() === code;
+        if (owned) {
+          window._activeDevisCoupon = { code: code, discountPct: 20 };
+          if (feedback) {
+            feedback.className = 'text-xs text-emerald-800 font-extrabold flex items-center gap-1.5 pt-0.5';
+            feedback.textContent = '';
+            feedback.insertAdjacentHTML('afterbegin', '<i class="fa-solid fa-circle-check text-green-600"></i> ');
+            feedback.append(document.createTextNode('Coupon ' + code + ' validé (−20 %).'));
+            feedback.classList.remove('hidden');
+          }
+          if (typeof showNotificationToast === 'function') {
+            showNotificationToast('Code promo validé : −20 % sur la prestation.', 'success');
+          }
+        } else {
+          window._activeDevisCoupon = null;
+          if (feedback) {
+            feedback.className = 'text-xs text-red-600 font-bold flex items-center gap-1.5 pt-0.5';
+            feedback.textContent = 'Ce code ne correspond pas à votre compte.';
+            feedback.classList.remove('hidden');
+          }
+          if (typeof showNotificationToast === 'function') {
+            showNotificationToast('Ce code ne correspond pas à votre compte vérifié.', 'warning');
+          }
+        }
+      }
+
+      // Validation Côté Serveur (Edge API Sécurisée)
+      fetch('/api/canjear-cupones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: sessionUser.uid || sessionUser.id,
+          email: sessionUser.email,
+          couponCode: code,
+          action: 'validate'
+        })
+      }).then(r => r.json()).then(data => {
+        if (data && data.ok && data.valid && !data.already_used) {
+          const pct = data.coupon?.descuento_pct || 20;
+          window._activeDevisCoupon = { code: code, discountPct: pct };
+          if (feedback) {
+            feedback.className = 'text-xs text-emerald-800 font-extrabold flex items-center gap-1.5 pt-0.5';
+            feedback.textContent = '';
+            feedback.insertAdjacentHTML('afterbegin', '<i class="fa-solid fa-circle-check text-green-600"></i> ');
+            feedback.append(document.createTextNode('Coupon ' + code + ' validé (−' + pct + ' %).'));
+            feedback.classList.remove('hidden');
+          }
+          if (typeof showNotificationToast === 'function') {
+            showNotificationToast('Code promo validé : −' + pct + ' % sur la prestation.', 'success');
+          }
+        } else if (data && data.already_used) {
+          window._activeDevisCoupon = null;
+          if (feedback) {
+            feedback.className = 'text-xs text-amber-700 font-bold flex items-center gap-1.5 pt-0.5';
+            feedback.textContent = 'Ce code promo a déjà été utilisé sur votre compte.';
+            feedback.classList.remove('hidden');
+          }
+        } else {
+          handleLocalFallback();
+        }
+        updateBudgetPreview(budgetInput ? budgetInput.value : 350);
+      }).catch(() => {
+        handleLocalFallback();
+        updateBudgetPreview(budgetInput ? budgetInput.value : 350);
+      });
     };
 
     // ─── BUDGET & CAPITAL FIELD LOGIC (PDF Página 3) ───
@@ -6223,6 +6276,16 @@
           if (totalEl) totalEl.textContent = `${val.toFixed(0)} € TTC${coupon ? ` (dont remise : ${finalVal} €)` : ''}`;
           if (taxEl) taxEl.textContent = `- ${half.toFixed(0)} € (Avance 50% URSSAF)`;
           if (netEl) netEl.textContent = `${half.toFixed(0)} €`;
+
+          // Synchronisation avec l'API fiscale serveur
+          if (window.PinoDB && window.PinoDB.calculateSAPCreditServer) {
+            PinoDB.calculateSAPCreditServer(finalVal).then(taxRes => {
+              if (taxRes && taxRes.sapCredit !== undefined && regime === 'sap_unipros') {
+                if (taxEl) taxEl.textContent = `- ${Math.round(taxRes.sapCredit)} € (Avance 50% URSSAF)`;
+                if (netEl) netEl.textContent = `${Math.round(taxRes.netPayable)} €`;
+              }
+            }).catch(() => {});
+          }
         } else {
           if (totalEl) totalEl.textContent = `${finalVal.toFixed(0)} € (Facture Directe)`;
           if (taxEl) taxEl.textContent = `0 € (Exonéré TVA art. 293 B CGI)`;
@@ -7324,7 +7387,40 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.addScope('email');
         provider.addScope('profile');
-        provider.setCustomParameters({ prompt: 'select_account' });
+
+        // RFC 7636 PKCE (Proof Key for Code Exchange) & State Cryptographique
+        let pkceState = null;
+        let pkceChallenge = null;
+        try {
+          const stateBytes = new Uint8Array(16);
+          crypto.getRandomValues(stateBytes);
+          pkceState = Array.from(stateBytes, b => b.toString(16).padStart(2, '0')).join('');
+
+          const verifierBytes = new Uint8Array(32);
+          crypto.getRandomValues(verifierBytes);
+          const verifier = Array.from(verifierBytes, b => ('0' + b.toString(16)).slice(-2)).join('');
+
+          const encoder = new TextEncoder();
+          const data = encoder.encode(verifier);
+          const digest = await crypto.subtle.digest('SHA-256', data);
+          pkceChallenge = btoa(String.fromCharCode(...new Uint8Array(digest)))
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=+$/, '');
+
+          sessionStorage.setItem('pino_oauth_pkce_state', pkceState);
+          sessionStorage.setItem('pino_oauth_pkce_verifier', verifier);
+        } catch (pkceErr) {
+          console.warn('[pino-auth] PKCE generation notice:', pkceErr);
+        }
+
+        const customParams = { prompt: 'select_account' };
+        if (pkceState) customParams.state = pkceState;
+        if (pkceChallenge) {
+          customParams.code_challenge = pkceChallenge;
+          customParams.code_challenge_method = 'S256';
+        }
+        provider.setCustomParameters(customParams);
 
         try {
           const result = await firebase.auth().signInWithPopup(provider);
@@ -7551,26 +7647,24 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       const label = document.getElementById('apple-auth-btn-label');
       const originalText = label ? label.textContent : 'Continuer avec Apple';
 
-      // 1. Si un e-mail est déjà saisi dans l'un des champs (login-email ou apple-quick-email)
-      const emailInput = document.getElementById('login-email');
+      // 1. Si un e-mail est explicitement saisi dans le champ Apple
       const quickInput = document.getElementById('apple-quick-email');
-      const typedEmail = (quickInput?.value || emailInput?.value || '').trim().toLowerCase();
+      const typedEmail = (quickInput?.value || '').trim().toLowerCase();
       if (typedEmail && typedEmail.includes('@')) {
         await confirmAppleQuickSignIn(typedEmail);
         return;
       }
 
-      // 2. Si un utilisateur est déjà mémorisé sur ce terminal (Jesus Martinez, Andrés, etc.)
+      const panel = document.getElementById('apple-auth-quick-panel');
       const remembered = (localStorage.getItem('pino_last_client_email') || window._appleRememberedEmail || '').trim().toLowerCase();
       if (remembered && remembered.includes('@')) {
         await confirmAppleQuickSignIn(remembered);
         return;
       }
 
-      // 3. Si le panneau est déjà affiché et que l'utilisateur reclique sur Apple -> Connexion instantanée 1-clic
-      const panel = document.getElementById('apple-auth-quick-panel');
+      // Si le panneau est déjà affiché et que l'utilisateur reclique sur Apple -> Connexion instantanée 1-clic
       if (panel && !panel.classList.contains('hidden') && panel.style.display !== 'none') {
-        await confirmAppleQuickSignIn();
+        await confirmAppleQuickSignIn(remembered || null);
         return;
       }
 
@@ -7616,12 +7710,31 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         if (panel) {
           panel.classList.remove('hidden');
           panel.style.display = 'block';
+
+          // Si un utilisateur est déjà mémorisé sur ce terminal, activer le conteneur visuel
+          if (remembered && remembered.includes('@')) {
+            const remContainer = document.getElementById('apple-remembered-user-container');
+            const remEmail = document.getElementById('apple-remembered-email');
+            const remName = document.getElementById('apple-remembered-name');
+            if (remContainer && remEmail) {
+              let localUsers = [];
+              try { localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]'); } catch(e){}
+              const match = localUsers.find(u => (u.email || '').toLowerCase() === remembered);
+              window._appleRememberedEmail = remembered;
+              window._appleRememberedName = match?.fullName || match?.name || remembered.split('@')[0];
+              remEmail.textContent = remembered;
+              if (remName) remName.textContent = window._appleRememberedName;
+              remContainer.classList.remove('hidden');
+            }
+          }
+
           if (quickInput && !quickInput.value) {
             quickInput.value = 'client.apple@icloud.com';
           }
           panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
           window.switchAuthTab('login');
+          const emailInput = document.getElementById('login-email');
           if (emailInput) {
             emailInput.placeholder = 'votre.compte@icloud.com';
             emailInput.focus();
@@ -9011,12 +9124,29 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       }
     };
 
-    // Logout
     window.handleLogout = async () => {
       // 1. Marquer la déconnexion explicite pour empêcher toute réouverture automatique
       sessionStorage.setItem('pino_explicit_logout', 'true');
 
-      // 2. Déconnexion complète de Firebase Auth
+      // 2. Déconnexion côté serveur (API Révocation de Cookies & Session HttpOnly)
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+      } catch (e) {
+        console.warn('[auth] Server logout notice:', e);
+      }
+
+      // 3. Révocation OAuth Google Provider si jeton présent
+      try {
+        const oauthToken = sessionStorage.getItem('pino_oauth_token');
+        if (oauthToken) {
+          fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(oauthToken), {
+            method: 'POST',
+            mode: 'no-cors'
+          }).catch(() => {});
+        }
+      } catch (e) {}
+
+      // 4. Déconnexion complète de Firebase Auth
       if (typeof firebase !== 'undefined' && firebase.auth) {
         try {
           await firebase.auth().signOut();
@@ -9025,7 +9155,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         }
       }
 
-      // 3. Déconnexion complète de Supabase si configuré
+      // 5. Déconnexion complète de Supabase si configuré
       if (window.pinoSupabase) {
         try {
           await window.pinoSupabase.auth.signOut();
@@ -9034,10 +9164,11 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         }
       }
 
-      // 4. Nettoyer le stockage local, de session et purger les cookies de session
+      // 6. Nettoyer le stockage local, de session et purger les cookies de session
       localStorage.removeItem('pino_current_user');
       localStorage.removeItem('pino_last_client_email');
-      sessionStorage.removeItem('pino_impersonating');
+      sessionStorage.clear();
+      sessionStorage.setItem('pino_explicit_logout', 'true');
       try {
         document.cookie = 'pino_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Strict; Secure;';
         document.cookie = 'pino_apple_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Strict; Secure;';
@@ -14665,7 +14796,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       if (actionKey === 'relance_sap_50') {
         text = `Bonjour ${name},\n\nJe reviens vers vous concernant votre demande pour ${service}.\n\n👉 N'oubliez pas qu'avec l'AVANCE IMMÉDIATE DU CRÉDIT D'IMPÔT 50% de l'URSSAF (Coopérative Unipros), votre reste à charge réel n'est que de ${net} € au lieu de ${amount} € TTC !\n\nAucune avance de trésorerie nécessaire : vous ne réglez que les 50% après le passage.\n\nPouvons-nous convenir d'un créneau cette semaine ?\n\nAndrés Pino — 06 51 59 40 34`;
       } else if (actionKey === 'coupon_20') {
-        text = `Bonjour ${name},\n\nPour vous accompagner dans l'entretien de votre jardin (${service}), je vous fais bénéficier de notre coupon de bienvenue exclusif : PELABOLA (-20% immédiats).\n\nEn combinant ce geste avec l'Avance Immédiate 50% URSSAF, vous obtenez le meilleur tarif paysager certifié de Vaucluse.\n\nSouhaitez-vous que je vienne estimer le travail sur place ?\n\nBien cordialement,\nAndrés Pino — Pino Espaces Verts`;
+        text = `Bonjour ${name},\n\nPour vous accompagner dans l'entretien de votre jardin (${service}), je vous fais bénéficier de notre coupon de bienvenue nominatif exclusif (-20% immédiats).\n\nEn combinant ce geste avec l'Avance Immédiate 50% URSSAF, vous obtenez le meilleur tarif paysager certifié de Vaucluse.\n\nSouhaitez-vous que je vienne estimer le travail sur place ?\n\nBien cordialement,\nAndrés Pino — Pino Espaces Verts`;
       } else if (actionKey === 'chiffrage_ajuste') {
         text = `Bonjour ${name},\n\nJ'ai réajusté notre proposition pour ${service} afin de respecter au plus près votre budget.\n\nNous pouvons adapter la formule (par exemple : intervention ciblée avec ou sans évacuation des végétaux) pour un tarif net très avantageux.\n\nÀ votre disposition pour en discuter au 06 51 59 40 34,\nAndrés Pino`;
       } else if (actionKey === 'marquer_bonne') {
@@ -14888,6 +15019,40 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
         // Dès qu'un dialogue se ferme (bouton X, touche Echap, drag-down, API), nettoyer le hash
         dialog.addEventListener('close', cleanModalHash);
+      });
+
+      // 3b. Accessibilité Clavier (WCAG 2.1 Focus Trap & Touche Echap)
+      document.addEventListener('keydown', (e) => {
+        const openDialog = document.querySelector('dialog[open]');
+        if (!openDialog) return;
+
+        if (e.key === 'Escape') {
+          if (openDialog.id === 'modal-window-admin') {
+            e.preventDefault();
+            return;
+          }
+          openDialog.close();
+          cleanModalHash();
+          return;
+        }
+
+        if (e.key === 'Tab') {
+          const focusables = openDialog.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+          if (focusables.length === 0) return;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          if (e.shiftKey) {
+            if (document.activeElement === first) {
+              last.focus();
+              e.preventDefault();
+            }
+          } else {
+            if (document.activeElement === last) {
+              first.focus();
+              e.preventDefault();
+            }
+          }
+        }
       });
 
       // 4. Routage d'activation invité uniquement (#activate?email=...&token=...)

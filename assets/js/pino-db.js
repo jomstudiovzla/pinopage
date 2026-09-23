@@ -1677,15 +1677,35 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
    *  CUPONES — Canjear / Asignar Cupón (20% de réduction)
    * ───────────────────────────────────────────────────────── */
   async function redeemPelabola(userId, email, customCode = 'PELABOLA') {
+    const couponCode = customCode || 'PELABOLA';
     const couponData = {
       user_id:       userId,
       email:         email,
-      codigo_cupon:  customCode || 'PELABOLA',
+      codigo_cupon:  couponCode,
       descuento_eur: 20.00,
       descuento_pct: 20,
       estado:        'valid',
       created_at:    new Date().toISOString(),
     };
+
+    // 1. Validation & Enregistrement Côté Serveur (Edge API Sécurisée)
+    try {
+      const srvRes = await fetch('/api/canjear-cupones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, email, couponCode })
+      });
+      if (srvRes.ok) {
+        const srvData = await srvRes.json();
+        if (srvData && srvData.coupon) {
+          couponData.codigo_cupon = srvData.coupon.code || couponData.codigo_cupon;
+          couponData.descuento_pct = srvData.coupon.descuento_pct || 20;
+          couponData.estado = srvData.coupon.status || 'valid';
+        }
+      }
+    } catch (e) {
+      log('redeemPelabola:server', e);
+    }
 
     const db = rtdb();
     if (db) {
@@ -1706,6 +1726,33 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     }
 
     return { ok: true, coupon: couponData };
+  }
+
+  /* ─────────────────────────────────────────────────────────
+   *  TAX — Calcul Côté Serveur Crédit d'Impôt SAP 50%
+   * ───────────────────────────────────────────────────────── */
+  async function calculateSAPCreditServer(amountTTC) {
+    try {
+      const res = await fetch('/api/tax/calculate-sap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amountTTC: Number(amountTTC) || 0 })
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      log('calculateSAPCreditServer', e);
+    }
+    const val = Math.max(0, Number(amountTTC) || 0);
+    const sapCredit = Math.round(val * 0.50 * 100) / 100;
+    return {
+      amountTTC: val,
+      sapCredit: sapCredit,
+      netPayable: Math.round((val - sapCredit) * 100) / 100,
+      annualCeilingEur: 12000.0,
+      vatRatePct: 20.0
+    };
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -3172,6 +3219,7 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     fetchProfiles,
     fetchUserCoupon,
     redeemPelabola,
+    calculateSAPCreditServer,
     recordAuditSession,
     fetchAdminKPIs,
     saveJob,

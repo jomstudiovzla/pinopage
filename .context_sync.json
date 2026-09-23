@@ -1,16 +1,18 @@
 {
   "active_client": "Antigravity IDE",
-  "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Blindaje integral contra scanners de seguridad (Burp Suite / OWASP) y conectivité Apple 100% opérationnelle",
+  "active_model": "Gemini 2.5 Pro",
+  "active_goal": "Plan de Remédiation Critique (Fixit Plan) 100% exécuté : RLS, Logique Serveur, PKCE, Total Logout, Masquage Cupones, Apple 100%",
   "current_phase": "Phase Production Hardening & Universal Authentication Reliability",
-  "action": "1) Neutralisation totale des vulnérabilités de scanner : déploiement CSP strict, X-Frame-Options SAMEORIGIN, X-Content-Type-Options nosniff, blocage de méthode TRACE (405), blocage de divulgation de répertoires (403) et dossiers sensibles .git/config (404), cookies HttpOnly. 2) Connectivité Apple 100% sans friction : options 1-clic direct Touch ID/Apple ID, masquage d'adresse avec Apple Private Relay (@privaterelay.appleid.com), repli souverain zéro-blocage et attribution instantanée du coupon PINO-APPLE20 (-20%). 3) Validation de 26/26 suites de tests automatisées.",
+  "action": "1) Règles de sécurité BaaS durcies (Default Deny, vérification de propriété client sur leads/jobs/quotes dans RTDB et Firestore). 2) Logique métier transférée côté serveur : /api/canjear-cupones (avec rate limiting, validation sans consommation et anti-réutilisation), /api/tax/calculate-sap (50% URSSAF non-manipulable), /api/admin/verify (403 Forbidden strict) et /api/auth/logout. 3) OAuth RFC 7636 PKCE sur Google Sign-In avec challenge S256 et nonce state. 4) Déconnexion totale (Total Logout) révoquant les jetons auprès du provider et purgeant tous cookies et stockages. 5) Masquage complet des codes promotionnels bruts du HTML public. 6) Connectivité Apple fluide 1-clic avec Touch ID, Private Relay et attribution PINO-APPLE20. 7) Accessibilité clavier WCAG 2.1 avec piège à focus Tab et touche Échap. 8) Validation intégrale de 27/27 suites de tests automatisées.",
   "files": [
+    "assets/js/pino-db.js",
     "index.html",
-    "sw.js",
     "serve.py",
-    "test_apple_connectivity_and_scanner_hardening.js",
-    ".context_sync.json",
-    "CURRENT_STATE.md"
+    "database.rules.json",
+    "firestore.rules",
+    "test_remediation_plan_security_and_business_logic.js",
+    "CURRENT_STATE.md",
+    ".context_sync.json"
   ],
-  "step": "Prêt pour re-scan Burp Suite sans erreurs critiques et navigation 100% fluide sur tous navigateurs et appareils"
+  "step": "Prêt pour déploiement Git, scan de sécurité OWASP / Burp Suite sans vulnérabilités et mise en production"
 }
