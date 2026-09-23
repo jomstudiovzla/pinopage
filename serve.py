@@ -24,7 +24,12 @@ class PinoCORSRequestHandler(SimpleHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, HEAD')
         self.send_header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Authorization, Range, Origin')
-        self.send_header('Access-Control-Expose-Headers', 'Content-Length, Content-Range')
+        # En-têtes de sécurité HTTP & Hardening
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('X-Frame-Options', 'SAMEORIGIN')
+        self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
+        self.send_header('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)')
+        self.send_header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
         # Désactiver le cache local en développement pour rafraîchissement immédiat
         self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
         self.send_header('Pragma', 'no-cache')

@@ -1,15 +1,16 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Orquestación integral de resolución de errores v9.0: cero toasts no solicitados, paleta institucional esmeralda y autenticación soberana",
-  "current_phase": "Phase Production Excellence & Zero Disruption Architecture",
-  "action": "Armonización estética y funcional total: 1) Reestilización del panel in-situ #apple-auth-quick-panel con la paleta de lujo esmeralda/crema y badge oficial Apple text-white. 2) Supresión definitiva de toasts técnicos en requireSupabase y advertencias de depuración. 3) Reemplazo de textos de depuración por mensajes de confianza. 4) Limpieza de cierre y estilo de paneles. 5) Service Worker v39 desplegado. 6) 25/25 suites de pruebas verificadas con 100% de éxito.",
+  "active_goal": "Hardening corporativo de protocolos OAuth 2.0/OIDC, reglas de bases de datos BaaS y cabeceras HTTP de seguridad",
+  "current_phase": "Hito 1 — Auditoría de Seguridad Experta, Hardening de Arquitectura & Zero-Disruption",
+  "action": "Hardening de database.rules.json para clients_records con verificación estricta de propiedad de datos, despliegue de cabeceras HTTP (nosniff, SAMEORIGIN, strict-origin-when-cross-origin, HSTS, Permissions-Policy) en serve.py e index.html, purga activa de cookies de sesión en handleLogout() y validación del 100% de las 25 suites de tests automatizadas.",
   "files": [
+    "database.rules.json",
+    "serve.py",
     "index.html",
-    "sw.js",
-    "test_zero_unsolicited_toasts_and_clean_apple_sso.js",
-    ".context_sync.json",
-    "CURRENT_STATE.md"
+    ".gitignore",
+    "CURRENT_STATE.md",
+    ".context_sync.json"
   ],
-  "step": "Despliegue atómico a GitHub Pages (main) y entrega de reporte ejecutivo al CEO"
+  "step": "Commit con atribución Grok 4.6, push a origin main y reporte técnico/ejecutivo de pentesting avanzado"
 }

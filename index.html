@@ -7,6 +7,8 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="format-detection" content="telephone=yes" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   
   <!-- SEO & Cimientos -->
   <title>Pino Espaces Verts – Entretien de Jardins Entraigues-sur-la-Sorgue & Vaucluse (84)</title>
@@ -9006,10 +9008,15 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         }
       }
 
-      // 4. Nettoyer le stockage local et de session
+      // 4. Nettoyer le stockage local, de session et purger les cookies de session
       localStorage.removeItem('pino_current_user');
       localStorage.removeItem('pino_last_client_email');
       sessionStorage.removeItem('pino_impersonating');
+      try {
+        document.cookie = 'pino_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Strict; Secure;';
+        document.cookie = 'pino_apple_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Strict; Secure;';
+        document.cookie = 'pino_auth_status=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Strict; Secure;';
+      } catch (e) {}
 
       // 5. Arrêter et détacher tous les écouteurs de notifications temps réel
       if (typeof window.stopClientNotificationListeners === 'function') {
