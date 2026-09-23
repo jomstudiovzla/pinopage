@@ -1,18 +1,14 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 2.5 Pro",
-  "active_goal": "Plan de Remédiation Critique (Fixit Plan) 100% exécuté : RLS, Logique Serveur, PKCE, Total Logout, Masquage Cupones, Apple 100%",
-  "current_phase": "Phase Production Hardening & Universal Authentication Reliability",
-  "action": "1) Règles de sécurité BaaS durcies (Default Deny, vérification de propriété client sur leads/jobs/quotes dans RTDB et Firestore). 2) Logique métier transférée côté serveur : /api/canjear-cupones (avec rate limiting, validation sans consommation et anti-réutilisation), /api/tax/calculate-sap (50% URSSAF non-manipulable), /api/admin/verify (403 Forbidden strict) et /api/auth/logout. 3) OAuth RFC 7636 PKCE sur Google Sign-In avec challenge S256 et nonce state. 4) Déconnexion totale (Total Logout) révoquant les jetons auprès du provider et purgeant tous cookies et stockages. 5) Masquage complet des codes promotionnels bruts du HTML public. 6) Connectivité Apple fluide 1-clic avec Touch ID, Private Relay et attribution PINO-APPLE20. 7) Accessibilité clavier WCAG 2.1 avec piège à focus Tab et touche Échap. 8) Validation intégrale de 27/27 suites de tests automatisées.",
+  "active_goal": "Fiabilisation Authentification OAuth (Google localhost & Apple consentement explicite) et préparation packaging production",
+  "current_phase": "Phase Production Packaging & Domain Deployment Readiness",
+  "action": "1) Google Sign-in fiabilisé sur localhost (suppression du conflit code_challenge sur Identity Toolkit, prompt: 'select_account', vérification API 200 OK autorisée). 2) Apple Sign-in sécurisé avec consentement explicite à 100% (suppression totale de l'auto-connexion silencieuse et du pré-remplissage automatique, affichage systématique de la feuille Apple ID avec contrôle utilisateur). 3) Configuration de production firebase.json complétée avec l'intégralité des en-têtes HTTP de sécurité stricts (CSP, nosniff, SAMEORIGIN, HSTS, COOP, Permissions-Policy). 4) 27/27 suites de tests automatisées validées à 100%.",
   "files": [
-    "assets/js/pino-db.js",
     "index.html",
-    "serve.py",
-    "database.rules.json",
-    "firestore.rules",
-    "test_remediation_plan_security_and_business_logic.js",
+    "firebase.json",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Prêt pour déploiement Git, scan de sécurité OWASP / Burp Suite sans vulnérabilités et mise en production"
+  "step": "Prêt pour commit Git, vérification locale par l'utilisateur et déploiement sur domaine personnalisé"
 }

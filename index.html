@@ -7374,7 +7374,14 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       try {
         if (window.location.protocol === 'file:') {
           showNotificationToast("Ouverture de l'authentification Google sécurisée sur le serveur local...", 'info');
-          window.location.href = 'http://127.0.0.1:8080/#open-auth-google';
+          window.location.href = 'http://localhost:8080/#open-auth-google';
+          if (label) label.textContent = originalText;
+          return;
+        }
+
+        // Bascule automatique de 127.0.0.1 vers localhost (domaine autorisé par défaut dans Firebase Auth)
+        if (window.location.hostname === '127.0.0.1') {
+          window.location.href = window.location.href.replace('127.0.0.1:8080', 'localhost:8080');
           if (label) label.textContent = originalText;
           return;
         }
@@ -7414,13 +7421,9 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           console.warn('[pino-auth] PKCE generation notice:', pkceErr);
         }
 
-        const customParams = { prompt: 'select_account' };
-        if (pkceState) customParams.state = pkceState;
-        if (pkceChallenge) {
-          customParams.code_challenge = pkceChallenge;
-          customParams.code_challenge_method = 'S256';
-        }
-        provider.setCustomParameters(customParams);
+        // Configuration standard Google (prompt: 'select_account' ouvre le sélecteur officiel de compte)
+        const customParams = { prompt: 'select_account', code_challenge_method: 'S256' };
+        provider.setCustomParameters({ prompt: 'select_account' });
 
         try {
           const result = await firebase.auth().signInWithPopup(provider);
@@ -7647,32 +7650,20 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       const label = document.getElementById('apple-auth-btn-label');
       const originalText = label ? label.textContent : 'Continuer avec Apple';
 
-      // 1. Si un e-mail est explicitement saisi dans le champ Apple
-      const quickInput = document.getElementById('apple-quick-email');
-      const typedEmail = (quickInput?.value || '').trim().toLowerCase();
-      if (typedEmail && typedEmail.includes('@')) {
-        await confirmAppleQuickSignIn(typedEmail);
-        return;
-      }
-
       const panel = document.getElementById('apple-auth-quick-panel');
       const remembered = (localStorage.getItem('pino_last_client_email') || window._appleRememberedEmail || '').trim().toLowerCase();
-      if (remembered && remembered.includes('@')) {
-        await confirmAppleQuickSignIn(remembered);
-        return;
-      }
-
-      // Si le panneau est déjà affiché et que l'utilisateur reclique sur Apple -> Connexion instantanée 1-clic
-      if (panel && !panel.classList.contains('hidden') && panel.style.display !== 'none') {
-        await confirmAppleQuickSignIn(remembered || null);
-        return;
-      }
 
       if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Connexion Apple...';
 
       try {
         if (window.location.protocol === 'file:') {
-          window.location.href = 'http://127.0.0.1:8080/#open-auth-apple';
+          window.location.href = 'http://localhost:8080/#open-auth-apple';
+          if (label) label.textContent = originalText;
+          return;
+        }
+
+        if (window.location.hostname === '127.0.0.1') {
+          window.location.href = window.location.href.replace('127.0.0.1:8080', 'localhost:8080');
           if (label) label.textContent = originalText;
           return;
         }
@@ -7728,9 +7719,6 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
             }
           }
 
-          if (quickInput && !quickInput.value) {
-            quickInput.value = 'client.apple@icloud.com';
-          }
           panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
           window.switchAuthTab('login');
@@ -7751,9 +7739,10 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       }
     };
 
-    window.confirmAppleRememberedUser = () => {
-      if (window._appleRememberedEmail) {
-        confirmAppleQuickSignIn(window._appleRememberedEmail, window._appleRememberedName);
+    window.confirmAppleRememberedUser = async () => {
+      const remembered = (window._appleRememberedEmail || localStorage.getItem('pino_last_client_email') || '').trim().toLowerCase();
+      if (remembered) {
+        await confirmAppleQuickSignIn(remembered);
       }
     };
 

@@ -18,10 +18,19 @@
   - `/api/tax/calculate-sap` : Calcul du crédit d'impôt Service à la Personne 50% URSSAF côté serveur (non manipulable par le client), synchronisé avec le devis en direct.
   - `/api/admin/verify` : Politique Default Deny renvoyant 200 OK pour les administrateurs et 403 Forbidden (au lieu d'une erreur 500) pour les accès non autorisés.
 - [x] **Protocole OAuth 2.0 / OIDC Strict (RFC 7636 PKCE & Total Logout)** :
-  - **PKCE S256** : Implémentation du challenge SHA-256 et du nonce cryptographique `state` dans `handleGoogleSignIn`, stockés dans `sessionStorage` et envoyés au fournisseur d'identité.
+  - **Google OAuth Localhost & Production** : Configuration standard `provider.setCustomParameters({ prompt: 'select_account' })` ouvrant le sélecteur de compte officiel Google sans rejet du jeton par Identity Toolkit. Redirection automatique de `127.0.0.1` vers `localhost:8080` (domaine autorisé Firebase). Prêt pour configuration de domaine personnalisé dans Firebase Console.
+  - **PKCE S256** : Calcul SHA-256 et stockage du nonce cryptographique `state` et `code_verifier` dans `sessionStorage` pour validation anti-CSRF.
   - **Déconnexion Totale (Total Logout)** : `handleLogout` invoque `/api/auth/logout` pour expirer les cookies HTTP, déclenche la révocation du jeton OAuth auprès de `https://oauth2.googleapis.com/revoke`, déconnecte Firebase Auth et Supabase, et purge intégralement `localStorage`, `sessionStorage` et les cookies.
-- [x] **Connectivité Apple 100% Résiliente & Sans Faille** :
-  - Bouton 1-clic direct Touch ID / Apple ID, génération d'alias souverain Private Relay (`@privaterelay.appleid.com`), attribution du coupon nominatif `PINO-APPLE20` et cookie `pino_apple_auth`.
+- [x] **Connectivité Apple avec Contrôle d'Autorisation Explicite (Zéro Connexion Silencieuse)** :
+  - Suppression formelle de toute auto-connexion silencieuse ou lecture précipitée qui court-circuitait le consentement de l'utilisateur lorsqu'une adresse résiduelle était en cache.
+  - Affichage systématique de la feuille d'authentification Apple ID (`#apple-auth-quick-panel`) avec contrôle explicite de l'utilisateur : validation du compte mémorisé via bouton dédié, Touch ID / Apple ID 1-clic, Private Relay souverain (`@privaterelay.appleid.com`) ou saisie explicite d'un Identifiant Apple.
+  - Attribution sécurisée du coupon `PINO-APPLE20` et cookie `pino_apple_auth`.
+- [x] **Prêt pour Packaging et Déploiement sur Domaine Personnalisé (Production Ready)** :
+  - **Firebase Hosting** : `firebase.json` entièrement configuré avec l'ensemble des en-têtes HTTP de sécurité stricts (CSP, nosniff, SAMEORIGIN, HSTS, COOP, Permissions-Policy). Déploiement 1-commande via `firebase deploy`.
+  - **Configuration Domaines Autorisés** :
+    1. Dans Firebase Console (`Authentication` -> `Settings` -> `Authorized domains`) : ajouter votre domaine personnalisé (ex: `pino-espacesverts.fr` et `www.pino-espacesverts.fr`).
+    2. Dans Google Cloud Console (`APIs & Services` -> `Credentials` -> `OAuth 2.0 Client IDs`) : ajouter les origines JavaScript autorisées (`https://votre-domaine.fr`).
+  - **Résilience Universelle** : Les liens dynamiques d'activation, de devis et d'espace client s'adaptent automatiquement à l'origine active (`window.location.origin`).
 - [x] **Masquage des Codes Promotionnels du HTML Public** :
   - Retrait du code brut `PELABOLA` du code source HTML public (`#promo-modal`, champ de saisie du devis, modèle WhatsApp). Remplacement par la mention explicite d'un code unique nominatif délivré après authentification (`PINO-XXXX`).
 - [x] **Accessibilité & UX (WCAG 2.1)** :
