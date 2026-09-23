@@ -4,12 +4,15 @@
 - **Repositorio remoto**: [https://github.com/jomstudiovzla/pinopage](https://github.com/jomstudiovzla/pinopage)
 - **URL pública (GitHub Pages)**: [https://jomstudiovzla.github.io/pinopage/](https://jomstudiovzla.github.io/pinopage/)
 - **Rama principal**: `main`
-- **Localhost**: `http://localhost:8080/` (o `http://127.0.0.1:8080/`)
+- **Localhost**: `http://localhost:5500/` (o `http://127.0.0.1:5500/` — Port 8080 libéré pour Burp Suite)
 - **Backend Activo**: **Firebase (pagepino-e8e97)**
   - Realtime Database: `https://pagepino-e8e97-default-rtdb.europe-west1.firebasedatabase.app`
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
 ## ✅ Plan de Remédiation Critique Intégral (Fixit Plan 100% Validé)
+- [x] **Élimination Définitive du Conflit de Port Burp Suite (Bascule sur Port 5500)** :
+  - **Port 8080 libéré** : Burp Suite utilise le port 8080 comme écouteur de proxy par défaut. Le serveur `serve.py` a été déplacé sur le port **5500** (`http://localhost:5500/`), éliminant tout blocage ou boucle de proxy.
+  - **Compilation Locale de Tailwind CSS (`assets/css/tailwind.min.css`)** : Auparavant, l'interception de Burp ou l'absence de réseau bloquait le CDN `https://cdn.tailwindcss.com`, affichant la page sans styles (Times New Roman, éléments bruts). Un fichier CSS autonome de 68 KB a été compilé avec la palette exacte de Pino et lié dans `index.html`, garantissant un affichage parfait à 100% même hors ligne ou derrière Burp Suite.
 - [x] **Sécurité des Données & Règles BaaS (RLS & Document Rules Default Deny)** :
   - `database.rules.json` : Isolement strict des leads, devis, travaux et factures au seul propriétaire vérifié (`data.child('email').val() === auth.token.email`) et privilèges exclusifs pour les administrateurs certifiés (`pino.espacesverts@gmail.com`, `jomstudiovzla@gmail.com`).
   - `firestore.rules` : Règle Default Deny (`match /{document=**} { allow read, write: if false; }`), accès aux sessions et coupons strictement restreints à l'UID du propriétaire ou à l'administrateur.

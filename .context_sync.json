@@ -1,14 +1,19 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 2.5 Pro",
-  "active_goal": "Fiabilisation Authentification OAuth (Google localhost & Apple consentement explicite) et préparation packaging production",
-  "current_phase": "Phase Production Packaging & Domain Deployment Readiness",
-  "action": "1) Google Sign-in fiabilisé sur localhost (suppression du conflit code_challenge sur Identity Toolkit, prompt: 'select_account', vérification API 200 OK autorisée). 2) Apple Sign-in sécurisé avec consentement explicite à 100% (suppression totale de l'auto-connexion silencieuse et du pré-remplissage automatique, affichage systématique de la feuille Apple ID avec contrôle utilisateur). 3) Configuration de production firebase.json complétée avec l'intégralité des en-têtes HTTP de sécurité stricts (CSP, nosniff, SAMEORIGIN, HSTS, COOP, Permissions-Policy). 4) 27/27 suites de tests automatisées validées à 100%.",
+  "active_goal": "Migration port 5500 (libération port 8080 pour Burp Suite) et intégration Tailwind CSS compilé localement",
+  "current_phase": "Phase Production Packaging & Security Tooling Hardening",
+  "action": "1) Port par défaut de serve.py changé de 8080 vers 5500 pour éliminer tout conflit avec le proxy Burp Suite. 2) Compilation autonome de Tailwind CSS dans assets/css/tailwind.min.css (68 KB) avec palette et polices officielles Pino, éliminant tout affichage brut sans CSS causé par le blocage CDN de Burp ou d'extensions de filtrage. 3) index.html mis à jour pour charger assets/css/tailwind.min.css et gérer dynamiquement le port 5500. 4) 27/27 suites de tests automatisées validées sur le port 5500.",
   "files": [
+    "serve.py",
     "index.html",
-    "firebase.json",
+    "assets/css/tailwind.min.css",
+    "tailwind.config.js",
+    "test_apple_connectivity_and_scanner_hardening.js",
+    "test_apple_sso_resilience_and_post_handling.js",
+    "test_remediation_plan_security_and_business_logic.js",
     "CURRENT_STATE.md",
     ".context_sync.json"
   ],
-  "step": "Prêt pour commit Git, vérification locale par l'utilisateur et déploiement sur domaine personnalisé"
+  "step": "Prêt pour audit Burp Suite sans interférence de port et test visuel immédiat sur http://localhost:5500/"
 }

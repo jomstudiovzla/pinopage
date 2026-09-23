@@ -384,5 +384,5 @@ def run(port=8080, bind="0.0.0.0"):
         httpd.server_close()
 
 if __name__ == '__main__':
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+    port = int(os.environ.get('PINO_PORT') or (sys.argv[1] if len(sys.argv) > 1 else 5500))
     run(port=port)

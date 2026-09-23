@@ -68,7 +68,7 @@ const makeReq = (path, method = 'GET') => {
   return new Promise((resolve, reject) => {
     const req = http.request({
       hostname: '127.0.0.1',
-      port: 8080,
+      port: process.env.PINO_PORT || 5500,
       path: path,
       method: method
     }, (res) => {

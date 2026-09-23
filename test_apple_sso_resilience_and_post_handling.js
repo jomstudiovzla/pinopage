@@ -53,7 +53,7 @@ const postPayload = 'id_token=sample_apple_jwt&code=sample_auth_code&user=%7B%22
 
 const req = http.request({
   hostname: '127.0.0.1',
-  port: 8080,
+  port: process.env.PINO_PORT || 5500,
   path: '/',
   method: 'POST',
   headers: {

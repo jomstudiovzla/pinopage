@@ -94,7 +94,7 @@ const makePost = (apiPath, payload) => {
     const data = JSON.stringify(payload);
     const req = http.request({
       hostname: '127.0.0.1',
-      port: 8080,
+      port: process.env.PINO_PORT || 5500,
       path: apiPath,
       method: 'POST',
       headers: {
