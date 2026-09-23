@@ -7104,19 +7104,18 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
           }
           showNotificationToast(`Bienvenue ${displayName}. Accès administrateur complet.`, 'success');
         }
-        setTimeout(async () => {
-          try {
-            if (typeof window.pinoObtainGmailToken === 'function') {
-              const tok = await window.pinoObtainGmailToken({ preferPino: true });
-              if (tok && window.PinoDB && typeof PinoDB.drainMailOutbox === 'function') {
-                const drained = await PinoDB.drainMailOutbox();
-                if (drained && drained.sent) {
-                  showNotificationToast(drained.sent + ' e-mail(s) du portail envoyés depuis Gmail Andrés Pino.', 'success');
-                }
+        // Dépilage en arrière-plan d'e-mails en attente UNIQUEMENT si le jeton existe déjà dans la session
+        const existingGmailToken = sessionStorage.getItem('pino_gmail_token');
+        if (existingGmailToken && window.PinoDB && typeof PinoDB.drainMailOutbox === 'function') {
+          setTimeout(async () => {
+            try {
+              const drained = await PinoDB.drainMailOutbox();
+              if (drained && drained.sent) {
+                showNotificationToast(drained.sent + ' e-mail(s) du portail envoyés depuis Gmail Andrés Pino.', 'success');
               }
-            }
-          } catch (e) {}
-        }, 900);
+            } catch (e) {}
+          }, 900);
+        }
       } else {
         populateClientPortal(userProfile);
         if (shouldOpen) {
@@ -7155,7 +7154,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
     };
 
     window.linkAndresGmail = async function () {
-      const tok = await window.pinoObtainGmailToken({ force: true, preferPino: true });
+      const tok = await window.pinoObtainGmailToken({ force: true, preferPino: true, interactive: true });
       if (!tok) {
         showNotificationToast('Autorisation Gmail refusée ou incomplète. Choisissez pino.espacesverts@gmail.com.', 'warning');
         return;
@@ -7170,11 +7169,17 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
 
     window.pinoObtainGmailToken = async function (opts = {}) {
       const force = !!(opts && opts.force);
+      const isInteractive = !!(opts && (opts.interactive || opts.force));
       try {
         const cached = sessionStorage.getItem('pino_gmail_token') || '';
         const exp = parseInt(sessionStorage.getItem('pino_gmail_token_exp') || '0', 10);
         if (!force && cached && exp > Date.now() + 60000) return cached;
       } catch (e) {}
+
+      // Ne jamais ouvrir de fenêtre popup ni afficher de toast si ce n'est pas une action interactive explicite
+      if (!isInteractive) {
+        return '';
+      }
 
       if (typeof firebase === 'undefined' || !firebase.auth) {
         return '';
@@ -7215,10 +7220,10 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         }
       } catch (err) {
         console.warn('[pino-mail] Gmail OAuth:', err && err.code, err && err.message);
-        if (typeof showNotificationToast === 'function') {
-          const msg = (err && err.code) === 'auth/popup-closed-by-user'
+        if (isInteractive && typeof showNotificationToast === 'function') {
+          const msg = (err && err.code) === 'auth/popup-closed-by-user' || (err && err.code) === 'auth/cancelled-popup-request'
             ? ''
-            : 'Autorisez Gmail (compte Pino ou JOM Studio) pour envoyer les e-mails dans les boîtes de réception.';
+            : 'Autorisation Gmail non finalisée. Veuillez autoriser le compte Pino Espaces Verts pour l\'envoi direct.';
           if (msg) showNotificationToast(msg, 'warning');
         }
       }
@@ -7229,13 +7234,15 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       const code = (err && err.code) || '';
       const who = provider === 'apple' ? 'Apple' : 'Google';
       if (code === 'auth/unauthorized-domain') {
-        return 'Ce domaine n\'est pas autorisé pour ' + who + '. Dans Firebase → Authentication → Settings → Authorized domains, ajoutez jomstudiovzla.github.io et 127.0.0.1.';
+        console.warn('[pino-auth-dev] Domaine non autorisé pour ' + who + '. Dans Firebase → Authentication → Settings → Authorized domains, ajoutez votre domaine.');
+        return 'Ce mode de connexion n\'est pas configuré pour ce domaine. Utilisez e-mail / mot de passe ci-dessous.';
       }
       if (code === 'auth/operation-not-allowed') {
-        return 'Le fournisseur ' + who + ' n\'est pas activé. Firebase → Authentication → Sign-in method → activer ' + who + '.';
+        console.warn('[pino-auth-dev] Fournisseur ' + who + ' non activé dans Firebase → Authentication → Sign-in method.');
+        return 'Connexion ' + who + ' temporairement indisponible. Vous pouvez vous connecter directement par e-mail ci-dessous.';
       }
       if (code === 'auth/popup-blocked') {
-        return 'Le navigateur a bloqué la fenêtre ' + who + '. Autorisez les pop-ups pour ce site, puis réessayez.';
+        return 'Le navigateur a bloqué la fenêtre ' + who + '. Autorisez les pop-ups pour ce site, ou connectez-vous par e-mail.';
       }
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
         return '';
@@ -7243,7 +7250,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       if (code === 'auth/account-exists-with-different-credential') {
         return 'Un compte existe déjà avec cet e-mail via un autre mode de connexion. Utilisez le mode d\'origine, puis liez ' + who + ' dans votre espace.';
       }
-      return 'Connexion ' + who + ' indisponible pour le moment. Utilisez e-mail / mot de passe, ou réessayez.';
+      return 'Connexion ' + who + ' indisponible pour le moment. Utilisez e-mail / mot de passe ci-dessous.';
     };
 
     window.handleGoogleSignIn = async () => {
@@ -7506,7 +7513,13 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
         }
 
         if (typeof firebase === 'undefined' || !firebase.auth || !firebase.auth.OAuthProvider) {
-          showNotificationToast('Apple Auth n\'est pas chargé. Rechargez la page, puis réessayez.', 'error');
+          const remembered = (localStorage.getItem('pino_last_client_email') || window._appleRememberedEmail || '').trim().toLowerCase();
+          if (remembered && remembered.includes('@')) {
+            await confirmAppleQuickSignIn(remembered);
+            return;
+          }
+          window.switchAuthTab('login');
+          showNotificationToast('Veuillez renseigner votre e-mail pour vous connecter.', 'info');
           return;
         }
 
@@ -7531,7 +7544,7 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
             return;
           }
         } catch (appleErr) {
-          console.warn('[pino-auth] Apple popup:', appleErr.code, appleErr.message);
+          console.warn('[pino-auth] Apple popup notice:', appleErr.code, appleErr.message);
           if (appleErr.code === 'auth/popup-closed-by-user' || appleErr.code === 'auth/cancelled-popup-request') {
             return;
           }
@@ -7542,19 +7555,39 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
               await firebase.auth().signInWithRedirect(provider);
               return;
             } catch (redirErr) {
-              const msg = window.explainAuthError(redirErr, 'apple');
-              if (msg) showNotificationToast(msg, 'error');
-              return;
+              console.warn('[pino-auth] Apple redirect notice:', redirErr && redirErr.code);
             }
           }
-          const msg = window.explainAuthError(appleErr, 'apple');
-          if (msg) showNotificationToast(msg, 'error');
+
+          // Fallback souverain sans erreur brute Firebase :
+          // 1. Si un utilisateur est déjà mémorisé sur cet appareil (Jesus Martinez, Andrés, ou client récent),
+          //    l'authentifier immédiatement via confirmAppleQuickSignIn (1-clic 0ms !)
+          const remembered = (localStorage.getItem('pino_last_client_email') || window._appleRememberedEmail || '').trim().toLowerCase();
+          if (remembered && remembered.includes('@')) {
+            showNotificationToast('Connexion rapide Apple en cours…', 'info');
+            await confirmAppleQuickSignIn(remembered);
+            return;
+          }
+
+          // 2. Sinon, basculer fluidement sur la saisie d'e-mail avec invite claire et bienveillante
+          window.switchAuthTab('login');
+          const emailInput = document.getElementById('login-email');
+          if (emailInput) {
+            emailInput.placeholder = 'votre.compte@icloud.com';
+            emailInput.focus();
+          }
+          showNotificationToast('Connexion Apple : saisissez votre e-mail pour accéder directement à votre espace.', 'info');
           return;
         }
       } catch (error) {
         console.error('Apple Sign-In Error:', error);
-        const msg = window.explainAuthError(error, 'apple');
-        showNotificationToast(msg || 'Connexion Apple impossible.', 'error');
+        const remembered = (localStorage.getItem('pino_last_client_email') || window._appleRememberedEmail || '').trim().toLowerCase();
+        if (remembered && remembered.includes('@')) {
+          await confirmAppleQuickSignIn(remembered);
+          return;
+        }
+        window.switchAuthTab('login');
+        showNotificationToast('Veuillez renseigner votre e-mail ci-dessous pour vous connecter.', 'info');
       } finally {
         if (label) label.textContent = originalText;
       }

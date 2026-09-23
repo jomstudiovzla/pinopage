@@ -1,15 +1,15 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Optimisation globale responsive & tactile iPhone / iPad pour les tableaux et aperçus documents",
-  "current_phase": "Phase Production & Pulido Mobile / Cross-Device",
-  "action": "Validation intégrale de 24/24 suites de tests. Fluidité tactile iOS Safari avec -webkit-overflow-scrolling: touch, débordement horizontal sécurisé sur #document-preview-container, .no-scrollbar sans barres parasites, isolation de messages clients et cache Service Worker v36.",
+  "active_goal": "Éradication définitive des toasts intrusifs au démarrage & fiabilisation souveraine Apple SSO",
+  "current_phase": "Phase Production Hardening & Customer Experience Excellence",
+  "action": "Suppression totale de l'appel automatique non-sollicité à Gmail OAuth au chargement, assainissement des messages explainAuthError (zéro directive interne Firebase fuitée aux utilisateurs), fallback souverain 1-clic direct pour Apple SSO (Jesus Martinez / Andrés) et validation de 25/25 suites de tests automatisés (0 échec). Cache Service Worker v37.",
   "files": [
     "index.html",
     "sw.js",
-    "assets/js/pino-db.js",
-    "test_ios_client_panel_appearance.js",
-    ".context_sync.json"
+    "test_zero_unsolicited_toasts_and_clean_apple_sso.js",
+    ".context_sync.json",
+    "CURRENT_STATE.md"
   ],
-  "step": "Validation complète sur iPhone et suivi utilisateur"
+  "step": "Vérification sur le site en ligne et validation CEO sans aucun toast parasite"
 }

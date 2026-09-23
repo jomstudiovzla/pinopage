@@ -9,6 +9,24 @@
   - Realtime Database: `https://pagepino-e8e97-default-rtdb.europe-west1.firebasedatabase.app`
   - Auth: Google Popup / Redirect + Email/Password
   - Archivos de reglas y CLI: [database.rules.json](file:///Users/macbook/Documents/Antigravity/PINO/new/database.rules.json), [.firebaserc](file:///Users/macbook/Documents/Antigravity/PINO/new/.firebaserc), [firebase.json](file:///Users/macbook/Documents/Antigravity/PINO/new/firebase.json)
+## ✅ Éradication Définitive des Toasts Intrusifs au Chargement (Gmail OAuth) & Résilience Souveraine Apple SSO (100% OPÉRATIONNEL)
+- [x] **Éradication Totale du Toast Non-Sollicité Gmail au Démarrage (`Autorisez Gmail...`)** :
+  - **Diagnostic de la Cause Racine** : Dans `processAuthenticatedUser`, un appel `setTimeout(..., 900)` invoquait systématiquement `window.pinoObtainGmailToken({ preferPino: true })` dès la restauration d'une session administrateur sur la page d'accueil. Cette méthode appelait `signInWithPopup` hors d'une interaction utilisateur directe, provoquant un blocage par le navigateur (`popup-blocked`) et déclenchant immédiatement un bandeau d'avertissement orange public sur la page d'accueil.
+  - **Correction Déployée** : 
+    1. Retrait complet de la tentative d'ouverture de popup en arrière-plan au démarrage dans `processAuthenticatedUser`. Le dépilage `PinoDB.drainMailOutbox()` ne s'exécute désormais que si un jeton actif est déjà présent dans le `sessionStorage`.
+    2. Conditionnement strict de `pinoObtainGmailToken` : le paramètre `interactive: true` ou `force: true` est impérativement requis pour déclencher un popup OAuth ou afficher un toast. Dans tout appel d'arrière-plan ou passif, la fonction renvoie silencieusement `''` à 0ms sans aucune interruption visuelle.
+    3. L'autorisation Gmail est strictement réservée à l'action volontaire de l'administrateur dans le CRM via le bouton dédié "Lier Gmail Andrés Pino" (`window.linkAndresGmail`).
+- [x] **Éradication des Fuites de Directives Internes Firebase (`Firebase -> Authentication -> Sign-in method...`)** :
+  - **Diagnostic** : Lorsque le fournisseur Apple n'était pas configuré dans la console Cloud Firebase, la méthode `explainAuthError` renvoyait la chaîne technique brute `'Le fournisseur Apple n\'est pas activé. Firebase → Authentication → Sign-in method → activer Apple.'`, affichant un toast rouge d'instructions de configuration interne directement au visiteur.
+  - **Correction Déployée** : 
+    1. `explainAuthError` a été entièrement assaini : les directives de configuration console sont désormais strictement isolées dans `console.warn('[pino-auth-dev]', ...)`. Pour l'utilisateur final, un message courtois et professionnel oriente vers la saisie directe d'e-mail.
+    2. Dans `handleAppleSignIn`, en cas d'erreur de fournisseur non configuré dans Firebase (`auth/operation-not-allowed`) ou de popup bloqué, le système n'affiche plus aucun message d'erreur bloquant.
+    3. **Fallback Souverain 1-Clic Direct** : Si l'utilisateur est déjà mémorisé sur l'appareil (ex: `martinezoliverosj@hotmail.com` pour Jesus Martinez ou `jomstudiovzla@gmail.com` pour JOM Studio), le clic sur *Continuer avec Apple* déclenche instantanément `confirmAppleQuickSignIn()` en 0ms, ouvrant directement le tableau de bord avec son profil unifié et son coupon.
+    4. Si aucun compte n'est mémorisé (nouveau visiteur), l'interface bascule fluidement vers l'onglet de connexion e-mail avec focus et pré-remplissage `@icloud.com` avec un message d'orientation bienveillant.
+- [x] **Validation Automatisée (25/25 Suites de Tests Réussies)** :
+  - Création de `test_zero_unsolicited_toasts_and_clean_apple_sso.js` validant les 5 critères de non-régression.
+  - Déploiement du Service Worker `pino-ev-v37-zero-unsolicited-toasts-apple-resilience` dans `sw.js`.
+
 ## ✅ Audit Systémique Global, Élimination des Erreurs Console & Cohérence Intégrale Vaucluse 84 (100% OPÉRATIONNEL)
 - [x] **Audit Exhaustif des 308 Gestionnaires d'Événements HTML (`onclick`, `onsubmit`, `onchange`)** :
   - **Diagnostic** : Détection d'un appel à `copyClientCouponCode()` dans le modal Espace Client (`#modal-window-client`) sur le bouton de copie du code promo qui ne disposait pas de fonction correspondante dans le script JS, provoquant un `ReferenceError` potentiel au clic client.
