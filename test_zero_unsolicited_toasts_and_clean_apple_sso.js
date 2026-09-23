@@ -49,13 +49,14 @@ console.log('\n🍎 [TEST 4 : FLUX APPLE SSO AVEC FALLBACK SOUVERAIN SANS ÉCHEC
 assert(indexHtml.includes('handleAppleSignIn'), 'handleAppleSignIn est déclaré');
 assert(indexHtml.includes('confirmAppleQuickSignIn'), 'confirmAppleQuickSignIn est déclaré');
 assert(indexHtml.includes('await confirmAppleQuickSignIn(remembered)'), 'handleAppleSignIn connecte directement un utilisateur mémorisé en cas d\'indisponibilité du provider cloud');
-assert(indexHtml.includes("window.switchAuthTab('login')"), 'handleAppleSignIn bascule sur l\'onglet de saisie en douceur si aucun compte mémorisé');
-console.log('  ✅ PASS: Déclenchement Apple 100% résilient avec secours 1-clic direct.');
+assert(!indexHtml.includes("Connexion Apple : saisissez votre e-mail pour accéder directement à votre espace."), 'Le toast maladroit de redirection e-mail a été supprimé au profit du panneau in-situ');
+assert(indexHtml.includes("apple-auth-quick-panel"), 'Panneau Apple ID présent et fonctionnel');
+console.log('  ✅ PASS: Déclenchement Apple 100% résilient avec secours 1-clic direct sans toast intempestif.');
 
-// ── 5. SERVICE WORKER V37 ACTUALISÉ ──
-console.log('\n🚀 [TEST 5 : SERVICE WORKER V37 EN PLACE]');
-assert(swJs.includes('pino-ev-v37'), 'Le Service Worker doit être en version v37 pour rafraîchir le cache');
-console.log('  ✅ PASS: Cache v37 déployé.');
+// ── 5. SERVICE WORKER V38 ACTUALISÉ ──
+console.log('\n🚀 [TEST 5 : SERVICE WORKER V38 EN PLACE]');
+assert(swJs.includes('pino-ev-v38'), 'Le Service Worker doit être en version v38 pour rafraîchir le cache');
+console.log('  ✅ PASS: Cache v38 déployé.');
 
 console.log('\n===============================================================');
 console.log('🎉 TOUS LES 5 CONTRÔLES DE SÉCURITÉ ET D\'EXPÉRIENCE CLIENT SONT VALIDÉS !');

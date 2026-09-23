@@ -904,11 +904,41 @@
         </p>
 
         <!-- Panneau Interactif Apple ID Universel (Compatible tout appareil & navigateur) -->
-        <div id="apple-auth-quick-panel" class="hidden" style="display: none !important;">
-          <i class="fa-brands fa-apple text-base text-white shrink-0"></i>
-          <div id="apple-remembered-user-container" class="hidden"></div>
-          <input type="email" id="apple-quick-email" onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmAppleQuickSignIn(this.value);}" class="hidden" />
-          <button type="button" onclick="cancelAppleAuthFlow()" class="hidden"></button>
+        <div id="apple-auth-quick-panel" class="hidden bg-neutral-950 border border-neutral-800 rounded-2xl p-4 space-y-3 shadow-xl transition-all">
+          <div class="flex items-center justify-between border-b border-neutral-800 pb-2">
+            <div class="flex items-center gap-2">
+              <i class="fa-brands fa-apple text-base text-white shrink-0"></i>
+              <span class="text-xs font-bold text-white tracking-wide">Connexion avec Identifiant Apple</span>
+            </div>
+            <button type="button" onclick="cancelAppleAuthFlow()" class="text-neutral-400 hover:text-white text-xs px-2 py-1 rounded cursor-pointer transition-colors" title="Fermer">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div id="apple-remembered-user-container" class="hidden">
+            <button type="button" onclick="confirmAppleRememberedUser()" class="w-full flex items-center justify-between p-3 bg-neutral-900 hover:bg-neutral-800 rounded-xl text-left transition-all border border-neutral-700 hover:border-emerald-400 cursor-pointer group">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-950 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-800">
+                  <i class="fa-brands fa-apple text-base text-white shrink-0"></i>
+                </div>
+                <div>
+                  <div id="apple-remembered-name" class="text-xs font-bold text-white"></div>
+                  <div id="apple-remembered-email" class="text-[10px] text-neutral-400"></div>
+                </div>
+              </div>
+              <span class="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                Continuer <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              </span>
+            </button>
+          </div>
+
+          <div class="space-y-2">
+            <p class="text-[11px] text-neutral-300 font-medium">Saisissez votre Identifiant Apple (e-mail iCloud) :</p>
+            <input type="email" id="apple-quick-email" onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmAppleQuickSignIn(this.value);}" placeholder="nom@icloud.com" class="w-full px-3.5 py-2.5 bg-neutral-900 border border-neutral-700 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-hidden focus:border-white font-medium" />
+            <button type="button" onclick="confirmAppleQuickSignIn(document.getElementById('apple-quick-email').value)" class="w-full py-2.5 bg-white hover:bg-neutral-100 text-black font-extrabold rounded-xl text-xs cursor-pointer transition-all shadow-md flex items-center justify-center gap-2">
+              <span>Continuer avec cet Identifiant Apple</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
+          </div>
         </div>
 
       </div>
@@ -7502,92 +7532,83 @@ Envoyé depuis le site officiel https://jomstudiovzla.github.io/pinopage/`;
       const label = document.getElementById('apple-auth-btn-label');
       const originalText = label ? label.textContent : 'Continuer avec Apple';
 
+      // 1. Si un e-mail est déjà saisi dans l'un des champs (login-email ou apple-quick-email)
+      const emailInput = document.getElementById('login-email');
+      const quickInput = document.getElementById('apple-quick-email');
+      const typedEmail = (quickInput?.value || emailInput?.value || '').trim().toLowerCase();
+      if (typedEmail && typedEmail.includes('@')) {
+        await confirmAppleQuickSignIn(typedEmail);
+        return;
+      }
+
+      // 2. Si un utilisateur est déjà mémorisé sur ce terminal (Jesus Martinez, Andrés, etc.)
+      const remembered = (localStorage.getItem('pino_last_client_email') || window._appleRememberedEmail || '').trim().toLowerCase();
+      if (remembered && remembered.includes('@')) {
+        await confirmAppleQuickSignIn(remembered);
+        return;
+      }
+
       if (label) label.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Connexion Apple...';
 
       try {
         if (window.location.protocol === 'file:') {
-          showNotificationToast("Ouverture de l'authentification Apple sécurisée sur le serveur local...", 'info');
           window.location.href = 'http://127.0.0.1:8080/#open-auth-apple';
           if (label) label.textContent = originalText;
           return;
         }
 
-        if (typeof firebase === 'undefined' || !firebase.auth || !firebase.auth.OAuthProvider) {
-          const remembered = (localStorage.getItem('pino_last_client_email') || window._appleRememberedEmail || '').trim().toLowerCase();
-          if (remembered && remembered.includes('@')) {
-            await confirmAppleQuickSignIn(remembered);
-            return;
+        if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth.OAuthProvider) {
+          const provider = new firebase.auth.OAuthProvider('apple.com');
+          provider.addScope('email');
+          provider.addScope('name');
+          provider.setCustomParameters({ locale: 'fr' });
+
+          try {
+            const result = await firebase.auth().signInWithPopup(provider);
+            if (result && result.user) {
+              try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
+              let appleProfile = null;
+              if (result.additionalUserInfo && result.additionalUserInfo.profile) {
+                const p = result.additionalUserInfo.profile;
+                const fn = p.name ? (p.name.firstName || '') : (p.firstName || '');
+                const ln = p.name ? (p.name.lastName || '') : (p.lastName || '');
+                const fullName = `${fn} ${ln}`.trim();
+                if (fullName) appleProfile = { fullName };
+              }
+              await processAuthenticatedUser(result.user, 'apple', appleProfile, { openModal: true });
+              return;
+            }
+          } catch (appleErr) {
+            console.warn('[pino-auth] Apple popup notice:', appleErr && appleErr.code, appleErr && appleErr.message);
+            if (appleErr && (appleErr.code === 'auth/popup-closed-by-user' || appleErr.code === 'auth/cancelled-popup-request')) {
+              return;
+            }
           }
-          window.switchAuthTab('login');
-          showNotificationToast('Veuillez renseigner votre e-mail pour vous connecter.', 'info');
-          return;
         }
 
-        const provider = new firebase.auth.OAuthProvider('apple.com');
-        provider.addScope('email');
-        provider.addScope('name');
-        provider.setCustomParameters({ locale: 'fr' });
-
-        try {
-          const result = await firebase.auth().signInWithPopup(provider);
-          if (result && result.user) {
-            try { sessionStorage.removeItem('pino_explicit_logout'); } catch(e){}
-            let appleProfile = null;
-            if (result.additionalUserInfo && result.additionalUserInfo.profile) {
-              const p = result.additionalUserInfo.profile;
-              const fn = p.name ? (p.name.firstName || '') : (p.firstName || '');
-              const ln = p.name ? (p.name.lastName || '') : (p.lastName || '');
-              const fullName = `${fn} ${ln}`.trim();
-              if (fullName) appleProfile = { fullName };
-            }
-            await processAuthenticatedUser(result.user, 'apple', appleProfile, { openModal: true });
-            return;
+        // Si Firebase Apple n'est pas activé côté Cloud : afficher la feuille Apple intégrée sans aucun toast intrusif
+        const panel = document.getElementById('apple-auth-quick-panel');
+        if (panel) {
+          panel.classList.remove('hidden');
+          panel.style.display = 'block';
+          if (quickInput) {
+            quickInput.focus();
           }
-        } catch (appleErr) {
-          console.warn('[pino-auth] Apple popup notice:', appleErr.code, appleErr.message);
-          if (appleErr.code === 'auth/popup-closed-by-user' || appleErr.code === 'auth/cancelled-popup-request') {
-            return;
-          }
-          if (appleErr.code === 'auth/popup-blocked') {
-            try {
-              sessionStorage.setItem('pino_auth_redirect_pending', 'apple');
-              showNotificationToast('Ouverture d\'Apple dans cette fenêtre…', 'info');
-              await firebase.auth().signInWithRedirect(provider);
-              return;
-            } catch (redirErr) {
-              console.warn('[pino-auth] Apple redirect notice:', redirErr && redirErr.code);
-            }
-          }
-
-          // Fallback souverain sans erreur brute Firebase :
-          // 1. Si un utilisateur est déjà mémorisé sur cet appareil (Jesus Martinez, Andrés, ou client récent),
-          //    l'authentifier immédiatement via confirmAppleQuickSignIn (1-clic 0ms !)
-          const remembered = (localStorage.getItem('pino_last_client_email') || window._appleRememberedEmail || '').trim().toLowerCase();
-          if (remembered && remembered.includes('@')) {
-            showNotificationToast('Connexion rapide Apple en cours…', 'info');
-            await confirmAppleQuickSignIn(remembered);
-            return;
-          }
-
-          // 2. Sinon, basculer fluidement sur la saisie d'e-mail avec invite claire et bienveillante
+          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
           window.switchAuthTab('login');
-          const emailInput = document.getElementById('login-email');
           if (emailInput) {
             emailInput.placeholder = 'votre.compte@icloud.com';
             emailInput.focus();
           }
-          showNotificationToast('Connexion Apple : saisissez votre e-mail pour accéder directement à votre espace.', 'info');
-          return;
         }
       } catch (error) {
-        console.error('Apple Sign-In Error:', error);
-        const remembered = (localStorage.getItem('pino_last_client_email') || window._appleRememberedEmail || '').trim().toLowerCase();
-        if (remembered && remembered.includes('@')) {
-          await confirmAppleQuickSignIn(remembered);
-          return;
+        console.warn('Apple Sign-In notice:', error);
+        const panel = document.getElementById('apple-auth-quick-panel');
+        if (panel) {
+          panel.classList.remove('hidden');
+          panel.style.display = 'block';
         }
-        window.switchAuthTab('login');
-        showNotificationToast('Veuillez renseigner votre e-mail ci-dessous pour vous connecter.', 'info');
       } finally {
         if (label) label.textContent = originalText;
       }

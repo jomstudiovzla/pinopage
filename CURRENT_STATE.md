@@ -22,7 +22,8 @@
     1. `explainAuthError` a été entièrement assaini : les directives de configuration console sont désormais strictement isolées dans `console.warn('[pino-auth-dev]', ...)`. Pour l'utilisateur final, un message courtois et professionnel oriente vers la saisie directe d'e-mail.
     2. Dans `handleAppleSignIn`, en cas d'erreur de fournisseur non configuré dans Firebase (`auth/operation-not-allowed`) ou de popup bloqué, le système n'affiche plus aucun message d'erreur bloquant.
     3. **Fallback Souverain 1-Clic Direct** : Si l'utilisateur est déjà mémorisé sur l'appareil (ex: `martinezoliverosj@hotmail.com` pour Jesus Martinez ou `jomstudiovzla@gmail.com` pour JOM Studio), le clic sur *Continuer avec Apple* déclenche instantanément `confirmAppleQuickSignIn()` en 0ms, ouvrant directement le tableau de bord avec son profil unifié et son coupon.
-    4. Si aucun compte n'est mémorisé (nouveau visiteur), l'interface bascule fluidement vers l'onglet de connexion e-mail avec focus et pré-remplissage `@icloud.com` avec un message d'orientation bienveillant.
+    4. Si aucun compte n'est mémorisé (nouveau visiteur), la feuille interactive Apple ID `#apple-auth-quick-panel` s'ouvre in-situ directement au sein de la modale de connexion avec un champ dédié `@icloud.com` et bouton de soumission sans AUCUN toast flottant intrusif.
+    5. Prise en compte prioritaire immédiate de tout e-mail déjà tapé dans le formulaire avant de cliquer sur Apple pour une connexion 1-clic instantanée à 0ms.
 - [x] **Validation Automatisée (25/25 Suites de Tests Réussies)** :
   - Création de `test_zero_unsolicited_toasts_and_clean_apple_sso.js` validant les 5 critères de non-régression.
   - Déploiement du Service Worker `pino-ev-v37-zero-unsolicited-toasts-apple-resilience` dans `sw.js`.

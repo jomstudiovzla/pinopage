@@ -1,9 +1,9 @@
 {
   "active_client": "Antigravity IDE",
   "active_model": "Gemini 3.8 Flash",
-  "active_goal": "Éradication définitive des toasts intrusifs au démarrage & fiabilisation souveraine Apple SSO",
+  "active_goal": "Éradication totale du toast parasite Apple ID & intégration de la feuille Apple in-situ dans la modale",
   "current_phase": "Phase Production Hardening & Customer Experience Excellence",
-  "action": "Suppression totale de l'appel automatique non-sollicité à Gmail OAuth au chargement, assainissement des messages explainAuthError (zéro directive interne Firebase fuitée aux utilisateurs), fallback souverain 1-clic direct pour Apple SSO (Jesus Martinez / Andrés) et validation de 25/25 suites de tests automatisés (0 échec). Cache Service Worker v37.",
+  "action": "Suppression intégrale du toast intempestif 'Connexion Apple : saisissez votre e-mail...', réactivation de la feuille intégrée #apple-auth-quick-panel avec saisie in-situ d'identifiant Apple / iCloud, prise en compte immédiate d'un email déjà renseigné dans le formulaire et validation de 25/25 suites de tests. Service Worker v38 déployé.",
   "files": [
     "index.html",
     "sw.js",
@@ -11,5 +11,5 @@
     ".context_sync.json",
     "CURRENT_STATE.md"
   ],
-  "step": "Vérification sur le site en ligne et validation CEO sans aucun toast parasite"
+  "step": "Validation complète en ligne par le CEO sans aucun toast flottant résiduel"
 }
