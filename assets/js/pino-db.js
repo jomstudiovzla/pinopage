@@ -23,6 +23,10 @@
     return null;
   }
 
+  function siteUrl() {
+    return (typeof global.pinoSiteUrl === 'function' && global.pinoSiteUrl()) || '/';
+  }
+
   function sb() {
     return global.pinoSupabase || null;
   }
@@ -266,7 +270,7 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
   async function saveLead(data) {
     const payload = {
       full_name:    data.name     || null,
-      email:        data.email    || null,
+      email:        (data.email || '').trim().toLowerCase() || null,
       phone:        data.phone    || null,
       commune:      data.commune  || null,
       service_type: data.service  || 'Entretien',
@@ -288,10 +292,13 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
         const fullLead = { ...payload, id: ref.key };
         await ref.set(fullLead);
 
-        // Partitionnement dédié par client dans clients_records/{sanitizedEmail}/quotes/{leadId}
-        const rawEmail = data.email || '';
-        const sanitizedEmail = rawEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
-        if (sanitizedEmail) {
+        // Partition clients_records/{email}/quotes : seulement si le demandeur est connecté avec CETTE adresse
+        // (règles : un visiteur ne peut pas écrire dans le dossier d'un autre client).
+        const rawEmail = (data.email || '').trim().toLowerCase();
+        const sanitizedEmail = rawEmail.replace(/[.#$\[\]]/g, '_');
+        const authUser = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
+        const ownsPartition = !!(authUser && authUser.emailVerified && (authUser.email || '').toLowerCase() === rawEmail);
+        if (sanitizedEmail && ownsPartition) {
           await db.ref(`clients_records/${sanitizedEmail}/quotes/${ref.key}`).set(fullLead).catch(() => {});
           await db.ref(`clients_records/${sanitizedEmail}/profile`).update({
             fullName: data.name || data.fullName || '',
@@ -335,7 +342,7 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
               `\n💡 Zéro euro à payer maintenant : cette demande est 100% gratuite et sans aucun engagement. Andrés Pino va étudier votre dossier et vous contactera dans les plus brefs délais pour convenir de la visite technique sur place.`,
             amountCharged: budgetNum,
             netClient: netEstime,
-            actionUrl: `https://jomstudiovzla.github.io/pinopage/#suivi?id=${ref.key}&email=${encodeURIComponent(data.email)}`
+            actionUrl: `${siteUrl()}#suivi?id=${ref.key}&email=${encodeURIComponent(data.email)}`
           }).catch(() => {});
         }
 
@@ -345,27 +352,7 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
       }
     }
 
-    // Fallback Supabase si estuviera disponible
-    const client = sb();
-    if (client) {
-      try {
-        const { data: row, error } = await client.from('leads').insert(payload).select('id').single();
-        if (!error) return { ok: true, id: row.id };
-      } catch (err) {
-        log('saveLead:sb', err);
-      }
-    }
-
-    // Fallback localStorage
-    try {
-      const leads = JSON.parse(localStorage.getItem('pino_leads') || '[]');
-      const id = 'lead_' + Date.now();
-      leads.unshift({ ...payload, id });
-      localStorage.setItem('pino_leads', JSON.stringify(leads));
-      return { ok: true, id };
-    } catch(e) {
-      return { ok: false };
-    }
+    return { ok: false, error: 'lead_not_saved' };
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -662,7 +649,7 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
    * ───────────────────────────────────────────────────────── */
 
   /**
-   * Envoie une notification par e-mail à Andrés Pino (pino.spacesverts@gmail.com)
+   * Envoie une notification par e-mail à Andrés Pino (pino.espacesverts@gmail.com)
    * via Web3Forms et enregistre l'événement dans /admin_notifications.
    */
   async function notifyAdminByEmail(opts = {}) {
@@ -697,7 +684,7 @@ MESSAGE / DÉTAILS TRANSMIS :
 ${message}
 -----------------------------------------------------
 ACCÉDER AU CRM ADMINISTRATEUR :
-https://jomstudiovzla.github.io/pinopage/#admin
+${siteUrl()}#admin
 =====================================================`;
 
     let emailSent = false;
@@ -787,7 +774,7 @@ https://jomstudiovzla.github.io/pinopage/#admin
     const subject = opts.subject || '🌿 Pino Espaces Verts — Information sur votre dossier';
     const type = opts.type || 'direct_message';
     const message = opts.message || '';
-    const actionUrl = opts.actionUrl || 'https://jomstudiovzla.github.io/pinopage/#espace-client';
+    const actionUrl = opts.actionUrl || `${siteUrl()}#espace-client`;
     const sanitizedEmail = sanitizeEmail(rawEmail);
 
     const mailBody = `Bonjour ${clientName},
@@ -814,7 +801,7 @@ SIRET : 105 075 006 00012 | Siège : 1990 ROUTE de Trévouse, 84320 Entraigues-s
 Téléphone : 06 51 59 40 34 | E-mail : pino.espacesverts@gmail.com
 Rayon d'intervention : Entraigues-sur-la-Sorgue et 40-45 km (Avignon, Carpentras, Cavaillon, Sorgues, Vedène)
 Règlements autorisés SAP : Chèque à l'ordre exact de PINO ANDRES, Virement bancaire, CESU / e-CESU, Prélèvement URSSAF. Carte bancaire non proposée. Espèces : pas de crédit d'impôt 50 %.
-Site web : https://jomstudiovzla.github.io/pinopage/`;
+Site web : ${siteUrl()}`;
 
     let clientEmailSent = false;
     let via = '';
@@ -1284,14 +1271,8 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       lastLogin: null
     };
 
-    // Construction du lien d'activation universel (compatible localhost et GitHub Pages)
-    let baseUrl = 'https://jomstudiovzla.github.io/pinopage/';
-    if (typeof window !== 'undefined' && window.location) {
-      const { origin, pathname } = window.location;
-      if (origin && !origin.includes('file:')) {
-        baseUrl = origin + (pathname.endsWith('/') ? pathname : pathname + '/');
-      }
-    }
+    // Lien d'activation toujours sur l'URL publique officielle (jamais localhost).
+    const baseUrl = siteUrl();
     const activationLink = `${baseUrl}#activate?email=${encodeURIComponent(normEmail)}&token=${encodeURIComponent(token)}`;
 
     const db = rtdb();
@@ -1370,7 +1351,7 @@ Bien cordialement,
 Andrés Pino — Pino Espaces Verts
 Artisan Paysagiste • Entraigues-sur-la-Sorgue & Vaucluse (84)
 Tél / WhatsApp : +33 6 51 59 40 34
-Site web : https://jomstudiovzla.github.io/pinopage/`;
+Site web : ${siteUrl()}`;
 
       await notifyClientByEmail({
         clientEmail: normEmail,
@@ -1389,98 +1370,32 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
   /**
    * Active le mot de passe d'un client pré-enregistré par Andrés Pino
    */
+  // Activation d'un compte invité : création du compte Firebase + e-mail de vérification.
+  // Aucune session n'est ouverte ici ; le dossier clients_records devient lisible après vérification.
   async function activateClientPassword(email, token, password) {
-    if (!email || !password || password.length < 6) {
-      return { ok: false, error: 'Le mot de passe doit comporter au moins 6 caractères.' };
+    if (!email || !password || password.length < 8) {
+      return { ok: false, error: 'Le mot de passe doit comporter au moins 8 caractères.' };
+    }
+    if (typeof firebase === 'undefined' || !firebase.auth) {
+      return { ok: false, error: 'Service d\'authentification indisponible. Réessayez.' };
     }
     const normEmail = String(email).trim().toLowerCase();
-    const sanitizedEmail = sanitizeEmail(normEmail);
-    const timestamp = new Date().toISOString();
-
-    const db = rtdb();
-    let clientProfile = null;
-
-    if (db) {
-      try {
-        const snap = await db.ref(`clients_records/${sanitizedEmail}/profile`).once('value');
-        clientProfile = snap.val();
-
-        if (!clientProfile) {
-          const usersSnap = await db.ref('users').once('value');
-          const allUsers = usersSnap.val() || {};
-          for (const u of Object.values(allUsers)) {
-            if (u.email && u.email.toLowerCase() === normEmail) {
-              clientProfile = u;
-              break;
-            }
-          }
-        }
-
-        // Si un token a été fourni, vérifier s'il correspond (ou tolérance si admin pré-enregistré)
-        if (token && clientProfile && clientProfile.activation_token && clientProfile.activation_token !== token) {
-          return { ok: false, error: 'Lien d\'activation invalide ou expiré.' };
-        }
-
-        // Créer l'utilisateur dans Firebase Auth s'il n'existe pas encore
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-          try {
-            const cred = await firebase.auth().createUserWithEmailAndPassword(normEmail, password);
-            if (cred && cred.user && clientProfile && clientProfile.fullName) {
-              await cred.user.updateProfile({ displayName: clientProfile.fullName }).catch(() => {});
-            }
-          } catch (authErr) {
-            if (authErr.code === 'auth/email-already-in-use') {
-              try {
-                const cred = await firebase.auth().signInWithEmailAndPassword(normEmail, password);
-                if (cred && cred.user && cred.user.updatePassword) {
-                  await cred.user.updatePassword(password).catch(() => {});
-                }
-              } catch (signInErr) {}
-            } else {
-              console.warn('[pino-db] activateClientPassword auth warning:', authErr);
-            }
-          }
-        }
-
-        // Mettre à jour le statut du profil en 'actif'
-        const updatePayload = {
-          status: 'actif',
-          activation_token: null,
-          activated_at: timestamp,
-          updated_at: timestamp
-        };
-
-        await db.ref(`clients_records/${sanitizedEmail}/profile`).update(updatePayload);
-
-        if (clientProfile && clientProfile.uid) {
-          await db.ref('users/' + clientProfile.uid).update(updatePayload).catch(() => {});
-        }
-
-        await safePushAudit(db, {
-          action: 'client_account_activated',
-          email: normEmail,
-          activated_at: timestamp
-        });
-
-      } catch (err) {
-        log('activateClientPassword:rtdb', err);
-      }
-    }
-
-    // Mise à jour de localStorage pino_users
+    const settings = (typeof global.pinoAuthActionSettings === 'function') ? global.pinoAuthActionSettings() : undefined;
     try {
-      let localUsers = JSON.parse(localStorage.getItem('pino_users') || '[]');
-      const idx = localUsers.findIndex(u => u.email && u.email.toLowerCase() === normEmail);
-      if (idx >= 0) {
-        localUsers[idx].status = 'actif';
-        localUsers[idx].activation_token = null;
-        localUsers[idx].activated_at = timestamp;
-        localStorage.setItem('pino_users', JSON.stringify(localUsers));
-        clientProfile = localUsers[idx];
+      const cred = await firebase.auth().createUserWithEmailAndPassword(normEmail, password);
+      await cred.user.sendEmailVerification(settings);
+      await firebase.auth().signOut();
+      return { ok: true, email: normEmail, verificationSent: true };
+    } catch (err) {
+      const code = (err && err.code) || '';
+      if (code === 'auth/email-already-in-use') {
+        return { ok: false, error: 'Un compte existe déjà pour cette adresse. Connectez-vous ou utilisez « Mot de passe oublié ».' };
       }
-    } catch(e) {}
-
-    return { ok: true, email: normEmail, profile: clientProfile };
+      if (code === 'auth/weak-password') return { ok: false, error: 'Mot de passe trop faible : 8 caractères minimum.' };
+      if (code === 'auth/invalid-email') return { ok: false, error: 'Adresse e-mail invalide.' };
+      log('activateClientPassword', err);
+      return { ok: false, error: 'Activation impossible pour le moment. Réessayez.' };
+    }
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -1503,11 +1418,10 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
         // 2. Fallback / Rétrocompatibilité : si partition vide, interroger /leads global et rétro-migrer
         if (fbMatches.length === 0) {
-          const snapAll = await db.ref('leads').once('value');
+          // Requête filtrée par e-mail : seule forme de lecture de /leads autorisée pour un client.
+          const snapAll = await db.ref('leads').orderByChild('email').equalTo(normEmail).once('value');
           const valAll = snapAll.val() || {};
-          fbMatches = Object.keys(valAll)
-            .map(k => ({ id: k, ...valAll[k] }))
-            .filter(lead => (lead.email || '').trim().toLowerCase() === normEmail);
+          fbMatches = Object.keys(valAll).map(k => ({ id: k, ...valAll[k] }));
 
           // Sauvegarder dans la partition pour les accès futurs
           for (const quote of fbMatches) {
@@ -1563,16 +1477,15 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
     const normEmail = (fbUser.email || '').trim().toLowerCase();
     const isJom = normEmail === 'jomstudiovzla@gmail.com';
-    const isAdmin = normEmail === 'pino.spacesverts@gmail.com' ||
-                    normEmail === 'pino.espacesverts@gmail.com' ||
-                    normEmail === 'jomstudiovzla@gmail.com';
+    const isAdmin = fbUser.emailVerified === true &&
+                    (normEmail === 'pino.espacesverts@gmail.com' || normEmail === 'jomstudiovzla@gmail.com');
     const sanitizedEmail = normEmail ? normEmail.replace(/[.#$[\]]/g, '_') : null;
 
     const payload = {
       id:            fbUser.uid,
       uid:           fbUser.uid,
       email:         normEmail,
-      full_name:     extra.fullName || fbUser.displayName || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : (normEmail.includes('martinezoliverosj') ? 'Jesus Martinez' : 'Client Particulier'))),
+      full_name:     extra.fullName || fbUser.displayName || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : 'Client Particulier')),
       phone:         extra.phone    || fbUser.phoneNumber || null,
       commune:       extra.commune  || 'Entraigues-sur-la-Sorgue (84)',
       role:          isAdmin ? 'admin' : 'client',
@@ -1581,21 +1494,28 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       avatar_url:    fbUser.photoURL || null,
       updated_at:    new Date().toISOString(),
     };
+    if (extra.addressExtra) payload.address_extra = extra.addressExtra;
+    // update() efface les champs à null : ne jamais écraser un téléphone / avatar déjà enregistré.
+    Object.keys(payload).forEach((k) => { if (payload[k] === null || payload[k] === '') delete payload[k]; });
 
     const db = rtdb();
     if (db) {
       try {
         await db.ref('users/' + fbUser.uid).update(payload);
         if (sanitizedEmail) {
-          await db.ref(`clients_records/${sanitizedEmail}/profile`).update({
+          const profilePatch = {
             fullName: payload.full_name,
             email: normEmail,
             phone: payload.phone,
             commune: payload.commune,
             role: payload.role,
             lastAuthProvider: payload.auth_provider,
-            updatedAt: payload.updated_at
-          }).catch(() => {});
+            updatedAt: payload.updated_at,
+            uid: fbUser.uid,
+            status: 'actif'
+          };
+          Object.keys(profilePatch).forEach((k) => { if (profilePatch[k] === undefined) delete profilePatch[k]; });
+          await db.ref(`clients_records/${sanitizedEmail}/profile`).update(profilePatch).catch(() => {});
         }
         return { ok: true };
       } catch (err) {
@@ -1688,62 +1608,24 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
       created_at:    new Date().toISOString(),
     };
 
-    // 1. Validation & Enregistrement Côté Serveur (Edge API Sécurisée)
-    try {
-      const srvRes = await fetch('/api/canjear-cupones', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, email, couponCode })
-      });
-      if (srvRes.ok) {
-        const srvData = await srvRes.json();
-        if (srvData && srvData.coupon) {
-          couponData.codigo_cupon = srvData.coupon.code || couponData.codigo_cupon;
-          couponData.descuento_pct = srvData.coupon.descuento_pct || 20;
-          couponData.estado = srvData.coupon.status || 'valid';
-        }
-      }
-    } catch (e) {
-      log('redeemPelabola:server', e);
-    }
-
+    // Validation côté serveur : database.rules.json n'accepte la création que par le titulaire (auth.uid),
+    // une seule fois, à -20 %, statut « valid » et code au format PINO-XXXX. Toute autre écriture est refusée.
     const db = rtdb();
-    if (db) {
-      try {
-        await db.ref('coupons/' + userId).set(couponData);
-        return { ok: true, coupon: couponData };
-      } catch (err) {
-        log('redeemPelabola:rtdb', err);
-      }
+    if (!db) return { ok: false, error: 'db_unavailable' };
+    try {
+      await db.ref('coupons/' + userId).set(couponData);
+      return { ok: true, coupon: couponData };
+    } catch (err) {
+      log('redeemPelabola:rtdb', err);
+      return { ok: false, error: (err && err.code) || 'denied' };
     }
-
-    const client = sb();
-    if (client) {
-      try {
-        const { data, error } = await client.from('cupones').upsert(couponData, { onConflict: 'user_id' }).select().single();
-        if (!error) return { ok: true, coupon: data };
-      } catch(e) {}
-    }
-
-    return { ok: true, coupon: couponData };
   }
 
   /* ─────────────────────────────────────────────────────────
    *  TAX — Calcul Côté Serveur Crédit d'Impôt SAP 50%
    * ───────────────────────────────────────────────────────── */
+  // Estimation indicative (affichage). Le montant facturé fait foi et n'est saisi que par l'admin (règles jobs/).
   async function calculateSAPCreditServer(amountTTC) {
-    try {
-      const res = await fetch('/api/tax/calculate-sap', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amountTTC: Number(amountTTC) || 0 })
-      });
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch (e) {
-      log('calculateSAPCreditServer', e);
-    }
     const val = Math.max(0, Number(amountTTC) || 0);
     const sapCredit = Math.round(val * 0.50 * 100) / 100;
     return {
@@ -2023,15 +1905,9 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
 
         // 2. Fallback / Rétrocompatibilité : si partition vide, interroger /jobs global et rétro-migrer
         if (fbMatches.length === 0) {
-          const snapAll = await db.ref('jobs').once('value');
+          const snapAll = await db.ref('jobs').orderByChild('client_email').equalTo(normEmail).once('value');
           const valAll = snapAll.val() || {};
-          fbMatches = Object.keys(valAll)
-            .map(k => ({ id: k, ...valAll[k] }))
-            .filter(j => (j.client_email || '').trim().toLowerCase() === normEmail);
-
-          for (const job of fbMatches) {
-            db.ref(`clients_records/${sanitizedEmail}/invoices/${job.id}`).set(job).catch(() => {});
-          }
+          fbMatches = Object.keys(valAll).map(k => ({ id: k, ...valAll[k] }));
         }
       } catch (err) {
         log('fetchClientInvoices:rtdb', err);
@@ -2737,104 +2613,17 @@ Site web : https://jomstudiovzla.github.io/pinopage/`;
     let localLeads = [];
     try {
       localLeads = JSON.parse(localStorage.getItem('pino_platform_leads') || '[]');
+      // Purge des anciens leads fictifs « plt_seed_* ».
+      const realLocal = localLeads.filter(l => !String(l && l.id || '').startsWith('plt_seed_'));
+      if (realLocal.length !== localLeads.length) {
+        localLeads = realLocal;
+        localStorage.setItem('pino_platform_leads', JSON.stringify(realLocal));
+      }
     } catch(e) {}
 
     const fbIds = new Set(fbLeads.map(l => l.id));
     const extraLocal = localLeads.filter(l => !fbIds.has(l.id));
     const all = [...fbLeads, ...extraLocal];
-
-    if (all.length === 0) {
-      const seed = [
-        {
-          id: 'plt_seed_1',
-          platform: 'leboncoin',
-          name: 'Marc Delmas',
-          commune: '84000 Avignon',
-          service: 'Taille de haie de lauriers (40m)',
-          phone: '06 12 45 78 90',
-          email: 'marc.delmas84@gmail.com',
-          url: 'https://www.leboncoin.fr',
-          budget: 350,
-          notes: 'Recherche artisan déclaré SAP pour déduction 50% immédiate.',
-          status: 'a_contacter',
-          created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-        },
-        {
-          id: 'plt_seed_2',
-          platform: 'allovoisins',
-          name: 'Sophie V.',
-          commune: '84200 Carpentras',
-          service: 'Tonte pelouse 300m² + désherbage',
-          phone: '06 98 76 54 32',
-          email: '',
-          url: 'https://www.allovoisins.com',
-          budget: 180,
-          notes: 'Demande urgente avant le weekend, évacuation des déchets nécessaire.',
-          status: 'message_envoye',
-          created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
-        },
-        {
-          id: 'plt_seed_3',
-          platform: 'nextdoor',
-          name: 'Laurent B.',
-          commune: '84700 Sorgues',
-          service: 'Débroussaillage grand terrain en friche',
-          phone: '',
-          email: '',
-          url: 'https://nextdoor.fr',
-          budget: 500,
-          notes: 'Posté sur le groupe de quartier Sorgues Centre.',
-          status: 'en_discussion',
-          created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
-        },
-        {
-          id: 'plt_seed_4',
-          platform: 'yoojo',
-          name: 'Claire M.',
-          commune: '84270 Vedène',
-          service: 'Entretien régulier pelouse & massifs',
-          phone: '07 65 43 21 09',
-          email: 'claire.vedene@laposte.net',
-          url: 'https://yoojo.fr',
-          budget: 240,
-          notes: 'Cherche jardinier mensuel avec avance immédiate Unipros.',
-          status: 'a_contacter',
-          created_at: new Date(Date.now() - 3600000 * 30).toISOString(),
-        },
-        {
-          id: 'plt_seed_5',
-          platform: 'facebook',
-          name: 'Julien Morel',
-          commune: '84130 Le Pontet',
-          service: 'Remise en état jardin de printemps',
-          phone: '06 44 33 22 11',
-          email: '',
-          url: 'https://www.facebook.com/marketplace',
-          budget: 300,
-          notes: 'Vu sur le groupe Entraide Grand Avignon / Le Pontet.',
-          status: 'rdv_pris',
-          created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
-        },
-        {
-          id: 'plt_seed_6',
-          platform: 'needhelp',
-          name: 'David R.',
-          commune: '84320 Entraigues-sur-la-Sorgue',
-          service: 'Élagage branches basses chêne',
-          phone: '',
-          email: '',
-          url: 'https://www.needhelp.com',
-          budget: 420,
-          notes: 'Demande NeedHelp liée à un achat chez Leroy Merlin Avignon.',
-          status: 'a_contacter',
-          created_at: new Date(Date.now() - 3600000 * 50).toISOString(),
-        }
-      ];
-      try {
-        localStorage.setItem('pino_platform_leads', JSON.stringify(seed));
-      } catch(e) {}
-      return { ok: true, data: seed };
-    }
 
     return { ok: true, data: all };
   }

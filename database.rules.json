@@ -1,75 +1,109 @@
 {
   "rules": {
+    ".read": false,
+    ".write": false,
     "leads": {
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
-      ".indexOn": ["email", "status", "created_at"],
+      ".read": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com') || (query.orderByChild === 'email' && query.equalTo === auth.token.email.toLowerCase()))",
+      ".indexOn": [
+        "email",
+        "status",
+        "created_at"
+      ],
       "$leadId": {
-        ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || data.child('email').val() === auth.token.email)",
-        ".write": "!data.exists() || (auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || data.child('email').val() === auth.token.email))"
+        ".read": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com') || data.child('email').val() === auth.token.email.toLowerCase())",
+        ".write": "(!data.exists() && newData.exists() && newData.child('status').val() === 'new' && newData.child('source').val() === 'web_devis') || (auth != null && auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com') || (data.exists() && newData.exists() && data.child('email').val() === auth.token.email.toLowerCase() && newData.child('email').val() === data.child('email').val())))",
+        ".validate": "newData.hasChildren(['created_at']) && (!newData.child('email').exists() || (newData.child('email').isString() && newData.child('email').val().length <= 254 && newData.child('email').val().matches(/^[^@ ]+@[^@ ]+[.][^@ ]+$/)))",
+        "details": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 5000)"
+        },
+        "full_name": {
+          ".validate": "!newData.exists() || (newData.isString() && newData.val().length <= 200)"
+        }
       }
     },
     "users": {
+      ".read": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
       "$uid": {
-        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
-        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || (auth.uid === $uid && (!newData.child('isAdmin').exists() || newData.child('isAdmin').val() === false || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')))"
-      },
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
-      ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')"
+        ".read": "auth != null && (auth.uid === $uid || (auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')))",
+        ".write": "auth != null && ((auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')) || (auth.uid === $uid && newData.exists() && newData.child('isAdmin').val() !== true && newData.child('role').val() !== 'admin'))"
+      }
     },
     "jobs": {
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
-      ".indexOn": ["client_email", "payment_status", "created_at"],
+      ".read": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com') || (query.orderByChild === 'client_email' && query.equalTo === auth.token.email.toLowerCase()))",
+      ".indexOn": [
+        "client_email",
+        "payment_status",
+        "created_at"
+      ],
       "$jobId": {
-        ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || data.child('client_email').val() === auth.token.email)",
-        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')"
+        ".read": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com') || data.child('client_email').val() === auth.token.email.toLowerCase())",
+        ".write": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')"
       }
     },
     "coupons": {
-      "$uid": {
-        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
-        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || (auth.uid === $uid && !data.exists() && newData.child('descuento_pct').val() == 20))"
-      },
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
-      ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')"
+      ".read": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+      "$key": {
+        ".read": "auth != null && (auth.uid === $key || (auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')))",
+        ".write": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com') || (auth.uid === $key && !data.exists() && newData.child('user_id').val() === auth.uid && newData.child('email').val() === auth.token.email.toLowerCase() && newData.child('descuento_pct').val() === 20 && newData.child('estado').val() === 'valid' && newData.child('codigo_cupon').isString() && newData.child('codigo_cupon').val().matches(/^PINO-[A-Z0-9]{4,8}$/)))"
+      }
     },
     "audit_logs": {
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
-      ".write": "auth != null"
+      ".read": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+      "$id": {
+        ".write": "auth != null && !data.exists() && newData.exists()"
+      }
     },
     "quotes_responses": {
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+      ".read": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
       "$leadId": {
-        ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || data.child('client_email').val() === auth.token.email)",
-        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || data.child('client_email').val() === auth.token.email)"
+        ".read": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com') || data.child('client_email').val() === auth.token.email.toLowerCase())",
+        ".write": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com') || (data.exists() && newData.exists() && data.child('client_email').val() === auth.token.email.toLowerCase() && newData.child('client_email').val() === data.child('client_email').val()))"
       }
     },
     "client_notifications": {
       "$sanitizedEmail": {
-        ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || $sanitizedEmail === auth.token.email.replace('.', '_'))",
-        ".write": "auth != null"
+        ".read": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com') || $sanitizedEmail === auth.token.email.toLowerCase().replace('.', '_'))",
+        ".write": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com') || $sanitizedEmail === auth.token.email.toLowerCase().replace('.', '_'))"
       }
     },
     "admin_notifications": {
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
-      ".write": "auth != null"
+      ".read": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+      ".write": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+      ".indexOn": [
+        "created_at"
+      ],
+      "$id": {
+        ".write": "!data.exists() && newData.exists() && (auth != null || newData.child('type').val() === 'new_lead')",
+        ".validate": "newData.hasChildren(['type']) && newData.child('type').isString() && newData.child('type').val().length <= 64"
+      }
     },
     "mail_outbox": {
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+      ".read": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
       "$id": {
-        ".write": "!data.exists() || (auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com'))"
+        ".write": "(!data.exists() && newData.exists()) || (auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com'))"
       }
     },
     "platform_leads": {
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
-      "$pltId": {
-        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')"
-      }
+      ".read": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+      ".write": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')"
     },
     "clients_records": {
-      ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+      ".read": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
+      ".write": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com')",
       "$sanitizedEmail": {
-        ".read": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || data.child('profile/email').val() === auth.token.email || !data.exists())",
-        ".write": "auth != null && (auth.token.email === 'pino.spacesverts@gmail.com' || auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'jomstudiovzla@gmail.com' || newData.child('profile/email').val() === auth.token.email || data.child('profile/email').val() === auth.token.email || !data.exists())"
+        ".read": "auth != null && auth.token.email_verified === true && $sanitizedEmail === auth.token.email.toLowerCase().replace('.', '_')",
+        "profile": {
+          ".write": "auth != null && auth.token.email_verified === true && $sanitizedEmail === auth.token.email.toLowerCase().replace('.', '_') && newData.exists() && newData.child('role').val() !== 'admin'"
+        },
+        "quotes": {
+          ".write": "auth != null && auth.token.email_verified === true && $sanitizedEmail === auth.token.email.toLowerCase().replace('.', '_')"
+        },
+        "messages": {
+          ".write": "auth != null && auth.token.email_verified === true && $sanitizedEmail === auth.token.email.toLowerCase().replace('.', '_')"
+        },
+        "notifications": {
+          ".write": "auth != null && auth.token.email_verified === true && $sanitizedEmail === auth.token.email.toLowerCase().replace('.', '_')"
+        }
       }
     }
   }

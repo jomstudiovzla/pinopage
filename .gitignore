@@ -10,3 +10,9 @@ supabase/.env
 .env.local
 correcciones/
 .impeccable/
+node_modules/
+test-results/
+playwright-report/
+audit-reports/
+firebase-debug.log
+database-debug.log

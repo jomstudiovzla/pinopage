@@ -8,7 +8,7 @@ Site et plateforme de **Pino Espaces Verts** (Andrés Pino, SIRET 105 075 006 00
 |---|---|---|
 | Code | `index.html` + PWA | Next.js 15 + Supabase `eu-west-3` (Paris) |
 | URL actuelle | [GitHub Pages](https://jomstudiovzla.github.io/pinopage/) | Domaine cible `www.pinoespacesverts.fr` |
-| Données | Firebase `crm-jom` + Web3Forms | Postgres RLS + Storage UE |
+| Données | Firebase Auth + Realtime Database `pagepino-e8e97` (europe-west1) | Postgres RLS + Storage UE |
 | Spec | — | **[`DOCUMENTO_MAESTRO.md`](./DOCUMENTO_MAESTRO.md)** |
 
 La v1 **reste en production** jusqu’au hito 6 (coupure DNS). Ne pas la démanteler.
@@ -42,15 +42,19 @@ La v1 **reste en production** jusqu’au hito 6 (coupure DNS). Ne pas la démant
 
 ## Développement local (localhost)
 
-À la racine du dépôt :
-
 ```bash
-python3 -m http.server 8080 --bind 127.0.0.1
+pnpm install          # une fois
+pnpm dev              # http://localhost:5500/
+pnpm test             # règles (émulateur) + E2E Chromium / WebKit iPhone
+pnpm audit:static     # contrôles du code livré
 ```
 
-- Site v1 : [http://127.0.0.1:8080/](http://127.0.0.1:8080/)
-- Document maître : [http://127.0.0.1:8080/DOCUMENTO_MAESTRO.md](http://127.0.0.1:8080/DOCUMENTO_MAESTRO.md)
+Prérequis : Node 20+, pnpm, Python 3, Java 21 (émulateurs Firebase), `firebase-tools`.
+Utiliser `localhost` (autorisé par Firebase Auth) plutôt que `127.0.0.1`.
 
 ## Déploiement v1
 
 Hébergeur actuel : GitHub Pages (`main` / racine) — [pinopage](https://jomstudiovzla.github.io/pinopage/). Le texte Mentions Légales devra citer l’hébergeur **réel** dès la v2 (voir ADR-0004).
+
+Règles de la base : `pnpm deploy:rules` (compte Google propriétaire du projet `pagepino-e8e97`).
+Mise en ligne sur le domaine définitif : voir la checklist de `CURRENT_STATE.md`.

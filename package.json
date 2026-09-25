@@ -1,0 +1,23 @@
+{
+  "name": "pino-espaces-verts",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Pino Espaces Verts — v1 statique (index.html + PWA) sur Firebase Auth + Realtime Database",
+  "scripts": {
+    "dev": "python3 serve.py 5500",
+    "build:css": "tailwindcss -c tailwind.config.js -i assets/css/tailwind.src.css -o assets/css/tailwind.min.css --minify",
+    "emulators": "firebase emulators:start --only auth,database --project demo-pino",
+    "test:rules": "firebase emulators:exec --only database --project demo-pino \"node --test tests/rules/\"",
+    "test:e2e": "firebase emulators:exec --only auth,database --project demo-pino \"playwright test\"",
+    "test": "pnpm test:rules && pnpm test:e2e",
+    "audit:static": "node scripts/audit-static.mjs",
+    "audit:live": "node scripts/audit-live.mjs",
+    "deploy:rules": "firebase deploy --only database --project pagepino-e8e97"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "@playwright/test": "^1.55.0",
+    "firebase": "^11.0.0",
+    "tailwindcss": "^3.4.17"
+  }
+}

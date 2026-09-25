@@ -1,0 +1,55 @@
+name: Pagepino Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 7 * * *' # audit quotidien de la production (lecture seule)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node scripts/audit-static.mjs
+
+  tests:
+    needs: static
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm add -g firebase-tools
+      - run: pnpm exec playwright install --with-deps chromium webkit
+      - name: Règles Realtime Database (émulateur)
+        run: pnpm test:rules
+      - name: E2E navigateur (Chromium + WebKit iPhone + CSP réelle)
+        run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: playwright-report, path: playwright-report/, retention-days: 14 }
+
+  live-audit:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node scripts/audit-live.mjs
