@@ -1,21 +1,22 @@
-# Estado actual — Pino Espaces Verts v1 (Production Ready)
+# Estado actual — Pino Espaces Verts v1 (Production Ready - Firebase Hosting)
 
 > Solo se marca ✅ lo verificado con un test ejecutable o una comprobación técnica.
 > Última actualización: 2026-09-25.
 
 ---
 
-## 🏗️ Stack de Producción & Entrega
+## 🌐 Orquestación de Dominio: `pinoespacesverts.fr` en Firebase Hosting
 
-| Componente | Configuración Real |
-|---|---|
-| **Frontend de Producción** | Hermético en `dist/` (`index.html`, PWA `sw.js`/`manifest.json`, CSS local, SEO, legales) |
-| **Backend & Cloud Functions** | `functions/` (Node.js 22, `europe-west1`) — Endpoints `/api/**` (Health, Quotes, Coupons, Tax SAP, Auth, Admin) |
-| **Auth** | Firebase Auth `pagepino-e8e97` (Google + Email/Password verificados, sin cuentas demo ni bypass) |
-| **Base de Datos** | Firebase Realtime Database `europe-west1` (`pagepino-e8e97-default-rtdb`) — Reglas en `database.rules.json` |
-| **Empaquetado Hostinger** | `pino-espaces-verts-production.zip` (1-click upload con `.htaccess` preconfigurado) |
-| **Hosting Definitivo** | Firebase Hosting (`pagepino-e8e97.web.app`) o Hostinger Web Hosting (`dist/` + `.htaccess`) |
-| **Documentación** | `docs/DEPLOIEMENT_HOSTINGER_ET_FIREBASE.md` con paso a paso para el cliente |
+| Parámetro | Configuración Oficial | Estado |
+|---|---|---|
+| **Dominio Principal** | `https://pinoespacesverts.fr` | ⏳ Registros DNS pendientes en el registrador (ver `docs/ORQUESTACION_FIREBASE_DOMINIO.md`) |
+| **Subdominio Redirección** | `https://www.pinoespacesverts.fr` | ⏳ CNAME configurado para apuntar a `pinoespacesverts.fr` |
+| **Hosting Definitivo** | Firebase Hosting (`pagepino-e8e97`, sirve `dist/`) | ✅ Preparado, hermético, rewrites `/api/**` a Cloud Functions |
+| **Auth Domain Dinámico** | `authDomain: window.location.hostname` (`pinoespacesverts.fr`) | ✅ Configurado para evitar bloqueo de cookies 3rd-party en Safari / Chrome |
+| **Backend & Cloud Functions** | `functions/` (Node.js 22, `europe-west1`) | ✅ 7/7 tests de integración PASS (Quotes, Coupons, Tax SAP, Auth, Admin) |
+| **Base de Datos** | Firebase Realtime Database `europe-west1` (`pagepino-e8e97-default-rtdb`) | ✅ Reglas en `database.rules.json` (43/43 tests PASS) |
+| **CI/CD Pipeline** | GitHub Actions (`.github/workflows/pagepino-pipeline.yml`) | ✅ Tests de reglas, API, E2E y despliegue automatizado |
+| **Documentación Guía** | `docs/ORQUESTACION_FIREBASE_DOMINIO.md` | ✅ Diagnóstico DNS `ERR_NAME_NOT_RESOLVED` y guía paso a paso |
 
 ---
 
@@ -31,21 +32,18 @@
 
 ---
 
-## 📦 Artefactos de Despliegue Generados
+## 📋 Pasos Inmediatos para el Cliente / Propietario del Proyecto
 
-1. **`dist/`** : Carpeta lista para Firebase Hosting (`"public": "dist"` en `firebase.json`).
-2. **`pino-espaces-verts-production.zip`** : Paquete comprimido autónomo listo para extraer en `public_html` de Hostinger.
-3. **`public/.htaccess`** : Archivo de servidor Apache/Hostinger con redirección HTTPS forzada, headers de seguridad OWASP y ruteo SPA.
-4. **`functions/`** : Código backend Firebase Cloud Functions con Express, CORS y Firebase Admin SDK.
-5. **`docs/DEPLOIEMENT_HOSTINGER_ET_FIREBASE.md`** : Guía detallada en francés para el cliente sobre cómo desplegar en Hostinger y conectar Firebase.
-
----
-
-## 🚀 Pasos Inmediatos para el Cliente en Hostinger
-
-1. **Subir y extraer `pino-espaces-verts-production.zip`** en la carpeta `public_html` del File Manager de Hostinger.
-2. **Autorizar el dominio en Firebase Console** :
-   - Firebase Console → Proyecto `pagepino-e8e97` → Authentication → Settings → Authorized domains.
-   - Añadir el dominio de Hostinger (ejemplo : `pinoespacesverts.fr` y `www.pinoespacesverts.fr`).
-3. **Desplegar las reglas de base de datos** :
-   - Con la cuenta propietaria de `pagepino-e8e97` (`pino.espacesverts@gmail.com`), ejecutar `pnpm deploy:rules`.
+1. **Resolver `ERR_NAME_NOT_RESOLVED` en el Registrador de Dominio**:
+   - En la Zona DNS del registrador donde compró `pinoespacesverts.fr`:
+     - Agregar registro **A**: `@` apuntando a `199.36.158.100`
+     - Agregar registro **CNAME**: `www` apuntando a `pinoespacesverts.fr.`
+     - Agregar registro **TXT**: El token que proporcione Firebase Console en Hosting.
+2. **Conectar el Dominio en Firebase Console**:
+   - Firebase Console → Proyecto `pagepino-e8e97` → Hosting → "Agregar dominio personalizado".
+   - Añadir `pinoespacesverts.fr` con redirección de `www`.
+3. **Autorizar Dominios en Firebase Auth**:
+   - Firebase Console → Authentication → Settings → Authorized domains → Añadir `pinoespacesverts.fr` y `www.pinoespacesverts.fr`.
+4. **Habilitar Permiso de Despliegue en CLI**:
+   - En Firebase Console → Project settings → Users and permissions:
+   - Añadir `jomstudiovzla@gmail.com` con rol **Editor** (o iniciar sesión con `pino.espacesverts@gmail.com` con `npx firebase login`).

@@ -39,11 +39,34 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium webkit
       - name: Règles Realtime Database (émulateur)
         run: pnpm test:rules
+      - name: Tests Backend Functions API
+        run: pnpm test:api
       - name: E2E navigateur (Chromium + WebKit iPhone + CSP réelle)
         run: pnpm test:e2e
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: playwright-report, path: playwright-report/, retention-days: 14 }
+
+  deploy:
+    needs: tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Compilation production dist
+        run: pnpm build
+      - name: Validation propreté production
+        run: pnpm cleanup:preprod
+      - name: Déploiement Firebase Hosting, Functions et Règles
+        if: env.FIREBASE_TOKEN != ''
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: npx firebase-tools deploy --only hosting,functions,database --token "$FIREBASE_TOKEN" --project pagepino-e8e97 --non-interactive
 
   live-audit:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
