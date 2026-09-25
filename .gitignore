@@ -17,3 +17,8 @@ audit-reports/
 firebase-debug.log
 database-debug.log
 functions/node_modules/
+
+# Build / empaquetado (se regeneran con pnpm build)
+dist/
+*.zip
+firebase.static.json

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 Disallow: /admin
-Sitemap: https://www.pinoespacesverts.fr/sitemap.xml
+Sitemap: https://pagepino-e8e97.web.app/sitemap.xml

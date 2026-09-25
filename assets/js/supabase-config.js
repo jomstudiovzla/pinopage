@@ -10,7 +10,7 @@ window.PINO_SUPABASE = {
 (function computeSiteUrl() {
   const { protocol, origin } = window.location;
   if (protocol === "file:") {
-    window.PINO_SITE_URL = "https://www.pinoespacesverts.fr/";
+    window.PINO_SITE_URL = "https://pagepino-e8e97.web.app/";
     return;
   }
   window.PINO_SITE_URL = origin + "/";

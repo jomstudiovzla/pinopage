@@ -1,5 +1,9 @@
 # Agent Instructions — Pino Espaces Verts
 
+> Single source for every coding agent (Claude Code, Grok, Antigravity/Gemini, Codex, Cursor…).
+> `CLAUDE.md` and `GEMINI.md` are symlinks to this file: edit rules HERE only.
+> Handoff between agents: at the end of each session update `.context_sync.json` (agent, what changed, next step).
+
 ## Source of truth
 - Product + architecture: `DOCUMENTO_MAESTRO.md`
 - Tasks: `tareas.md`
@@ -20,7 +24,10 @@ v1 live = static `index.html` + PWA. Do not delete it until Hito 6. v2 app will 
 - Apple Sign-In is hidden behind `PINO_FLAGS.appleLogin` until the `apple.com` provider is enabled in Firebase.
 - Supabase is **not loaded in v1**; it is reserved for v2 (Next.js + Postgres RLS, `eu-west-3`).
 - No server API in v1 (static hosting): never call `/api/*` from the client.
-- Public URL used in emails: `PINO_PUBLIC_URL` in `firebase-config.js` (one line to change when the domain arrives).
+- Public URL (canonical, free): **`https://pagepino-e8e97.web.app`**. Set in `PINO_PUBLIC_URL` (`firebase-config.js`) and `SITE_URL` (`scripts/build.mjs`, overridable with `PINO_SITE_URL`).
+- `pinoespacesverts.fr` is **not registered** (AFNIC: not found, 2026-09-25). Do not reference it until Andrés buys it and it is connected in Firebase Hosting → Custom domains.
+- Contact e-mail shown on the site: `pino.espacesverts@gmail.com`.
+- Deploy: `pnpm deploy:production` (needs a CLI account with access to `pagepino-e8e97`; works on the free Spark plan, Functions optional).
 
 ## Package Manager
 Use **pnpm**: `pnpm install`, `pnpm dev` (http://localhost:5500), `pnpm test`.
@@ -35,6 +42,7 @@ Use **pnpm**: `pnpm install`, `pnpm dev` (http://localhost:5500), `pnpm test`.
 | Static audit | `pnpm audit:static` |
 | Production audit (read-only) | `pnpm audit:live` |
 | Deploy DB rules | `pnpm deploy:rules` |
+| Full deploy (Hosting + rules, Functions if Blaze) | `pnpm deploy:production` |
 
 Never send write requests to the production database to "test" rules: prove denials on the emulator.
 
@@ -47,10 +55,13 @@ Never send write requests to the production database to "test" rules: prove deni
 | Unit calculadora | `pnpm vitest run path/to/file.test.ts` |
 
 ## Commit Attribution
-AI commits MUST include:
+AI commits MUST end with a `Co-Authored-By` line naming the agent that actually wrote the change, e.g.:
 ```
-Co-Authored-By: Grok 4.6 <noreply@x.ai>
+Co-Authored-By: Claude <noreply@anthropic.com>
+Co-Authored-By: Grok <noreply@x.ai>
+Co-Authored-By: Gemini (Antigravity) <noreply@google.com>
 ```
+Never attribute work to an agent that did not do it.
 
 ## Key conventions
 - UI language: **French**. Internal docs: Spanish.

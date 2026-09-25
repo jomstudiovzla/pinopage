@@ -9,9 +9,7 @@
 
 window.PINO_FIREBASE_CONFIG = {
   apiKey: "AIzaSyCOrSsb3dMl-tYr9y23zCPaDu63cRn7l-k",
-  authDomain: (typeof window !== "undefined" && window.location && (window.location.hostname === "pinoespacesverts.fr" || window.location.hostname === "www.pinoespacesverts.fr")) 
-    ? window.location.hostname 
-    : "pagepino-e8e97.firebaseapp.com",
+  authDomain: "pagepino-e8e97.firebaseapp.com",
   databaseURL: "https://pagepino-e8e97-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "pagepino-e8e97",
   storageBucket: "pagepino-e8e97.firebasestorage.app",
@@ -30,7 +28,7 @@ window.PINO_FLAGS = Object.assign({ appleLogin: false }, window.PINO_FLAGS || {}
  * URL publique officielle utilisée dans les e-mails et notifications.
  * ► À changer ICI (une seule ligne) le jour où le domaine définitif est branché.
  */
-window.PINO_PUBLIC_URL = (typeof window !== "undefined" && window.location && window.location.origin && window.location.origin !== "null" && !window.location.origin.startsWith("file:")) ? window.location.origin + "/" : "https://www.pinoespacesverts.fr/";
+window.PINO_PUBLIC_URL = (typeof window !== "undefined" && window.location && window.location.origin && window.location.origin !== "null" && !window.location.origin.startsWith("file:")) ? window.location.origin + "/" : "https://pagepino-e8e97.web.app/";
 window.pinoSiteUrl = () => window.PINO_PUBLIC_URL;
 
 /**
