@@ -152,6 +152,24 @@ if (existsSync(join(ROOT, 'public'))) {
   }
 }
 
+// 5b. URL canonique : les sources utilisent le domaine gratuit Firebase ; on le remplace
+// par SITE_URL (ex. PINO_SITE_URL=https://pinoespacesverts.fr) dans tout le bundle.
+const DEFAULT_ORIGIN = 'https://pagepino-e8e97.web.app';
+const SITE_ORIGIN = SITE_URL.replace(/\/$/, '');
+if (SITE_ORIGIN !== DEFAULT_ORIGIN) {
+  const rewriteUrls = (dir) => {
+    for (const f of readdirSync(dir)) {
+      const p = join(dir, f);
+      if (statSync(p).isDirectory()) { rewriteUrls(p); continue; }
+      if (!/\.(html|xml|txt|js|json|webmanifest)$/.test(f)) continue;
+      const txt = readFileSync(p, 'utf8');
+      if (txt.includes(DEFAULT_ORIGIN)) writeFileSync(p, txt.split(DEFAULT_ORIGIN).join(SITE_ORIGIN), 'utf8');
+    }
+  };
+  rewriteUrls(DIST);
+  console.log(`5b — URL canonique : ${SITE_ORIGIN}`);
+}
+
 // 6. Suppression de fichiers interdits dans dist/
 console.log('6/7 — Vérification d\'exclusion des fichiers sensibles...');
 const forbiddenNames = ['package.json', 'pnpm-lock.yaml', 'serve.py', '.env', 'database.rules.json', 'firestore.rules'];

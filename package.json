@@ -17,7 +17,8 @@
     "audit:live": "node scripts/audit-live.mjs",
     "verify:production": "bash scripts/verify-production.sh",
     "deploy:rules": "firebase deploy --only database --project pagepino-e8e97",
-    "deploy:production": "bash scripts/deploy-production.sh"
+    "deploy:production": "bash scripts/deploy-production.sh",
+    "domain:connect": "bash scripts/connect-domain.sh"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",
