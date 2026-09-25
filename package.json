@@ -6,13 +6,18 @@
   "scripts": {
     "dev": "python3 serve.py 5500",
     "build:css": "tailwindcss -c tailwind.config.js -i assets/css/tailwind.src.css -o assets/css/tailwind.min.css --minify",
-    "emulators": "firebase emulators:start --only auth,database --project demo-pino",
-    "test:rules": "firebase emulators:exec --only database --project demo-pino \"node --test tests/rules/\"",
+    "build": "node scripts/build.mjs",
+    "cleanup:preprod": "bash scripts/cleanup-preprod.sh",
+    "emulators": "firebase emulators:start --only auth,database,functions,hosting --project demo-pino",
+    "test:rules": "firebase emulators:exec --only database --project demo-pino \"node --test tests/rules/database.rules.test.mjs\"",
+    "test:api": "node --test tests/integration/functions.test.mjs",
     "test:e2e": "firebase emulators:exec --only auth,database --project demo-pino \"playwright test\"",
-    "test": "pnpm test:rules && pnpm test:e2e",
+    "test": "pnpm test:rules && pnpm test:api && pnpm test:e2e",
     "audit:static": "node scripts/audit-static.mjs",
     "audit:live": "node scripts/audit-live.mjs",
-    "deploy:rules": "firebase deploy --only database --project pagepino-e8e97"
+    "verify:production": "bash scripts/verify-production.sh",
+    "deploy:rules": "firebase deploy --only database --project pagepino-e8e97",
+    "deploy:production": "bash scripts/deploy-production.sh"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",

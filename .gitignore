@@ -16,3 +16,4 @@ playwright-report/
 audit-reports/
 firebase-debug.log
 database-debug.log
+functions/node_modules/

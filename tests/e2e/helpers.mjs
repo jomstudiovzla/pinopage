@@ -73,8 +73,12 @@ export async function openAuthModal(page) {
 
 export async function loginWithPassword(page, email, password) {
   await openAuthModal(page);
-  await page.fill('#login-email', email);
-  await page.fill('#login-password', password);
+  const emailInput = page.locator('#login-email');
+  await emailInput.clear();
+  await emailInput.fill(email);
+  const passwordInput = page.locator('#login-password');
+  await passwordInput.clear();
+  await passwordInput.fill(password);
   await page.locator('#auth-view-login form button[type="submit"]').click();
 }
 

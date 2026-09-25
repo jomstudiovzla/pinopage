@@ -28,7 +28,7 @@ window.PINO_FLAGS = Object.assign({ appleLogin: false }, window.PINO_FLAGS || {}
  * URL publique officielle utilisée dans les e-mails et notifications.
  * ► À changer ICI (une seule ligne) le jour où le domaine définitif est branché.
  */
-window.PINO_PUBLIC_URL = "https://jomstudiovzla.github.io/pinopage/";
+window.PINO_PUBLIC_URL = (typeof window !== "undefined" && window.location && window.location.origin && window.location.origin !== "null" && !window.location.origin.startsWith("file:")) ? window.location.origin + "/" : "https://www.pinoespacesverts.fr/";
 window.pinoSiteUrl = () => window.PINO_PUBLIC_URL;
 
 /**
