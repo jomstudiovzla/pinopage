@@ -1,3 +1,5 @@
+> ⚠️ **Actualización 2026-09-25:** `pinoespacesverts.fr` NO está registrado (AFNIC: not found). El dominio canónico actual es el gratuito `https://pagepino-e8e97.web.app`. Las secciones DNS de abajo solo aplican el día que Andrés compre el dominio.
+
 # 🌐 Orquestación Integral: Pino Espaces Verts en Firebase Hosting con Dominio `pinoespacesverts.fr`
 
 > **Documento Maestro de Infraestructura y Despliegue**  
@@ -84,7 +86,7 @@ Ingresa al panel del registrador donde compraste el dominio (Hostinger DNS, OVH,
 | **A** | `@` (segunda IP si Firebase la solicita) | `199.36.158.100` | 3600 | IP redundante Anycast de Google |
 | **CNAME** | `www` | `pinoespacesverts.fr.` *(o `pagepino-e8e97.web.app.` según indique la consola)* | 3600 | Enrutar `www.pinoespacesverts.fr` |
 
-> ⚠️ **Importante sobre registros anteriores:** Si tienes registros A o CNAME antiguos que apuntaban a GitHub Pages (`185.199.x.x` o `jomstudiovzla.github.io`), **elimínalos** para que no haya conflicto.
+> ⚠️ **Importante sobre registros anteriores:** Si tienes registros A o CNAME antiguos que apuntaban a GitHub Pages (`185.199.x.x` o `pagepino-e8e97.web.app`), **elimínalos** para que no haya conflicto.
 
 ---
 
@@ -110,27 +112,14 @@ Para que el inicio de sesión con **Google** y los correos de verificación func
 
 ## 4. 🔑 Permisos para Desplegar desde la Terminal (CLI)
 
-Durante la auditoría local, el comando `firebase hosting:sites:list` arrojó:
-`HTTP Error: 403, The caller does not have permission`
+El proyecto `pagepino-e8e97` pertenece a la cuenta de Andrés, `pino.espacesverts@gmail.com`.
+Todo despliegue se hace con esa cuenta (no se añaden cuentas externas):
 
-**Causa:** La terminal está logueada con `jomstudiovzla@gmail.com`, pero el proyecto `pagepino-e8e97` fue creado por `pino.espacesverts@gmail.com`.
-
-### Solución A (Recomendada — Añadir Colaborador en Firebase Console):
-1. Desde la cuenta de Andrés (`pino.espacesverts@gmail.com`), entra a Firebase Console:  
-   👉 [https://console.firebase.google.com/project/pagepino-e8e97/settings/iam](https://console.firebase.google.com/project/pagepino-e8e97/settings/iam)
-2. Haz clic en **"Agregar miembro"** (Add member).
-3. Escribe el correo: `jomstudiovzla@gmail.com`.
-4. Asigna el rol: **Editor** (o *Firebase Admin*).
-5. Haz clic en **Guardar**.
-
-### Solución B (Cambiar de cuenta en la terminal):
-Ejecutar en la terminal de este Mac:
 ```bash
-npx firebase login:add
+firebase login:add                               # elegir pino.espacesverts@gmail.com en el navegador
+firebase login:use pino.espacesverts@gmail.com
+pnpm deploy:production
 ```
-E iniciar sesión en el navegador con `pino.espacesverts@gmail.com`.
-
----
 
 ## 5. 🚀 Comandos de Despliegue Inmediato
 

@@ -46,4 +46,4 @@
    - Firebase Console → Authentication → Settings → Authorized domains → Añadir `pinoespacesverts.fr` y `www.pinoespacesverts.fr`.
 4. **Habilitar Permiso de Despliegue en CLI**:
    - En Firebase Console → Project settings → Users and permissions:
-   - Añadir `jomstudiovzla@gmail.com` con rol **Editor** (o iniciar sesión con `pino.espacesverts@gmail.com` con `npx firebase login`).
+   - Iniciar sesión en la CLI con la cuenta propietaria `pino.espacesverts@gmail.com`: `firebase login:add` y `firebase login:use pino.espacesverts@gmail.com`.

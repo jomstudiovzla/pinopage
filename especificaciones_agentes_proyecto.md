@@ -174,7 +174,7 @@ sequenceDiagram
    - Indicación expresa de que **no tiene nada que pagar en este momento (0.00 €)**.
    - Recordatorio de los medios de pago aceptados al finalizar el trabajo (Chèque à l'ordre de PINO ANDRES, Virement bancaire direct, CESU).
    - Fecha y franja horaria solicitada para la visita previa.
-   - **Magic Link de Seguimiento:** Un enlace seguro directo (`https://jomstudiovzla.github.io/pinopage/#suivi?id=DEV-XXXX&token=...`) que le permite consultar el estado de su presupuesto sin necesidad de crear cuenta, con un botón opcional para definir contraseña si lo desea.
+   - **Magic Link de Seguimiento:** Un enlace seguro directo (`https://pagepino-e8e97.web.app/#suivi?id=DEV-XXXX&token=...`) que le permite consultar el estado de su presupuesto sin necesidad de crear cuenta, con un botón opcional para definir contraseña si lo desea.
 
 #### Lo que recibe Andrés Pino (`pino.espacesverts@gmail.com`):
 1. **Asunto:** `🚨 NOUVEAU DEVIS REÇU — [Nom Client] — [Commune] ([Montant] €)`

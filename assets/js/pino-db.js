@@ -36,8 +36,7 @@
   }
 
   const PINO_ADMIN_EMAIL = 'pino.espacesverts@gmail.com';
-  const STUDIO_ADMIN_EMAIL = 'jomstudiovzla@gmail.com';
-  const ADMIN_INBOXES = [PINO_ADMIN_EMAIL, STUDIO_ADMIN_EMAIL];
+  const ADMIN_INBOXES = [PINO_ADMIN_EMAIL];
   const WEB3FORMS_ACCESS_KEY = '646876c1-a20d-48d6-953e-8c3b7a5a4c9b';
 
   async function safePushAudit(db, payload) {
@@ -714,8 +713,7 @@ ${siteUrl()}#admin
       to: PINO_ADMIN_EMAIL,
       email: replyTo,
       replyto: replyTo,
-      cc: STUDIO_ADMIN_EMAIL,
-      message: mailBody + '\n\nCopie studio : ' + STUDIO_ADMIN_EMAIL,
+      message: mailBody,
       client_name: clientName,
       client_email: clientEmail,
       client_phone: clientPhone,
@@ -853,7 +851,6 @@ Site web : ${siteUrl()}`;
       subject: `[COPIE] ${subject} → ${clientName} <${rawEmail}>`,
       to: PINO_ADMIN_EMAIL,
       email: PINO_ADMIN_EMAIL,
-      cc: STUDIO_ADMIN_EMAIL,
       replyto: rawEmail,
       message: `Copie de l'e-mail destiné au client ${clientName} (${rawEmail}) le ${timestamp}.\nCanal principal : ${via || (activationRequired ? 'formsubmit_activation' : 'en_attente')}.\n\n${mailBody}`
     });
@@ -1476,16 +1473,15 @@ Site web : ${siteUrl()}`;
     if (!fbUser?.uid) return { ok: false };
 
     const normEmail = (fbUser.email || '').trim().toLowerCase();
-    const isJom = normEmail === 'jomstudiovzla@gmail.com';
     const isAdmin = fbUser.emailVerified === true &&
-                    (normEmail === 'pino.espacesverts@gmail.com' || normEmail === 'jomstudiovzla@gmail.com');
+                    normEmail === 'pino.espacesverts@gmail.com';
     const sanitizedEmail = normEmail ? normEmail.replace(/[.#$[\]]/g, '_') : null;
 
     const payload = {
       id:            fbUser.uid,
       uid:           fbUser.uid,
       email:         normEmail,
-      full_name:     extra.fullName || fbUser.displayName || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : 'Client Particulier')),
+      full_name:     extra.fullName || fbUser.displayName || (isAdmin ? 'Andrés Pino' : 'Client Particulier'),
       phone:         extra.phone    || fbUser.phoneNumber || null,
       commune:       extra.commune  || 'Entraigues-sur-la-Sorgue (84)',
       role:          isAdmin ? 'admin' : 'client',

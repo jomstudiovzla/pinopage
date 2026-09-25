@@ -18,7 +18,7 @@ Fuente: `DOCUMENTO_MAESTRO.md` §9. Cada tarea: una sesión, criterios, verifica
 - [x] Modal auth `max-h-[80vh] overflow-y-auto` + CGV bajo Google
 - [x] Cupón: sin email público; CTA Google; código solo con `user_id`
 - [x] SQL `docs/sql/002_cupones_rls.sql`
-- [x] Pegar `url` + `anonKey` en `assets/js/supabase-config.js` y autorizar `jomstudiovzla.github.io`
+- [x] Pegar `url` + `anonKey` en `assets/js/supabase-config.js` y autorizar `pagepino-e8e97.web.app`
 
 ## Hito 1 — Infra UE
 

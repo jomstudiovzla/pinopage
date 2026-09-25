@@ -7,7 +7,7 @@ Site et plateforme de **Pino Espaces Verts** (Andrés Pino, SIRET 105 075 006 00
 | | v1 (en ligne) | v2 (spécifiée) |
 |---|---|---|
 | Code | `index.html` + PWA | Next.js 15 + Supabase `eu-west-3` (Paris) |
-| URL actuelle | [GitHub Pages](https://jomstudiovzla.github.io/pinopage/) | Domaine cible `www.pinoespacesverts.fr` |
+| URL actuelle | [GitHub Pages](https://pagepino-e8e97.web.app/) | Domaine cible `www.pinoespacesverts.fr` |
 | Données | Firebase Auth + Realtime Database `pagepino-e8e97` (europe-west1) | Postgres RLS + Storage UE |
 | Spec | — | **[`DOCUMENTO_MAESTRO.md`](./DOCUMENTO_MAESTRO.md)** |
 
@@ -54,7 +54,7 @@ Utiliser `localhost` (autorisé par Firebase Auth) plutôt que `127.0.0.1`.
 
 ## Déploiement v1
 
-Hébergeur actuel : GitHub Pages (`main` / racine) — [pinopage](https://jomstudiovzla.github.io/pinopage/). Le texte Mentions Légales devra citer l’hébergeur **réel** dès la v2 (voir ADR-0004).
+Hébergeur actuel : GitHub Pages (`main` / racine) — [pinopage](https://pagepino-e8e97.web.app/). Le texte Mentions Légales devra citer l’hébergeur **réel** dès la v2 (voir ADR-0004).
 
 Règles de la base : `pnpm deploy:rules` (compte Google propriétaire du projet `pagepino-e8e97`).
 Mise en ligne sur le domaine définitif : voir la checklist de `CURRENT_STATE.md`.

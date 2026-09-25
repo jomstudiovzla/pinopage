@@ -46,7 +46,7 @@ for (const f of rootFiles) {
 if (existsSync(join(DIST, 'index.html'))) {
   let html = readFileSync(join(DIST, 'index.html'), 'utf8');
   // Remplacement de tout github.io par le domaine officiel
-  html = html.replace(/https:\/\/jomstudiovzla\.github\.io\/pinopage\/?/g, SITE_URL);
+  html = html.replace(/https:\/\/[\w-]+\.github\.io\/pinopage\/?/g, SITE_URL);
   writeFileSync(join(DIST, 'index.html'), html, 'utf8');
 }
 

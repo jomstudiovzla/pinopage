@@ -11,7 +11,7 @@ La v1 es un `index.html` estático con Tailwind CDN, PWA y Firestore (`crm-jom`)
 ## Decision Drivers
 
 - Residencia de Postgres, Auth y Storage **dentro de un Estado miembro de la UE**.
-- Un solo equipo (JOM Studio + Andrés), sin microservicios.
+- Un solo equipo (Andrés + equipo técnico), sin microservicios.
 - SEO de la landing no puede degradarse.
 - Continuidad con el código React-like ya mentalizado (no Vue/Svelte).
 

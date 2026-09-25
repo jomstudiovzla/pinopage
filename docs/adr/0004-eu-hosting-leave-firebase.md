@@ -18,6 +18,6 @@ Producción actual: GitHub Pages (EE. UU.). Mentions Légales declaran OVHcloud 
 
 ## Consequences
 
-- Redirect 301 desde `jomstudiovzla.github.io/pinopage/` hacia `www.pinoespacesverts.fr`.
+- Redirect 301 desde `pagepino-e8e97.web.app/` hacia `www.pinoespacesverts.fr`.
 - Export CSV de Firestore antes del apagado (Hito 1).
 - Analytics solo tras consentimiento CNIL.

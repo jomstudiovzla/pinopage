@@ -1388,10 +1388,10 @@
       <!-- Options d'envoi -->
       <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 text-xs">
         <p class="text-[11px] text-emerald-900 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2 leading-relaxed">
-          Les e-mails partent depuis <strong>Gmail</strong> (compte Pino <span class="font-mono">pino.espacesverts@gmail.com</span> ou studio <span class="font-mono">jomstudiovzla@gmail.com</span>). Une copie arrive aussi dans les deux boîtes admin.
+          Les e-mails partent depuis <strong>Gmail</strong> (compte Pino <span class="font-mono">pino.espacesverts@gmail.com</span>). Une copie arrive aussi dans la boîte admin.
         </p>
         <button type="button" onclick="pinoObtainGmailToken({force:true}).then(function(t){ if(t) showNotificationToast('Gmail autorisé. Vous pouvez envoyer.', 'success'); })" class="w-full py-2 px-3 rounded-xl border border-emerald-300 bg-white hover:bg-emerald-50 text-emerald-900 font-bold text-xs cursor-pointer">
-          <i class="fa-brands fa-google mr-1"></i> Autoriser Gmail (Pino ou JOM Studio)
+          <i class="fa-brands fa-google mr-1"></i> Autoriser Gmail (compte Pino)
         </button>
         <label class="flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
           <input type="checkbox" id="adm-msg-send-email" checked class="rounded text-emerald-600 focus:ring-emerald-500" />
@@ -2244,7 +2244,7 @@
     </div>
 
     <div id="admin-gmail-strip" class="px-4 sm:px-6 py-2 bg-emerald-50 border-b border-emerald-100 text-[11px] text-emerald-950 flex flex-wrap items-center justify-between gap-2 shrink-0">
-      <span><i class="fa-solid fa-envelope mr-1"></i> Les e-mails du portail partent comme Andrés Pino. Copie : pino.espacesverts@gmail.com et jomstudiovzla@gmail.com.</span>
+      <span><i class="fa-solid fa-envelope mr-1"></i> Les e-mails du portail partent comme Andrés Pino. Copie : pino.espacesverts@gmail.com.</span>
       <button type="button" onclick="linkAndresGmail()" class="px-3 py-1.5 rounded-lg bg-white border border-emerald-300 font-bold cursor-pointer">
         Relier Gmail Andrés Pino
       </button>
@@ -6871,7 +6871,7 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
     // AUTHENTIFICATION SUPABASE (Google OAuth + email) — Zero Trust cupón
     // =========================================================================
     // Doit rester identique à la liste de database.rules.json.
-    const ADMIN_EMAILS = ['pino.espacesverts@gmail.com', 'jomstudiovzla@gmail.com'];
+    const ADMIN_EMAILS = ['pino.espacesverts@gmail.com'];
     const isPinoEmail = (email) => ADMIN_EMAILS.includes((email || '').trim().toLowerCase());
 
     function getCurrentUser() {
@@ -6979,7 +6979,7 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
         || meta.full_name 
         || meta.name 
         || savedName 
-        || (normEmail === 'jomstudiovzla@gmail.com' ? 'JOM Studio (Admin)' : (isAdmin ? 'Andrés Pino' : normEmail.split('@')[0]));
+        || (isAdmin ? 'Andrés Pino' : normEmail.split('@')[0]);
       const phone = registrationProfile?.phone || user.phoneNumber || meta.phone || matchedUser?.phone || '';
       const commune = window.sanitizeCommune(registrationProfile?.commune || matchedUser?.commune || 'Entraigues-sur-la-Sorgue (84)');
 
@@ -8469,9 +8469,8 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
       }
 
       const isAdmin = user.role === 'admin' || user.isAdmin;
-      const isJom = (user.email || '').trim().toLowerCase() === 'jomstudiovzla@gmail.com';
-      const adminDisplayName = isJom ? "👑 JOM Studio (Admin)" : "👑 Andrés (Admin)";
-      const shortName = (user.fullName || (isAdmin ? (isJom ? 'JOM Studio' : 'Admin') : 'Client')).split(' ')[0];
+      const adminDisplayName = "👑 Andrés (Admin)";
+      const shortName = (user.fullName || (isAdmin ? 'Admin' : 'Client')).split(' ')[0];
 
       paintLiveButton(shortName, isAdmin);
       setOn(chip, true);
@@ -12219,7 +12218,7 @@ Site web : ${window.pinoSiteUrl()}`;
 
       leads.forEach(l => {
         const email = (l.email || '').trim().toLowerCase();
-        if (email && email.includes('@') && !isPinoEmail(email) && email !== 'jomstudiovzla@gmail.com') {
+        if (email && email.includes('@') && !isPinoEmail(email)) {
           if (!clientMap.has(email)) {
             clientMap.set(email, {
               email: (l.email || '').trim(),
@@ -12236,7 +12235,7 @@ Site web : ${window.pinoSiteUrl()}`;
       try { factures = JSON.parse(localStorage.getItem('pino_admin_factures') || '[]'); } catch (e) { factures = []; }
       factures.forEach(f => {
         const email = (f.client_email || '').trim().toLowerCase();
-        if (email && email.includes('@') && !isPinoEmail(email) && email !== 'jomstudiovzla@gmail.com') {
+        if (email && email.includes('@') && !isPinoEmail(email)) {
           if (!clientMap.has(email)) {
             clientMap.set(email, {
               email: (f.client_email || '').trim(),
@@ -12253,7 +12252,7 @@ Site web : ${window.pinoSiteUrl()}`;
       try { users = JSON.parse(localStorage.getItem('pino_users') || '[]'); } catch (e) { users = []; }
       users.forEach(u => {
         const email = (u.email || '').trim().toLowerCase();
-        if (email && email.includes('@') && !isPinoEmail(email) && email !== 'jomstudiovzla@gmail.com') {
+        if (email && email.includes('@') && !isPinoEmail(email)) {
           if (!clientMap.has(email)) {
             clientMap.set(email, {
               email: (u.email || '').trim(),
@@ -12562,11 +12561,11 @@ Site web : ${window.pinoSiteUrl()}`;
           showNotificationToast('Notification publiée dans l\'Espace Client de ' + name + '.', 'success');
         } else if (res.clientEmailSent) {
           const fromHint = sessionStorage.getItem('pino_gmail_from') || 'Gmail';
-          showNotificationToast('E-mail envoyé à ' + email + ' depuis ' + fromHint + '. Copie admin Pino + JOM Studio.', 'success');
+          showNotificationToast('E-mail envoyé à ' + email + ' depuis ' + fromHint + '. Copie admin Pino.', 'success');
         } else if (res.activationRequired) {
           showNotificationToast('Le client doit confirmer un premier e-mail FormSubmit (dossier Spam). Copie admin envoyée.', 'warning');
         } else {
-          showNotificationToast('Espace Client notifié. L\'e-mail Gmail n\'est pas parti : cliquez « Autoriser Gmail » avec le compte Pino ou JOM Studio, puis renvoyez.', 'warning');
+          showNotificationToast('Espace Client notifié. L\'e-mail Gmail n\'est pas parti : cliquez « Autoriser Gmail » avec le compte Pino, puis renvoyez.', 'warning');
         }
 
         try {

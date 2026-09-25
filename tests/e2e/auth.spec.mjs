@@ -79,7 +79,7 @@ test('porte dérobée supprimée : e-mail admin + mot de passe quelconque → re
 test('porte dérobée supprimée : e-mail admin inexistant + service indisponible → refus', async ({ page }) => {
   await openSite(page);
   await simulateAuthOutage(page);
-  await loginWithPassword(page, 'jomstudiovzla@gmail.com', 'nimportequoi');
+  await loginWithPassword(page, 'pino.espacesverts@gmail.com', 'nimportequoi');
   await expect(page.locator('#login-error-msg')).toBeVisible();
   expect(await cachedSession(page)).toBeNull();
   await expect(page.locator('#modal-window-admin')).toHaveJSProperty('open', false);
