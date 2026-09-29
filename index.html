@@ -662,8 +662,27 @@
       <button onclick="document.getElementById('gallery-modal').close()" class="absolute top-4 right-4 z-20 w-10 h-10 bg-black/60 hover:bg-black text-white rounded-full flex items-center justify-center transition-colors shadow-lg">
         <i class="fa-solid fa-xmark text-lg"></i>
       </button>
-      <div class="aspect-[16/10] bg-slate-900 overflow-hidden flex items-center justify-center">
-        <img id="lightbox-img" src="" alt="Chantier en plein écran" class="w-full h-full object-contain" />
+      <div class="bg-slate-900 overflow-hidden relative">
+        <!-- Mode image simple -->
+        <div id="lightbox-single" class="aspect-[16/10] w-full flex items-center justify-center">
+          <img id="lightbox-img" src="" alt="Chantier en plein écran" class="w-full h-full object-contain" />
+        </div>
+        <!-- Mode Avant / Après (curseur glissant) -->
+        <div id="lightbox-ba" class="ba-slider aspect-[16/10] w-full hidden">
+          <img id="lightbox-ba-after" src="" alt="Après les travaux" class="ba-image-after" />
+          <div class="ba-resize" id="lightbox-ba-resize">
+            <img id="lightbox-ba-before" src="" alt="Avant les travaux" class="ba-image-before" />
+          </div>
+          <div class="ba-handle" id="lightbox-ba-handle">
+            <div class="ba-handle-button"><i class="fa-solid fa-arrows-left-right text-xs"></i></div>
+          </div>
+          <span class="absolute top-3 left-3 bg-black/60 text-white text-[10px] font-extrabold px-2 py-1 rounded-full z-20 pointer-events-none uppercase tracking-wider">◀ Avant</span>
+          <span class="absolute top-3 right-3 bg-brand-vivid text-white text-[10px] font-extrabold px-2 py-1 rounded-full z-20 pointer-events-none uppercase tracking-wider">Après ▶</span>
+        </div>
+        <!-- Mode vidéo -->
+        <div id="lightbox-video-wrap" class="aspect-[16/10] w-full hidden bg-black">
+          <video id="lightbox-video" class="w-full h-full object-contain" controls playsinline preload="metadata"></video>
+        </div>
       </div>
       <div class="p-6 sm:p-8 space-y-4 max-h-[50vh] overflow-y-auto">
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
@@ -4161,10 +4180,13 @@
           <button type="button" onclick="filterGallery('debroussaillage')" class="gallery-filter px-4 py-2 rounded-full font-bold text-xs transition-all border-2 border-transparent bg-white text-brand-green hover:border-brand-accent/40 shadow-sm">
             🚜 Débroussaillage
           </button>
+          <button type="button" onclick="filterGallery('elagage')" class="gallery-filter px-4 py-2 rounded-full font-bold text-xs transition-all border-2 border-transparent bg-white text-brand-green hover:border-brand-accent/40 shadow-sm">
+            🌳 Élagage & Palmiers
+          </button>
         </div>
 
         <!-- Gallery Grid of Real Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div id="gallery-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
           <!-- Project 1: Taille de Haie (Sorgues) -->
           <div class="gallery-item haie bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-slate-100 flex flex-col justify-between group cursor-pointer" onclick="openLightbox(0)">
@@ -5884,6 +5906,100 @@
         creditPrice: "Fourniture & Pose",
         legend: "Végétaux persistants méditerranéens supportant la chaleur sans feuilles dans l'eau du bassin.",
         serviceType: "creation-paysage"
+      },
+      {
+        title: "Taille de Cyprès en Colonnes",
+        img: "assets/images/real_cypres_colonnes_apres.jpg",
+        imgBefore: "assets/images/real_cypres_colonnes_avant.jpg",
+        badge: "✂️ Taille de Cyprès",
+        loc: "Vaucluse (84)",
+        duration: "Avant / Après",
+        work: "Taille de mise en forme de cyprès colonnaires : reprise des colonnes déformées, resserrage des flancs et égalisation des sommets pour retrouver des fûts nets et réguliers. Ramassage et évacuation des déchets de coupe.",
+        price: "Sur devis",
+        creditPrice: "−50 % crédit d'impôt",
+        legend: "Cyprès remis en forme de colonne nette. Glissez le curseur pour comparer l'avant et l'après.",
+        serviceType: "taille-haie",
+        category: "haie"
+      },
+      {
+        title: "Taille de Haie de Cyprès de Leyland",
+        img: "assets/images/real_haie_cypres_apres.jpg",
+        imgBefore: "assets/images/real_haie_cypres_avant.jpg",
+        badge: "✂️ Taille de Haies",
+        loc: "Vaucluse (84)",
+        duration: "Avant / Après",
+        work: "Taille double-face d'une haie de cyprès de Leyland dense et débordante : réduction des pousses folles, remise à niveau du sommet au cordeau et nettoyage complet du pied. Évacuation des déchets verts.",
+        price: "Sur devis",
+        creditPrice: "−50 % crédit d'impôt",
+        legend: "Haie touffue reprise en ligne nette. Glissez pour comparer l'avant et l'après.",
+        serviceType: "taille-haie",
+        category: "haie"
+      },
+      {
+        title: "Taille de Haie le long d'une Allée",
+        img: "assets/images/real_haie_allee_apres.jpg",
+        badge: "✂️ Taille de Haies",
+        loc: "Vaucluse (84)",
+        duration: "Finition soignée",
+        work: "Taille verticale et sommitale d'une haie séparative le long d'une allée étroite, avec finition rectiligne pour dégager le passage et la vue. Nettoyage du cheminement.",
+        price: "Sur devis",
+        creditPrice: "−50 % crédit d'impôt",
+        legend: "Haie taillée nette des deux côtés pour dégager l'allée.",
+        serviceType: "taille-haie",
+        category: "haie"
+      },
+      {
+        title: "Élagage d'Arbre d'Ornement",
+        img: "assets/images/real_elagage_arbre.jpg",
+        badge: "🌳 Élagage",
+        loc: "Vaucluse (84)",
+        duration: "Travail en hauteur",
+        work: "Élagage et réduction de couronne d'un arbre d'ornement : suppression du bois mort, éclaircissage et mise en sécurité des branches. Travail à l'échelle avec ramassage complet des branches.",
+        price: "Sur devis",
+        creditPrice: "−50 % crédit d'impôt",
+        legend: "Arbre allégé et remis en forme, en toute sécurité.",
+        serviceType: "elagage",
+        category: "elagage"
+      },
+      {
+        title: "Élagage & Nettoyage de Palmiers",
+        img: "assets/images/real_elagage_palmiers.jpg",
+        badge: "🌴 Palmiers",
+        loc: "Vaucluse (84)",
+        duration: "Travail en hauteur",
+        work: "Nettoyage de palmiers (Washingtonia) : retrait des palmes sèches et des hampes florales, lissage du stipe et remise en forme de la couronne. Intervention à l'échelle et évacuation des palmes.",
+        price: "Sur devis",
+        creditPrice: "−50 % crédit d'impôt",
+        legend: "Palmiers nettoyés et remis en valeur.",
+        serviceType: "elagage",
+        category: "elagage"
+      },
+      {
+        title: "Taille de Mûrier Platane en Tête",
+        img: "assets/images/real_taille_murier.jpg",
+        badge: "🌳 Élagage",
+        loc: "Vaucluse (84)",
+        duration: "Taille de forme",
+        work: "Taille en tête (rideau) d'un mûrier platane : recépage des rejets sur les têtes de charpentières pour reformer un ombrage dense à la belle saison. Ramassage et évacuation des bois de taille.",
+        price: "Sur devis",
+        creditPrice: "−50 % crédit d'impôt",
+        legend: "Mûrier platane taillé en tête pour un ombrage maîtrisé.",
+        serviceType: "elagage",
+        category: "elagage"
+      },
+      {
+        title: "Chantier en Vidéo : Avant / Après",
+        img: "assets/images/real_cypres_colonnes_apres.jpg",
+        video: "assets/videos/real_avant_apres.mp4",
+        badge: "🎥 Vidéo",
+        loc: "Vaucluse (84)",
+        duration: "Vidéo du chantier",
+        work: "Découvrez en vidéo le déroulé d'un chantier de taille et le résultat avant / après en mouvement.",
+        price: "Sur devis",
+        creditPrice: "−50 % crédit d'impôt",
+        legend: "Cliquez sur ▶ pour lancer la vidéo du chantier.",
+        serviceType: "taille-haie",
+        category: "haie"
       }
     ];
 
@@ -5894,8 +6010,35 @@
       if (!proj) return;
       currentProjectIndex = index;
       
-      document.getElementById('lightbox-img').src = proj.img;
-      document.getElementById('lightbox-img').alt = proj.title;
+      // ── Sélection du mode média : vidéo / avant-après / image simple ──
+      const lbSingle = document.getElementById('lightbox-single');
+      const lbBa = document.getElementById('lightbox-ba');
+      const lbVideoWrap = document.getElementById('lightbox-video-wrap');
+      const lbVideo = document.getElementById('lightbox-video');
+      if (lbVideo) { try { lbVideo.pause(); } catch (e) {} }
+      lbSingle.classList.add('hidden');
+      lbBa.classList.add('hidden');
+      lbVideoWrap.classList.add('hidden');
+
+      if (proj.video) {
+        lbVideoWrap.classList.remove('hidden');
+        if (lbVideo && lbVideo.getAttribute('src') !== proj.video) {
+          lbVideo.setAttribute('src', proj.video);
+          lbVideo.setAttribute('poster', proj.img || '');
+        }
+      } else if (proj.imgBefore) {
+        lbBa.classList.remove('hidden');
+        document.getElementById('lightbox-ba-after').src = proj.img;
+        document.getElementById('lightbox-ba-after').alt = 'Après — ' + proj.title;
+        document.getElementById('lightbox-ba-before').src = proj.imgBefore;
+        document.getElementById('lightbox-ba-before').alt = 'Avant — ' + proj.title;
+        document.getElementById('lightbox-ba-resize').style.width = '50%';
+        document.getElementById('lightbox-ba-handle').style.left = '50%';
+      } else {
+        lbSingle.classList.remove('hidden');
+        document.getElementById('lightbox-img').src = proj.img;
+        document.getElementById('lightbox-img').alt = proj.title;
+      }
       document.getElementById('lightbox-title').textContent = proj.title;
       document.getElementById('lightbox-badge').textContent = proj.badge;
       document.getElementById('lightbox-loc').innerHTML = `<i class="fa-solid fa-location-dot"></i> ${proj.loc}`;
@@ -5953,6 +6096,82 @@
         }
       });
     };
+
+    // ─── INJECTION DES NOUVELLES RÉALISATIONS (photos réelles Andrés) ───
+    // Les 6 premières cartes sont statiques (HTML) ; les suivantes sont générées
+    // depuis galleryProjects pour éviter la duplication et rester alignées sur openLightbox().
+    (function injectExtraRealisations(){
+      const grid = document.getElementById('gallery-grid');
+      if (!grid) return;
+      const STATIC_CARDS = 6;
+      const esc = (s) => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      for (let i = STATIC_CARDS; i < galleryProjects.length; i++) {
+        const p = galleryProjects[i];
+        const card = document.createElement('div');
+        card.className = 'gallery-item ' + (p.category || '') + ' bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-slate-100 flex flex-col justify-between group cursor-pointer';
+        card.setAttribute('onclick', 'openLightbox(' + i + ')');
+        const cornerBadge = p.video
+          ? '<span class="absolute top-3 right-3 bg-red-600 text-white font-extrabold text-[11px] px-3 py-1 rounded-full shadow flex items-center gap-1"><i class="fa-solid fa-play"></i> Vidéo</span>'
+          : (p.imgBefore ? '<span class="absolute top-3 right-3 bg-brand-vivid text-white font-extrabold text-[11px] px-3 py-1 rounded-full shadow flex items-center gap-1"><i class="fa-solid fa-arrows-left-right"></i> Avant / Après</span>' : '');
+        const priceLine = (p.price === 'Sur devis')
+          ? '<div class="flex items-center justify-between p-3 bg-emerald-50 rounded-2xl border border-emerald-200"><div><span class="text-[10px] text-slate-500 font-bold block uppercase">Tarif</span><span class="text-base font-extrabold text-slate-700">Sur devis</span></div><div class="text-right"><span class="text-[10px] text-emerald-800 font-extrabold block uppercase">Crédit d\'impôt</span><span class="text-xl font-extrabold text-brand-vivid">−50 %</span></div></div>'
+          : '<div class="flex items-center justify-between p-3 bg-emerald-50 rounded-2xl border border-emerald-200"><div><span class="text-[10px] text-slate-500 font-bold block uppercase">Montant Facturé</span><span class="text-base font-extrabold text-slate-700">' + esc(p.price) + '</span></div><div class="text-right"><span class="text-[10px] text-emerald-800 font-extrabold block uppercase">Reste Unipros (50%)</span><span class="text-xl font-extrabold text-brand-vivid">' + esc(p.creditPrice) + '</span></div></div>';
+        card.innerHTML =
+          '<div>' +
+            '<div class="aspect-[4/3] overflow-hidden relative bg-slate-100">' +
+              '<img src="' + esc(p.img) + '" alt="' + esc(p.title) + '" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />' +
+              '<span class="absolute top-3 left-3 bg-brand-green/90 text-white font-extrabold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider shadow">' + esc(p.badge) + '</span>' +
+              cornerBadge +
+              '<span class="absolute bottom-3 right-3 bg-white/95 text-brand-green font-extrabold text-xs px-2.5 py-1 rounded-lg shadow flex items-center gap-1"><i class="fa-solid fa-magnifying-glass-plus text-brand-vivid"></i> Agrandir</span>' +
+            '</div>' +
+            '<div class="p-6 space-y-3">' +
+              '<div class="flex justify-between items-center text-xs">' +
+                '<span class="font-extrabold text-brand-vivid"><i class="fa-solid fa-location-dot mr-1"></i> ' + esc(p.loc) + '</span>' +
+                '<span class="text-slate-500 font-bold">' + esc(p.duration) + '</span>' +
+              '</div>' +
+              '<h4 class="font-serif text-xl font-extrabold text-brand-green leading-snug">' + esc(p.title) + '</h4>' +
+              '<div class="p-3 bg-brand-light rounded-xl border border-brand-accent/15 text-xs text-brand-charcoal space-y-1 font-medium">' +
+                '<span class="font-bold text-brand-green block">Travaux réalisés :</span><p>' + esc(p.work) + '</p>' +
+              '</div>' +
+              '<p class="text-xs text-slate-600 italic"><strong>Légende :</strong> ' + esc(p.legend) + '</p>' +
+            '</div>' +
+          '</div>' +
+          '<div class="p-6 pt-0 border-t border-slate-100 mt-2">' + priceLine + '</div>';
+        grid.appendChild(card);
+      }
+    })();
+
+    // ─── CURSEUR AVANT/APRÈS DE LA LIGHTBOX ───
+    (function initLightboxBASlider(){
+      const slider = document.getElementById('lightbox-ba');
+      const resize = document.getElementById('lightbox-ba-resize');
+      const handle = document.getElementById('lightbox-ba-handle');
+      if (!slider || !resize || !handle) return;
+      let dragging = false;
+      const adjust = (clientX) => {
+        const rect = slider.getBoundingClientRect();
+        let pct = ((clientX - rect.left) / rect.width) * 100;
+        pct = Math.max(0, Math.min(100, pct));
+        handle.style.left = pct + '%';
+        resize.style.width = pct + '%';
+      };
+      handle.addEventListener('mousedown', (e) => { dragging = true; e.preventDefault(); });
+      window.addEventListener('mouseup', () => { dragging = false; });
+      window.addEventListener('mousemove', (e) => { if (dragging) adjust(e.clientX); });
+      handle.addEventListener('touchstart', () => { dragging = true; }, { passive: true });
+      window.addEventListener('touchend', () => { dragging = false; });
+      window.addEventListener('touchmove', (e) => { if (dragging && e.touches[0]) adjust(e.touches[0].clientX); }, { passive: true });
+      slider.addEventListener('click', (e) => { adjust(e.clientX); });
+    })();
+
+    // Met la vidéo en pause quand on ferme la lightbox.
+    (function(){
+      const gm = document.getElementById('gallery-modal');
+      if (gm) gm.addEventListener('close', () => {
+        const v = document.getElementById('lightbox-video');
+        if (v) { try { v.pause(); } catch (e) {} }
+      });
+    })();
 
     // ─── GOOGLE MAPS CONNECTION & POSTAL CODE (PDF Página 3) ───
     const postalInput = document.getElementById('postal-code');
