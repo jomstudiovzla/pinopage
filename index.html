@@ -1444,6 +1444,10 @@
           <input type="checkbox" id="adm-msg-send-inapp" checked class="rounded text-emerald-600 focus:ring-emerald-500" />
           <span><i class="fa-solid fa-mobile-screen text-blue-600 mr-1"></i> Publier la notification dans l'Espace Client sécurisé</span>
         </label>
+        <label class="flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+          <input type="checkbox" id="adm-msg-include-signature" checked class="rounded text-emerald-600 focus:ring-emerald-500" />
+          <span><i class="fa-solid fa-signature text-emerald-600 mr-1"></i> Inclure ma signature (Andrés · WhatsApp · Instagram)</span>
+        </label>
       </div>
 
       <div class="flex items-center gap-3 pt-3 border-t border-slate-200">
@@ -12750,6 +12754,7 @@ Site web : ${window.pinoSiteUrl()}`;
       const message = (document.getElementById('adm-msg-body')?.value || '').trim();
       const sendEmail = document.getElementById('adm-msg-send-email')?.checked;
       const sendInApp = document.getElementById('adm-msg-send-inapp')?.checked;
+      const includeSignature = document.getElementById('adm-msg-include-signature')?.checked !== false;
       const templateType = document.getElementById('adm-msg-template-select')?.value || 'custom';
 
       if (!email && sendEmail) {
@@ -12786,7 +12791,7 @@ Site web : ${window.pinoSiteUrl()}`;
         // Acuse de lectura personalizado al cliente por Resend (Worker) + enlaces WhatsApp/Instagram.
         try {
           if (window.PinoMail && typeof window.PinoMail.notify === 'function') {
-            window.PinoMail.notify('admin_reply', { email: email, name: name, message: message });
+            window.PinoMail.notify('admin_reply', { email: email, name: name, message: message, signature: includeSignature });
           }
         } catch (e2) {}
 
