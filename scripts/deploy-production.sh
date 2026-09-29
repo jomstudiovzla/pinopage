@@ -9,12 +9,18 @@ set -euo pipefail
 
 PROJECT_ID="pagepino-e8e97"
 SITE_URL="${PINO_SITE_URL:-https://pinoespacesverts.online}"
+# Cuenta con acceso al proyecto. Se pasa explícitamente con --account porque, al
+# ejecutarse dentro de pnpm (shell no interactivo), la cuenta activa por directorio
+# no siempre se resuelve. Override: FIREBASE_ACCOUNT=otra@cuenta pnpm deploy:production
+FIREBASE_ACCOUNT="${FIREBASE_ACCOUNT:-pino.spacesverts@gmail.com}"
+# Los flags van DESPUÉS del subcomando (posición fiable en firebase-tools).
+FB_ARGS="--account $FIREBASE_ACCOUNT --non-interactive"
 
-echo "0/7 — Verificando acceso al proyecto $PROJECT_ID..."
-if ! firebase projects:list 2>/dev/null | grep -q "$PROJECT_ID"; then
-  echo "⛔ La cuenta de Firebase CLI activa no tiene acceso a $PROJECT_ID."
-  echo "   Ejecuta: firebase login:add   (con la cuenta propietaria del proyecto)"
-  echo "   y luego:  firebase login:use <esa-cuenta>"
+echo "0/7 — Verificando acceso al proyecto $PROJECT_ID (cuenta: $FIREBASE_ACCOUNT)..."
+if ! firebase projects:list --account "$FIREBASE_ACCOUNT" 2>&1 | grep -q "$PROJECT_ID"; then
+  echo "⛔ La cuenta $FIREBASE_ACCOUNT no tiene acceso a $PROJECT_ID."
+  echo "   Añádela con: firebase login:add  (inicia sesión con esa cuenta),"
+  echo "   o exporta otra: FIREBASE_ACCOUNT=tu@cuenta pnpm deploy:production"
   exit 1
 fi
 
@@ -33,11 +39,11 @@ echo "4/7 — Limpiando build..."
 bash scripts/cleanup-preprod.sh
 
 echo "5/7 — Desplegando reglas de base de datos..."
-firebase deploy --only database --project "$PROJECT_ID"
+firebase deploy --only database --project "$PROJECT_ID" $FB_ARGS
 
 echo "6/7 — Desplegando Functions + Hosting..."
-if firebase deploy --only functions --project "$PROJECT_ID"; then
-  firebase deploy --only hosting --project "$PROJECT_ID"
+if firebase deploy --only functions --project "$PROJECT_ID" $FB_ARGS; then
+  firebase deploy --only hosting --project "$PROJECT_ID" $FB_ARGS
 else
   echo "⚠️  Functions no desplegadas (¿plan Spark?). Publicando Hosting sin /api..."
   node -e '
@@ -45,7 +51,7 @@ else
     c.hosting.rewrites = c.hosting.rewrites.filter((r) => !r.function);
     require("fs").writeFileSync("firebase.static.json", JSON.stringify(c, null, 2));
   '
-  firebase deploy --only hosting --project "$PROJECT_ID" --config firebase.static.json
+  firebase deploy --only hosting --project "$PROJECT_ID" --config firebase.static.json $FB_ARGS
   rm -f firebase.static.json
 fi
 
