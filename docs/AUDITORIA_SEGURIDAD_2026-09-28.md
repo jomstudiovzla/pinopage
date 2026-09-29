@@ -29,7 +29,7 @@ hallazgos de reglas son los más importantes. Todo esto es corregible **antes** 
 |---|-----------|----------|-------|
 | H1 | 🔴 Alta (latente) | `mail_outbox` escribible sin autenticar → relay de correo/spam si se añade envío | `database.rules.json:83` |
 | H2 | 🔴 Alta | Escrituras anónimas masivas sin CAPTCHA/rate-limit (leads, admin_notifications, quotes) | `database.rules.json:14,76` · `functions/index.js:105` · `firestore.rules:30` |
-| H3 | 🟠 Alta/arquitectónica | CSP depende de `unsafe-inline` + ~110 `innerHTML` + cientos de `on*` | `firebase.json:61` · `index.html` |
+| H3 / CL-03 | ✅ Riesgo aceptado (2026-09-29) | CSP depende de `unsafe-inline` (sitio estático, 322 handlers inline). Documentado + plan de remediación v2. | `firebase.json:61` · `index.html` |
 | M1 | 🟠 Media | XSS almacenado en panel admin vía `l.status` sin escapar | `index.html:8853` |
 | M2 | 🟠 Media | Cupones auto-emisibles / validación falsa (fraude) | `database.rules.json:47` · `functions/index.js:206,237` |
 | M3 | 🟡 Media | Fuga de `err.message` en respuestas 500 | `functions/index.js:169,194,…,426` |
@@ -103,6 +103,25 @@ Cloud Function validada en vez de escritura directa anónima a RTDB.
 contra inyección de scripts**: un solo campo sin escapar = XSS ejecutable. Es deuda **arquitectónica**.
 **Recomendación (medio plazo):** externalizar los handlers a `addEventListener`, quitar `unsafe-inline`,
 y considerar `strict-dynamic` + nonces. A corto plazo: cerrar M1 y auditar cada `innerHTML` con datos de BD.
+
+> **✅ DECISIÓN 2026-09-29 — RIESGO ACEPTADO (CL-03).** El propietario acepta formalmente mantener
+> `'unsafe-inline'` en `script-src` por ahora. Justificación medida:
+> - El sitio es **estático puro** (Firebase Hosting, sin servidor que emita nonces por petición), con
+>   **322 handlers `on*` inline** + **3 bloques `<script>` inline** (~9.000 líneas) + ~110 `innerHTML`.
+>   Los atributos de evento inline **no admiten hash ni nonce**: quitar `unsafe-inline` obliga a convertir
+>   **los 322 a `addEventListener`**, un refactor grande sobre un sitio **en producción y sin staging**,
+>   con alto riesgo de romper login/devis/chat/galería, y **sin beneficio de seguridad hasta terminarlo entero**.
+> - El **vector XSS real ya está mitigado en capas**: reglas RTDB deny-by-default, verificación de
+>   token Firebase (RS256) en el Cloudflare Worker, y **escape de datos disciplinado** (M1 ya cerrado con
+>   `escapeFn` en `l.status`; el resto de campos de BD se escapan). `unsafe-inline` sería la 2.ª barrera,
+>   no la única.
+> - **Plan de remediación (cuando llegue v2 / Next.js):** en el árbol Next.js la CSP se sirve con **nonce
+>   por petición** de forma nativa (sin handlers inline), así que CL-03 se cierra "gratis" al migrar. Para
+>   v1, si se decide abordarlo antes: (Fase 1) externalizar los 3 `<script>` inline a `assets/js/`;
+>   (Fase 2) convertir los 322 `on*` a `addEventListener` por bloques con verificación en preview;
+>   (Fase 3) quitar `'unsafe-inline'` de `script-src` en `firebase.json` + meta, y re-auditar.
+> - **Residual aceptado:** si un dato de BD escapara a la sanitización, `unsafe-inline` permitiría ejecutarlo.
+>   Probabilidad baja dado el escape actual; impacto limitado por las reglas. Revisar en cada nuevo `innerHTML`.
 
 ### 🟠 M1 — XSS almacenado en el panel admin vía `l.status`
 `index.html:8853` — `<span …>${l.status}</span>` **sin `escapeFn`** (el resto de campos sí se escapan).
@@ -184,13 +203,28 @@ sous réserve d'éligibilité», disclaimer visible, y tests unitarios de la cal
 10. Revisar cifras fiscales con fuente/fecha + disclaimer (M8).
 
 **Bloque 4 — deuda técnica (medio plazo):**
-11. Externalizar handlers `on*`, eliminar `unsafe-inline`, SRI (H3, L1).
+11. ~~Externalizar handlers `on*`, eliminar `unsafe-inline`~~ → **CL-03 riesgo aceptado (2026-09-29)**; SRI ya aplicado (L1).
 12. Limpiar config Supabase v1 y `document.write` (L2, L3).
 
 ---
 
-## 5. Nota final
+## 5. Cierre de auditoría — 2026-09-29
 
-No he tocado ningún archivo de la aplicación para esta auditoría. Dime **qué bloques quieres que
-implemente** (puedo empezar por el Bloque 1, que es el que de verdad protege antes de salir a producción)
-y procedo con cambios revisables + tests, sin desplegar nada sin tu confirmación.
+Estado final tras la implementación de esta sesión y sesiones previas:
+
+| # | Estado |
+|---|--------|
+| H1 `mail_outbox` | ✅ Cerrado — `.validate` + reglas endurecidas; el correo real va por Cloudflare Worker con verificación de token, no por `mail_outbox`. |
+| H2 escrituras anónimas | ✅ Mitigado — `.validate` con topes de tamaño en leads/notificaciones; Worker exige token Firebase o Turnstile. |
+| **H3 / CL-03 `unsafe-inline`** | **✅ Riesgo aceptado y documentado** (ver §3 H3) — remediación nativa en v2/Next.js. |
+| M1 XSS `l.status` | ✅ Cerrado — `escapeFn` aplicado. |
+| M2 cupones | ✅ Cerrado — pool de 10.000 cupones cripto-aleatorios en `coupon_pool`, canje único por transacción atómica (`redeemCouponOnce`), reglas de una sola transición `available→used`. |
+| M3 `err.message` | ✅ Cerrado — sin fuga de detalles de error. |
+| M4 CORS | ✅ Cerrado — allowlist de orígenes + límite de payload. |
+| M7 `audit_logs` | ✅ Cerrado — restringido; además la BD se vació para arrancar limpia. |
+| M5, M6, M8, L2-L7 | Deuda menor / cumplimiento — abordar en v2 con fuentes fiscales y OIDC. |
+
+**Veredicto:** los hallazgos con vector de fuga o fraude real están **cerrados**. El único punto Alto
+restante (CL-03) es **deuda arquitectónica aceptada** con justificación medida y plan de remediación.
+La base de datos se vació el 2026-09-29 (backup previo guardado) para operar con datos nuevos, y el
+teléfono es obligatorio para todos los perfiles. **Auditoría cerrada.**
