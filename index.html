@@ -1344,6 +1344,12 @@
         </div>
       </div>
 
+      <!-- Historique de conversation (Andrés voit TOUT : ses messages + les réponses du client) -->
+      <div id="adm-msg-thread-wrap" class="hidden">
+        <label class="block text-xs font-bold text-slate-700 mb-1"><i class="fa-solid fa-clock-rotate-left text-emerald-600 mr-1"></i> Historique de la conversation</label>
+        <div id="adm-msg-thread" class="max-h-56 overflow-y-auto space-y-2 p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs"></div>
+      </div>
+
       <input type="hidden" id="adm-msg-client-email" />
       <input type="hidden" id="adm-msg-client-name" />
       <input type="hidden" id="adm-msg-client-phone" />
@@ -7886,7 +7892,8 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
         try {
           const msgRes = await PinoDB.fetchClientMessages(email);
           if (msgRes.ok && Array.isArray(msgRes.data)) {
-            directMessages = msgRes.data;
+            // Le client ne voit QUE les messages d'Andrés (pas ses propres réponses).
+            directMessages = (msgRes.data || []).filter(m => (m.from || '').toLowerCase() !== 'client');
           }
         } catch(e) {}
       }
@@ -12418,6 +12425,7 @@ Site web : ${window.pinoSiteUrl()}`;
         if (emailDisplay) emailDisplay.textContent = 'Veuillez choisir un client ci-dessus';
         if (phoneDisplay) phoneDisplay.innerHTML = '<span class="text-slate-400">—</span>';
         updateAdminMessageGreeting('Client');
+        loadAdminConversationThread('');
         return;
       }
 
@@ -12439,6 +12447,45 @@ Site web : ${window.pinoSiteUrl()}`;
       }
 
       updateAdminMessageGreeting(clientName);
+      loadAdminConversationThread(clientEmail);
+    };
+
+    // Historial de conversación con un cliente: Andrés ve SUS mensajes + los del cliente.
+    window.loadAdminConversationThread = async (clientEmail) => {
+      const wrap = document.getElementById('adm-msg-thread-wrap');
+      const box = document.getElementById('adm-msg-thread');
+      if (!wrap || !box) return;
+      if (!clientEmail) { wrap.classList.add('hidden'); box.innerHTML = ''; return; }
+      wrap.classList.remove('hidden');
+      box.innerHTML = '<div class="text-center text-slate-400 py-2"><i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Chargement…</div>';
+      let msgs = [];
+      try {
+        if (window.PinoDB && typeof PinoDB.fetchClientMessages === 'function') {
+          const r = await PinoDB.fetchClientMessages(clientEmail);
+          if (r && Array.isArray(r.data)) msgs = r.data;
+        }
+      } catch (e) {}
+      // fetchClientMessages devuelve del más reciente al más antiguo -> invertir a orden cronológico.
+      msgs = msgs.slice().reverse();
+      if (!msgs.length) {
+        box.innerHTML = '<div class="text-center text-slate-400 py-2">Aucun message pour le moment.</div>';
+        return;
+      }
+      const esc = (typeof escapeHtml === 'function') ? escapeHtml : (s) => String(s || '');
+      box.innerHTML = msgs.map((m) => {
+        const fromClient = (m.from || '').toLowerCase() === 'client';
+        const when = m.created_at ? new Date(m.created_at).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+        const who = fromClient ? 'Client' : 'Andrés';
+        const align = fromClient ? 'items-start' : 'items-end';
+        const bubble = fromClient ? 'bg-blue-50 border-blue-200 text-blue-950' : 'bg-emerald-50 border-emerald-200 text-emerald-950';
+        return `<div class="flex flex-col ${align}">
+          <div class="max-w-[85%] px-3 py-2 rounded-2xl border ${bubble}">
+            <div class="text-[10px] font-bold opacity-70 mb-0.5">${who} · ${esc(when)}</div>
+            <div class="whitespace-pre-line leading-relaxed">${esc(m.message || '')}</div>
+          </div>
+        </div>`;
+      }).join('');
+      box.scrollTop = box.scrollHeight;
     };
 
     window.handleManualRecipientInput = () => {
@@ -12597,6 +12644,12 @@ Site web : ${window.pinoSiteUrl()}`;
             message: text
           });
         }
+        // Guarda el mensaje del cliente en el hilo (para que Andrés vea el historial completo).
+        try {
+          if (window.PinoDB && typeof PinoDB.saveClientThreadMessage === 'function') {
+            await PinoDB.saveClientThreadMessage(u.email, text);
+          }
+        } catch (e4) {}
         // Aviso por correo en tiempo real a Andrés (+ copia JOM) vía Resend (Worker).
         try {
           if (window.PinoMail && typeof window.PinoMail.notify === 'function') {

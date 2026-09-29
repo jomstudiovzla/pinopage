@@ -1043,6 +1043,31 @@ Site web : ${siteUrl()}`;
     return () => msgRef.off('value', listener);
   }
 
+  // Guarda un mensaje SALIENTE del cliente en su propio hilo (from: 'client').
+  // El cliente puede escribir en su propio nodo (reglas clients_records/$email/messages).
+  // Andrés ve el hilo completo; la vista del cliente filtra para mostrar solo lo de Andrés.
+  async function saveClientThreadMessage(clientEmail, message) {
+    if (!clientEmail || !message) return { ok: false };
+    const sanitizedEmail = clientEmail.trim().toLowerCase().replace(/[.#$\[\]]/g, '_');
+    const db = rtdb();
+    if (!db) return { ok: false };
+    try {
+      const msgId = 'cmsg_' + Date.now();
+      await db.ref(`clients_records/${sanitizedEmail}/messages/${msgId}`).set({
+        id: msgId,
+        subject: 'Message du client',
+        message: String(message).slice(0, 2000),
+        from: 'client',
+        client_email: clientEmail,
+        created_at: new Date().toISOString()
+      });
+      return { ok: true };
+    } catch (err) {
+      log('saveClientThreadMessage:rtdb', err);
+      return { ok: false, error: (err && err.code) || 'denied' };
+    }
+  }
+
   /* ─────────────────────────────────────────────────────────
    *  NOTIFICATIONS — Écoute et gestion temps réel pour les clients
    * ───────────────────────────────────────────────────────── */
@@ -3075,6 +3100,7 @@ Site web : ${siteUrl()}`;
     notifyClientStatusChange,
     fetchClientMessages,
     listenClientMessages,
+    saveClientThreadMessage,
     fetchCompletePersonalData,
     anonymizeClientAccount,
   };
