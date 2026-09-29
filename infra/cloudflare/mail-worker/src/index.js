@@ -128,19 +128,24 @@ function socialLinksHtml(env) {
   return `<p>En attendant, vous pouvez aussi nous joindre directement : ${parts.join(" · ")}.</p>`;
 }
 
-// Correo al CLIENTE cuando Andrés (admin) le responde / lee su mensaje.
+// Correo al CLIENTE con el mensaje REAL de Andrés (+ firma opcional).
+// data.message = texto escrito por Andrés ; data.signature === false para omitir la firma.
 function adminReplyBody(first, data, env) {
   const salut = first ? `Bonjour ${esc(first)},` : "Bonjour,";
+  const corps = data.message
+    ? esc(data.message).replace(/\n/g, "<br>")
+    : "Nous avons bien lu votre message et revenons vers vous dans les meilleurs délais.";
+  const signature = (data.signature === false) ? "" : `
+      <hr style="border:none;border-top:1px solid #e2e8f0;margin:18px 0">
+      <p style="margin:0;font-weight:700;color:#047857">Andrés Pino</p>
+      <p style="margin:2px 0 0;color:#64748b;font-size:13px">Pino Espaces Verts · Vaucluse (84)</p>
+      ${socialLinksHtml(env)}`;
   return `
     <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a;line-height:1.6;font-size:14px">
       <p style="font-size:18px;font-weight:700;color:#047857">🌲 Pino Espaces Verts</p>
       <p>${salut}</p>
-      <p>Nous avons bien <strong>lu votre message</strong>. Andrés Pino le prend en charge personnellement et
-         vous répondra dans les <strong>meilleurs délais</strong> ; votre devis / réponse vous parviendra sous peu.</p>
-      ${data.message ? `<p style="color:#475569;border-left:3px solid #047857;padding-left:10px">« ${esc(data.message)} »</p>` : ""}
-      ${socialLinksHtml(env)}
-      <p>Merci de votre confiance et à très vite.</p>
-      <p style="color:#64748b;font-size:12px">Andrés Pino · Pino Espaces Verts · Vaucluse (84) · ${esc(env.ADMIN_EMAIL.split(",")[0] || "")}</p>
+      <div style="white-space:pre-line">${corps}</div>
+      ${signature}
     </div>`;
 }
 
@@ -296,6 +301,8 @@ export default {
     const adminList = (env.ADMIN_EMAIL || "").split(",").map((e) => ({ email: e.trim(), name: "Andrés — Pino Espaces Verts" })).filter((a) => a.email);
     const jomCc = env.JOM_EMAIL ? [{ email: env.JOM_EMAIL, name: "JOM Studio" }] : [];
     const adminEmails = (env.ADMIN_EMAIL || "").split(",").map((e) => e.trim().toLowerCase());
+    // JOM Studio es también administrador (puede disparar el acuse admin_reply).
+    if (env.JOM_EMAIL && adminEmails.indexOf(env.JOM_EMAIL.toLowerCase()) === -1) adminEmails.push(env.JOM_EMAIL.toLowerCase());
     const results = { client: false, admin: false };
 
     try {
@@ -320,7 +327,8 @@ export default {
           html: clientMessageBody(data, ident, env)
         });
       } else {
-        // login / signup / devis / interaction : correo al cliente + a Andrés (+ copia JOM).
+        // Correo al cliente siempre. A Andrés SOLO en eventos importantes (no en cada login/
+        // interaction, que saturaban su bandeja) : signup, devis, etc.
         if (clientEmail) {
           results.client = await sendEmail(env, {
             to: [{ email: clientEmail, name: data.name || ident.name || first || "Client" }],
@@ -328,12 +336,15 @@ export default {
             html: clientEmailBody(event, first, data, env)
           });
         }
-        results.admin = await sendEmail(env, {
-          to: adminList,
-          cc: jomCc,
-          subject: `[Pino] ${EVENT_LABELS[event] || event} — ${data.name || ident.name || clientEmail || "client"}`,
-          html: adminEmailBody(event, data, ident, env)
-        });
+        const noAdminMail = (event === "login" || event === "interaction");
+        if (!noAdminMail) {
+          results.admin = await sendEmail(env, {
+            to: adminList,
+            cc: jomCc,
+            subject: `[Pino] ${EVENT_LABELS[event] || event} — ${data.name || ident.name || clientEmail || "client"}`,
+            html: adminEmailBody(event, data, ident, env)
+          });
+        }
       }
     } catch (e) {
       return new Response(JSON.stringify({ error: "send_failed" }), { status: 502, headers: { "content-type": "application/json", ...cors } });

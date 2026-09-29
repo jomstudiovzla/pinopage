@@ -17,7 +17,7 @@ routes = [
 FIREBASE_PROJECT_ID = "pagepino-e8e97"
 # Destinatarios de los avisos (ambas cuentas de Andrés, separadas por coma).
 ADMIN_EMAIL = "pino.espacesverts@gmail.com,pino.spacesverts@gmail.com"
-JOM_EMAIL = "martinezoliverosj@gmail.com"
+JOM_EMAIL = "jomstudiovzla@gmail.com"
 SENDER_NAME = "Pino Espaces Verts"
 # Remitente profesional (dominio propio). Requiere dominio verificado en Resend (SPF/DKIM).
 SENDER_EMAIL = "andresp@pinoespacesverts.online"

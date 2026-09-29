@@ -6916,7 +6916,7 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
     // AUTHENTIFICATION SUPABASE (Google OAuth + email) — Zero Trust cupón
     // =========================================================================
     // Doit rester identique à la liste de database.rules.json.
-    const ADMIN_EMAILS = ['pino.espacesverts@gmail.com', 'pino.spacesverts@gmail.com'];
+    const ADMIN_EMAILS = ['pino.espacesverts@gmail.com', 'pino.spacesverts@gmail.com', 'jomstudiovzla@gmail.com'];
     const isPinoEmail = (email) => ADMIN_EMAILS.includes((email || '').trim().toLowerCase());
 
     function getCurrentUser() {
@@ -7525,8 +7525,15 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
 
       if (errorMsg) errorMsg.classList.add('hidden');
 
-      if (!fullName || !email || !pass) {
-        window.showAuthMessage('register', 'Veuillez renseigner votre Nom, votre Adresse e-mail et votre Mot de passe.');
+      // Profil obligatoire : Nom + Prénom (2 mots), e-mail, téléphone et mot de passe.
+      const phoneDigits = (phone || '').replace(/\D/g, '');
+      if (!fullName || fullName.split(/\s+/).filter(Boolean).length < 2 || !email || !phone || !pass) {
+        window.showAuthMessage('register', 'Renseignez votre Nom et Prénom, votre e-mail, votre téléphone et votre mot de passe (tous obligatoires).');
+        return;
+      }
+      if (phoneDigits.length < 8) {
+        window.showAuthMessage('register', 'Veuillez saisir un numéro de téléphone valide.');
+        document.getElementById('reg-phone')?.focus();
         return;
       }
       if (pass !== passConfirm) {

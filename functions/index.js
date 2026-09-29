@@ -44,7 +44,8 @@ app.use(express.json({ limit: "256kb" }));
 // List of allowed admin emails (fallback validation alongside custom claims)
 const ADMIN_EMAILS = [
   "pino.espacesverts@gmail.com",
-  "pino.spacesverts@gmail.com"
+  "pino.spacesverts@gmail.com",
+  "jomstudiovzla@gmail.com"
 ];
 
 // Middleware: Authenticated User Required
