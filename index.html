@@ -9637,6 +9637,7 @@ Site web : ${window.pinoSiteUrl()}`;
 
     let _activeClientNotifListener = null;
     let _activeClientQuotesListener = null;
+    let _activeClientMessagesListener = null;
     let _activeClientNotifEmail = null;
     let _seenNotifIds = new Set();
 
@@ -9648,6 +9649,10 @@ Site web : ${window.pinoSiteUrl()}`;
       if (_activeClientQuotesListener) {
         try { _activeClientQuotesListener(); } catch(e) {}
         _activeClientQuotesListener = null;
+      }
+      if (_activeClientMessagesListener) {
+        try { _activeClientMessagesListener(); } catch(e) {}
+        _activeClientMessagesListener = null;
       }
       _activeClientNotifEmail = null;
       const badge = document.getElementById('nav-auth-notif-badge');
@@ -9690,6 +9695,18 @@ Site web : ${window.pinoSiteUrl()}`;
           }
           renderClientQuotes(normEmail);
           renderClientInvoices(normEmail);
+        });
+      }
+
+      // 3. Écouter le fil de messages d'Andrés en temps réel (indépendamment des
+      //    notifications) : le texte du message s'affiche en direct sans délai.
+      if (window.PinoDB && typeof PinoDB.listenClientMessages === 'function') {
+        _activeClientMessagesListener = PinoDB.listenClientMessages(normEmail, () => {
+          if (!getCurrentUser()) {
+            window.stopClientNotificationListeners();
+            return;
+          }
+          renderClientQuotes(normEmail);
         });
       }
     };
