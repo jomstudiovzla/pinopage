@@ -100,9 +100,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   
   <!-- Firebase Compat SDK v10 (App, Auth, Realtime Database) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" integrity="sha384-sEVIly94UBRLKWdkYoPpSG7GD/e79YHMrxVyZaOk712Ga7+EAw6w1EFi+xBzBdd+" crossorigin="anonymous"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" integrity="sha384-EkqK+ezBWJuvO3hfrSx2iVqr3YQbhmnzn8kPhOpBZ+0GMVU5oGSgptwIu8D84HjE" crossorigin="anonymous"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js" integrity="sha384-1/m+A1jVWbD3yiK3/vtFvm1+LjK1WLpSoDY+Kaxppwn/yP9BVSgdHTNQVOjrzUO5" crossorigin="anonymous"></script>
   <script src="assets/js/firebase-config.js?v=2"></script>
   <script src="assets/js/pino-mail.js?v=2" defer></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
@@ -118,8 +118,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
   <!-- jsPDF & html2pdf — génération et téléchargement de PDF universel (admin & client) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha384-Yv5O+t3uE3hunW8uyrbpPW3iw6/5/Y7HitWJBLgqfMoA36NogMmy+8wWZMpn3HWc" crossorigin="anonymous"></script>
 
   <style>
     /* ── GARANTIE ABSOLUE ZÉRO FLASH & ZÉRO PRÉVISUALISATION AU DÉMARRAGE ── */
@@ -855,7 +855,7 @@
       </div>
 
       <!-- Formulaire Connexion E-mail & Mot de passe -->
-      <form onsubmit="handleLoginSubmit(event)" class="space-y-3">
+      <form method="post" action="#" onsubmit="handleLoginSubmit(event)" class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1" for="login-email">Adresse e-mail</label>
           <input type="email" id="login-email" required autocomplete="username" placeholder="nom@exemple.com"
@@ -907,7 +907,7 @@
       </div>
 
       <!-- Formulaire d'inscription -->
-      <form onsubmit="handleRegisterSubmit(event)" class="space-y-3">
+      <form method="post" action="#" onsubmit="handleRegisterSubmit(event)" class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1" for="reg-fullname">Nom et Prénom *</label>
           <input type="text" id="reg-fullname" required placeholder="Ex : Jesus Martinez ou Jean Dupont"
@@ -1541,7 +1541,7 @@
       </button>
     </div>
 
-    <form id="client-set-password-form" onsubmit="handleClientSetPasswordSubmit(event)" class="p-6 space-y-4 overflow-y-auto flex-1">
+    <form method="post" action="#" id="client-set-password-form" onsubmit="handleClientSetPasswordSubmit(event)" class="p-6 space-y-4 overflow-y-auto flex-1">
       <div class="text-center space-y-1">
         <h4 class="font-bold text-slate-900 text-sm">Bienvenue chez Pino Espaces Verts</h4>
         <p class="text-xs text-slate-600">Andrés Pino a préparé votre espace personnel. Veuillez définir votre mot de passe confidentiel pour y accéder.</p>
@@ -7211,6 +7211,10 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
       const label = document.getElementById('google-auth-btn-label');
       const originalText = 'Continuer avec Google';
 
+      // Un nouvel essai de connexion annule toute "déconnexion explicite" antérieure,
+      // AVANT que onAuthStateChanged ne la lise (sinon il fermait la 1re tentative → double clic).
+      try { sessionStorage.removeItem('pino_explicit_logout'); } catch (e) {}
+
       if (window.location.protocol === 'file:') {
         showNotificationToast('Connexion momentanément indisponible. Réessayez depuis le site en ligne.', 'warning');
         return;
@@ -7386,6 +7390,7 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
       }
       const label = document.getElementById('apple-auth-btn-label');
       const originalText = label ? label.textContent : 'Continuer avec Apple';
+      try { sessionStorage.removeItem('pino_explicit_logout'); } catch (e) {}
       if (typeof firebase === 'undefined' || !firebase.auth || !firebase.auth.OAuthProvider) {
         showNotificationToast('Service d\'authentification indisponible. Rechargez la page.', 'error');
         return;
@@ -7438,6 +7443,7 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
       const email = (emailInput ? emailInput.value : '').trim().toLowerCase();
       const pass = passInput ? passInput.value : '';
       if (errorMsg) errorMsg.classList.add('hidden');
+      try { sessionStorage.removeItem('pino_explicit_logout'); } catch (e2) {}
 
       if (typeof firebase === 'undefined' || !firebase.auth) {
         window.showAuthMessage('login', 'Nous n\'avons pas pu vérifier votre identité (service indisponible). Réessayez.');
@@ -7486,6 +7492,7 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
 
     window.handleRegisterSubmit = async (e) => {
       e.preventDefault();
+      try { sessionStorage.removeItem('pino_explicit_logout'); } catch (e2) {}
       const val = (id) => ((document.getElementById(id) || {}).value || '').trim();
       const fullName = val('reg-fullname');
       const email = val('reg-email').toLowerCase();
