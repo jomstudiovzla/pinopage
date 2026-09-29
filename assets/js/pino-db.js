@@ -1617,6 +1617,31 @@ Site web : ${siteUrl()}`;
     }
   }
 
+  // Canje atómico del cupón: valid -> used, UNA sola vez, mediante transacción.
+  // Anti-replay: si un script externo repite la llamada, la 2ª transacción ve estado
+  // 'used' y aborta; además las reglas del servidor sólo permiten valid->used sin tocar
+  // código ni descuento, y rechazan cualquier reintento (permission_denied).
+  // Devuelve { ok, redeemed:bool } — redeemed=false si ya estaba usado o no existe.
+  async function redeemCouponOnce(userId) {
+    const db = rtdb();
+    if (!db || !userId) return { ok: false, error: 'db_unavailable' };
+    try {
+      const res = await db.ref('coupons/' + userId).transaction((cur) => {
+        if (!cur) return;                       // pas de coupon
+        if (cur.estado !== 'valid') return;     // déjà utilisé / expiré -> abort (anti-rejeu)
+        cur.estado = 'used';
+        cur.redeemed_at = new Date().toISOString();
+        return cur;
+      });
+      const val = res && res.snapshot && res.snapshot.val();
+      const redeemed = !!(res && res.committed && val && val.estado === 'used');
+      return { ok: true, redeemed };
+    } catch (err) {
+      log('redeemCouponOnce:rtdb', err);
+      return { ok: false, error: (err && err.code) || 'denied' };
+    }
+  }
+
   /* ─────────────────────────────────────────────────────────
    *  TAX — Calcul Côté Serveur Crédit d'Impôt SAP 50%
    * ───────────────────────────────────────────────────────── */
@@ -3004,6 +3029,7 @@ Site web : ${siteUrl()}`;
     fetchProfiles,
     fetchUserCoupon,
     redeemPelabola,
+    redeemCouponOnce,
     calculateSAPCreditServer,
     recordAuditSession,
     fetchAdminKPIs,

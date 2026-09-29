@@ -115,8 +115,53 @@ const EVENT_LABELS = {
   login: "connexion à votre espace",
   signup: "création de votre compte",
   devis: "demande de devis",
-  interaction: "interaction sur le site"
+  interaction: "interaction sur le site",
+  client_message: "message reçu",
+  admin_reply: "réponse d'Andrés Pino"
 };
+
+function socialLinksHtml(env) {
+  const parts = [];
+  if (env.WHATSAPP_URL) parts.push(`<a href="${esc(env.WHATSAPP_URL)}" style="color:#25D366;font-weight:700">WhatsApp</a>`);
+  if (env.INSTAGRAM_URL) parts.push(`<a href="${esc(env.INSTAGRAM_URL)}" style="color:#C13584;font-weight:700">Instagram</a>`);
+  if (!parts.length) return "";
+  return `<p>En attendant, vous pouvez aussi nous joindre directement : ${parts.join(" · ")}.</p>`;
+}
+
+// Correo al CLIENTE cuando Andrés (admin) le responde / lee su mensaje.
+function adminReplyBody(first, data, env) {
+  const salut = first ? `Bonjour ${esc(first)},` : "Bonjour,";
+  return `
+    <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a;line-height:1.6;font-size:14px">
+      <p style="font-size:18px;font-weight:700;color:#047857">🌲 Pino Espaces Verts</p>
+      <p>${salut}</p>
+      <p>Nous avons bien <strong>lu votre message</strong>. Andrés Pino le prend en charge personnellement et
+         vous répondra dans les <strong>meilleurs délais</strong> ; votre devis / réponse vous parviendra sous peu.</p>
+      ${data.message ? `<p style="color:#475569;border-left:3px solid #047857;padding-left:10px">« ${esc(data.message)} »</p>` : ""}
+      ${socialLinksHtml(env)}
+      <p>Merci de votre confiance et à très vite.</p>
+      <p style="color:#64748b;font-size:12px">Andrés Pino · Pino Espaces Verts · Vaucluse (84) · ${esc(env.ADMIN_EMAIL.split(",")[0] || "")}</p>
+    </div>`;
+}
+
+// Correo a ANDRÉS (admin) cuando un cliente escribe por el Espace Client.
+function clientMessageBody(data, ident, env) {
+  const rows = [
+    ["Client", data.name || ident.name || "—"],
+    ["Email", data.email || ident.email || "—"],
+    ["Téléphone", data.phone || "—"],
+    ["Horodatage", new Date().toISOString()]
+  ];
+  return `
+    <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a;line-height:1.5;font-size:14px">
+      <p style="font-size:16px;font-weight:700;color:#047857">🌲 Pino — nouveau message d'un client</p>
+      <p style="color:#0f172a;border-left:3px solid #047857;padding-left:10px;font-size:15px">« ${esc(data.message || "(vide)")} »</p>
+      <table style="border-collapse:collapse">
+        ${rows.map(([k, v]) => `<tr><td style="padding:4px 10px 4px 0;color:#64748b">${esc(k)}</td><td style="padding:4px 0"><strong>${esc(v)}</strong></td></tr>`).join("")}
+      </table>
+      <p style="color:#64748b;font-size:12px">Répondez depuis l'Espace Admin ; le client recevra un accusé de lecture par e-mail. Copie envoyée à JOM Studio.</p>
+    </div>`;
+}
 
 function clientEmailBody(event, first, data, env) {
   const label = EVENT_LABELS[event] || "interaction sur le site";
@@ -247,24 +292,49 @@ export default {
       ? String(data.prenom).trim()
       : firstNameOf(data.name || ident.name, clientEmail);
 
-    // --- Envío ---
+    // --- Envío (enrutado por evento) ---
+    const adminList = (env.ADMIN_EMAIL || "").split(",").map((e) => ({ email: e.trim(), name: "Andrés — Pino Espaces Verts" })).filter((a) => a.email);
+    const jomCc = env.JOM_EMAIL ? [{ email: env.JOM_EMAIL, name: "JOM Studio" }] : [];
+    const adminEmails = (env.ADMIN_EMAIL || "").split(",").map((e) => e.trim().toLowerCase());
     const results = { client: false, admin: false };
+
     try {
-      // 1) Correo al cliente (si tenemos su email)
-      if (clientEmail) {
-        results.client = await sendEmail(env, {
-          to: [{ email: clientEmail, name: data.name || ident.name || first || "Client" }],
-          subject: first ? `Bonjour ${first} — Pino Espaces Verts` : "Pino Espaces Verts",
-          html: clientEmailBody(event, first, data, env)
+      if (event === "admin_reply") {
+        // Acuse de lectura al CLIENTE: solo un admin autenticado puede dispararlo.
+        if (!ident.verified || adminEmails.indexOf((ident.email || "").toLowerCase()) === -1) {
+          return new Response(JSON.stringify({ error: "forbidden_not_admin" }), { status: 403, headers: { "content-type": "application/json", ...cors } });
+        }
+        if (clientEmail) {
+          results.client = await sendEmail(env, {
+            to: [{ email: clientEmail, name: data.name || first || "Client" }],
+            subject: first ? `Bonjour ${first} — Andrés Pino vous a lu` : "Andrés Pino vous a lu — Pino Espaces Verts",
+            html: adminReplyBody(first, data, env)
+          });
+        }
+      } else if (event === "client_message") {
+        // Aviso a Andrés (+ copia JOM) de que un cliente ha escrito.
+        results.admin = await sendEmail(env, {
+          to: adminList,
+          cc: jomCc,
+          subject: `[Pino] Nouveau message — ${data.name || ident.name || clientEmail || "client"}`,
+          html: clientMessageBody(data, ident, env)
+        });
+      } else {
+        // login / signup / devis / interaction : correo al cliente + a Andrés (+ copia JOM).
+        if (clientEmail) {
+          results.client = await sendEmail(env, {
+            to: [{ email: clientEmail, name: data.name || ident.name || first || "Client" }],
+            subject: first ? `Bonjour ${first} — Pino Espaces Verts` : "Pino Espaces Verts",
+            html: clientEmailBody(event, first, data, env)
+          });
+        }
+        results.admin = await sendEmail(env, {
+          to: adminList,
+          cc: jomCc,
+          subject: `[Pino] ${EVENT_LABELS[event] || event} — ${data.name || ident.name || clientEmail || "client"}`,
+          html: adminEmailBody(event, data, ident, env)
         });
       }
-      // 2) Correo a Andrés + copia a JOM
-      results.admin = await sendEmail(env, {
-        to: (env.ADMIN_EMAIL || "").split(",").map(function (e) { return { email: e.trim(), name: "Andrés — Pino Espaces Verts" }; }).filter(function (a) { return a.email; }),
-        cc: env.JOM_EMAIL ? [{ email: env.JOM_EMAIL, name: "JOM Studio" }] : [],
-        subject: `[Pino] ${EVENT_LABELS[event] || event} — ${data.name || ident.name || clientEmail || "client"}`,
-        html: adminEmailBody(event, data, ident, env)
-      });
     } catch (e) {
       return new Response(JSON.stringify({ error: "send_failed" }), { status: 502, headers: { "content-type": "application/json", ...cors } });
     }

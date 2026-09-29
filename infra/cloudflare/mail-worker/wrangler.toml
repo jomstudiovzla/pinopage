@@ -19,8 +19,11 @@ FIREBASE_PROJECT_ID = "pagepino-e8e97"
 ADMIN_EMAIL = "pino.espacesverts@gmail.com,pino.spacesverts@gmail.com"
 JOM_EMAIL = "martinezoliverosj@gmail.com"
 SENDER_NAME = "Pino Espaces Verts"
-# Remitente profesional (dominio propio). Requiere dominio verificado en Brevo (SPF/DKIM).
+# Remitente profesional (dominio propio). Requiere dominio verificado en Resend (SPF/DKIM).
 SENDER_EMAIL = "andresp@pinoespacesverts.online"
+# Enlaces incluidos en los correos al cliente (contacto directo).
+WHATSAPP_URL = "https://wa.me/33651594034"
+INSTAGRAM_URL = "https://instagram.com/pino.espacesverts"
 ALLOWED_ORIGINS = "https://pinoespacesverts.online,https://www.pinoespacesverts.online,https://pagepino-e8e97.web.app"
 
 # Secretos (NO se ponen aquí; se cargan con `wrangler secret put`):

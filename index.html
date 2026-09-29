@@ -6355,6 +6355,15 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
         });
       } catch (e) { /* le mail ne doit jamais bloquer l'envoi du devis */ }
 
+      // Canje único del cupón (valid -> used) si hay uno aplicado y el usuario está conectado.
+      // El servidor (reglas + transacción atómica) impide reutilizarlo, reactivarlo o manipularlo.
+      try {
+        const _u = (window.firebase && firebase.auth && firebase.auth().currentUser) || null;
+        if (couponCode && _u && window.PinoDB && typeof window.PinoDB.redeemCouponOnce === 'function') {
+          window.PinoDB.redeemCouponOnce(_u.uid).catch(() => {});
+        }
+      } catch (e) { /* le canje ne doit jamais bloquer l'envoi du devis */ }
+
       // Populate Corroboration Screen
       document.getElementById('corrob-ref').textContent = refCode;
       document.getElementById('corrob-time').textContent = nowStr;
@@ -12551,6 +12560,14 @@ Site web : ${window.pinoSiteUrl()}`;
             message: text
           });
         }
+        // Aviso por correo en tiempo real a Andrés (+ copia JOM) vía Resend (Worker).
+        try {
+          if (window.PinoMail && typeof window.PinoMail.notify === 'function') {
+            window.PinoMail.notify('client_message', {
+              name: u.fullName || 'Client', email: u.email, phone: u.phone || '', message: text
+            });
+          }
+        } catch (e3) {}
         if (ta) ta.value = '';
         showNotificationToast('Message transmis à Andrés Pino (portail + Gmail).', 'success');
       } catch (e) {
@@ -12602,6 +12619,13 @@ Site web : ${window.pinoSiteUrl()}`;
             notifyEmail: sendEmail
           }) || { ok: false };
         }
+
+        // Acuse de lectura personalizado al cliente por Resend (Worker) + enlaces WhatsApp/Instagram.
+        try {
+          if (window.PinoMail && typeof window.PinoMail.notify === 'function') {
+            window.PinoMail.notify('admin_reply', { email: email, name: name, message: message });
+          }
+        } catch (e2) {}
 
         document.getElementById('modal-admin-message-client').close();
         if (!sendEmail) {

@@ -172,6 +172,18 @@ test('client ne lit pas le coupon d\'un autre', async () => {
   await assertFails(get(ref(db(['uidA', CLIENT_A]), 'coupons/uidB')));
 });
 
+test('coupon single-use : canje valid->used une seule fois, anti-rejeu et anti-manipulation', async () => {
+  const dbB = db(['uidB', CLIENT_B]);
+  // On ne peut pas gonfler la remise au moment du canje
+  await assertFails(update(ref(dbB, 'coupons/uidB'), { estado: 'used', descuento_pct: 90 }));
+  // Canje légitime valid -> used (une fois)
+  await assertSucceeds(update(ref(dbB, 'coupons/uidB'), { estado: 'used', redeemed_at: '2026-09-29' }));
+  // Rejeu / ré-application bloqués (déjà used) — protège des scripts externes qui répètent l'action
+  await assertFails(update(ref(dbB, 'coupons/uidB'), { estado: 'used' }));
+  // Impossible de le réactiver
+  await assertFails(update(ref(dbB, 'coupons/uidB'), { estado: 'valid' }));
+});
+
 // ── Notifications / file d'e-mails ─────────────────────────────────────────
 test('client ne lit pas les notifications admin ni la file d\'e-mails', async () => {
   await assertFails(get(ref(db(['uidA', CLIENT_A]), 'admin_notifications')));

@@ -30,3 +30,6 @@ firebase.static.json
 
 # Firebase (caché de despliegue local)
 .firebase/
+
+# Lote de cupones generado (ya subido a la RTDB)
+coupon_pool.json

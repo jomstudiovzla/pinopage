@@ -59,7 +59,14 @@
       ".read": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'pino.spacesverts@gmail.com'))",
       "$key": {
         ".read": "auth != null && (auth.uid === $key || (auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'pino.spacesverts@gmail.com'))))",
-        ".write": "auth != null && auth.token.email_verified === true && (((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'pino.spacesverts@gmail.com')) || (auth.uid === $key && !data.exists() && newData.child('user_id').val() === auth.uid && newData.child('email').val() === auth.token.email.toLowerCase() && newData.child('descuento_pct').val() === 20 && newData.child('estado').val() === 'valid' && newData.child('codigo_cupon').isString() && newData.child('codigo_cupon').val().matches(/^PINO-[A-Z0-9]{4,8}$/)))"
+        ".write": "auth != null && auth.token.email_verified === true && (((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'pino.spacesverts@gmail.com')) || (auth.uid === $key && !data.exists() && newData.child('user_id').val() === auth.uid && newData.child('email').val() === auth.token.email.toLowerCase() && newData.child('descuento_pct').val() === 20 && newData.child('estado').val() === 'valid' && newData.child('codigo_cupon').isString() && newData.child('codigo_cupon').val().matches(/^PINO-[A-Z0-9]{4,8}$/)) || (auth.uid === $key && data.exists() && data.child('estado').val() === 'valid' && newData.child('estado').val() === 'used' && newData.child('user_id').val() === data.child('user_id').val() && newData.child('codigo_cupon').val() === data.child('codigo_cupon').val() && newData.child('descuento_pct').val() === data.child('descuento_pct').val() && newData.child('email').val() === data.child('email').val()))"
+      }
+    },
+    "coupon_pool": {
+      ".read": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'pino.spacesverts@gmail.com'))",
+      ".write": false,
+      "$code": {
+        ".write": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'pino.espacesverts@gmail.com' || auth.token.email === 'pino.spacesverts@gmail.com') || (data.exists() && data.child('estado').val() === 'available' && newData.child('estado').val() === 'used' && newData.child('claimed_by').val() === auth.uid && newData.child('descuento_pct').val() === data.child('descuento_pct').val()))"
       }
     },
     "audit_logs": {
