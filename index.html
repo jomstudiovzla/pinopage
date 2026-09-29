@@ -1016,6 +1016,10 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
+          <button type="button" id="client-notif-bell-btn" onclick="scrollToClientMessages()" class="relative w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer" title="Vos messages et notifications d'Andrés" aria-label="Notifications">
+            <i id="client-bell-icon" class="fa-solid fa-bell text-lg text-amber-300"></i>
+            <span id="client-bell-badge" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-md ring-2 ring-[#2d4d36]"></span>
+          </button>
           <button onclick="handleLogout()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer">
             <i class="fa-solid fa-arrow-right-from-bracket"></i> Déconnexion
           </button>
@@ -7900,6 +7904,11 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
             </div>
             <div class="text-xs text-slate-800 font-semibold">${escapeFn(directMessages[0].subject || 'Information sur votre chantier')}</div>
             <p class="text-xs text-slate-700 whitespace-pre-line bg-white/70 p-3 rounded-xl border border-amber-200/60 leading-relaxed">${escapeFn(directMessages[0].message)}</p>
+            <div class="flex justify-end pt-1">
+              <button type="button" onclick="focusReplyToAndres()" class="text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer shadow-xs">
+                <i class="fa-solid fa-reply"></i> Répondre à Andrés
+              </button>
+            </div>
           </div>
         `;
       }
@@ -9443,6 +9452,20 @@ Site web : ${window.pinoSiteUrl()}`;
       let badge = document.getElementById('nav-auth-notif-badge');
       const user = getCurrentUser();
 
+      // Campanita dans l'Espace Client (temps réel) : badge + animation quand Andrés écrit.
+      const bellBadge = document.getElementById('client-bell-badge');
+      const bellIcon = document.getElementById('client-bell-icon');
+      const nUnread = (user && unreadList) ? unreadList.length : 0;
+      if (bellBadge) {
+        if (nUnread > 0) {
+          bellBadge.textContent = nUnread > 9 ? '9+' : String(nUnread);
+          bellBadge.classList.remove('hidden');
+          if (bellIcon) { bellIcon.classList.add('animate-bounce'); setTimeout(() => { if (bellIcon) bellIcon.classList.remove('animate-bounce'); }, 2500); }
+        } else {
+          bellBadge.classList.add('hidden');
+        }
+      }
+
       // Sécurité : Ne jamais afficher de badge de notification si l'utilisateur est déconnecté
       if (!user || !unreadList || unreadList.length === 0) {
         if (badge) badge.remove();
@@ -9459,6 +9482,20 @@ Site web : ${window.pinoSiteUrl()}`;
         }
         badge.textContent = String(unreadList.length);
       }
+    };
+
+    // Clic en la campanita del Espace -> ir a los mensajes de Andrés.
+    window.scrollToClientMessages = () => {
+      const el = document.getElementById('client-quotes-list');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    // Botón « Répondre à Andrés » -> enfocar la caja de respuesta.
+    window.focusReplyToAndres = () => {
+      const ta = document.getElementById('client-write-andres');
+      if (!ta) return;
+      ta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => { try { ta.focus(); } catch (e) {} }, 400);
     };
 
     // ─────────────────────────────────────────────────────────
