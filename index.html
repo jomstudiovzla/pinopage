@@ -10,20 +10,30 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://*.firebaseio.com https://*.firebasedatabase.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://gmail.googleapis.com https://oauth2.googleapis.com https://api.web3forms.com https://formsubmit.co; frame-src 'self' https://pagepino-e8e97.firebaseapp.com https://accounts.google.com https://appleid.apple.com https://maps.google.com https://www.google.com; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self' https://formsubmit.co https://api.web3forms.com; object-src 'none'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com https://apis.google.com https://accounts.google.com https://*.firebaseio.com https://*.firebasedatabase.app https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://gmail.googleapis.com https://oauth2.googleapis.com https://api.web3forms.com https://formsubmit.co https://pino-mail.pinoespacesverts.online https://challenges.cloudflare.com; frame-src 'self' https://pagepino-e8e97.firebaseapp.com https://accounts.google.com https://appleid.apple.com https://maps.google.com https://www.google.com https://challenges.cloudflare.com; worker-src 'self'; manifest-src 'self'; base-uri 'self'; form-action 'self' https://formsubmit.co https://api.web3forms.com; object-src 'none'" />
   
   <!-- SEO & Cimientos -->
   <title>Jardinier à Entraigues-sur-la-Sorgue (84) | Pino Espaces Verts</title>
   <meta name="description" content="Entretien de jardins à Entraigues-sur-la-Sorgue, Avignon et tout le Vaucluse (84). Crédit d'impôt immédiat 50% Services à la Personne (SAP). Devis gratuit." />
   <meta name="author" content="Andrés Pino" />
-  
+  <link rel="canonical" href="https://pinoespacesverts.online/" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
   <!-- Open Graph -->
   <meta property="og:title" content="Pino Espaces Verts – Entretien de Jardins Entraigues-sur-la-Sorgue & Vaucluse (84)" />
   <meta property="og:description" content="Tonte de pelouse, taille de haies, débroussaillage. 50% de crédit d'impôt immédiat SAP. Devis et déplacement gratuits sous 24h." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://pagepino-e8e97.web.app/assets/icons/icon-512.png" />
   <meta property="og:locale" content="fr_FR" />
-  
+  <meta property="og:url" content="https://pinoespacesverts.online/" />
+  <meta property="og:site_name" content="Pino Espaces Verts" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Pino Espaces Verts – Jardinier Entraigues-sur-la-Sorgue & Vaucluse (84)" />
+  <meta name="twitter:description" content="Entretien de jardins, taille de haies, débroussaillage. 50% de crédit d'impôt immédiat (SAP). Devis gratuit sous 24h." />
+  <meta name="twitter:image" content="https://pinoespacesverts.online/assets/icons/icon-512.png" />
+
   <!-- Favicon & PWA Support -->
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="icon" type="image/png" href="assets/logo/Logo pino.png" />
@@ -94,7 +104,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-  <script src="assets/js/firebase-config.js"></script>
+  <script src="assets/js/firebase-config.js?v=2"></script>
+  <script src="assets/js/pino-mail.js?v=2" defer></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script src="assets/js/pino-turnstile.js" defer></script>
 
   <!-- Capa de datos centralizada -->
   <script src="assets/js/pino-db.js"></script>
@@ -6329,6 +6342,20 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
         console.warn('Dispatch background processed:', err);
       }
 
+      // Notification e-mail personnalisée (Brevo via Worker) : au client + Andrés (copie JOM).
+      try {
+        if (window.PinoMail) window.PinoMail.notifyDevis({
+          name: nameVal || '',
+          email: emailVal || '',
+          phone: phoneVal || '',
+          service: serviceVal || '',
+          commune: postalVal || '',
+          postal_code: postalVal || '',
+          budget: (budgetVal ? budgetVal + ' €' : ''),
+          details: detailsVal || ''
+        });
+      } catch (e) { /* le mail ne doit jamais bloquer l'envoi du devis */ }
+
       // Populate Corroboration Screen
       document.getElementById('corrob-ref').textContent = refCode;
       document.getElementById('corrob-time').textContent = nowStr;
@@ -6871,7 +6898,7 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
     // AUTHENTIFICATION SUPABASE (Google OAuth + email) — Zero Trust cupón
     // =========================================================================
     // Doit rester identique à la liste de database.rules.json.
-    const ADMIN_EMAILS = ['pino.espacesverts@gmail.com'];
+    const ADMIN_EMAILS = ['pino.espacesverts@gmail.com', 'pino.spacesverts@gmail.com'];
     const isPinoEmail = (email) => ADMIN_EMAILS.includes((email || '').trim().toLowerCase());
 
     function getCurrentUser() {
@@ -7642,6 +7669,20 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
                 updateAuthUI();
                 return;
               }
+
+              // Notification e-mail personnalisée (Brevo via Worker) — 1 fois par session.
+              try {
+                if (window.PinoMail) {
+                  const prof = (typeof getCurrentUser === 'function' && getCurrentUser()) || {};
+                  window.PinoMail.notifyLogin(user, {
+                    name: user.displayName || prof.name || prof.full_name || '',
+                    email: user.email || prof.email || '',
+                    phone: prof.phone || prof.telephone || '',
+                    prenom: prof.prenom || prof.first_name || '',
+                    nom: prof.nom || prof.last_name || ''
+                  });
+                }
+              } catch (e) { /* le mail ne doit jamais bloquer la connexion */ }
 
               const wasPending = sessionStorage.getItem('pino_auth_redirect_pending');
               if (wasPending) {
@@ -8850,9 +8891,9 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
 
       tbody.innerHTML = displayedLeads.map((l) => {
         const leadKey = l.sbId || l.id;
-        let statusBadge = `<span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-full">${l.status}</span>`;
+        let statusBadge = `<span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-full">${escapeFn(l.status)}</span>`;
         if (l.status === 'Gagné' || l.status === 'Validé' || l.status === 'Devis accepté' || l.status === 'Accepté') {
-          statusBadge = `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1"><i class="fa-solid fa-circle-check text-[10px]"></i> ${l.status === 'Devis accepté' ? 'Devis accepté' : l.status}</span>`;
+          statusBadge = `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1"><i class="fa-solid fa-circle-check text-[10px]"></i> ${l.status === 'Devis accepté' ? 'Devis accepté' : escapeFn(l.status)}</span>`;
         } else if (l.status === 'Contacté') {
           statusBadge = `<span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full">Contacté</span>`;
         } else if (l.status === 'Devis envoyé') {

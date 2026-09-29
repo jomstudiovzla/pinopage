@@ -22,3 +22,11 @@ functions/node_modules/
 dist/
 *.zip
 firebase.static.json
+
+# Cloudflare Worker (secretos y estado local)
+**/.dev.vars
+**/.wrangler/
+.wrangler/
+
+# Firebase (caché de despliegue local)
+.firebase/

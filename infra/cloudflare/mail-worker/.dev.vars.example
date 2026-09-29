@@ -1,0 +1,5 @@
+# Copia este archivo a `.dev.vars` (git-ignored) para pruebas locales con `wrangler dev`.
+# En producción, usa `wrangler secret put ...` (NO subas secretos al repo).
+
+RESEND_API_KEY=re_tu_clave_de_resend
+TURNSTILE_SECRET=0x-tu-secreto-de-turnstile

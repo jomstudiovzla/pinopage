@@ -22,12 +22,29 @@ const db = admin.database();
 const auth = admin.auth();
 
 const app = express();
-app.use(cors({ origin: true }));
-app.use(express.json());
+
+// M4 — CORS restringido a orígenes propios (evita abuso cross-origin de la API).
+// Ajusta ALLOWED_ORIGINS si cambias de dominio. Peticiones sin Origin (server-to-server,
+// curl, health checks) se permiten; navegadores de otros orígenes quedan bloqueados.
+const ALLOWED_ORIGINS = [
+  "https://pinoespacesverts.online",
+  "https://www.pinoespacesverts.online",
+  "https://pagepino-e8e97.web.app",
+  "https://pagepino-e8e97.firebaseapp.com",
+  "http://localhost:5500",
+  "http://127.0.0.1:5500",
+  "http://localhost:5000",
+  "http://127.0.0.1:5000"
+];
+app.use(cors({
+  origin: (origin, cb) => cb(null, !origin || ALLOWED_ORIGINS.includes(origin))
+}));
+app.use(express.json({ limit: "256kb" }));
 
 // List of allowed admin emails (fallback validation alongside custom claims)
 const ADMIN_EMAILS = [
-  "pino.espacesverts@gmail.com"
+  "pino.espacesverts@gmail.com",
+  "pino.spacesverts@gmail.com"
 ];
 
 // Middleware: Authenticated User Required
@@ -166,7 +183,8 @@ router.get(["/quotes/:id", "/api/quotes/:id"], requireAuth, async (req, res) => 
 
     return res.status(200).json(quote);
   } catch (err) {
-    return res.status(500).json({ error: "internal_error", message: err.message });
+    console.error("Error reading quote:", err);
+    return res.status(500).json({ error: "internal_error", message: "Erreur interne du serveur" });
   }
 });
 
@@ -191,7 +209,7 @@ router.post(["/quotes/:id/accept", "/api/quotes/:id/accept"], requireAuth, async
 
     return res.status(200).json({ success: true, status: "ACCEPTED" });
   } catch (err) {
-    return res.status(500).json({ error: "internal_error", message: err.message });
+    return res.status(500).json({ error: "internal_error", message: "Erreur interne du serveur" });
   }
 });
 
@@ -230,7 +248,7 @@ router.post(["/coupons/validate", "/api/coupons/validate"], requireAuth, async (
       status: "valid"
     });
   } catch (err) {
-    return res.status(500).json({ error: "internal_error", message: err.message });
+    return res.status(500).json({ error: "internal_error", message: "Erreur interne du serveur" });
   }
 });
 
@@ -273,7 +291,7 @@ router.post(["/coupons/redeem", "/api/coupons/redeem"], requireAuth, async (req,
       discountPct: 20
     });
   } catch (err) {
-    return res.status(500).json({ error: "internal_error", message: err.message });
+    return res.status(500).json({ error: "internal_error", message: "Erreur interne du serveur" });
   }
 });
 
@@ -306,7 +324,7 @@ router.post(["/tax/calculate", "/api/tax/calculate"], (req, res) => {
       mentionLegale: isSAP ? "TVA non applicable, art. 293 B du CGI - Agrément SAP via SCIC Unipros" : "TVA 20%"
     });
   } catch (err) {
-    return res.status(500).json({ error: "internal_error", message: err.message });
+    return res.status(500).json({ error: "internal_error", message: "Erreur interne du serveur" });
   }
 });
 
@@ -329,7 +347,7 @@ router.post(["/auth/reset-password", "/api/auth/reset-password"], async (req, re
       message: "Si l'adresse correspond à un compte, un lien de réinitialisation a été envoyé."
     });
   } catch (err) {
-    return res.status(500).json({ error: "internal_error", message: err.message });
+    return res.status(500).json({ error: "internal_error", message: "Erreur interne du serveur" });
   }
 });
 
@@ -351,7 +369,7 @@ router.post(["/auth/logout", "/api/auth/logout"], async (req, res) => {
     }
     return res.status(200).json({ success: true, message: "Déconnexion enregistrée" });
   } catch (err) {
-    return res.status(500).json({ error: "internal_error", message: err.message });
+    return res.status(500).json({ error: "internal_error", message: "Erreur interne du serveur" });
   }
 });
 
@@ -384,7 +402,7 @@ router.post(["/admin/users/:uid/role", "/api/admin/users/:uid/role"], requireAdm
     });
   } catch (err) {
     console.error("Error setting custom claims:", err);
-    return res.status(500).json({ error: "internal_error", message: err.message });
+    return res.status(500).json({ error: "internal_error", message: "Erreur interne du serveur" });
   }
 });
 
@@ -413,7 +431,7 @@ router.post(["/emails/send", "/api/emails/send"], requireAdmin, async (req, res)
       message: "Email ajouté à la file d'envoi"
     });
   } catch (err) {
-    return res.status(500).json({ error: "internal_error", message: err.message });
+    return res.status(500).json({ error: "internal_error", message: "Erreur interne du serveur" });
   }
 });
 
@@ -423,7 +441,7 @@ router.get(["/admin/audit", "/api/admin/audit"], requireAdmin, async (req, res) 
     const snap = await db.ref("audit_logs").limitToLast(50).get();
     return res.status(200).json(snap.exists() ? snap.val() : {});
   } catch (err) {
-    return res.status(500).json({ error: "internal_error", message: err.message });
+    return res.status(500).json({ error: "internal_error", message: "Erreur interne du serveur" });
   }
 });
 

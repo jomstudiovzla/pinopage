@@ -5,14 +5,15 @@
 
 ---
 
-## 🌐 Orquestación de Dominio: `pinoespacesverts.fr` en Firebase Hosting
+## 🌐 Orquestación de Dominio: `pinoespacesverts.online` (Cloudflare) en Firebase Hosting
 
 | Parámetro | Configuración Oficial | Estado |
 |---|---|---|
-| **Dominio Principal** | `https://pinoespacesverts.fr` | ⏳ Registros DNS pendientes en el registrador (ver `docs/ORQUESTACION_FIREBASE_DOMINIO.md`) |
-| **Subdominio Redirección** | `https://www.pinoespacesverts.fr` | ⏳ CNAME configurado para apuntar a `pinoespacesverts.fr` |
+| **Dominio Principal** | `https://pinoespacesverts.online` | ⏳ Registrado en Cloudflare (2026-09-28); pendiente conectar en Firebase Hosting + registros A/TXT en Cloudflare DNS **en modo "DNS only" (gris)**. Guía: `docs/dns/CONECTAR_DOMINIO.md` |
+| **Subdominio Redirección** | `https://www.pinoespacesverts.online` | ⏳ Redirección a ápex `pinoespacesverts.online` (se configura al añadir el custom domain en Firebase) |
 | **Hosting Definitivo** | Firebase Hosting (`pagepino-e8e97`, sirve `dist/`) | ✅ Preparado, hermético, rewrites `/api/**` a Cloud Functions |
-| **Auth Domain Dinámico** | `authDomain: window.location.hostname` (`pinoespacesverts.fr`) | ✅ Configurado para evitar bloqueo de cookies 3rd-party en Safari / Chrome |
+| **URL canónica en build** | `SITE_URL` por defecto = `https://pinoespacesverts.online` (`scripts/build.mjs`) | ✅ El build reescribe todo el bundle; `web.app` queda como repli |
+| **Auth Domain** | `authDomain: pagepino-e8e97.firebaseapp.com` (gestiona OAuth) | ✅ Solo falta añadir `.online` + `www` a Firebase Auth → Authorized domains |
 | **Backend & Cloud Functions** | `functions/` (Node.js 22, `europe-west1`) | ✅ 7/7 tests de integración PASS (Quotes, Coupons, Tax SAP, Auth, Admin) |
 | **Base de Datos** | Firebase Realtime Database `europe-west1` (`pagepino-e8e97-default-rtdb`) | ✅ Reglas en `database.rules.json` (43/43 tests PASS) |
 | **CI/CD Pipeline** | GitHub Actions (`.github/workflows/pagepino-pipeline.yml`) | ✅ Tests de reglas, API, E2E y despliegue automatizado |
@@ -34,16 +35,18 @@
 
 ## 📋 Pasos Inmediatos para el Cliente / Propietario del Proyecto
 
-1. **Resolver `ERR_NAME_NOT_RESOLVED` en el Registrador de Dominio**:
-   - En la Zona DNS del registrador donde compró `pinoespacesverts.fr`:
-     - Agregar registro **A**: `@` apuntando a `199.36.158.100`
-     - Agregar registro **CNAME**: `www` apuntando a `pinoespacesverts.fr.`
-     - Agregar registro **TXT**: El token que proporcione Firebase Console en Hosting.
-2. **Conectar el Dominio en Firebase Console**:
-   - Firebase Console → Proyecto `pagepino-e8e97` → Hosting → "Agregar dominio personalizado".
-   - Añadir `pinoespacesverts.fr` con redirección de `www`.
+> Guía detallada con la tabla exacta de registros: **`docs/dns/CONECTAR_DOMINIO.md`**.
+
+1. **Conectar el Dominio en Firebase Console**:
+   - Firebase Console → Proyecto `pagepino-e8e97` → Hosting → "Add custom domain".
+   - Añadir `pinoespacesverts.online` (+ `www` con redirección al ápex). Copiar los registros **TXT + A** que muestre Firebase.
+2. **Pegar los registros en Cloudflare DNS** (el dominio ya está en Cloudflare):
+   - Cloudflare → `pinoespacesverts.online` → DNS → Records: pegar el **TXT** y los **A** de Firebase.
+   - ⚠️ **Proxy status = "DNS only" (nube gris)**, no "Proxied" (naranja): el proxy rompe el certificado gestionado de Firebase.
+   - Borrar los registros de parking (`@`/`www`) que Cloudflare creó por defecto.
 3. **Autorizar Dominios en Firebase Auth**:
-   - Firebase Console → Authentication → Settings → Authorized domains → Añadir `pinoespacesverts.fr` y `www.pinoespacesverts.fr`.
-4. **Habilitar Permiso de Despliegue en CLI**:
-   - En Firebase Console → Project settings → Users and permissions:
-   - Iniciar sesión en la CLI con la cuenta propietaria `pino.espacesverts@gmail.com`: `firebase login:add` y `firebase login:use pino.espacesverts@gmail.com`.
+   - Firebase Console → Authentication → Settings → Authorized domains → Añadir `pinoespacesverts.online` y `www.pinoespacesverts.online`.
+4. **Habilitar Permiso de Despliegue en CLI** (bloqueante actual, `403`):
+   - Iniciar sesión en la CLI con la cuenta propietaria: `firebase login:add` y `firebase login:use pino.espacesverts@gmail.com`.
+5. **Publicar con el dominio** (cuando Firebase marque *Connected* con candado):
+   - `pnpm domain:connect pinoespacesverts.online` (verifica DNS + HTTPS y republica con la URL canónica).

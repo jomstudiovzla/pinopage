@@ -2,7 +2,9 @@
 # scripts/verify-production.sh
 set -uo pipefail
 
-DOMAIN="${DOMAIN:-https://pagepino-e8e97.web.app}"
+# Domaine canónico. Antes de conectar el dominio, audita el repli con:
+#   DOMAIN=https://pagepino-e8e97.web.app pnpm verify:production
+DOMAIN="${DOMAIN:-https://pinoespacesverts.online}"
 RTDB="${RTDB:-https://pagepino-e8e97-default-rtdb.europe-west1.firebasedatabase.app}"
 
 PASS=0

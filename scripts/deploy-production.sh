@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # scripts/deploy-production.sh
-# Publica Pino Espaces Verts en Firebase Hosting (dominio gratuito por defecto).
+# Publica Pino Espaces Verts en Firebase Hosting (dominio canónico pinoespacesverts.online).
+# El dominio gratuito pagepino-e8e97.web.app sigue funcionando como repli permanente.
 # Funciona en el plan gratuito Spark: si Cloud Functions no se puede desplegar
 # (requiere plan Blaze), publica el sitio igualmente sin la ruta /api
 # (la v1 estática no llama nunca a /api desde el cliente).
 set -euo pipefail
 
 PROJECT_ID="pagepino-e8e97"
-SITE_URL="${PINO_SITE_URL:-https://pagepino-e8e97.web.app}"
+SITE_URL="${PINO_SITE_URL:-https://pinoespacesverts.online}"
 
 echo "0/7 — Verificando acceso al proyecto $PROJECT_ID..."
 if ! firebase projects:list 2>/dev/null | grep -q "$PROJECT_ID"; then

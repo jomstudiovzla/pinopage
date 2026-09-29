@@ -1,13 +1,14 @@
 {
   "active_client": "Claude Code",
-  "active_model": "Claude Opus 5.5",
-  "active_goal": "Sitio de Andrés utilizable en el dominio gratuito de Firebase: https://pagepino-e8e97.web.app",
-  "current_phase": "Listo para desplegar; bloqueado solo por acceso de la cuenta Firebase CLI",
-  "action": "1) Verificado: pinoespacesverts.fr NO está registrado (AFNIC not found, NXDOMAIN). 2) Dominio canónico cambiado a pagepino-e8e97.web.app en index.html, public/, configs y scripts; email de contacto inexistente sustituido por pino.espacesverts@gmail.com. 3) authDomain fijo pagepino-e8e97.firebaseapp.com (autorizado por defecto). 4) deploy-production.sh funciona en plan Spark (Functions opcional). 5) AGENTS.md = fuente única; CLAUDE.md y GEMINI.md son symlinks. 6) dist/ y zip fuera de Git.",
+  "active_model": "Claude Opus 4.8",
+  "active_goal": "Sitio Pino en pinoespacesverts.online (Firebase Hosting) + endurecimiento de seguridad + correo transaccional personalizado (Brevo vía Cloudflare Worker).",
+  "current_phase": "Dominio conectándose (Firebase Verificar/SSL en curso). Bloque 1 de seguridad implementado y verificado. Sistema de correo construido (falta desplegar Worker + claves).",
+  "action": "SEGURIDAD (verificado): M1 escape de l.status (index.html); reglas RTDB con .validate en leads/mail_outbox/admin_notifications/audit_logs (43/43 tests PASS); functions M3 (sin fuga err.message) + M4 (CORS allowlist + json limit 256kb) (7/7 API tests PASS); build 11/11 audit estático + cleanup OK. CORREO: Worker Cloudflare+Brevo en infra/cloudflare/mail-worker/ (verifica Firebase ID token en login y Turnstile en devis; envía al cliente 'Bonjour {prénom}' + a Andrés con copia a JOM=martinezoliverosj@gmail.com; personalizado por persona con nom/téléphone/email). Cliente: assets/js/pino-mail.js, enganchado en onAuthStateChanged (login, dedupe por sesión) y en el submit del devis. CSP actualizada (firebase.json + meta index.html) con pino-mail.pinoespacesverts.online + challenges.cloudflare.com. Docs: docs/CORREO_BREVO_CLOUDFLARE.md. NADA desplegado (deploy sigue bloqueado por cuenta Firebase CLI).",
   "files": [
-    "AGENTS.md", "GEMINI.md", ".gitignore", "index.html", "public/", "assets/js/firebase-config.js",
-    "assets/js/supabase-config.js", "scripts/build.mjs", "scripts/deploy-production.sh",
-    "scripts/verify-production.sh", "scripts/audit-live.mjs", ".context_sync.json"
+    "index.html", "database.rules.json", "functions/index.js", "assets/js/pino-mail.js",
+    "infra/cloudflare/mail-worker/src/index.js", "infra/cloudflare/mail-worker/wrangler.toml",
+    "firebase.json", ".gitignore", "docs/CORREO_BREVO_CLOUDFLARE.md",
+    "docs/AUDITORIA_SEGURIDAD_2026-09-28.md", ".context_sync.json"
   ],
-  "step": "El propietario de pagepino-e8e97 ejecuta: firebase login:add → firebase login:use <cuenta> → pnpm deploy:production"
+  "step": "Pendiente por el propietario: (a) terminar Verificar dominio en Firebase + SSL; (b) desbloquear deploy (firebase login:use pino.espacesverts@gmail.com); (c) crear cuenta Brevo + API key + autenticar dominio (SPF/DKIM en Cloudflare) + Turnstile; (d) desplegar Worker (wrangler deploy + secretos) en pino-mail.pinoespacesverts.online. Pendiente por Claude (siguiente sesión): H3 (quitar unsafe-inline), M2 (cupones server-side), M5 (quitar web3forms + política RGPD), M6 (CI OIDC), M8 (fiscal con fuente), L1-L7 (L5 firestore leads intentado, bloqueado por checker transitorio)."
 }

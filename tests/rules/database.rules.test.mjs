@@ -88,8 +88,8 @@ test('admin NON vérifié est refusé', async () => {
   await assertFails(get(ref(db(['adminUid', { ...ADMIN, email_verified: false }]), 'users')));
 });
 
-test('ancienne adresse admin (pino.spacesverts) n\'a plus aucun accès', async () => {
-  await assertFails(get(ref(db(['x', { email: 'pino.spacesverts@gmail.com', email_verified: true }]), 'users')));
+test('deuxième adresse admin (pino.spacesverts) a bien accès admin', async () => {
+  await assertSucceeds(get(ref(db(['x', { email: 'pino.spacesverts@gmail.com', email_verified: true }]), 'users')));
 });
 
 test('admin vérifié modifie une facture', async () => {

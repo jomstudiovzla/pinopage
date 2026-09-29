@@ -24,8 +24,10 @@ v1 live = static `index.html` + PWA. Do not delete it until Hito 6. v2 app will 
 - Apple Sign-In is hidden behind `PINO_FLAGS.appleLogin` until the `apple.com` provider is enabled in Firebase.
 - Supabase is **not loaded in v1**; it is reserved for v2 (Next.js + Postgres RLS, `eu-west-3`).
 - No server API in v1 (static hosting): never call `/api/*` from the client.
-- Public URL (canonical, free): **`https://pagepino-e8e97.web.app`**. Set in `PINO_PUBLIC_URL` (`firebase-config.js`) and `SITE_URL` (`scripts/build.mjs`, overridable with `PINO_SITE_URL`).
-- `pinoespacesverts.fr` is **not registered** (AFNIC: not found, 2026-09-25). Do not reference it until Andrés buys it and it is connected in Firebase Hosting → Custom domains.
+- Canonical URL: **`https://pinoespacesverts.online`** — registered on **Cloudflare** (2026-09-28), being connected to Firebase Hosting → Custom domains (see `docs/dns/CONECTAR_DOMINIO.md`). It is the default of `SITE_URL` (`scripts/build.mjs`), which the build injects into `PINO_PUBLIC_URL` and rewrites across the bundle; override per-deploy with `PINO_SITE_URL`.
+- Free fallback (always works, used for rollback): **`https://pagepino-e8e97.web.app`**. Source files keep this origin as a placeholder; `build.mjs` step 5b swaps it for `SITE_URL`. Connect `.online` via `pnpm domain:connect pinoespacesverts.online`. Cloudflare DNS records for Firebase must be **"DNS only" (grey cloud)**, never Proxied — the proxy breaks Firebase's managed SSL.
+- `authDomain` stays `pagepino-e8e97.firebaseapp.com` (handles Google OAuth redirect); just add `pinoespacesverts.online` + `www` to Firebase Auth → Authorized domains.
+- `pinoespacesverts.fr` is **not registered** (AFNIC: not found, 2026-09-25). Do not reference it; `.online` is the live domain.
 - Contact e-mail shown on the site: `pino.espacesverts@gmail.com`.
 - Deploy: `pnpm deploy:production` (needs a CLI account with access to `pagepino-e8e97`; works on the free Spark plan, Functions optional).
 

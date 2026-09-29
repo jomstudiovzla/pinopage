@@ -10,9 +10,11 @@ import { execSync } from 'node:child_process';
 
 const ROOT = process.cwd();
 const DIST = join(ROOT, 'dist');
-// URL publique officielle (domaine gratuit Firebase Hosting). Une seule ligne à changer
-// le jour où un domaine propre est acheté et branché dans Firebase Hosting.
-const SITE_URL = (process.env.PINO_SITE_URL || 'https://pagepino-e8e97.web.app').replace(/\/?$/, '/');
+// URL publique officielle : domaine propre pinoespacesverts.online (enregistré sur
+// Cloudflare, branché sur Firebase Hosting). Le domaine gratuit pagepino-e8e97.web.app
+// reste le repli permanent (voir docs/dns/CONECTAR_DOMINIO.md, section Rollback).
+// Surcharge ponctuelle possible : PINO_SITE_URL=https://autre-domaine.
+const SITE_URL = (process.env.PINO_SITE_URL || 'https://pinoespacesverts.online').replace(/\/?$/, '/');
 
 console.log('════════════════════════════════════════════════════');
 console.log(' PINO ESPACES VERTS — COMPILATION PRODUCTION DIST');
@@ -121,6 +123,17 @@ window.initPinoFirebase = () => {
     return false;
   }
 };
+
+// Initialisation immédiate : le SDK Firebase est chargé avant ce script dans <head>.
+if (typeof firebase !== 'undefined') {
+  window.initPinoFirebase();
+}
+
+// Apple Sign-In : n'afficher le bouton que si le fournisseur est activé.
+document.addEventListener('DOMContentLoaded', () => {
+  const appleBtn = document.getElementById('apple-auth-btn');
+  if (appleBtn && window.PINO_FLAGS.appleLogin === true) appleBtn.style.display = '';
+});
 `;
   writeFileSync(distFirebaseConfig, prodFirebaseConfig, 'utf8');
 }
@@ -152,8 +165,8 @@ if (existsSync(join(ROOT, 'public'))) {
   }
 }
 
-// 5b. URL canonique : les sources utilisent le domaine gratuit Firebase ; on le remplace
-// par SITE_URL (ex. PINO_SITE_URL=https://pinoespacesverts.fr) dans tout le bundle.
+// 5b. URL canonique : les sources conservent le domaine gratuit Firebase comme repli ;
+// on le remplace par SITE_URL (défaut https://pinoespacesverts.online) dans tout le bundle.
 const DEFAULT_ORIGIN = 'https://pagepino-e8e97.web.app';
 const SITE_ORIGIN = SITE_URL.replace(/\/$/, '');
 if (SITE_ORIGIN !== DEFAULT_ORIGIN) {

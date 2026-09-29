@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // Audit en production (pnpm audit:live) : ce que voit réellement un visiteur anonyme. Lecture seule (GET).
 // Usage : node scripts/audit-live.mjs [URL_DU_SITE]
-const SITE = process.argv[2] || process.env.PINO_SITE_URL || 'https://pagepino-e8e97.web.app/';
+// Défaut : domaine canonique. Repli tant que le domaine n'est pas branché :
+//   node scripts/audit-live.mjs https://pagepino-e8e97.web.app/
+const SITE = process.argv[2] || process.env.PINO_SITE_URL || 'https://pinoespacesverts.online/';
 const DB = 'https://pagepino-e8e97-default-rtdb.europe-west1.firebasedatabase.app';
 const API_KEY = 'AIzaSyCOrSsb3dMl-tYr9y23zCPaDu63cRn7l-k';
 
