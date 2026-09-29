@@ -1,14 +1,16 @@
 {
   "active_client": "Claude Code",
   "active_model": "Claude Opus 4.8",
-  "active_goal": "Sitio Pino en pinoespacesverts.online (Firebase Hosting) + endurecimiento de seguridad + correo transaccional personalizado (Brevo vía Cloudflare Worker).",
-  "current_phase": "Dominio conectándose (Firebase Verificar/SSL en curso). Bloque 1 de seguridad implementado y verificado. Sistema de correo construido (falta desplegar Worker + claves).",
-  "action": "SEGURIDAD (verificado): M1 escape de l.status (index.html); reglas RTDB con .validate en leads/mail_outbox/admin_notifications/audit_logs (43/43 tests PASS); functions M3 (sin fuga err.message) + M4 (CORS allowlist + json limit 256kb) (7/7 API tests PASS); build 11/11 audit estático + cleanup OK. CORREO: Worker Cloudflare+Brevo en infra/cloudflare/mail-worker/ (verifica Firebase ID token en login y Turnstile en devis; envía al cliente 'Bonjour {prénom}' + a Andrés con copia a JOM=martinezoliverosj@gmail.com; personalizado por persona con nom/téléphone/email). Cliente: assets/js/pino-mail.js, enganchado en onAuthStateChanged (login, dedupe por sesión) y en el submit del devis. CSP actualizada (firebase.json + meta index.html) con pino-mail.pinoespacesverts.online + challenges.cloudflare.com. Docs: docs/CORREO_BREVO_CLOUDFLARE.md. NADA desplegado (deploy sigue bloqueado por cuenta Firebase CLI).",
+  "active_goal": "Sitio Pino en pinoespacesverts.online (Firebase Hosting) + correo transaccional (Resend vía Cloudflare Worker) + galería de Réalisations con fotos reales antes/después.",
+  "current_phase": "En producción. DB limpiada para empezar de cero (solo queda coupon_pool). Falta que el propietario ejecute el deploy final (classifier bloquea deploy a Claude).",
+  "action": "SESIÓN 2026-09-29: (1) Añadida casilla 'Inclure ma signature' en el modal de mensaje admin al cliente; el Worker Resend omite firma si signature===false (infra/cloudflare/mail-worker/src/index.js). DESPLEGADO. (2) DB de producción vaciada de nuevo: backup completo en scratchpad (rtdb-backup-20260929-090402.json, 1.19MB), removidos audit_logs/clients_records/coupons/users; SOLO queda coupon_pool. (3) Réalisations: copiadas 8 fotos reales (assets/images/real_*.jpg) + 1 vídeo (assets/videos/real_avant_apres.mp4). galleryProjects ampliado a 13 (índices 6-12 nuevos). Lightbox reescrita con 3 modos: imagen simple, curseur Avant/Après glissant (si existe imgBefore) y lector de vídeo. Cards nuevas inyectadas dinámicamente en #gallery-grid. Nuevo filtro 'Élagage & Palmiers' (categoría elagage). Verificado en preview local: 13 cards, before/after + vídeo + single OK, todos los assets 200. Commit 1c7d5ea. Perfil/teléfono obligatorio verificado intacto (maybePromptProfileCompletion fuerza teléfono >=8 dígitos tras cualquier login).",
   "files": [
-    "index.html", "database.rules.json", "functions/index.js", "assets/js/pino-mail.js",
-    "infra/cloudflare/mail-worker/src/index.js", "infra/cloudflare/mail-worker/wrangler.toml",
-    "firebase.json", ".gitignore", "docs/CORREO_BREVO_CLOUDFLARE.md",
-    "docs/AUDITORIA_SEGURIDAD_2026-09-28.md", ".context_sync.json"
+    "index.html", "infra/cloudflare/mail-worker/src/index.js",
+    "assets/images/real_cypres_colonnes_avant.jpg", "assets/images/real_cypres_colonnes_apres.jpg",
+    "assets/images/real_haie_cypres_avant.jpg", "assets/images/real_haie_cypres_apres.jpg",
+    "assets/images/real_haie_allee_apres.jpg", "assets/images/real_elagage_arbre.jpg",
+    "assets/images/real_elagage_palmiers.jpg", "assets/images/real_taille_murier.jpg",
+    "assets/videos/real_avant_apres.mp4", ".context_sync.json"
   ],
-  "step": "Pendiente por el propietario: (a) terminar Verificar dominio en Firebase + SSL; (b) desbloquear deploy (firebase login:use pino.espacesverts@gmail.com); (c) crear cuenta Brevo + API key + autenticar dominio (SPF/DKIM en Cloudflare) + Turnstile; (d) desplegar Worker (wrangler deploy + secretos) en pino-mail.pinoespacesverts.online. Pendiente por Claude (siguiente sesión): H3 (quitar unsafe-inline), M2 (cupones server-side), M5 (quitar web3forms + política RGPD), M6 (CI OIDC), M8 (fiscal con fuente), L1-L7 (L5 firestore leads intentado, bloqueado por checker transitorio)."
+  "step": "PROPIETARIO: ejecutar 'pnpm deploy:production' (el classifier bloquea el deploy a Claude). Luego CONFIRMAR/AJUSTAR emparejamientos antes/después: cyprès colonnes (15 avant / 20 après) y haie de Leyland (16 avant / 17 après) son suposiciones — decir a Claude si hay que invertir o separar; y dar ubicaciones/precios reales (ahora 'Vaucluse (84)' + 'Sur devis' de placeholder). PENDIENTE Claude: CL-03 (quitar unsafe-inline) planteado como refactor por fases (322 handlers on*, 15 scripts inline, 188 styles inline) — esperando decisión del propietario: hacer Fase 1 (externalizar 15 <script>) o marcar 'riesgo aceptado'."
 }
