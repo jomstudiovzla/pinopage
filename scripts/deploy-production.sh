@@ -17,7 +17,11 @@ FIREBASE_ACCOUNT="${FIREBASE_ACCOUNT:-pino.spacesverts@gmail.com}"
 FB_ARGS="--account $FIREBASE_ACCOUNT --non-interactive"
 
 echo "0/7 — Verificando acceso al proyecto $PROJECT_ID (cuenta: $FIREBASE_ACCOUNT)..."
-if ! firebase projects:list --account "$FIREBASE_ACCOUNT" 2>&1 | grep -q "$PROJECT_ID"; then
+# Capturamos la salida ANTES de grep: con `set -o pipefail`, `... | grep -q` cerraría
+# la tubería al primer match y firebase saldría con SIGPIPE (141), fallando el check
+# aunque el acceso sea correcto.
+PROJECTS_LIST="$(firebase projects:list --account "$FIREBASE_ACCOUNT" 2>&1 || true)"
+if ! printf '%s\n' "$PROJECTS_LIST" | grep -q "$PROJECT_ID"; then
   echo "⛔ La cuenta $FIREBASE_ACCOUNT no tiene acceso a $PROJECT_ID."
   echo "   Añádela con: firebase login:add  (inicia sesión con esa cuenta),"
   echo "   o exporta otra: FIREBASE_ACCOUNT=tu@cuenta pnpm deploy:production"
