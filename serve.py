@@ -17,6 +17,24 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 BLOCKED_SUFFIXES = ('.py', '.sql', '.sh', '.log', '.key', '.pem', '.env', '.md', '.toml', '.lock', '.yaml', '.yml')
 BLOCKED_DIRS = {'node_modules', 'supabase', 'tests', 'scripts', 'docs', 'correcciones', 'error'}
 
+# Pages d'erreur FASE 6 (fichiers dans public/, servies à la racine comme en prod).
+ERROR_PAGES = {
+    '/404': 'public/404.html',
+    '/404.html': 'public/404.html',
+    '/403': 'public/403.html',
+    '/403.html': 'public/403.html',
+    '/500': 'public/500.html',
+    '/500.html': 'public/500.html',
+    '/maintenance': 'public/maintenance.html',
+    '/maintenance.html': 'public/maintenance.html',
+}
+
+# Route protégée FASE 7 : le navigateur garde /admin, le fichier servi est index.html.
+SPA_ALIASES = {
+    '/admin': '/index.html',
+    '/admin.html': '/index.html',
+}
+
 
 class PinoDevHandler(SimpleHTTPRequestHandler):
     server_version = "PinoDev"
@@ -34,10 +52,35 @@ class PinoDevHandler(SimpleHTTPRequestHandler):
             return True
         return False
 
+    def send_error(self, code, message=None, explain=None):
+        if code == 404:
+            path = os.path.join(os.getcwd(), 'public', '404.html')
+            if os.path.isfile(path):
+                try:
+                    with open(path, 'rb') as fh:
+                        body = fh.read()
+                    self.send_response(404, message or "Not Found")
+                    self.send_header('Content-Type', 'text/html; charset=utf-8')
+                    self.send_header('Content-Length', str(len(body)))
+                    self.end_headers()
+                    if self.command != 'HEAD':
+                        self.wfile.write(body)
+                    return
+                except OSError:
+                    pass
+        return super().send_error(code, message, explain)
+
     def send_head(self):
         if self._is_blocked():
             self.send_error(404, "Not Found")
             return None
+        route = self.path.split('?', 1)[0]
+        alias = ERROR_PAGES.get(route)
+        if alias:
+            self.path = '/' + alias
+        spa = SPA_ALIASES.get(route)
+        if spa:
+            self.path = spa
         # Pas de listing de répertoire
         local = self.translate_path(self.path)
         if os.path.isdir(local) and not os.path.exists(os.path.join(local, 'index.html')):

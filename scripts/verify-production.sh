@@ -38,11 +38,26 @@ HOME_HTML="$(curl -sfL "$DOMAIN" || true)"
 HOME_HEAD="$(curl -sfIL "$DOMAIN" || true)"
 MANIFEST="$(curl -sfL "$DOMAIN/manifest.json" || true)"
 SW_HEAD="$(curl -sfIL "$DOMAIN/sw.js" || true)"
+SW_JS="$(curl -sfL "$DOMAIN/sw.js" || true)"
 ROBOTS="$(curl -sfL "$DOMAIN/robots.txt" || true)"
 SITEMAP="$(curl -sfL "$DOMAIN/sitemap.xml" || true)"
 RGPD="$(curl -sfL "$DOMAIN/legal/rgpd.html" || true)"
 MENTIONS="$(curl -sfL "$DOMAIN/legal/mentions-legales.html" || true)"
 CGV="$(curl -sfL "$DOMAIN/legal/cgv.html" || true)"
+PRIVACY="$(curl -sfL "$DOMAIN/politique-de-confidentialite" || true)"
+TERMS="$(curl -sfL "$DOMAIN/conditions-generales" || true)"
+PRIVACY_CODE="$(curl -sfL -o /dev/null -w '%{http_code}' "$DOMAIN/politique-de-confidentialite" || true)"
+TERMS_CODE="$(curl -sfL -o /dev/null -w '%{http_code}' "$DOMAIN/conditions-generales" || true)"
+UNKNOWN_CODE="$(curl -sL -o /tmp/pino-fase6-404.html -w '%{http_code}' "$DOMAIN/cette-page-nexiste-pas-pino-fase6" || true)"
+UNKNOWN_BODY="$(cat /tmp/pino-fase6-404.html 2>/dev/null || true)"
+ADMIN_CODE="$(curl -sL -o /tmp/pino-fase7-admin.html -w '%{http_code}' "$DOMAIN/admin" || true)"
+ADMIN_BODY="$(cat /tmp/pino-fase7-admin.html 2>/dev/null || true)"
+FORBIDDEN="$(curl -sfL "$DOMAIN/403.html" || true)"
+FIVEHUNDRED="$(curl -sfL "$DOMAIN/500.html" || true)"
+MAINT="$(curl -sfL "$DOMAIN/maintenance.html" || true)"
+ERR_JS="$(curl -sfL "$DOMAIN/assets/js/pino-errors.js" || true)"
+ADMIN_JS="$(curl -sfL "$DOMAIN/assets/js/pino-admin.js" || true)"
+FB_CFG="$(curl -sfL "$DOMAIN/assets/js/firebase-config.js" || true)"
 
 [ -n "$HOME_HTML" ]; check "Home responde 200" $?
 has "$HOME_HEAD" "HTTP/[123](\.[0-9])? 200"; check "HTTPS/SSL operativo" $?
@@ -72,7 +87,41 @@ has "$(curl -s "$RTDB/leads.json" || true)" "permission_denied|permission denied
 has "$RGPD" "RGPD|données"; check "Página legal RGPD disponible" $?
 has "$MENTIONS" "mentions|éditeur"; check "Mentions légales disponibles" $?
 has "$CGV" "conditions|vente"; check "CGV disponible" $?
+[ "$PRIVACY_CODE" = "200" ]; check "URL OAuth privacy HTTP 200" $?
+has "$PRIVACY" "Politique de Confidentialité"; check "URL OAuth privacy publique sans login" $?
+hasnot "$PRIVACY" "pinoConsumeRedirectResult"; check "Privacy n'est pas le SPA" $?
+[ "$TERMS_CODE" = "200" ]; check "URL OAuth CGV HTTP 200" $?
+has "$TERMS" "Conditions Générales de Vente"; check "URL OAuth CGV publique sans login" $?
+hasnot "$TERMS" "pinoConsumeRedirectResult"; check "CGV n'est pas le SPA" $?
+has "$SITEMAP" "politique-de-confidentialite"; check "Sitemap contient privacy OAuth" $?
+has "$HOME_HTML" 'href="/politique-de-confidentialite"'; check "Footer accueil lie la privacy" $?
 has "$HOME_HTML" "Pino Espaces Verts"; check "Marca correcta en dominio final" $?
+has "$HOME_HTML" "pino-auth-google.js"; check "Script Google multidispositif chargé" $?
+has "$HOME_HTML" "pinoConsumeRedirectResult"; check "getRedirectResult singleton présent" $?
+has "$HOME_HTML" "pino-ba-slider.js"; check "Script curseur Avant/Après chargé" $?
+has "$HOME_HTML" 'id="galerie-ba-prev"'; check "Bouton Voir l'Avant présent" $?
+has "$HOME_HTML" 'id="lightbox-next"'; check "Navigation lightbox galerie présente" $?
+has "$SW_JS" "pino-ev-v47-admin"; check "Service Worker v47 admin" $?
+has "$SW_JS" "pino-ba-slider.js"; check "SW cache le helper slider" $?
+has "$HOME_HTML" "pino-errors.js"; check "Script couche erreurs globale chargé" $?
+has "$SW_JS" "pino-errors.js"; check "SW cache pino-errors.js" $?
+[ "$UNKNOWN_CODE" = "404" ]; check "URL inconnue HTTP 404" $?
+has "$UNKNOWN_BODY" "introuvable"; check "Page 404 française (pas le SPA)" $?
+hasnot "$UNKNOWN_BODY" "pinoConsumeRedirectResult"; check "404 n'est pas le SPA" $?
+has "$FIVEHUNDRED" "indisponible"; check "Page 500 française disponible" $?
+has "$MAINT" "maintenance"; check "Page maintenance française disponible" $?
+has "$ERR_JS" "textContent"; check "Toast live utilise textContent" $?
+hasnot "$ERR_JS" "innerHTML"; check "Toast live sans innerHTML" $?
+has "$FB_CFG" "maintenance:\s*false"; check "PINO_FLAGS.maintenance désactivé" $?
+[ "$ADMIN_CODE" = "200" ]; check "/admin HTTP 200 (SPA, pas 404)" $?
+has "$ADMIN_BODY" "pinoConsumeRedirectResult"; check "/admin sert le SPA" $?
+has "$ADMIN_BODY" "modal-window-admin"; check "/admin contient le panneau admin" $?
+hasnot "$ADMIN_BODY" "Page introuvable"; check "/admin n'est pas la 404" $?
+has "$FORBIDDEN" "Accès refusé"; check "Page 403 française disponible" $?
+has "$FORBIDDEN" "noindex"; check "403 noindex" $?
+has "$HOME_HTML" "pino-admin.js"; check "Script PinoAdmin chargé" $?
+has "$ADMIN_JS" "decideAdminRoute"; check "PinoAdmin.decideAdminRoute live" $?
+has "$SW_JS" "pino-admin.js"; check "SW cache pino-admin.js" $?
 
 # API (Cloud Functions): informativo. En plan Spark no se despliegan y /api da 404;
 # la v1 estática no llama a /api, así que NO cuenta como fallo de producción.

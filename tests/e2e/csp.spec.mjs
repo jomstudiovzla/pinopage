@@ -26,6 +26,9 @@ test('CSP : pas de CDN Tailwind, pas de localhost, pas de unsafe-eval', async ({
   expect(csp).not.toContain('cdn.tailwindcss.com');
   expect(csp).not.toMatch(/localhost|127\.0\.0\.1/);
   expect(csp).not.toContain('unsafe-eval');
+  expect(csp).not.toContain('formsubmit');
+  expect(csp).not.toContain('web3forms');
+  expect(csp).toContain("form-action 'self'");
   expect(csp).toContain('https://maps.google.com');
   expect(await page.locator('script[src*="cdn.tailwindcss"]').count()).toBe(0);
 });

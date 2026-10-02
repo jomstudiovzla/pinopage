@@ -84,7 +84,7 @@ async function requireAdmin(req, res, next) {
   const token = authHeader.split("Bearer ")[1].trim();
   try {
     const decoded = await auth.verifyIdToken(token);
-    const hasAdminRole = decoded.role === "admin";
+    const hasAdminRole = decoded.role === "admin" || decoded.admin === true;
     const isAdminEmail = ADMIN_EMAILS.includes(decoded.email);
     const isVerified = decoded.email_verified === true;
 
@@ -138,10 +138,11 @@ router.post(["/quotes/create", "/api/quotes/create"], async (req, res) => {
       commune: commune ? String(commune).slice(0, 100) : "Vaucluse (84)",
       ownerUid: ownerUid || (req.user ? req.user.uid : null),
       status: "REQUESTED",
+      mail_status: "received",
       created_at: new Date().toISOString()
     };
 
-    // Store in quotes and leads
+    // Store in quotes and leads. L'envoi mail est le Worker (client) : pas de double envoi ici.
     await db.ref(`quotes/${quoteId}`).set(quoteData);
     await db.ref(`leads/${quoteId}`).set({
       id: quoteId,
@@ -151,6 +152,7 @@ router.post(["/quotes/create", "/api/quotes/create"], async (req, res) => {
       service: quoteData.service,
       details: quoteData.details,
       status: "new",
+      mail_status: "received",
       source: "web_devis",
       created_at: quoteData.created_at
     });
@@ -176,7 +178,7 @@ router.get(["/quotes/:id", "/api/quotes/:id"], requireAuth, async (req, res) => 
 
     const quote = snap.val();
     const isOwner = quote.ownerUid === req.user.uid || quote.email === req.user.email;
-    const isAdmin = req.user.role === "admin" || ADMIN_EMAILS.includes(req.user.email);
+    const isAdmin = req.user.role === "admin" || req.user.admin === true || ADMIN_EMAILS.includes(req.user.email);
 
     if (!isOwner && !isAdmin) {
       return res.status(403).json({ error: "forbidden", message: "Accès refusé à ce devis" });
@@ -199,7 +201,7 @@ router.post(["/quotes/:id/accept", "/api/quotes/:id/accept"], requireAuth, async
 
     const quote = snap.val();
     const isOwner = quote.ownerUid === req.user.uid || quote.email === req.user.email;
-    const isAdmin = req.user.role === "admin" || ADMIN_EMAILS.includes(req.user.email);
+    const isAdmin = req.user.role === "admin" || req.user.admin === true || ADMIN_EMAILS.includes(req.user.email);
 
     if (!isOwner && !isAdmin) {
       return res.status(403).json({ error: "forbidden", message: "Action non autorisée" });
@@ -384,7 +386,7 @@ router.post(["/admin/users/:uid/role", "/api/admin/users/:uid/role"], requireAdm
       return res.status(400).json({ error: "invalid_argument", message: "UID ou rôle invalide" });
     }
 
-    await auth.setCustomUserClaims(targetUid, { role });
+    await auth.setCustomUserClaims(targetUid, { role, admin: role === "admin" });
     await db.ref(`users/${targetUid}/role`).set(role);
     await db.ref(`users/${targetUid}/isAdmin`).set(role === "admin");
 
@@ -407,30 +409,125 @@ router.post(["/admin/users/:uid/role", "/api/admin/users/:uid/role"], requireAdm
   }
 });
 
-// 7. Transactional Email Dispatcher (Admin)
+async function sendViaResend({ to, subject, text, html, replyTo }) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { ok: false, queued: true, reason: "resend_not_configured" };
+  const toList = (Array.isArray(to) ? to : [to]).map((item) => String(item || "").trim()).filter(Boolean);
+  if (!toList.length) return { ok: false, reason: "no_recipient" };
+  const payload = {
+    from: "Andrés Pino — Pino Espaces Verts <andresp@pinoespacesverts.online>",
+    to: toList,
+    subject: String(subject || "").slice(0, 200),
+    text: String(text || subject || "").slice(0, 10000),
+    reply_to: replyTo || "pino.espacesverts@gmail.com"
+  };
+  if (html) payload.html = html;
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  let j = {};
+  try { j = await r.json(); } catch (e) { j = {}; }
+  if (r.ok) return { ok: true, id: j.id || null };
+  return { ok: false, reason: j.message || `http_${r.status}` };
+}
+
+// 7. Transactional Email Dispatcher (Admin) — persist first, then Resend if configured.
 router.post(["/emails/send", "/api/emails/send"], requireAdmin, async (req, res) => {
   try {
-    const { to, subject, template, variables } = req.body || {};
+    const { to, subject, template, variables, text, html, replyTo } = req.body || {};
     if (!to || !subject) {
       return res.status(400).json({ error: "bad_request", message: "Destinataire et sujet requis" });
     }
 
     const emailId = "mail_" + Date.now();
+    const now = new Date().toISOString();
+    const bodyText = text || (variables && variables.message) || "";
     await db.ref(`mail_outbox/${emailId}`).set({
       id: emailId,
-      to,
-      subject,
+      to: Array.isArray(to) ? String(to[0] || "") : String(to),
+      subject: String(subject).slice(0, 200),
       template: template || "generic",
       variables: variables || {},
-      status: "queued",
-      created_at: new Date().toISOString()
+      text: String(bodyText).slice(0, 10000),
+      status: "received",
+      created_at: now
     });
 
-    return res.status(200).json({
-      success: true,
-      emailId,
-      message: "Email ajouté à la file d'envoi"
+    await db.ref(`mail_outbox/${emailId}`).update({ status: "processing" });
+    const sent = await sendViaResend({
+      to,
+      subject,
+      text: bodyText || subject,
+      html,
+      replyTo
     });
+
+    if (sent.ok) {
+      await db.ref(`mail_outbox/${emailId}`).update({
+        status: "sent",
+        sent_at: new Date().toISOString(),
+        provider_id: sent.id || null,
+        via: "resend"
+      });
+      return res.status(200).json({ success: true, emailId, status: "sent", id: sent.id || null });
+    }
+
+    const queued = sent.queued === true;
+    await db.ref(`mail_outbox/${emailId}`).update({
+      status: queued ? "queued" : "failed",
+      last_error: sent.reason || "send_failed"
+    });
+    if (queued) {
+      return res.status(200).json({
+        success: true,
+        emailId,
+        status: "queued",
+        message: "Email mis en file (Resend non configuré sur Functions)"
+      });
+    }
+    return res.status(502).json({ success: false, emailId, status: "failed", error: "send_failed" });
+  } catch (err) {
+    return res.status(500).json({ error: "internal_error", message: "Erreur interne du serveur" });
+  }
+});
+
+router.post(["/emails/drain", "/api/emails/drain"], requireAdmin, async (req, res) => {
+  try {
+    const snap = await db.ref("mail_outbox").limitToLast(40).get();
+    const val = snap.exists() ? snap.val() : {};
+    let sent = 0;
+    let failed = 0;
+    for (const [id, job] of Object.entries(val || {})) {
+      if (!job || job.status === "sent") continue;
+      await db.ref(`mail_outbox/${id}`).update({
+        status: "processing",
+        attempts: (job.attempts || 0) + 1
+      });
+      const result = await sendViaResend({
+        to: job.to,
+        subject: job.subject,
+        text: job.text || job.message || job.subject,
+        html: job.html,
+        replyTo: job.replyTo
+      });
+      if (result.ok) {
+        sent++;
+        await db.ref(`mail_outbox/${id}`).update({
+          status: "sent",
+          sent_at: new Date().toISOString(),
+          provider_id: result.id || null,
+          via: "resend"
+        });
+      } else if (result.queued) {
+        await db.ref(`mail_outbox/${id}`).update({ status: "queued", last_error: result.reason });
+      } else {
+        failed++;
+        await db.ref(`mail_outbox/${id}`).update({ status: "failed", last_error: result.reason || "send_failed" });
+      }
+    }
+    return res.status(200).json({ success: true, sent, failed });
   } catch (err) {
     return res.status(500).json({ error: "internal_error", message: "Erreur interne du serveur" });
   }
@@ -456,7 +553,8 @@ exports.app = app;
 exports.setUserRole = onCall({ region: "europe-west1" }, async (request) => {
   if (!request.auth?.token?.role || request.auth.token.role !== "admin") {
     const isAdminEmail = ADMIN_EMAILS.includes(request.auth?.token?.email);
-    if (!isAdminEmail) {
+    const hasClaim = request.auth?.token?.admin === true;
+    if (!isAdminEmail && !hasClaim) {
       throw new HttpsError("permission-denied", "Administrateur requis");
     }
   }
@@ -470,7 +568,7 @@ exports.setUserRole = onCall({ region: "europe-west1" }, async (request) => {
     throw new HttpsError("invalid-argument", "UID ou rôle invalide");
   }
 
-  await auth.setCustomUserClaims(uid, { role });
+  await auth.setCustomUserClaims(uid, { role, admin: role === "admin" });
   await db.ref(`users/${uid}/role`).set(role);
   await db.ref(`users/${uid}/isAdmin`).set(role === "admin");
 

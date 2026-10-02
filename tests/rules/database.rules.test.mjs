@@ -199,3 +199,110 @@ test('client lit uniquement ses propres notifications', async () => {
   await assertSucceeds(get(ref(db(['uidA', CLIENT_A]), 'client_notifications/alice@example_com')));
   await assertFails(get(ref(db(['uidA', CLIENT_A]), 'client_notifications/bob@example_com')));
 });
+
+test('anonyme ne peut pas créer une entrée mail_outbox', async () => {
+  await assertFails(set(push(ref(db(null), 'mail_outbox')), {
+    to: 'spam@example.com', subject: 'x', status: 'queued', text: 'hello',
+  }));
+});
+
+test('client ne peut pas écrire dans mail_outbox', async () => {
+  await assertFails(set(push(ref(db(['uidA', CLIENT_A]), 'mail_outbox')), {
+    to: 'alice@example.com', subject: 'x', status: 'queued', text: 'hello',
+  }));
+  await assertFails(update(ref(db(['uidA', CLIENT_A]), 'mail_outbox/m1'), { status: 'sent' }));
+});
+
+test('admin vérifié peut enfiler et marquer un e-mail (received → processing → sent)', async () => {
+  const adminDb = db(['adminUid', ADMIN]);
+  const jobRef = push(ref(adminDb, 'mail_outbox'));
+  await assertSucceeds(set(jobRef, {
+    to: 'alice@example.com', subject: 'Devis', status: 'received', text: 'Bonjour',
+  }));
+  await assertSucceeds(update(jobRef, { status: 'processing' }));
+  await assertSucceeds(update(jobRef, { status: 'sent' }));
+});
+
+test('admin ne peut pas poser un statut mail_outbox hors liste', async () => {
+  await assertFails(set(push(ref(db(['adminUid', ADMIN]), 'mail_outbox')), {
+    to: 'alice@example.com', subject: 'x', status: 'hacked', text: 'no',
+  }));
+});
+
+// ── Custom Claims (FASE 7) : admin hors liste e-mail ───────────────────────
+const CLAIM_ADMIN = { email: 'staff@example.com', email_verified: true, admin: true, role: 'admin' };
+const CLAIM_UNVERIFIED = { email: 'staff@example.com', email_verified: false, admin: true, role: 'admin' };
+
+test('claim admin:true (hors liste) lit users et mail_outbox', async () => {
+  await assertSucceeds(get(ref(db(['claimAdmin', CLAIM_ADMIN]), 'users')));
+  await assertSucceeds(get(ref(db(['claimAdmin', CLAIM_ADMIN]), 'mail_outbox')));
+});
+
+test('claim admin non vérifié est refusé', async () => {
+  await assertFails(get(ref(db(['claimAdmin', CLAIM_UNVERIFIED]), 'users')));
+});
+
+test('claim admin peut modifier une facture', async () => {
+  await assertSucceeds(update(ref(db(['claimAdmin', CLAIM_ADMIN]), 'jobs/J1'), { payment_status: 'paid' }));
+});
+
+// ── FASE 8 : durcissement modèle RTDB ──────────────────────────────────────
+test('client ne peut pas poser admin:true sur son profil', async () => {
+  await assertFails(update(ref(db(['uidA', CLIENT_A]), 'users/uidA'), { admin: true }));
+});
+
+test('client met à jour son profil sans champs admin', async () => {
+  await assertSucceeds(update(ref(db(['uidA', CLIENT_A]), 'users/uidA'), { phone: '0651594034', commune: 'Entraigues' }));
+});
+
+test('propriétaire ne peut pas changer le statut d\'un devis', async () => {
+  await assertFails(update(ref(db(['uidA', CLIENT_A]), 'leads/L1'), { status: 'Gagné' }));
+});
+
+test('propriétaire ne peut pas changer la source d\'un devis', async () => {
+  await assertFails(update(ref(db(['uidA', CLIENT_A]), 'leads/L1'), { source: 'hack' }));
+});
+
+test('propriétaire peut corriger le téléphone sans toucher status/source/email', async () => {
+  await assertSucceeds(update(ref(db(['uidA', CLIENT_A]), 'leads/L1'), { phone: '0611223344' }));
+});
+
+test('admin peut changer le statut d\'un devis', async () => {
+  await assertSucceeds(update(ref(db(['adminUid', ADMIN]), 'leads/L1'), { status: 'Devis envoyé' }));
+});
+
+test('client peut append un audit avec sessionUser = son e-mail', async () => {
+  await assertSucceeds(set(push(ref(db(['uidA', CLIENT_A]), 'audit_logs')), {
+    sessionUser: 'alice@example.com',
+    action: 'connexion',
+    created_at: '2026-10-02',
+  }));
+});
+
+test('client ne peut pas spoofier sessionUser d\'un autre', async () => {
+  await assertFails(set(push(ref(db(['uidA', CLIENT_A]), 'audit_logs')), {
+    sessionUser: 'pino.espacesverts@gmail.com',
+    action: 'connexion',
+  }));
+});
+
+test('client ne peut pas append un audit sans sessionUser', async () => {
+  await assertFails(set(push(ref(db(['uidA', CLIENT_A]), 'audit_logs')), {
+    action: 'connexion',
+  }));
+});
+
+test('admin peut append un audit sans sessionUser', async () => {
+  await assertSucceeds(set(push(ref(db(['adminUid', ADMIN]), 'audit_logs')), {
+    action: 'invite_client',
+    type: 'admin',
+  }));
+});
+
+test('client ne lit ni n\'efface les journaux d\'audit', async () => {
+  await assertFails(get(ref(db(['uidA', CLIENT_A]), 'audit_logs')));
+  await assertFails(get(ref(db(['uidA', CLIENT_A]), 'audit_logs/a1')));
+  await assertFails(update(ref(db(['uidA', CLIENT_A]), 'audit_logs/a1'), { action: 'hack' }));
+  await assertFails(set(ref(db(['uidA', CLIENT_A]), 'audit_logs/a1'), null));
+});
+

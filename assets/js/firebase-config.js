@@ -22,7 +22,7 @@ window.PINO_FIREBASE_CONFIG = {
  * appleLogin : n'activer qu'après configuration du fournisseur « apple.com » dans
  * Firebase → Authentication → Sign-in method (Apple Developer Program requis).
  */
-window.PINO_FLAGS = Object.assign({ appleLogin: false }, window.PINO_FLAGS || {});
+window.PINO_FLAGS = Object.assign({ appleLogin: false, maintenance: false }, window.PINO_FLAGS || {});
 
 /**
  * URL publique officielle utilisée dans les e-mails et notifications.

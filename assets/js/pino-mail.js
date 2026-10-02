@@ -1,9 +1,9 @@
 /**
- * Pino Espaces Verts — Cliente de notificaciones por correo (Brevo vía Cloudflare Worker).
+ * Pino Espaces Verts — Cliente de notificaciones por correo (Resend vía Cloudflare Worker).
  * ---------------------------------------------------------------------------------------
- * Envía eventos ("login", "signup", "devis", "interaction") al Worker `pino-mail`,
- * que manda correos PERSONALIZADOS por persona (prénom para el saludo; nom, téléphone,
- * email, prestation… en el cuerpo). Destinatarios: el propio cliente + Andrés con copia a JOM.
+ * Envía eventos ("login", "signup", "devis", "interaction", "transactional", "admin_alert")
+ * al Worker `pino-mail`, que manda correos PERSONALIZADOS (From: Andrés Pino).
+ * Destinatarios: el propio cliente + Andrés con copia a JOM.
  *
  * MODO SEGURO: si el Worker no está desplegado, las llamadas fallan en silencio (try/catch)
  * y NO rompen la web. Endpoint configurable en `window.PINO_MAIL_ENDPOINT`.
@@ -31,13 +31,27 @@
 
   // Un intento: lanza si la red falla O si el Worker responde != 2xx (para poder reintentar).
   async function sendOnce(payload) {
-    var res = await fetch(ENDPOINT.replace(/\/$/, "") + "/notify", {
+    var corr = (payload && payload.correlationId) || (globalThis.PinoErrors && PinoErrors.newCorrelationId && PinoErrors.newCorrelationId()) || '';
+    if (payload && corr && !payload.correlationId) payload.correlationId = corr;
+    var headers = { "content-type": "application/json" };
+    if (corr) headers["X-Pino-Correlation-Id"] = corr;
+    var url = ENDPOINT.replace(/\/$/, "") + "/notify";
+    var fetchFn = (globalThis.PinoErrors && typeof PinoErrors.fetchWithTimeout === "function")
+      ? function (u, init) { return PinoErrors.fetchWithTimeout(u, init, 8000); }
+      : fetch;
+    var res = await fetchFn(url, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: headers,
       body: JSON.stringify(payload),
       keepalive: true
     });
-    if (!res || !res.ok) throw new Error("HTTP " + (res ? res.status : "no-response"));
+    if (!res || !res.ok) {
+      var err = new Error("HTTP " + (res ? res.status : "no-response"));
+      err.status = res ? res.status : 0;
+      err.kind = "email";
+      err.correlationId = corr;
+      throw err;
+    }
     return true;
   }
 
@@ -56,6 +70,9 @@
         if (i === attempts - 1) {
           if (opts.queueOnFail !== false) enqueue(payload);
           if (window.console) console.warn("[pino-mail] notify falló tras reintentos" + (opts.queueOnFail !== false ? " (encolado)" : "") + ":", e && e.message);
+          if (globalThis.PinoErrors && typeof PinoErrors.logError === "function") {
+            PinoErrors.logError(PinoErrors.normalize(e || { kind: "email", message: "notify_failed" }, "pino-mail"));
+          }
           return false;
         }
         await sleep(400 * (i + 1));
@@ -100,19 +117,24 @@
    */
   function buildProfile(user, extra) {
     extra = extra || {};
-    var name = extra.name || (user && user.displayName) || "";
-    var email = (extra.email || (user && user.email) || "").trim();
+    var name = extra.name || extra.clientName || (user && user.displayName) || "";
+    var email = (extra.email || extra.clientEmail || (user && user.email) || "").trim();
     return {
       name: name,
       prenom: extra.prenom || extra.first_name || "",
       nom: extra.nom || extra.last_name || "",
       email: email,
-      phone: extra.phone || extra.telephone || "",
+      phone: extra.phone || extra.telephone || extra.clientPhone || "",
       service: extra.service || "",
       commune: extra.commune || "",
       postal_code: extra.postal_code || "",
-      budget: extra.budget || "",
-      details: extra.details || ""
+      budget: extra.budget || extra.amount || "",
+      details: extra.details || "",
+      message: extra.message || "",
+      subject: extra.subject || "",
+      kind: extra.kind || "",
+      leadId: extra.leadId || extra.lead_id || "",
+      signature: extra.signature
     };
   }
 

@@ -1,12 +1,17 @@
 // Pino Espaces Verts — service worker (hors ligne basique, mêmes origines uniquement).
 // Les appels Firebase / Google / CDN ne sont jamais mis en cache : données et sessions toujours à jour.
-const CACHE_NAME = 'pino-ev-v41-secure-auth';
+const CACHE_NAME = 'pino-ev-v47-admin';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './assets/css/tailwind.min.css',
   './assets/js/firebase-config.js',
+  './assets/js/pino-auth-errors.js',
+  './assets/js/pino-errors.js',
+  './assets/js/pino-admin.js',
+  './assets/js/pino-auth-google.js',
+  './assets/js/pino-ba-slider.js',
   './assets/js/pino-db.js',
   './assets/js/chatbot_knowledge_base.js',
   './assets/logo/Logo pino.png',

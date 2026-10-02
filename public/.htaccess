@@ -32,9 +32,21 @@ AddDefaultCharset UTF-8
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # Routeur SPA pour navigation directe
-  RewriteRule ^ index.html [L]
+  # Route admin FASE 7 (SPA) — pas de catch-all.
+  RewriteRule ^admin/?$ /index.html [L]
+  RewriteRule ^admin\.html$ /index.html [L]
+
+  # Alias légaux publics (OAuth consent + LCEN). Avant le catch-all SPA.
+  RewriteRule ^politique-de-confidentialite/?$ /legal/rgpd.html [L]
+  RewriteRule ^confidentialite/?$ /legal/rgpd.html [L]
+  RewriteRule ^conditions-generales/?$ /legal/cgv.html [L]
+  RewriteRule ^cgv/?$ /legal/cgv.html [L]
+  RewriteRule ^mentions-legales/?$ /legal/mentions-legales.html [L]
 </IfModule>
+
+ErrorDocument 403 /403.html
+ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html
 
 # 4. En-têtes de sécurité stricts (Conformes RGPD & OWASP)
 <IfModule mod_headers.c>
@@ -74,5 +86,7 @@ AddDefaultCharset UTF-8
   AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json image/svg+xml
 </IfModule>
 
-# 6. Page 404 personnalisée
+# 6. Pages d'erreur personnalisées
+ErrorDocument 403 /403.html
 ErrorDocument 404 /404.html
+ErrorDocument 500 /500.html

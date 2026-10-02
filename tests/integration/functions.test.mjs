@@ -99,3 +99,19 @@ test('API Quotes create validates required parameters', async () => {
   });
   assert.equal(res.status, 400);
 });
+
+test('API Emails send blocks anonymous requests with 401', async () => {
+  const res = await fetch(`${baseUrl}/api/emails/send`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ to: 'alice@example.com', subject: 'Test' })
+  });
+  assert.equal(res.status, 401);
+  const data = await res.json();
+  assert.equal(data.error, 'unauthorized');
+});
+
+test('API Emails drain blocks anonymous requests with 401', async () => {
+  const res = await fetch(`${baseUrl}/api/emails/drain`, { method: 'POST' });
+  assert.equal(res.status, 401);
+});

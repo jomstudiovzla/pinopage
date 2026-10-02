@@ -83,7 +83,7 @@ window.PINO_FIREBASE_CONFIG = {
   appId: "1:102396108475:web:070dcbdf881bd2b10c139e"
 };
 
-window.PINO_FLAGS = Object.assign({ appleLogin: false }, window.PINO_FLAGS || {});
+window.PINO_FLAGS = Object.assign({ appleLogin: false, maintenance: false }, window.PINO_FLAGS || {});
 
 window.PINO_PUBLIC_URL = "${SITE_URL}";
 window.pinoSiteUrl = () => window.PINO_PUBLIC_URL;
@@ -163,6 +163,22 @@ if (existsSync(join(ROOT, 'public'))) {
   if (existsSync(join(ROOT, 'public', '.htaccess'))) {
     cpSync(join(ROOT, 'public', '.htaccess'), join(DIST, '.htaccess'));
   }
+}
+
+// 5a. Alias publics pour Google OAuth Consent Screen + LCEN.
+// Fichiers réels à la racine de dist/ : cleanUrls sert /politique-de-confidentialite.
+// Le catch-all SPA (« ** » → index.html) a été retiré en FASE 6 pour servir 404.html.
+const LEGAL_ALIASES = [
+  ['legal/rgpd.html', 'politique-de-confidentialite.html'],
+  ['legal/rgpd.html', 'confidentialite.html'],
+  ['legal/cgv.html', 'conditions-generales.html'],
+  ['legal/cgv.html', 'cgv.html'],
+  ['legal/mentions-legales.html', 'mentions-legales.html'],
+];
+for (const [srcRel, destRel] of LEGAL_ALIASES) {
+  const src = join(DIST, srcRel);
+  const dest = join(DIST, destRel);
+  if (existsSync(src)) cpSync(src, dest);
 }
 
 // 5b. URL canonique : les sources conservent le domaine gratuit Firebase comme repli ;

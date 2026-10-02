@@ -57,8 +57,11 @@ Firebase Console → **Authentication → Settings → Authorized domains** → 
 - `pinoespacesverts.online`
 - `www.pinoespacesverts.online`
 
-Sin esto, **el login con Google falla** en el dominio nuevo. (No hace falta tocar `authDomain`:
-sigue siendo `pagepino-e8e97.firebaseapp.com`, que gestiona el redirect de OAuth.)
+**Comprobado 2026-10-02:** `accounts:createAuthUri` con la API key de `pagepino-e8e97` acepta
+`https://pinoespacesverts.online` y `https://www.pinoespacesverts.online` (también el repli
+`.web.app`, `firebaseapp.com` y `http://localhost:5500`). Sin estos dominios, registro y
+Google fallan con `auth/unauthorized-domain`. `authDomain` sigue siendo
+`pagepino-e8e97.firebaseapp.com` (redirect OAuth).
 
 ## Paso 4 — Esperar a «Connected»
 

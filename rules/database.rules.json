@@ -80,7 +80,8 @@
     "mail_outbox": {
       ".read": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com')",
       "$id": {
-        ".write": "(!data.exists() && newData.exists()) || (auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com'))"
+        ".write": "auth != null && auth.token.email_verified === true && (auth.token.email === 'pino.espacesverts@gmail.com')",
+        ".validate": "!newData.child('status').exists() || newData.child('status').val().matches(/^(received|queued|processing|sent|failed)$/)"
       }
     },
     "platform_leads": {

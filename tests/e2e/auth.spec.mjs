@@ -49,6 +49,8 @@ test('inscription → e-mail de vérification → connexion bloquée → lien cl
 
   // Profil et coupon -20 % créés côté base sous l'identité Firebase réelle.
   await expect.poll(() => dbGet(`users/${u.uid}/email`)).toBe(email);
+  await expect.poll(() => dbGet(`users/${u.uid}/created_at`)).toBeTruthy();
+  await expect.poll(() => dbGet(`users/${u.uid}/role`)).toBe('client');
   await expect.poll(() => dbGet(`coupons/${u.uid}/descuento_pct`)).toBe(20);
 });
 
@@ -199,3 +201,148 @@ test('Google (popup) : connexion via le fournisseur, profil créé', async ({ pa
   expect(u.email).toBe('gardener@gmail.com');
   await expect.poll(() => dbGet(`users/${u.uid}/auth_provider`)).toBe('google');
 });
+
+test('Google : stratégie popup bureau / redirect tactile', async ({ page, isMobile }) => {
+  await openSite(page);
+  const loaded = await page.evaluate(() => ({
+    helper: typeof window.pinoShouldUseRedirectAuth === 'function',
+    consume: typeof window.pinoConsumeRedirectResult === 'function',
+    begin: typeof window.pinoBeginFederatedSignIn === 'function',
+    redirect: typeof window.pinoShouldUseRedirectAuth === 'function' && window.pinoShouldUseRedirectAuth(),
+  }));
+  expect(loaded.helper).toBe(true);
+  expect(loaded.consume).toBe(true);
+  expect(loaded.begin).toBe(true);
+  expect(loaded.redirect).toBe(!!isMobile);
+});
+
+test('Google : mobile utilise redirect (aucun popup)', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'Chemin mobile uniquement.');
+  await openSite(page);
+  await page.evaluate(() => {
+    window.__pinoAuthCalls = [];
+    const auth = firebase.auth();
+    auth.signInWithPopup = () => {
+      window.__pinoAuthCalls.push('popup');
+      return Promise.resolve({ user: null });
+    };
+    auth.signInWithRedirect = () => {
+      window.__pinoAuthCalls.push('redirect');
+      return Promise.resolve();
+    };
+  });
+  await openAuthModal(page);
+  await page.getByRole('button', { name: /Continuer avec Google/ }).click();
+  await expect.poll(() => page.evaluate(() => (window.__pinoAuthCalls || []).join(','))).toBe('redirect');
+  expect(await page.evaluate(() => sessionStorage.getItem('pino_auth_redirect_pending'))).toBe('google');
+});
+
+test('Google : popup bloqué → repli redirect + drapeau pending', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'Sur mobile le redirect est le chemin principal.');
+  await openSite(page);
+  await page.evaluate(() => {
+    window.__pinoAuthCalls = [];
+    const auth = firebase.auth();
+    auth.signInWithPopup = () => {
+      window.__pinoAuthCalls.push('popup');
+      return Promise.reject(Object.assign(new Error('blocked'), { code: 'auth/popup-blocked' }));
+    };
+    auth.signInWithRedirect = () => {
+      window.__pinoAuthCalls.push('redirect');
+      return Promise.resolve();
+    };
+  });
+  await openAuthModal(page);
+  await page.getByRole('button', { name: /Continuer avec Google/ }).click();
+  await expect.poll(() => page.evaluate(() => (window.__pinoAuthCalls || []).join(','))).toBe('popup,redirect');
+  expect(await page.evaluate(() => sessionStorage.getItem('pino_auth_redirect_pending'))).toBe('google');
+});
+
+test('Google : getRedirectResult erreur → message FR, pas de secret', async ({ page }) => {
+  await openSite(page);
+  await page.evaluate(() => window.pinoConsumeRedirectResult());
+  await page.evaluate(() => {
+    window._pinoRedirectGate = null;
+    if (window.PinoAuthGoogle) window.PinoAuthGoogle.setPending('google');
+    firebase.auth().getRedirectResult = () =>
+      Promise.reject(Object.assign(new Error('domain'), { code: 'auth/unauthorized-domain' }));
+  });
+  await page.evaluate(() => window.pinoConsumeRedirectResult());
+  await expect(page.locator('#app-notification-toast')).toContainText(/pinoespacesverts\.online/i);
+  expect(await page.evaluate(() => sessionStorage.getItem('pino_auth_redirect_pending'))).toBeFalsy();
+});
+
+test('inscription : e-mail déjà utilisé → message précis, onglet connexion', async ({ page }) => {
+  await createUser('deja@example.com', PASS);
+  await openSite(page);
+  await openAuthModal(page);
+  await page.locator('#auth-tab-btn-register').click();
+  await expect(page.locator('#auth-view-register')).toBeVisible();
+  await page.fill('#reg-fullname', 'Claire Dupont');
+  await page.fill('#reg-email', 'deja@example.com');
+  await page.fill('#reg-password', PASS);
+  await page.fill('#reg-password-confirm', PASS);
+  await page.locator('#auth-view-register form').evaluate((form) => {
+    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+  });
+  await expect(page.locator('#login-error-msg:not(.hidden), #reg-error-msg:not(.hidden)')).toBeVisible();
+  await expect(page.locator('#login-error-text, #reg-error-text').filter({ hasText: 'déjà un compte' })).toBeVisible();
+  expect(await firebaseUser(page)).toBeNull();
+});
+
+test('inscription : operation-not-allowed → message FR spécifique, pas le générique', async ({ page }) => {
+  await openSite(page);
+  await page.evaluate(() => {
+    firebase.auth().createUserWithEmailAndPassword = () =>
+      Promise.reject(Object.assign(new Error('off'), { code: 'auth/operation-not-allowed' }));
+  });
+  await openAuthModal(page);
+  await page.locator('#auth-tab-btn-register').click();
+  await page.fill('#reg-fullname', 'Claire Dupont');
+  await page.fill('#reg-email', 'claire.na@example.com');
+  await page.fill('#reg-password', PASS);
+  await page.fill('#reg-password-confirm', PASS);
+  await page.locator('#auth-view-register form button[type="submit"]').click();
+  await expect(page.locator('#reg-error-text')).toContainText('pas disponible');
+  await expect(page.locator('#reg-error-text')).not.toContainText('Vérifiez votre adresse e-mail');
+});
+
+test('inscription : unauthorized-domain → indique le domaine officiel', async ({ page }) => {
+  await openSite(page);
+  await page.evaluate(() => {
+    firebase.auth().createUserWithEmailAndPassword = () =>
+      Promise.reject(Object.assign(new Error('dom'), { code: 'auth/unauthorized-domain' }));
+  });
+  await openAuthModal(page);
+  await page.locator('#auth-tab-btn-register').click();
+  await page.fill('#reg-fullname', 'Claire Dupont');
+  await page.fill('#reg-email', 'claire.dom@example.com');
+  await page.fill('#reg-password', PASS);
+  await page.fill('#reg-password-confirm', PASS);
+  await page.locator('#auth-view-register form button[type="submit"]').click();
+  await expect(page.locator('#reg-error-text')).toContainText('pinoespacesverts.online');
+});
+
+test('inscription : échec d\'envoi du mail de vérification → compte tout de même créé', async ({ page }) => {
+  await openSite(page);
+  await page.evaluate(() => {
+    const orig = firebase.auth().createUserWithEmailAndPassword.bind(firebase.auth());
+    firebase.auth().createUserWithEmailAndPassword = async (email, pass) => {
+      const cred = await orig(email, pass);
+      cred.user.sendEmailVerification = () =>
+        Promise.reject(Object.assign(new Error('mail'), { code: 'auth/too-many-requests' }));
+      return cred;
+    };
+  });
+  await openAuthModal(page);
+  await page.locator('#auth-tab-btn-register').click();
+  const email = `verif.fail.${Date.now()}@example.com`;
+  await page.fill('#reg-fullname', 'Claire Dupont');
+  await page.fill('#reg-email', email);
+  await page.fill('#reg-password', PASS);
+  await page.fill('#reg-password-confirm', PASS);
+  await page.locator('#auth-view-register form button[type="submit"]').click();
+  await expect(page.locator('#login-error-text')).toContainText('Compte créé');
+  expect(await firebaseUser(page)).toBeNull();
+});
+

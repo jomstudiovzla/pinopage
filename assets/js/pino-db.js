@@ -36,8 +36,28 @@
   }
 
   const PINO_ADMIN_EMAIL = 'pino.espacesverts@gmail.com';
-  const ADMIN_INBOXES = [PINO_ADMIN_EMAIL];
-  const WEB3FORMS_ACCESS_KEY = '646876c1-a20d-48d6-953e-8c3b7a5a4c9b';
+  const ADMIN_INBOXES = [
+    'pino.espacesverts@gmail.com',
+    'pino.spacesverts@gmail.com',
+    'jomstudiovzla@gmail.com'
+  ];
+  const MAIL_STATES = {
+    RECEIVED: 'received',
+    PROCESSING: 'processing',
+    QUEUED: 'queued',
+    SENT: 'sent',
+    FAILED: 'failed'
+  };
+
+  function isAdminUser() {
+    try {
+      const u = (typeof firebase !== 'undefined' && firebase.auth) ? firebase.auth().currentUser : null;
+      if (!u || u.emailVerified !== true) return false;
+      return ADMIN_INBOXES.indexOf(String(u.email || '').trim().toLowerCase()) !== -1;
+    } catch (e) {
+      return false;
+    }
+  }
 
   async function safePushAudit(db, payload) {
     if (!db) return;
@@ -179,18 +199,40 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
     }
   }
 
-  async function postWeb3Forms(fields) {
+  async function dispatchViaWorker(job) {
+    if (typeof global.PinoMail === 'undefined' || typeof global.PinoMail.notify !== 'function') {
+      return { ok: false, reason: 'no_worker_client' };
+    }
+    const to = Array.isArray(job.to) ? job.to[0] : job.to;
+    const extra = {
+      email: job.clientEmail || to || '',
+      name: job.clientName || '',
+      prenom: job.prenom || '',
+      phone: job.clientPhone || '',
+      service: job.service || '',
+      commune: job.commune || '',
+      subject: job.subject || '',
+      message: job.text || job.message || '',
+      kind: job.kind || 'general',
+      leadId: job.leadId || '',
+      signature: job.signature
+    };
+    const kind = job.kind || 'general';
     try {
-      const res = await fetchWithTimeout('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ access_key: WEB3FORMS_ACCESS_KEY, botcheck: '', ...fields })
-      }, 10000);
-      const data = res && typeof res.json === 'function' ? await res.json().catch(() => ({})) : {};
-      return { ok: Boolean(data && data.success === true), data };
+      let ok = false;
+      if (kind === 'devis' && typeof global.PinoMail.notifyDevis === 'function') {
+        ok = await global.PinoMail.notifyDevis(extra);
+      } else if (kind === 'admin_alert' || kind === 'admin_message') {
+        ok = await global.PinoMail.notify('admin_alert', extra);
+      } else if (kind === 'client_message') {
+        ok = await global.PinoMail.notify('client_message', extra);
+      } else {
+        ok = await global.PinoMail.notify('transactional', extra);
+      }
+      return ok ? { ok: true, via: 'worker', status: MAIL_STATES.SENT } : { ok: false, reason: 'worker_failed' };
     } catch (err) {
-      log('web3forms', err);
-      return { ok: false, data: null };
+      log('mail:worker', err);
+      return { ok: false, reason: 'worker_error' };
     }
   }
 
@@ -200,23 +242,42 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
       cc: job.cc || [],
       bcc: job.bcc || [],
       subject: job.subject || '',
-      text: job.text || '',
+      text: job.text || job.message || '',
       replyTo: job.replyTo || PINO_ADMIN_EMAIL,
       kind: job.kind || 'general',
-      status: 'pending',
+      status: MAIL_STATES.RECEIVED,
       attempts: 0,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      clientName: job.clientName || '',
+      clientEmail: job.clientEmail || '',
+      clientPhone: job.clientPhone || '',
+      leadId: job.leadId || ''
     };
-    const immediate = await sendViaGmailApi(payload);
-    if (immediate.ok) return { ok: true, via: 'gmail', queued: false };
 
-    const db = rtdb();
-    if (db) {
-      try {
-        const ref = db.ref('mail_outbox').push();
-        await ref.set({ ...payload, id: ref.key, last_error: immediate.reason || 'queued' });
-      } catch (err) {
-        log('mail_outbox:write', err);
+    payload.status = MAIL_STATES.PROCESSING;
+    const worker = await dispatchViaWorker({ ...job, ...payload });
+    if (worker.ok) return { ok: true, via: 'worker', queued: false, status: MAIL_STATES.SENT };
+
+    const gmail = await sendViaGmailApi(payload);
+    if (gmail.ok) return { ok: true, via: 'gmail', queued: false, status: MAIL_STATES.SENT };
+
+    payload.status = MAIL_STATES.QUEUED;
+    payload.last_error = worker.reason || gmail.reason || 'queued';
+
+    if (isAdminUser()) {
+      const db = rtdb();
+      if (db) {
+        try {
+          const ref = db.ref('mail_outbox').push();
+          await ref.set({
+            ...payload,
+            id: ref.key,
+            status: MAIL_STATES.QUEUED,
+            to: Array.isArray(payload.to) ? String(payload.to[0] || '') : String(payload.to || '')
+          });
+        } catch (err) {
+          log('mail_outbox:write', err);
+        }
       }
     }
     try {
@@ -224,7 +285,7 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
       q.push(payload);
       localStorage.setItem('pino_mail_outbox', JSON.stringify(q.slice(-80)));
     } catch (e) {}
-    return { ok: false, queued: true, reason: immediate.reason };
+    return { ok: false, queued: true, reason: payload.last_error, status: MAIL_STATES.QUEUED };
   }
 
   async function drainMailOutbox() {
@@ -233,7 +294,8 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
       const local = JSON.parse(localStorage.getItem('pino_mail_outbox') || '[]');
       const remain = [];
       for (const job of local) {
-        const r = await sendViaGmailApi(job);
+        let r = await dispatchViaWorker(job);
+        if (!r.ok) r = await sendViaGmailApi(job);
         if (r.ok) sent++;
         else remain.push(job);
       }
@@ -248,11 +310,15 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
         if (val) {
           for (const key of Object.keys(val)) {
             const job = val[key];
-            if (job && job.status === 'sent') continue;
-            const r = await sendViaGmailApi(job);
+            if (job && (job.status === MAIL_STATES.SENT || job.status === 'sent')) continue;
+            await db.ref('mail_outbox/' + key).update({ status: MAIL_STATES.PROCESSING, attempts: (job.attempts || 0) + 1 }).catch(() => {});
+            let r = await dispatchViaWorker(job);
+            if (!r.ok) r = await sendViaGmailApi(job);
             if (r.ok) {
               sent++;
-              await db.ref('mail_outbox/' + key).update({ status: 'sent', sent_at: new Date().toISOString() }).catch(() => {});
+              await db.ref('mail_outbox/' + key).update({ status: MAIL_STATES.SENT, sent_at: new Date().toISOString(), via: r.via || 'gmail' }).catch(() => {});
+            } else {
+              await db.ref('mail_outbox/' + key).update({ status: MAIL_STATES.FAILED, last_error: r.reason || 'send_failed' }).catch(() => {});
             }
           }
         }
@@ -281,6 +347,7 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
       ref_code:     data.refCode  || null,
       source:       'web_devis',
       status:       'new',
+      mail_status:  MAIL_STATES.RECEIVED,
       created_at:   new Date().toISOString(),
     };
 
@@ -308,40 +375,50 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
           }).catch(() => {});
         }
 
-        // Notification automatique de l'admin Andrés Pino en temps réel (pino.espacesverts@gmail.com)
-        notifyAdminByEmail({
-          subject: `🌿 [NOUVEAU DEVIS] Demande de ${data.name || 'Prospect'} (${data.service || 'Entretien'})`,
+        const devisSummary =
+          `Nouvelle demande reçue depuis le site web officiel.\n` +
+          `Prestation : ${data.service || 'Entretien'}\n` +
+          `Commune : ${data.commune || 'Entraigues-sur-la-Sorgue'}\n` +
+          `Surface : ${data.surface ? data.surface + ' m²' : 'Non précisée'}\n` +
+          `Budget estimé : ${data.budget || 'Non précisé'} €\n` +
+          `Détails : ${data.details || 'Aucun'}`;
+
+        const notifId = 'adm_notif_' + Date.now();
+        await db.ref('admin_notifications/' + notifId).set({
+          id: notifId,
           type: 'new_lead',
-          clientName: data.name || 'Prospect',
-          clientEmail: data.email || '',
-          clientPhone: data.phone || '',
-          leadId: ref.key,
-          amount: data.budget || null,
-          message: `Nouvelle demande reçue depuis le site web officiel.\nPrestation : ${data.service || 'Entretien'}\nCommune : ${data.commune || 'Entraigues-sur-la-Sorgue'}\nSurface : ${data.surface ? data.surface + ' m²' : 'Non précisée'}\nBudget estimé : ${data.budget || 'Non précisé'} €\nDétails : ${data.details || 'Aucun'}`
+          lead_id: ref.key,
+          title: `Nouveau devis — ${data.name || 'Prospect'}`,
+          client_name: data.name || 'Prospect',
+          client_email: data.email || '',
+          client_phone: data.phone || '',
+          message: devisSummary.slice(0, 2000),
+          created_at: payload.created_at,
+          read: false
         }).catch(() => {});
 
-        // Notification automatique immédiate au client (même sans compte / visiteur libre)
         if (data.email && isValidEmail(data.email)) {
-          const isSap = data.regime !== 'direct_pino';
-          const budgetNum = parseFloat(data.budget) || 0;
-          const netEstime = isSap ? Math.round(budgetNum / 2) : budgetNum;
-          notifyClientByEmail({
+          enqueueMailJob({
+            kind: 'devis',
+            to: data.email,
             clientEmail: data.email,
             clientName: data.name || 'Client Particulier',
-            subject: `🌿 Confirmation de votre Demande de Devis — Pino Espaces Verts (Entraigues-sur-la-Sorgue)`,
-            type: 'quote_confirmed',
-            message: `Nous avons bien reçu votre demande de devis pour l'entretien et l'aménagement de vos espaces extérieurs.\n\n` +
-              `RÉSUMÉ DE VOTRE PROJET :\n` +
-              `- Commune d'intervention : ${data.commune || 'Entraigues-sur-la-Sorgue'}\n` +
-              `- Prestation souhaitée : ${data.service || 'Entretien espaces verts'}\n` +
-              `- Surface estimée : ${data.surface ? data.surface + ' m²' : 'Non précisée'}\n` +
-              `- Régime : ${isSap ? "Services à la Personne (Crédit d'Impôt 50% URSSAF)" : "Jardinerie Directe / Professionnel"}\n` +
-              `- Montant indicatif : ${budgetNum} € TTC\n` +
-              (isSap ? `- Reste à charge réel après 50% SAP : ~${netEstime} €\n` : '') +
-              `\n💡 Zéro euro à payer maintenant : cette demande est 100% gratuite et sans aucun engagement. Andrés Pino va étudier votre dossier et vous contactera dans les plus brefs délais pour convenir de la visite technique sur place.`,
-            amountCharged: budgetNum,
-            netClient: netEstime,
-            actionUrl: `${siteUrl()}#suivi?id=${ref.key}&email=${encodeURIComponent(data.email)}`
+            clientPhone: data.phone || '',
+            subject: 'Confirmation de votre demande de devis — Pino Espaces Verts',
+            text: devisSummary,
+            leadId: ref.key,
+            service: data.service || '',
+            commune: data.commune || ''
+          }).catch(() => {});
+        } else {
+          enqueueMailJob({
+            kind: 'admin_alert',
+            to: ADMIN_INBOXES,
+            clientName: data.name || 'Prospect',
+            clientPhone: data.phone || '',
+            subject: `[Nouveau devis] ${data.name || 'Prospect'} (${data.service || 'Entretien'})`,
+            text: devisSummary,
+            leadId: ref.key
           }).catch(() => {});
         }
 
@@ -615,7 +692,7 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
       const clientPhone = clientDetails.phone || 'Non renseigné';
       const shortLeadId = String(leadId).slice(-6);
 
-      // 6a. Notifier Andrés Pino par e-mail direct (Web3Forms + RTDB admin_notifications)
+      // 6a. Notifier Andrés Pino (Worker Resend + RTDB admin_notifications)
       await notifyAdminByEmail({
         subject: `🎉 [DEVIS ACCEPTÉ] Proposition chiffrée validée par ${clientName}`,
         type: 'quote_accepted',
@@ -648,8 +725,8 @@ pino.espacesverts@gmail.com · SIRET 105 075 006 00012
    * ───────────────────────────────────────────────────────── */
 
   /**
-   * Envoie une notification par e-mail à Andrés Pino (pino.espacesverts@gmail.com)
-   * via Web3Forms et enregistre l'événement dans /admin_notifications.
+   * Envoie une alerte CRM à Andrés Pino (Worker Resend, From Andrés Pino)
+   * et enregistre l'événement dans /admin_notifications.
    */
   async function notifyAdminByEmail(opts = {}) {
     const timestamp = new Date().toISOString();
@@ -694,33 +771,15 @@ ${siteUrl()}#admin
     const alertJob = await enqueueMailJob({
       to: ADMIN_INBOXES,
       subject: '[Portail Pino] ' + subject,
-      text: alertText,
+      text: alertText + '\n\n' + messageText,
       replyTo: replyTo,
-      kind: 'admin_alert'
+      kind: 'admin_alert',
+      clientName: clientName,
+      clientEmail: clientEmail,
+      clientPhone: clientPhone,
+      leadId: leadId
     });
-    const msgJob = await enqueueMailJob({
-      to: ADMIN_INBOXES,
-      subject: clientEmail ? ('Message de ' + clientName + ' — ' + (type || 'portail')) : subject,
-      text: messageText,
-      replyTo: replyTo,
-      kind: 'admin_message'
-    });
-    if (alertJob.ok || msgJob.ok) emailSent = true;
-
-    const w3 = await postWeb3Forms({
-      from_name: 'Andrés Pino — Pino Espaces Verts',
-      subject: subject,
-      to: PINO_ADMIN_EMAIL,
-      email: replyTo,
-      replyto: replyTo,
-      message: mailBody,
-      client_name: clientName,
-      client_email: clientEmail,
-      client_phone: clientPhone,
-      event_type: type,
-      lead_id: leadId
-    });
-    if (w3.ok) emailSent = true;
+    if (alertJob.ok) emailSent = true;
 
     const db = rtdb();
     if (db) {
@@ -756,10 +815,9 @@ ${siteUrl()}#admin
   }
 
   /**
-   * Envoie un e-mail direct au client (via FormSubmit AJAX)
-   * + envoie une copie de contrôle à Andrés Pino (Web3Forms)
-   * + enregistre la notification dans /client_notifications/{sanitizedEmail}
-   * + archive dans le dossier client /clients_records/{sanitizedEmail}/messages
+   * Envoie un e-mail direct au client (Worker Resend, From Andrés Pino).
+   * Copie BCC admin. File locale / mail_outbox admin si l'envoi immédiat échoue.
+   * Enregistre aussi /client_notifications et /clients_records/.../messages.
    */
   async function notifyClientByEmail(opts = {}) {
     const rawEmail = (opts.clientEmail || '').trim().toLowerCase();
@@ -803,57 +861,26 @@ Site web : ${siteUrl()}`;
 
     let clientEmailSent = false;
     let via = '';
-    let activationRequired = false;
+    let queued = false;
 
-    const gmailRes = await enqueueMailJob({
+    const mailRes = await enqueueMailJob({
       to: rawEmail,
       bcc: ADMIN_INBOXES,
       subject: subject,
       text: mailBody,
       replyTo: PINO_ADMIN_EMAIL,
-      kind: 'client_mail'
+      kind: 'transactional',
+      clientName: clientName,
+      clientEmail: rawEmail,
+      leadId: opts.leadId || ''
     });
-    if (gmailRes.ok) {
+    if (mailRes.ok) {
       clientEmailSent = true;
-      via = 'gmail';
+      via = mailRes.via || 'worker';
+    } else if (mailRes.queued) {
+      queued = true;
+      via = 'queued';
     }
-
-    if (!clientEmailSent && typeof fetch === 'function') {
-      try {
-        const res = await fetchWithTimeout(`https://formsubmit.co/ajax/${encodeURIComponent(rawEmail)}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({
-            _subject: subject,
-            _replyto: PINO_ADMIN_EMAIL,
-            _cc: ADMIN_INBOXES.join(','),
-            _template: 'box',
-            _captcha: 'false',
-            name: 'Andrés Pino — Pino Espaces Verts',
-            message: mailBody
-          })
-        }, 10000);
-        const data = res && typeof res.json === 'function' ? await res.json().catch(() => ({})) : {};
-        const msg = String((data && (data.message || data.error)) || '');
-        if (data && (data.success === true || data.success === 'true')) {
-          clientEmailSent = true;
-          via = via || 'formsubmit';
-        } else if (/activ/i.test(msg)) {
-          activationRequired = true;
-        }
-      } catch (err) {
-        log('notifyClientByEmail:formsubmit', err);
-      }
-    }
-
-    await postWeb3Forms({
-      from_name: 'Pino Espaces Verts — Copie E-mail Client',
-      subject: `[COPIE] ${subject} → ${clientName} <${rawEmail}>`,
-      to: PINO_ADMIN_EMAIL,
-      email: PINO_ADMIN_EMAIL,
-      replyto: rawEmail,
-      message: `Copie de l'e-mail destiné au client ${clientName} (${rawEmail}) le ${timestamp}.\nCanal principal : ${via || (activationRequired ? 'formsubmit_activation' : 'en_attente')}.\n\n${mailBody}`
-    });
 
     const db = rtdb();
     if (db) {
@@ -898,7 +925,7 @@ Site web : ${siteUrl()}`;
       }
     }
 
-    return { ok: clientEmailSent || activationRequired, clientEmailSent, via, activationRequired, timestamp };
+    return { ok: clientEmailSent || queued, clientEmailSent, via, queued, timestamp };
   }
 
   /**
@@ -1383,7 +1410,7 @@ Site web : ${siteUrl()}`;
         type: 'client_invite'
       });
     } catch (mailErr) {
-      log('inviteClientByAdmin:web3forms', mailErr);
+      log('inviteClientByAdmin:mail', mailErr);
     }
 
     return { ok: true, client: clientProfile, activationLink, token };
@@ -1409,6 +1436,9 @@ Site web : ${siteUrl()}`;
       await firebase.auth().signOut();
       return { ok: true, email: normEmail, verificationSent: true };
     } catch (err) {
+      if (typeof global.explainFirebaseAuthError === 'function') {
+        return { ok: false, error: global.explainFirebaseAuthError(err, 'register') };
+      }
       const code = (err && err.code) || '';
       if (code === 'auth/email-already-in-use') {
         return { ok: false, error: 'Un compte existe déjà pour cette adresse. Connectez-vous ou utilisez « Mot de passe oublié ».' };
@@ -1502,6 +1532,7 @@ Site web : ${siteUrl()}`;
                     normEmail === 'pino.espacesverts@gmail.com';
     const sanitizedEmail = normEmail ? normEmail.replace(/[.#$[\]]/g, '_') : null;
 
+    const nowIso = new Date().toISOString();
     const payload = {
       id:            fbUser.uid,
       uid:           fbUser.uid,
@@ -1511,9 +1542,15 @@ Site web : ${siteUrl()}`;
       commune:       extra.commune  || 'Entraigues-sur-la-Sorgue (84)',
       role:          isAdmin ? 'admin' : 'client',
       isAdmin:       isAdmin,
-      auth_provider: extra.provider || 'google',
+      auth_provider: (function (p) {
+        const s = String(p || extra.provider || 'google').toLowerCase();
+        if (s.includes('apple')) return 'apple';
+        if (s.includes('password')) return 'password';
+        if (s.includes('google')) return 'google';
+        return s || 'google';
+      })(extra.provider),
       avatar_url:    fbUser.photoURL || null,
-      updated_at:    new Date().toISOString(),
+      updated_at:    nowIso,
     };
     if (extra.addressExtra) payload.address_extra = extra.addressExtra;
     // update() efface les champs à null : ne jamais écraser un téléphone / avatar déjà enregistré.
@@ -1522,6 +1559,15 @@ Site web : ${siteUrl()}`;
     const db = rtdb();
     if (db) {
       try {
+        let createdAt = extra.created_at || extra.createdAt || null;
+        if (!createdAt) {
+          try {
+            const snap = await db.ref('users/' + fbUser.uid).once('value');
+            const existing = snap.val() || {};
+            createdAt = existing.created_at || null;
+          } catch (e) {}
+        }
+        payload.created_at = createdAt || nowIso;
         await db.ref('users/' + fbUser.uid).update(payload);
         if (sanitizedEmail) {
           const profilePatch = {
@@ -1532,6 +1578,7 @@ Site web : ${siteUrl()}`;
             role: payload.role,
             lastAuthProvider: payload.auth_provider,
             updatedAt: payload.updated_at,
+            createdAt: payload.created_at,
             uid: fbUser.uid,
             status: 'actif'
           };
@@ -1555,6 +1602,50 @@ Site web : ${siteUrl()}`;
     }
 
     return { ok: false };
+  }
+
+  const PENDING_PROFILE_KEY = 'pino_pending_profile';
+
+  function savePendingProfile(uid, extra = {}) {
+    if (!uid) return { ok: false };
+    try {
+      const payload = {
+        uid,
+        fullName: extra.fullName || '',
+        phone: extra.phone || '',
+        commune: extra.commune || '',
+        addressExtra: extra.addressExtra || '',
+        provider: extra.provider || 'password',
+        email: extra.email || '',
+        savedAt: new Date().toISOString()
+      };
+      localStorage.setItem(PENDING_PROFILE_KEY, JSON.stringify(payload));
+      return { ok: true };
+    } catch (err) {
+      log('savePendingProfile', err);
+      return { ok: false };
+    }
+  }
+
+  function peekPendingProfile(uid) {
+    try {
+      const raw = localStorage.getItem(PENDING_PROFILE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || (uid && parsed.uid !== uid)) return null;
+      return parsed;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function clearPendingProfile(uid) {
+    try {
+      const pending = peekPendingProfile(uid);
+      if (!uid || (pending && pending.uid === uid) || !pending) {
+        localStorage.removeItem(PENDING_PROFILE_KEY);
+      }
+    } catch (e) {}
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -3051,6 +3142,9 @@ Site web : ${siteUrl()}`;
     fetchClientQuotes,
     upsertProfile,
     saveProfile: upsertProfile,
+    savePendingProfile,
+    peekPendingProfile,
+    clearPendingProfile,
     fetchProfiles,
     fetchUserCoupon,
     redeemPelabola,

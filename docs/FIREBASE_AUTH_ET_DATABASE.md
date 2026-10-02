@@ -1,5 +1,7 @@
 # Architecture Authentification & Base de Données Cloud — Pino Espaces Verts
 
+> **Historique (ne plus suivre pour v1 live).** Projet cité ci-dessous (`crm-jom`) et moteur Firestore **ne sont pas** l’almacén de production. v1 live = Firebase Auth + **Realtime Database** `pagepino-e8e97` (`europe-west1`). Modèle, CRUD et règles : [`docs/data/MODELO_RTDB_V1.md`](data/MODELO_RTDB_V1.md). Décision : [ADR 0006](adr/0006-rtdb-pas-firestore-v1.md). Auth : `authDomain` `pagepino-e8e97.firebaseapp.com`. URL canonique : `https://pinoespacesverts.online`.
+
 ## 1. Vue d'Ensemble
 
 Ce document définit l'architecture de sécurité et de persistance des données pour **Pino Espaces Verts** (v1 en production et v2).

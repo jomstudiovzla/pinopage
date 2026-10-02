@@ -49,9 +49,9 @@ Fuente: `DOCUMENTO_MAESTRO.md` §9. Cada tarea: una sesión, criterios, verifica
 - [ ] Tarea: Portar secciones (hero, services, unipros, coupon, devis, galerie, FAQ, footer)
   - Acceptance: mismos CTAs WhatsApp/tel. Chatbot knowledge base portada.
   - Verify: click-path devis + coupon.
-- [ ] Tarea: Rutas `/mentions-legales` `/cgv` `/confidentialite` `/aides-fiscales`
-  - Acceptance: ya no solo modales. Hébergeur real (placeholder interno hasta confirmar).
-  - Verify: enlace footer en todas las páginas.
+- [x] Tarea: Rutas `/mentions-legales` `/cgv` `/confidentialite` (FASE 4 OAuth; `/aides-fiscales` pendiente)
+  - Acceptance: páginas públicas sin login en `.online`. Privacy `/politique-de-confidentialite`, CGV `/conditions-generales`. Hébergeur real (Firebase Hosting).
+  - Verify: footer accueil + `pnpm verify:production`.
 - [ ] Tarea: CMP cookies CNIL (Refuser / Accepter / Personnaliser)
   - Acceptance: analytics no carga si reject. Fila en `consents`.
   - Verify: red tab Network.
