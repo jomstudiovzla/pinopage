@@ -1,0 +1,14 @@
+{
+  "name": "pino-mail-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker de correo transaccional (Brevo) para Pino Espaces Verts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

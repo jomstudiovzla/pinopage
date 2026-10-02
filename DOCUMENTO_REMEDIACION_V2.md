@@ -20,15 +20,15 @@
 
 Authentication → URL Configuration:
 
-- **Site URL:** `https://jomstudiovzla.github.io/pinopage/`
+- **Site URL:** `https://pagepino-e8e97.web.app/`
 - **Redirect URLs:**
-  - `https://jomstudiovzla.github.io/pinopage/`
-  - `https://jomstudiovzla.github.io/pinopage/index.html`
+  - `https://pagepino-e8e97.web.app/`
+  - `https://pagepino-e8e97.web.app/index.html`
   - `http://127.0.0.1:8080/`
   - `http://localhost:8080/`
 
 Providers → Google: Client ID + Secret de Google Cloud.  
-Authorized JavaScript origins de Google Cloud deben incluir `https://jomstudiovzla.github.io`.
+Authorized JavaScript origins de Google Cloud deben incluir `https://pagepino-e8e97.web.app`.
 
 Claves del proyecto: pegar URL y `anon` key en [`assets/js/supabase-config.js`](./assets/js/supabase-config.js). **Nunca** `service_role` en el cliente.
 

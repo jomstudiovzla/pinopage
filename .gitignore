@@ -2,6 +2,13 @@
 Thumbs.db
 *.log
 indicaciones del cliente /
+
+# Snapshots de config locales (sin datos de clientes; efímeros)
+backups/
+
+# Sincronización de sesión entre agentes IA (local, no va al repo)
+CURRENT_STATE.md
+.context_sync.json
 error/
 .env
 .env.*
@@ -10,3 +17,26 @@ supabase/.env
 .env.local
 correcciones/
 .impeccable/
+node_modules/
+test-results/
+playwright-report/
+audit-reports/
+firebase-debug.log
+database-debug.log
+functions/node_modules/
+
+# Build / empaquetado (se regeneran con pnpm build)
+dist/
+*.zip
+firebase.static.json
+
+# Cloudflare Worker (secretos y estado local)
+**/.dev.vars
+**/.wrangler/
+.wrangler/
+
+# Firebase (caché de despliegue local)
+.firebase/
+
+# Lote de cupones generado (ya subido a la RTDB)
+coupon_pool.json

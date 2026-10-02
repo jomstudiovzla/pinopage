@@ -1,0 +1,33 @@
+name = "pino-mail"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+# Dominio propio del Worker (zona ya gestionada en Cloudflare). Wrangler crea el
+# registro DNS y el certificado automáticamente. Coincide con la CSP del sitio.
+routes = [
+  { pattern = "pino-mail.pinoespacesverts.online", custom_domain = true }
+]
+
+# Ruta pública del Worker. Conecta un dominio personalizado en Cloudflare
+# (Workers & Pages → pino-mail → Settings → Domains & Routes) para servirlo en:
+#   https://pino-mail.pinoespacesverts.online
+# Ese origen ya está incluido en la CSP del sitio (firebase.json + index.html).
+
+[vars]
+FIREBASE_PROJECT_ID = "pagepino-e8e97"
+# Destinatarios de los avisos (ambas cuentas de Andrés, separadas por coma).
+ADMIN_EMAIL = "pino.espacesverts@gmail.com,pino.spacesverts@gmail.com"
+JOM_EMAIL = "jomstudiovzla@gmail.com"
+# Remitente visible : Andrés Pino (identidad officielle). Reply-To = Gmail métier
+# tant que la boîte @pinoespacesverts.online n'est pas provisionnée.
+SENDER_NAME = "Andrés Pino — Pino Espaces Verts"
+SENDER_EMAIL = "andresp@pinoespacesverts.online"
+REPLY_TO_EMAIL = "pino.espacesverts@gmail.com"
+# Enlaces incluidos en los correos al cliente (contacto directo).
+WHATSAPP_URL = "https://wa.me/33651594034"
+INSTAGRAM_URL = "https://instagram.com/pino.espacesverts"
+ALLOWED_ORIGINS = "https://pinoespacesverts.online,https://www.pinoespacesverts.online,https://pagepino-e8e97.web.app,https://pagepino-e8e97.firebaseapp.com,http://localhost:5500,http://127.0.0.1:5500"
+
+# Secretos (NO se ponen aquí; se cargan con `wrangler secret put`):
+#   wrangler secret put RESEND_API_KEY     # de https://resend.com (empieza por re_...)
+#   wrangler secret put TURNSTILE_SECRET   # recomendado para formularios públicos

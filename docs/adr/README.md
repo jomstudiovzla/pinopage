@@ -6,5 +6,8 @@
 | 0002 | Dos raíles de pago: Unipros vs directo (sin PSP propio) | Accepted | 2026-09-15 |
 | 0003 | Autorización por `app_metadata` + RLS, no por `user_metadata` | Accepted | 2026-09-15 |
 | 0004 | Hosting front en UE y retiro de Firebase/GitHub Pages | Accepted | 2026-09-15 |
+| 0005 | Courrier transactionnel Resend + Cloudflare Worker | Accepted | 2026-10-02 |
+| 0006 | v1 permanece en RTDB (no migrar a Firestore) | Accepted | 2026-10-02 |
 
 Plantilla: copiar un ADR existente. Los ADR aceptados no se reescriben: se superseden.
+ADR 0004 describe el **v2** (dejar Firebase). v1 sigue en RTDB hasta Hito 6 — ver 0006.

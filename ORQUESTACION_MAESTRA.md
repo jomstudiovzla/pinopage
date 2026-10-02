@@ -3,7 +3,7 @@
 > **Fecha:** 16 de Septiembre de 2026  
 > **Proyecto:** Pino Espaces Verts (v1 PWA Live + Transición v2)  
 > **Repositorio:** `https://github.com/jomstudiovzla/pinopage` | Rama: `main`  
-> **URL Producción:** `https://jomstudiovzla.github.io/pinopage/`  
+> **URL Producción:** `https://pagepino-e8e97.web.app/`  
 > **Último Commit:** `23c4f49` (Hub de prospection 6 plateformes + blindaje de auth y facturación SAP)  
 
 ---
@@ -151,7 +151,7 @@ graph TD
 Copia el siguiente bloque de texto en el próximo agente (Grok CLI, Terminal agy, Claude Code o nueva sesión de Antigravity):
 
 ```text
-Eres el Agente de Desarrollo de JOM Studio a cargo del proyecto Pino Espaces Verts (https://github.com/jomstudiovzla/pinopage).
+Eres el Agente de Desarrollo a cargo del proyecto Pino Espaces Verts (https://github.com/jomstudiovzla/pinopage).
 Lee atentamente `CURRENT_STATE.md`, `.context_sync.json`, `ORQUESTACION_MAESTRA.md` y `AGENTS.md`.
 
 ESTADO ACTUAL:

@@ -20,8 +20,8 @@ window.PINO_CHATBOT_KB = {
     instagramUrl: "https://www.instagram.com/pino.espacesverts",
     address: "1990 ROUTE de Trévouse, 84320 Entraigues-sur-la-Sorgue",
     siret: "105 075 006 00012",
-    zone: "Entraigues-sur-la-Sorgue & Vaucluse (84) — Rayon de 40 à 45 km",
-    hours: "Lundi au Samedi, 8h00 - 19h00 (Urgences & Devis sous 24h)",
+    zone: "Entraigues-sur-la-Sorgue (84) — rayon de 40 à 45 km",
+    hours: "Du lundi au samedi, 8h00 – 18h00",
     insurance: "Responsabilité Civile Professionnelle (RC Pro) complète",
     quoteNotice: "Déplacement & Devis 100% Gratuits sous 24h"
   },
@@ -50,7 +50,7 @@ window.PINO_CHATBOT_KB = {
       phoneFree: "08 05 38 11 61",
       email: "contact@unipros.coop",
       emailUrl: "mailto:contact@unipros.coop",
-      hours: "Du lundi au samedi de 8h00 à 20h00 (Numéro vert et gratuit)",
+      hours: "Du lundi au samedi de 8h00 à 20h00",
       website: "https://unipros.coop",
       paymentPortal: "https://paiement.unipros.coop/payment/step1",
       clientApp: "https://app.unipros.coop"
@@ -59,11 +59,11 @@ window.PINO_CHATBOT_KB = {
 
   // 3. Code Promo
   coupon: {
-    code: "PELABOLA",
+    code: "PINO-XXXX (code unique délivré après création d'un compte vérifié)",
     discount: "20% de remise",
     scope: "Valable sur le premier contrat d'entretien ou prestation de jardinage",
     stackable: "100% cumulable avec les 50% de crédit d'impôt Unipros",
-    database: "Enregistré en temps réel dans la base cloud Firebase (projet crm-jom)"
+    database: "Code nominatif, lié à votre compte client"
   },
 
   // 4. Catalogue des Services de Jardinage (Pino)
@@ -97,7 +97,7 @@ window.PINO_CHATBOT_KB = {
       name: "Aménagement Paysager & Massifs",
       eligibleUnipros: "Partiel (Main d'œuvre d'entretien déductible)",
       priceFrom: "Sur devis personnalisé gratuit",
-      creditPrice: "50% déductible sur la main d'œuvre de mise en place",
+      creditPrice: "Non éligible au crédit d'impôt SAP — facturation directe",
       details: "Création de massifs fleuris méditerranéens, bordures minérales en pierre calcaire, paillage d'écorces et bacs contemporains plage de piscine."
     },
     {
@@ -113,7 +113,7 @@ window.PINO_CHATBOT_KB = {
       name: "Contrats Annuels Copropriétés & Entreprises (B2B)",
       eligibleUnipros: false,
       priceFrom: "Sur devis sous 24h",
-      creditPrice: "Facturation avec TVA 100% déductible pour professionnels",
+      creditPrice: "TVA non applicable, art. 293 B du CGI",
       details: "Contrats d'entretien programmés pour syndics, cours d'immeubles, bureaux et commerces sur Entraigues-sur-la-Sorgue et le Vaucluse (84)."
     }
   ],
@@ -172,7 +172,7 @@ window.resolveChatbotQuery = function(userText) {
 
         <div class="p-2.5 bg-slate-100 rounded-xl border border-slate-200 text-xs space-y-1.5">
           <p class="font-bold text-slate-800">2. Ou contactez le Support Officiel Unipros :</p>
-          <p class="text-slate-700 font-semibold">• Tél vert gratuit : <a href="${kb.unipros.contacts.phoneUrl}" class="text-emerald-700 underline font-bold">${kb.unipros.contacts.phone}</a> (${kb.unipros.contacts.hours})</p>
+          <p class="text-slate-700 font-semibold">• Téléphone : <a href="${kb.unipros.contacts.phoneUrl}" class="text-emerald-700 underline font-bold">${kb.unipros.contacts.phone}</a> (${kb.unipros.contacts.hours})</p>
           <p class="text-slate-700 font-semibold">• E-mail : <a href="mailto:${kb.unipros.contacts.email}" class="text-emerald-700 underline font-bold">${kb.unipros.contacts.email}</a></p>
           <p class="text-slate-700 font-semibold">• Espace personnel : <a href="${kb.unipros.contacts.clientApp}" target="_blank" class="text-emerald-700 underline font-bold">${kb.unipros.contacts.clientApp}</a></p>
         </div>
@@ -500,7 +500,7 @@ window.resolveChatbotQuery = function(userText) {
           Zone d'Intervention : Entraigues-sur-la-Sorgue & Vaucluse (84)
         </p>
         <p class="text-xs text-slate-700 leading-relaxed">
-          Pino Espaces Verts se déplace gratuitement sur <strong>Entraigues-sur-la-Sorgue, Avignon et tout le Vaucluse (rayon 40-45 km)</strong> :
+          Pino Espaces Verts se déplace gratuitement sur <strong>Entraigues-sur-la-Sorgue, Avignon et les communes dans un rayon de 40 à 45 km</strong> :
         </p>
         <div class="p-2 bg-slate-100 rounded-xl text-[11px] text-slate-700 leading-relaxed">
           ${kb.localities.join(" • ")}
@@ -564,7 +564,7 @@ window.resolveChatbotQuery = function(userText) {
         </div>
       </div>
       <p class="text-[11px] text-slate-500">
-        Disponibilité : ${kb.pino.hours}. Déplacement et chiffrage 100% gratuits sur Entraigues-sur-la-Sorgue et tout le Vaucluse (84).
+        Disponibilité : ${kb.pino.hours}. Déplacement et devis gratuits à Entraigues-sur-la-Sorgue et dans un rayon de 40 à 45 km.
       </p>
     </div>
   `;

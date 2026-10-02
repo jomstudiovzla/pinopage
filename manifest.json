@@ -1,6 +1,7 @@
 {
   "name": "Pino Espaces Verts",
   "short_name": "Pino EV",
+  "id": "./",
   "lang": "fr",
   "description": "Entretien et aménagement de jardins à Entraigues-sur-la-Sorgue et dans un rayon de 40-45 km en Vaucluse (84).",
   "start_url": "./index.html",
@@ -10,15 +11,8 @@
   "background_color": "#faf6f0",
   "theme_color": "#2d6a4f",
   "icons": [
-    {
-      "src": "assets/logo/Logo pino.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "assets/logo/Logo completo.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

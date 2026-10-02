@@ -692,9 +692,9 @@ alter table public.profiles
 -- ============================================================================
 -- En el dashboard de Supabase:
 --   Authentication → URL Configuration → Redirect URLs
---   Agregar: https://jomstudiovzla.github.io/pinopage/
+--   Agregar: https://pagepino-e8e97.web.app/
 --   Agregar: http://127.0.0.1:8080/
---   Site URL: https://jomstudiovzla.github.io/pinopage/
+--   Site URL: https://pagepino-e8e97.web.app/
 --
 -- Authentication → Providers → Google → ON
 --   Client ID:     [el de Google Cloud Console]

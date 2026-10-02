@@ -1,0 +1,33 @@
+{
+  "name": "pino-espaces-verts",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Pino Espaces Verts — v1 statique (index.html + PWA) sur Firebase Auth + Realtime Database",
+  "scripts": {
+    "dev": "python3 serve.py 5500",
+    "build:css": "tailwindcss -c tailwind.config.js -i assets/css/tailwind.src.css -o assets/css/tailwind.min.css --minify",
+    "build": "node scripts/build.mjs",
+    "cleanup:preprod": "bash scripts/cleanup-preprod.sh",
+    "emulators": "firebase emulators:start --only auth,database,functions,hosting --project demo-pino",
+    "test:rules": "firebase emulators:exec --only database --project demo-pino \"node --test tests/rules/database.rules.test.mjs\"",
+    "test:api": "node --test tests/integration/functions.test.mjs",
+    "test:e2e": "firebase emulators:exec --only auth,database --project demo-pino \"playwright test\"",
+    "test:unit": "node --test tests/unit/*.test.mjs",
+    "test": "pnpm test:unit && pnpm test:rules && pnpm test:api && pnpm test:e2e",
+    "audit:static": "node scripts/audit-static.mjs",
+    "audit:live": "node scripts/audit-live.mjs",
+    "verify:production": "bash scripts/verify-production.sh",
+    "preflight": "bash scripts/preflight-deploy.sh",
+    "backup:config": "bash scripts/backup-firebase-config.sh",
+    "deploy:rules": "firebase deploy --only database --project pagepino-e8e97",
+    "deploy:production": "bash scripts/deploy-production.sh",
+    "domain:connect": "bash scripts/connect-domain.sh",
+    "admin:claim": "node scripts/set-admin-claim.mjs"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "@playwright/test": "^1.55.0",
+    "firebase": "^11.0.0",
+    "tailwindcss": "^3.4.17"
+  }
+}

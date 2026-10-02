@@ -24,10 +24,10 @@ Mientras tanto: SQL Editor → pegar `docs/sql/001` + `002` (ya copiados al port
 
 Authentication → URL Configuration:
 
-- Site URL: `https://jomstudiovzla.github.io/pinopage/`
+- Site URL: `https://pagepino-e8e97.web.app/`
 - Redirect URLs:
-  - `https://jomstudiovzla.github.io/pinopage/`
-  - `https://jomstudiovzla.github.io/pinopage/index.html`
+  - `https://pagepino-e8e97.web.app/`
+  - `https://pagepino-e8e97.web.app/index.html`
   - `http://127.0.0.1:8080/`
   - `http://localhost:8080/`
 
@@ -35,7 +35,7 @@ Authentication → Providers → Google: ON, pegar Client ID + Secret.
 
 En Google Cloud → APIs y servicios → Credenciales → ID de cliente OAuth:
 
-- Orígenes JavaScript: `https://jomstudiovzla.github.io` y `http://127.0.0.1:8080`
+- Orígenes JavaScript: `https://pagepino-e8e97.web.app` y `http://127.0.0.1:8080`
 - URI de redirección: `https://ziccgwonregaatujyyzb.supabase.co/auth/v1/callback`
 
 ## 3. SQL

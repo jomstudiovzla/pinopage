@@ -8,14 +8,10 @@ window.PINO_SUPABASE = {
 };
 
 (function computeSiteUrl() {
-  const { protocol, origin, pathname } = window.location;
+  const { protocol, origin } = window.location;
   if (protocol === "file:") {
-    window.PINO_SITE_URL = "http://127.0.0.1:8080/";
+    window.PINO_SITE_URL = "https://pagepino-e8e97.web.app/";
     return;
   }
-  if (pathname.indexOf("/pinopage") === 0) {
-    window.PINO_SITE_URL = origin + "/pinopage/";
-  } else {
-    window.PINO_SITE_URL = origin + "/";
-  }
+  window.PINO_SITE_URL = origin + "/";
 })();

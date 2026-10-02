@@ -54,7 +54,7 @@ Este no es un brief teórico. Es la fusión de:
 | Horario de contacto | Lun–Sáb 08:00–19:00 (landing JSON-LD cierra 18:00; unificar a 19:00 en v2) |
 | Promo vigente | Código **PELABOLA**, −20 % primera prestación, acumulable con crédito 50 % |
 | Repo | https://github.com/jomstudiovzla/pinopage |
-| Producción actual | https://jomstudiovzla.github.io/pinopage/ (GitHub Pages) |
+| Producción actual | https://pagepino-e8e97.web.app/ (Firebase Hosting) |
 | Dominio objetivo | `www.pinoespacesverts.fr` |
 
 ### 1.1 Qué ya está en producción (no rehacer)
@@ -485,4 +485,4 @@ Hasta tener 1–3, las Mentions v2 llevan un placeholder interno, **nunca** dato
 
 ---
 
-*Documento emitido por JOM Studio (Workspace Master) para Pino Espaces Verts. Próxima revisión: al cerrar el Hito 1 o cuando se resuelvan las preguntas abiertas 1–3.*
+*Documento de Pino Espaces Verts. Próxima revisión: al cerrar el Hito 1 o cuando se resuelvan las preguntas abiertas 1–3.*

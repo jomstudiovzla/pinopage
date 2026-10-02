@@ -2,9 +2,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function isAdmin() {
-      return request.auth != null && (
-        request.auth.token.email == 'pino.spacesverts@gmail.com' ||
+      return request.auth != null && request.auth.token.email_verified == true && (
+        request.auth.token.admin == true ||
+        request.auth.token.role == 'admin' ||
         request.auth.token.email == 'pino.espacesverts@gmail.com' ||
+        request.auth.token.email == 'pino.spacesverts@gmail.com' ||
         request.auth.token.email == 'jomstudiovzla@gmail.com'
       );
     }
@@ -28,8 +30,13 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // L5 — Firestore no se usa en v1 (los leads viven en Realtime Database). Se cierra el
+    // 'create: if true' mundo-escribible para que, si algún día se habilita Firestore, no
+    // quede una vía de spam abierta. Reabrir con validación explícita si se migra aquí.
     match /leads/{docId} {
-      allow create: if true;
+      allow create: if request.auth != null
+        && request.resource.data.keys().size() <= 30
+        && (!('email' in request.resource.data) || request.resource.data.email is string);
       allow read, update, delete: if isAdmin();
     }
 

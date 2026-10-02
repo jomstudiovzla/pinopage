@@ -18,7 +18,7 @@ Fuente: `DOCUMENTO_MAESTRO.md` §9. Cada tarea: una sesión, criterios, verifica
 - [x] Modal auth `max-h-[80vh] overflow-y-auto` + CGV bajo Google
 - [x] Cupón: sin email público; CTA Google; código solo con `user_id`
 - [x] SQL `docs/sql/002_cupones_rls.sql`
-- [x] Pegar `url` + `anonKey` en `assets/js/supabase-config.js` y autorizar `jomstudiovzla.github.io`
+- [x] Pegar `url` + `anonKey` en `assets/js/supabase-config.js` y autorizar `pagepino-e8e97.web.app`
 
 ## Hito 1 — Infra UE
 
@@ -49,9 +49,9 @@ Fuente: `DOCUMENTO_MAESTRO.md` §9. Cada tarea: una sesión, criterios, verifica
 - [ ] Tarea: Portar secciones (hero, services, unipros, coupon, devis, galerie, FAQ, footer)
   - Acceptance: mismos CTAs WhatsApp/tel. Chatbot knowledge base portada.
   - Verify: click-path devis + coupon.
-- [ ] Tarea: Rutas `/mentions-legales` `/cgv` `/confidentialite` `/aides-fiscales`
-  - Acceptance: ya no solo modales. Hébergeur real (placeholder interno hasta confirmar).
-  - Verify: enlace footer en todas las páginas.
+- [x] Tarea: Rutas `/mentions-legales` `/cgv` `/confidentialite` (FASE 4 OAuth; `/aides-fiscales` pendiente)
+  - Acceptance: páginas públicas sin login en `.online`. Privacy `/politique-de-confidentialite`, CGV `/conditions-generales`. Hébergeur real (Firebase Hosting).
+  - Verify: footer accueil + `pnpm verify:production`.
 - [ ] Tarea: CMP cookies CNIL (Refuser / Accepter / Personnaliser)
   - Acceptance: analytics no carga si reject. Fila en `consents`.
   - Verify: red tab Network.
