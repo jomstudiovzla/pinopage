@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-light: #f2f6f0;
+  --color-brand-cream: #fbf8f2;
+  --color-brand-sage: #8fa07e;
+  --color-brand-accent: #7b956c;
+  --color-brand-green: #2d4d36;
+  --color-brand-vivid: #1e5138;
+  --color-brand-earth: #c99665;
+  --color-brand-charcoal: #222820;
+
+  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-jakarta), "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+}
+
+:root {
+  --background: #fbf8f2;
+  --foreground: #222820;
+}
+
+/* Light green/cream palette only. No dark theme as per project guidelines. */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}

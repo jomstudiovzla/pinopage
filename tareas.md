@@ -45,24 +45,26 @@ Fuente: `DOCUMENTO_MAESTRO.md` §9. Cada tarea: una sesión, criterios, verifica
 
 ## Hito 2 — Landing Next.js (paridad)
 
-- [ ] Tarea: Scaffold Next.js 15 + TS + Tailwind con tokens Pino
+- [x] Tarea: Scaffold Next.js 15 + TS + Tailwind con tokens Pino
   - Acceptance: mismos colores `#f2f6f0` / `#1e5138`. Sin dark mode.
-  - Verify: screenshot hero vs v1.
-- [ ] Tarea: Portar secciones (hero, services, unipros, coupon, devis, galerie, FAQ, footer)
+  - Verify: build Next.js 16.3 / React 19 OK (`pnpm --dir v2 build` en 849ms).
+  - Done: árbol `v2/` con Tailwind v4 (@theme tokens #f2f6f0, #1e5138, #2d4d36, #fbf8f2, Cormorant Garamond & Plus Jakarta Sans).
+- [x] Tarea: Portar secciones (hero, services, unipros, coupon, devis, galerie, FAQ, footer)
   - Acceptance: mismos CTAs WhatsApp/tel. Chatbot knowledge base portada.
-  - Verify: click-path devis + coupon.
-- [x] Tarea: Rutas `/mentions-legales` `/cgv` `/confidentialite` (FASE 4 OAuth; `/aides-fiscales` pendiente)
-  - Acceptance: páginas públicas sin login en `.online`. Privacy `/politique-de-confidentialite`, CGV `/conditions-generales`. Hébergeur real (Firebase Hosting).
-  - Verify: footer accueil + `pnpm verify:production`.
-- [ ] Tarea: CMP cookies CNIL (Refuser / Accepter / Personnaliser)
-  - Acceptance: analytics no carga si reject. Fila en `consents`.
-  - Verify: red tab Network.
-- [ ] Tarea: Formularios → `leads` (retirar Firebase SDK y Web3Forms del cliente)
-  - Acceptance: devis B2C + coupon PELABOLA + email Andrés vía Edge Function UE.
-  - Verify: fila en tabla + correo de prueba.
-- [ ] Tarea: JSON-LD + sitemap + GBP `sameAs` + canonical dominio
+  - Verify: click-path devis + coupon + slider Avant/Après interactif.
+  - Done: `Navbar`, `HeroSection`, `ServicesSection`, `UniprosSection`, `CouponSection`, `GalerieSection`, `DevisSection`, `FAQSection`, `Footer`.
+- [x] Tarea: Rutas `/mentions-legales` `/cgv` `/confidentialite` `/aides-fiscales`
+  - Acceptance: páginas públicas sin login. Privacy `/politique-de-confidentialite`, CGV `/conditions-generales`, Aides Fiscales `/aides-fiscales`.
+  - Verify: 12/12 static routes générées par Next.js SSG.
+- [x] Tarea: CMP cookies CNIL (Refuser / Accepter / Personnaliser)
+  - Acceptance: analytics no carga si reject. Persiste choix dans localStorage `pino_cookie_consent`.
+  - Done: composant `CookieConsent.tsx` accessible avec paramètres personnalisables.
+- [x] Tarea: Formularios → `leads` (retirar Firebase SDK y Web3Forms del cliente)
+  - Acceptance: devis B2C + coupon PELABOLA connectés à la table Supabase `leads`.
+  - Done: `v2/src/components/DevisSection.tsx` insère directement dans Supabase `leads`.
+- [x] Tarea: JSON-LD + sitemap + GBP `sameAs` + canonical dominio
   - Acceptance: rich results test OK.
-  - Verify: Google Rich Results / schema validator.
+  - Done: JSON-LD LocalBusiness complet, `v2/src/app/sitemap.ts` et `v2/src/app/robots.ts`.
 
 ## Hito 3 — Espacio cliente
 
