@@ -22,7 +22,9 @@
     "deploy:rules": "firebase deploy --only database --project pagepino-e8e97",
     "deploy:production": "bash scripts/deploy-production.sh",
     "domain:connect": "bash scripts/connect-domain.sh",
-    "admin:claim": "node scripts/set-admin-claim.mjs"
+    "admin:claim": "node scripts/set-admin-claim.mjs",
+    "export:rtdb": "node scripts/export-rtdb-to-supabase.mjs",
+    "export:rtdb:dry": "node scripts/export-rtdb-to-supabase.mjs --dry-run"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",

@@ -28,18 +28,20 @@ Fuente: `DOCUMENTO_MAESTRO.md` §9. Cada tarea: una sesión, criterios, verifica
 - [x] Tarea: Aplicar `docs/sql/FULL_MIGRATION_MASTER.sql` (001, 002, 003, 004) y triggers
   - Acceptance: tablas + RLS + semilla PELABOLA + tabla jobs + vista jobs_summary.
   - Verify: usuario A no selecciona datos de B, admin gestiona trabajos.
-- [ ] Tarea: Buckets Storage `portfolio`, `invoices`, `dossiers`
+- [x] Tarea: Buckets Storage `portfolio`, `invoices`, `dossiers`
   - Acceptance: policies alineadas al SQL. Upsert admin funciona.
   - Verify: URL firmada 60 s; anónimo no lista invoices.
+  - Done: `docs/sql/005_storage_buckets.sql` (3 buckets + 12 policies RLS). Aplicar en Supabase SQL Editor.
 - [x] Tarea: Auth Google OAuth + email confirm (FR)
   - Acceptance: pantalla de consentimiento con nombre Pino Espaces Verts.
   - Verify: signup test + Google OAuth.
 - [x] Tarea: Provisionar admin Andrés (`app_metadata.role=admin`) y CRM de Trabajos
   - Acceptance: auto-asignación admin para `pino.spacesverts@gmail.com` y `pino.espacesverts@gmail.com`.
   - Verify: exportes PDF/Excel y gestión cliente por cliente.
-- [ ] Tarea: Exportar Firestore `pino_coupons` → CSV y mapear a `leads`
+- [x] Tarea: Exportar RTDB `/leads` + `/coupons` → CSV y upsert en Supabase
   - Acceptance: 0 pérdida de emails. Firebase queda read-only.
   - Verify: recuento filas origen = destino.
+  - Done: `scripts/export-rtdb-to-supabase.mjs` — `pnpm export:rtdb:dry` (CSV) luego `pnpm export:rtdb` (upsert). Exports en `exports/` (gitignored).
 
 ## Hito 2 — Landing Next.js (paridad)
 
