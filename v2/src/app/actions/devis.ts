@@ -38,9 +38,14 @@ export async function submitDevis(input: DevisInput): Promise<DevisResult> {
     .join(" — ");
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const { data, error } = await supabase
     .from("leads")
     .insert({
+      user_id: user?.id ?? null,
       full_name: fullName,
       email,
       phone,
