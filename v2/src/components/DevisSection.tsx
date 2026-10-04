@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Send, CheckCircle2, AlertCircle, Clock, PhoneCall } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { submitDevis } from "@/app/actions/devis";
 
 export function DevisSection() {
   const [formData, setFormData] = useState({
@@ -19,6 +19,7 @@ export function DevisSection() {
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [reference, setReference] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const availableServices = [
@@ -57,33 +58,29 @@ export function DevisSection() {
     setLoading(true);
 
     try {
-      // Direct insertion into Supabase leads table
-      const { error } = await supabase.from("leads").insert([
-        {
-          full_name: formData.fullName,
-          email: formData.email,
-          phone: formData.phone,
-          postal_code: formData.postalCode,
-          city: formData.city,
-          services: formData.services,
-          coupon_code: formData.couponCode || null,
-          message: formData.message,
-          lead_type: "b2c",
-          source: "v2_landing_devis",
-          created_at: new Date().toISOString(),
-        },
-      ]);
+      // Server Action : insert dans public.leads (colonnes du schéma maître) + notif Worker Resend.
+      const res = await submitDevis({
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        city: formData.city,
+        services: formData.services,
+        message: formData.message,
+        couponCode: formData.couponCode,
+      });
 
-      if (error) {
-        // Even if network or table issue occurs, log warning and show success with instructions
-        console.warn("Supabase lead submission fallback:", error.message);
+      if (!res.ok) {
+        setErrorMsg(
+          "Un problème est survenu lors de l'envoi. Réessayez, ou contactez-nous par WhatsApp au 06 51 59 40 34.",
+        );
+        return;
       }
 
+      setReference(res.ref ?? null);
       setSuccess(true);
     } catch (err: unknown) {
       console.error("Error submitting lead:", err);
-      // Graceful fallback to guarantee positive user experience
-      setSuccess(true);
+      setErrorMsg("Un problème réseau est survenu. Réessayez dans un instant.");
     } finally {
       setLoading(false);
     }
@@ -118,6 +115,12 @@ export function DevisSection() {
               Merci <strong>{formData.fullName}</strong>. Andrés Pino a bien reçu votre demande et étudie votre projet.
               Vous recevrez un devis détaillé ou un appel sous 24 heures ouvrées.
             </p>
+            {reference && (
+              <p className="text-sm text-slate-600">
+                Référence de votre demande :{" "}
+                <span className="font-mono font-bold text-[#1e5138]">{reference}</span>
+              </p>
+            )}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4 text-xs font-bold">
               <a
                 href="tel:+33651594034"

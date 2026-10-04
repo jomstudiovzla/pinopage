@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "../espace/actions";
+import LeadStatusSelect from "./LeadStatusSelect";
+import InvoiceStatusControl from "./InvoiceStatusControl";
 
 export const metadata = {
   title: "Administration | Pino Espaces Verts",
@@ -44,23 +46,6 @@ async function safeCount(
     .select("*", { count: "exact", head: true });
   return error ? 0 : count ?? 0;
 }
-
-const LEAD_STATUS_FR: Record<string, string> = {
-  new: "Nouveau",
-  contacted: "Contacté",
-  quoted: "Devis envoyé",
-  won: "Gagné",
-  lost: "Perdu",
-};
-
-const INVOICE_STATUS_FR: Record<string, string> = {
-  draft: "Brouillon",
-  issued: "Émise",
-  pending: "En attente",
-  paid: "Payée",
-  cancelled: "Annulée",
-  anonymized: "Anonymisée",
-};
 
 const eur = (n: number) =>
   new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n);
@@ -222,9 +207,7 @@ export default async function AdminPage() {
                         {l.promo_code || "—"}
                       </td>
                       <td className="py-2">
-                        <span className="rounded-full bg-brand-light px-2 py-0.5 text-xs font-bold text-brand-green">
-                          {LEAD_STATUS_FR[l.status ?? ""] || l.status || "—"}
-                        </span>
+                        <LeadStatusSelect leadId={l.id} current={l.status} />
                       </td>
                     </tr>
                   ))}
@@ -263,9 +246,7 @@ export default async function AdminPage() {
                         {inv.amount_ttc != null ? eur(Number(inv.amount_ttc)) : "—"}
                       </td>
                       <td className="py-2">
-                        <span className="rounded-full bg-brand-light px-2 py-0.5 text-xs font-bold text-brand-green">
-                          {INVOICE_STATUS_FR[inv.status ?? ""] || inv.status || "—"}
-                        </span>
+                        <InvoiceStatusControl invoiceId={inv.id} current={inv.status} />
                       </td>
                     </tr>
                   ))}
