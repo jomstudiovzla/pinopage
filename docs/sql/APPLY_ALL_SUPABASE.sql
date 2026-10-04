@@ -1,6 +1,6 @@
 -- ============================================================
 -- APPLY_ALL_SUPABASE.sql — Pino v2 : TODO en 1 solo Run
--- Generado 2026-10-04 (fix: create policy sin IF NOT EXISTS). Idempotente.
+-- Generado 2026-10-04 (fix: create policy sin IF NOT EXISTS + days_worked sin extract). Idempotente.
 -- Pegar completo en Supabase → SQL Editor → Run.
 -- ============================================================
 
@@ -899,7 +899,7 @@ select
   j.created_at,
   -- Campos calculados
   (j.amount_charged - j.amount_paid) as amount_pending,
-  extract(day from (j.date_end - j.date_start)) + 1 as days_worked
+  coalesce((j.date_end - j.date_start) + 1, 1) as days_worked
 from public.jobs j
 order by j.date_start desc;
 
