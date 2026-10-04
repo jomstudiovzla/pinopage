@@ -22,12 +22,13 @@ export const metadata = {
 async function safeCount(
   supabase: Awaited<ReturnType<typeof createClient>>,
   table: string,
+  ownerColumn: string,
   userId: string,
 ): Promise<number> {
   const { count, error } = await supabase
     .from(table)
     .select("*", { count: "exact", head: true })
-    .eq("user_id", userId);
+    .eq(ownerColumn, userId);
   return error ? 0 : count ?? 0;
 }
 
@@ -47,29 +48,30 @@ export default async function EspacePage() {
     "Client";
   const firstName = displayName.split(/\s+/)[0];
 
-  // Cupón
+  // Cupón (schema maestro : cupones.cliente_id -> profiles.id = auth.uid ; estados valido/usado/expire)
   let couponCode: string | null = null;
   let couponUsed = false;
   {
     const { data, error } = await supabase
       .from("cupones")
       .select("codigo_cupon, estado")
-      .eq("user_id", user.id)
+      .eq("cliente_id", user.id)
       .maybeSingle();
     if (!error && data) {
       couponCode = (data.codigo_cupon as string) ?? null;
-      couponUsed = (data.estado as string) === "used";
+      couponUsed = (data.estado as string) === "usado";
     }
   }
 
+  // leads.user_id, invoices.client_id, dossiers.client_id (tous -> profiles.id = auth.uid).
   const [devisCount, facturesCount, dossiersCount] = await Promise.all([
-    safeCount(supabase, "devis", user.id),
-    safeCount(supabase, "factures", user.id),
-    safeCount(supabase, "dossiers_sap", user.id),
+    safeCount(supabase, "leads", "user_id", user.id),
+    safeCount(supabase, "invoices", "client_id", user.id),
+    safeCount(supabase, "dossiers", "client_id", user.id),
   ]);
 
   const kpis = [
-    { label: "Devis actifs", value: devisCount, icon: FileText, color: "text-brand-vivid" },
+    { label: "Devis / Demandes", value: devisCount, icon: FileText, color: "text-brand-vivid" },
     { label: "Factures", value: facturesCount, icon: Receipt, color: "text-brand-green" },
     { label: "Dossiers SAP 50 %", value: dossiersCount, icon: BadgePercent, color: "text-brand-earth" },
   ];
