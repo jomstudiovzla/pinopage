@@ -5712,6 +5712,9 @@
       localStorage.setItem(`stat_${type}`, current + 1);
       updateStatsDisplay();
     };
+    // Exposer en global : les onclick inline (tél, WhatsApp) s'évaluent dans le scope
+    // global ; sans ceci, trackConversion('…') lançait un ReferenceError (bouton « cassé »).
+    window.trackConversion = trackConversion;
 
     // Track page view
     const currentViews = parseInt(localStorage.getItem('stat_views') || '0');
