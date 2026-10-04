@@ -1,0 +1,160 @@
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import {
+  FileText,
+  Receipt,
+  BadgePercent,
+  LogOut,
+  Phone,
+  MessageCircle,
+  Leaf,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { signOut } from "./actions";
+import CouponCard from "./CouponCard";
+
+export const metadata = {
+  title: "Espace Client | Pino Espaces Verts",
+};
+
+// Lecture défensive : si une table n'existe pas encore, on renvoie une valeur par défaut
+// (supabase-js renvoie { error } sans lever d'exception) → la page ne casse jamais.
+async function safeCount(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  table: string,
+  userId: string,
+): Promise<number> {
+  const { count, error } = await supabase
+    .from(table)
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
+  return error ? 0 : count ?? 0;
+}
+
+export default async function EspacePage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Le middleware protège déjà la route ; double sécurité ici.
+  if (!user) redirect("/connexion?next=/espace");
+
+  const displayName =
+    (user.user_metadata?.full_name as string | undefined) ||
+    (user.user_metadata?.name as string | undefined) ||
+    user.email ||
+    "Client";
+  const firstName = displayName.split(/\s+/)[0];
+
+  // Cupón
+  let couponCode: string | null = null;
+  let couponUsed = false;
+  {
+    const { data, error } = await supabase
+      .from("cupones")
+      .select("codigo_cupon, estado")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!error && data) {
+      couponCode = (data.codigo_cupon as string) ?? null;
+      couponUsed = (data.estado as string) === "used";
+    }
+  }
+
+  const [devisCount, facturesCount, dossiersCount] = await Promise.all([
+    safeCount(supabase, "devis", user.id),
+    safeCount(supabase, "factures", user.id),
+    safeCount(supabase, "dossiers_sap", user.id),
+  ]);
+
+  const kpis = [
+    { label: "Devis actifs", value: devisCount, icon: FileText, color: "text-brand-vivid" },
+    { label: "Factures", value: facturesCount, icon: Receipt, color: "text-brand-green" },
+    { label: "Dossiers SAP 50 %", value: dossiersCount, icon: BadgePercent, color: "text-brand-earth" },
+  ];
+
+  return (
+    <main className="min-h-screen bg-gradient-to-b from-brand-light via-brand-cream to-brand-light">
+      {/* Header */}
+      <header className="border-b border-brand-accent/15 bg-white/80 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-4">
+          <Link href="/" className="flex items-center gap-2 text-brand-green">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-green text-white">
+              <Leaf className="h-5 w-5" />
+            </span>
+            <span className="font-serif text-lg font-bold">Pino Espaces Verts</span>
+          </Link>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="flex items-center gap-2 rounded-xl border-2 border-brand-accent/30 px-3 py-2 text-xs font-bold text-brand-charcoal transition hover:border-brand-vivid hover:bg-brand-light"
+            >
+              <LogOut className="h-4 w-4" />
+              Se déconnecter
+            </button>
+          </form>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-5xl space-y-8 px-4 py-10">
+        {/* Bienvenue */}
+        <section>
+          <h1 className="font-serif text-3xl font-bold text-brand-green">
+            Bonjour {firstName} 🌿
+          </h1>
+          <p className="mt-1 text-sm text-brand-charcoal/70">
+            Bienvenue dans votre espace sécurisé — {user.email}
+          </p>
+        </section>
+
+        {/* KPIs */}
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {kpis.map((kpi) => (
+            <div
+              key={kpi.label}
+              className="rounded-3xl border-2 border-brand-accent/15 bg-white/90 p-6 shadow-sm"
+            >
+              <kpi.icon className={`h-7 w-7 ${kpi.color}`} />
+              <p className="mt-3 text-3xl font-black text-brand-charcoal">{kpi.value}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand-charcoal/60">
+                {kpi.label}
+              </p>
+            </div>
+          ))}
+        </section>
+
+        {/* Cupón */}
+        <section>
+          <CouponCard code={couponCode} used={couponUsed} />
+        </section>
+
+        {/* Contact direct */}
+        <section className="rounded-3xl border-2 border-brand-accent/15 bg-white/90 p-6 shadow-sm">
+          <h3 className="font-serif text-xl font-bold text-brand-green">Contacter Andrés Pino</h3>
+          <p className="mt-1 text-sm text-brand-charcoal/70">
+            Une question sur un devis ou un chantier ? Écrivez-nous directement.
+          </p>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <a
+              href="https://wa.me/33651594034"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand-vivid px-4 py-3 text-sm font-bold text-white transition hover:bg-brand-green"
+            >
+              <MessageCircle className="h-5 w-5" />
+              WhatsApp
+            </a>
+            <a
+              href="tel:+33651594034"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-brand-accent/30 px-4 py-3 text-sm font-bold text-brand-charcoal transition hover:border-brand-vivid hover:bg-brand-light"
+            >
+              <Phone className="h-5 w-5" />
+              06 51 59 40 34
+            </a>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
