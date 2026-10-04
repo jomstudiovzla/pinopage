@@ -9,10 +9,13 @@ import {
   ShieldAlert,
   ArrowLeft,
 } from "lucide-react";
+import { Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { signedUrl } from "@/lib/storage";
 import { signOut } from "../espace/actions";
 import LeadStatusSelect from "./LeadStatusSelect";
 import InvoiceStatusControl from "./InvoiceStatusControl";
+import InvoiceUpload from "./InvoiceUpload";
 
 export const metadata = {
   title: "Administration | Pino Espaces Verts",
@@ -34,6 +37,7 @@ type InvoiceRow = {
   client_display: string | null;
   amount_ttc: number | null;
   status: string | null;
+  document_path: string | null;
   created_at: string | null;
 };
 
@@ -108,10 +112,23 @@ export default async function AdminPage() {
 
   const { data: invoicesData } = await supabase
     .from("invoices")
-    .select("id, client_display, amount_ttc, status, created_at")
+    .select("id, client_display, amount_ttc, status, document_path, created_at")
     .order("created_at", { ascending: false })
     .limit(25);
-  const invoices: InvoiceRow[] = (invoicesData as InvoiceRow[]) ?? [];
+  const invoices = await Promise.all(
+    ((invoicesData as InvoiceRow[]) ?? []).map(async (inv) => ({
+      ...inv,
+      url: await signedUrl(supabase, "invoices", inv.document_path),
+    })),
+  );
+
+  // Liste des clients pour le formulaire de téléversement de factures.
+  const { data: clientsData } = await supabase
+    .from("profiles")
+    .select("id, full_name, email")
+    .order("created_at", { ascending: false })
+    .limit(200);
+  const clients = (clientsData as { id: string; full_name: string | null; email: string | null }[]) ?? [];
 
   const kpis = [
     { label: "Devis / Leads", value: String(leadsCount), icon: FileText, color: "text-brand-vivid" },
@@ -222,6 +239,15 @@ export default async function AdminPage() {
           <h2 className="mb-4 font-serif text-xl font-bold text-brand-green">
             Factures &amp; Dossiers SAP
           </h2>
+
+          {/* Téléversement sécurisé d'une facture (bucket privé invoices, RLS admin) */}
+          <div className="mb-6 rounded-2xl border border-brand-accent/20 bg-brand-light/40 p-4">
+            <p className="mb-3 text-xs font-bold uppercase tracking-wide text-brand-charcoal/60">
+              Téléverser une facture
+            </p>
+            <InvoiceUpload clients={clients} />
+          </div>
+
           {invoices.length === 0 ? (
             <p className="py-6 text-center text-sm text-brand-charcoal/60">
               Aucune facture pour le moment.
@@ -233,7 +259,8 @@ export default async function AdminPage() {
                   <tr className="border-b border-brand-accent/20 text-xs uppercase tracking-wide text-brand-charcoal/60">
                     <th className="py-2 pr-4">Client</th>
                     <th className="py-2 pr-4">Montant TTC</th>
-                    <th className="py-2">Statut</th>
+                    <th className="py-2 pr-4">Statut</th>
+                    <th className="py-2">Document</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -245,8 +272,23 @@ export default async function AdminPage() {
                       <td className="py-2 pr-4 text-brand-charcoal/80">
                         {inv.amount_ttc != null ? eur(Number(inv.amount_ttc)) : "—"}
                       </td>
-                      <td className="py-2">
+                      <td className="py-2 pr-4">
                         <InvoiceStatusControl invoiceId={inv.id} current={inv.status} />
+                      </td>
+                      <td className="py-2">
+                        {inv.url ? (
+                          <a
+                            href={inv.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs font-bold text-brand-vivid hover:underline"
+                          >
+                            <Download className="h-3.5 w-3.5" />
+                            PDF
+                          </a>
+                        ) : (
+                          <span className="text-xs text-brand-charcoal/40">—</span>
+                        )}
                       </td>
                     </tr>
                   ))}

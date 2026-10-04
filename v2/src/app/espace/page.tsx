@@ -8,10 +8,16 @@ import {
   Phone,
   MessageCircle,
   Leaf,
+  Download,
+  FolderOpen,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 import CouponCard from "./CouponCard";
+import { signedUrl } from "@/lib/storage";
+
+const eur = (n: number) =>
+  new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(n);
 
 export const metadata = {
   title: "Espace Client | Pino Espaces Verts",
@@ -76,6 +82,42 @@ export default async function EspacePage() {
     { label: "Dossiers SAP 50 %", value: dossiersCount, icon: BadgePercent, color: "text-brand-earth" },
   ];
 
+  // Documents du client : factures + dossiers, avec signed URL de téléchargement.
+  const { data: invRows } = await supabase
+    .from("invoices")
+    .select("id, amount_ttc, status, document_path, created_at")
+    .eq("client_id", user.id)
+    .order("created_at", { ascending: false });
+  const invoiceDocs = await Promise.all(
+    ((invRows as {
+      id: string;
+      amount_ttc: number | null;
+      status: string | null;
+      document_path: string | null;
+      created_at: string | null;
+    }[]) ?? []).map(async (r) => ({
+      ...r,
+      url: await signedUrl(supabase, "invoices", r.document_path),
+    })),
+  );
+
+  const { data: dosRows } = await supabase
+    .from("dossiers")
+    .select("id, title, document_path, created_at")
+    .eq("client_id", user.id)
+    .order("created_at", { ascending: false });
+  const dossierDocs = await Promise.all(
+    ((dosRows as {
+      id: string;
+      title: string | null;
+      document_path: string | null;
+      created_at: string | null;
+    }[]) ?? []).map(async (r) => ({
+      ...r,
+      url: await signedUrl(supabase, "dossiers", r.document_path),
+    })),
+  );
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-brand-light via-brand-cream to-brand-light">
       {/* Header */}
@@ -129,6 +171,79 @@ export default async function EspacePage() {
         {/* Cupón */}
         <section>
           <CouponCard code={couponCode} used={couponUsed} />
+        </section>
+
+        {/* Mes documents : factures + dossiers (téléchargement sécurisé par signed URL) */}
+        <section className="rounded-3xl border-2 border-brand-accent/15 bg-white/90 p-6 shadow-sm">
+          <div className="mb-4 flex items-center gap-2 text-brand-green">
+            <FolderOpen className="h-5 w-5" />
+            <h3 className="font-serif text-xl font-bold">Mes documents</h3>
+          </div>
+
+          <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-brand-charcoal/60">
+            Factures
+          </h4>
+          {invoiceDocs.length === 0 ? (
+            <p className="mb-4 text-sm text-brand-charcoal/60">Aucune facture disponible.</p>
+          ) : (
+            <ul className="mb-5 divide-y divide-brand-accent/10">
+              {invoiceDocs.map((d) => (
+                <li key={d.id} className="flex items-center justify-between gap-3 py-2.5">
+                  <span className="flex items-center gap-2 text-sm text-brand-charcoal">
+                    <Receipt className="h-4 w-4 text-brand-green" />
+                    {d.amount_ttc != null ? eur(Number(d.amount_ttc)) : "Facture"}
+                    <span className="rounded-full bg-brand-light px-2 py-0.5 text-[10px] font-bold text-brand-green">
+                      {d.status || "—"}
+                    </span>
+                  </span>
+                  {d.url ? (
+                    <a
+                      href={d.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 rounded-lg bg-brand-vivid px-3 py-1.5 text-xs font-bold text-white transition hover:bg-brand-green"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      Télécharger
+                    </a>
+                  ) : (
+                    <span className="text-xs text-brand-charcoal/40">Document à venir</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-brand-charcoal/60">
+            Dossiers crédit d&apos;impôt (SAP 50 %)
+          </h4>
+          {dossierDocs.length === 0 ? (
+            <p className="text-sm text-brand-charcoal/60">Aucun dossier disponible.</p>
+          ) : (
+            <ul className="divide-y divide-brand-accent/10">
+              {dossierDocs.map((d) => (
+                <li key={d.id} className="flex items-center justify-between gap-3 py-2.5">
+                  <span className="flex items-center gap-2 text-sm text-brand-charcoal">
+                    <FileText className="h-4 w-4 text-brand-earth" />
+                    {d.title || "Dossier"}
+                  </span>
+                  {d.url ? (
+                    <a
+                      href={d.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 rounded-lg bg-brand-vivid px-3 py-1.5 text-xs font-bold text-white transition hover:bg-brand-green"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      Télécharger
+                    </a>
+                  ) : (
+                    <span className="text-xs text-brand-charcoal/40">Document à venir</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         {/* Contact direct */}
