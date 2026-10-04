@@ -7749,6 +7749,15 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
             await processAuthenticatedUser(res.user, method, null, { openModal: true });
             return res;
           }
+          // iOS Safari (ITP) : on avait lancé une redirection (pendingBefore) mais on
+          // revient SANS utilisateur ni erreur — Safari a perdu l'état cross-domaine.
+          // Au lieu d'un échec silencieux, on guide l'utilisateur.
+          if (pendingBefore && !firebase.auth().currentUser) {
+            const who = pendingBefore === 'apple' ? 'Apple' : 'Google';
+            if (typeof showNotificationToast === 'function') {
+              showNotificationToast('La connexion ' + who + ' n\'a pas abouti sur ce navigateur. Réessayez, ou ouvrez le site dans Safari / Chrome (sans navigation privée).', 'warning', 6000);
+            }
+          }
           return res || null;
         } catch (err) {
           if (g && typeof g.clearPending === 'function') g.clearPending();
@@ -8089,7 +8098,7 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
         const loginInput = document.getElementById('login-email');
         if (loginInput) loginInput.value = email;
         const successMsg = verificationSent
-          ? 'Compte créé. Un lien de confirmation a été envoyé à ' + email + '. Cliquez dessus, puis connectez-vous : votre remise -20 % sera alors activée.'
+          ? 'Compte créé. Un lien de confirmation vient d\'être envoyé à ' + email + ' (expéditeur : noreply@pagepino-e8e97.firebaseapp.com — pensez à vérifier les Spams/Promotions). Cliquez dessus, puis connectez-vous : votre remise -20 % sera alors activée.'
           : 'Compte créé. L\'e-mail de confirmation n\'a pas pu partir tout de suite : connectez-vous après quelques minutes — un nouveau lien vous sera envoyé.';
         window.showAuthMessage('login', successMsg, 'success');
       } catch (err) {
