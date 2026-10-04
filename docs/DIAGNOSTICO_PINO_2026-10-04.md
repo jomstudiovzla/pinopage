@@ -104,3 +104,24 @@ Un 2.º agente auditó este pase; verifiqué sus hallazgos de forma independient
 2. **Resend:** envía el **formulario de devis** con tu correo → te llega el acuse (From: Andrés vía Resend) y a `pino.espacesverts@gmail.com` + `jomstudiovzla@gmail.com` la alerta de nuevo devis.
 3. **Google móvil:** abre en el teléfono → "Continuer avec Google" → vuelve conectado.
 4. **Admin:** entra con **Google** (cuenta admin) → abre `#admin`.
+
+---
+
+## PARTE F — Cierre Directiva Maestra (Opción 3) + transición v2 — 2026-10-04
+
+### Resultado por departamento (verificado en vivo/fuente)
+- **📧 DEPT 1 — Correos:** devis → `PinoDB.saveLead` + `PinoMail.notifyDevis` (OK). **Feature añadida:** correo del **código -20 %** al cliente verificado (evento `coupon`, envío único por uid, guard anti-abuso en el Worker). *Requiere redeploy del Worker (wrangler) + deploy del sitio.*
+- **🔐 DEPT 2 — Auth:** fallback **iOS Safari (ITP)** añadido (aviso si la redirección vuelve sin usuario); mensaje de registro aclara que el enlace es de **Firebase** (noreply@…firebaseapp.com). Google Cloud: nombre + URLs legales, **sin logo** (evita verificación de marca).
+- **🎨 DEPT 3 — UI/errores:** modales clave (calendrier, cgv, client, admin) abren; `pino-errors.js` captura `error` + `unhandledrejection` → toast amigable (ya existía, verificado, sin parche). `trackConversion` ya expuesto en `window`.
+- **👤 DEPT 4 — Admin:** `isAdmin` + 3 correos en lista blanca; `emailVerified !== false` exigido → **acceso infalible = "Continuer avec Google"** con correo admin.
+
+### Mapeo de transición a v2 (Next.js 15 + Supabase) — DEPT 4
+| v1 (estático) | v2 (Next.js/Supabase) |
+|---|---|
+| Modal `#modal-window-admin` | **Ruta dedicada `/admin`** (App Router, server component protegido) |
+| `ADMIN_EMAILS` (lista blanca por email) | **Rol en `app_metadata.role === 'admin'`** (nunca `user_metadata`) + Custom Claims |
+| `database.rules.json` (deny-by-default) | **RLS Postgres:** `(select auth.uid())`, `TO authenticated`, `UPDATE ... WITH CHECK`, región **eu-west-3** |
+| `coupons/{uid}` en RTDB | Tabla `cupones` con RLS por `user_id` |
+| Worker Resend (correo) | Edge Function (Paris) o Worker reutilizado |
+
+> Nota: en v2 los enlaces tel/WhatsApp son componentes React (sin `onclick` inline frágiles), por lo que el bug tipo `trackConversion` no reaparece.
