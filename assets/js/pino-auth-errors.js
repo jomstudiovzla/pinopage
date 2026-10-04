@@ -11,7 +11,7 @@
     'auth/weak-password': 'Mot de passe trop faible : 8 caractères minimum.',
     'auth/missing-password': 'Saisissez un mot de passe (8 caractères minimum).',
     'auth/missing-email': 'Saisissez une adresse e-mail valide.',
-    'auth/operation-not-allowed': 'L\'inscription par e-mail n\'est pas disponible pour le moment. Réessayez plus tard ou utilisez Google.',
+    'auth/operation-not-allowed': 'L\'inscription par e-mail est momentanément indisponible. Créez votre compte en 1 clic avec le bouton « Continuer avec Google » ci-dessus — votre remise -20 % sera activée de la même façon.',
     'auth/admin-restricted-operation': 'Cette opération est temporairement restreinte. Réessayez dans quelques minutes.',
     'auth/unauthorized-domain': 'Ce domaine n\'est pas encore autorisé pour la création de compte. Ouvrez le site sur https://pinoespacesverts.online',
     'auth/operation-not-supported-in-this-environment': 'Activez le stockage web ou les cookies dans les réglages de votre navigateur, puis réessayez.',
