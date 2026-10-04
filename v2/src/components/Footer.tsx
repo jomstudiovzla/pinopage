@@ -67,6 +67,11 @@ export function Footer() {
                 🔐 Mon Espace Client
               </Link>
             </li>
+            <li>
+              <Link href="/pro" className="hover:text-white hover:underline transition-colors">
+                🏢 Espace Pro / Copropriétés
+              </Link>
+            </li>
           </ul>
         </div>
 

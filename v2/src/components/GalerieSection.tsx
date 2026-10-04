@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Camera, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+
+type GalleryItem = { id: string; title: string; commune: string | null; url: string };
 
 interface Pair {
   title: string;
@@ -43,6 +46,36 @@ export function GalerieSection() {
 
   const [activePairIndex, setActivePairIndex] = useState(0);
   const [sliderPos, setSliderPos] = useState(50);
+  const [dbItems, setDbItems] = useState<GalleryItem[]>([]);
+
+  // Charge les chantiers publiés depuis Supabase (RLS : seuls published=true).
+  // Si la base est vide ou indisponible, on garde les photos locales en fallback.
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("portfolio_items")
+          .select("id, title, commune, image_path")
+          .eq("published", true)
+          .order("sort_order", { ascending: true })
+          .limit(9);
+        if (error || !data || !active) return;
+        const mapped = data.map((it) => ({
+          id: it.id as string,
+          title: it.title as string,
+          commune: (it.commune as string | null) ?? null,
+          url: supabase.storage.from("portfolio").getPublicUrl(it.image_path as string).data.publicUrl,
+        }));
+        if (active && mapped.length > 0) setDbItems(mapped);
+      } catch {
+        /* fallback local */
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const current = pairs[activePairIndex];
 
@@ -177,7 +210,27 @@ export function GalerieSection() {
           </p>
         </div>
 
-        {/* Additional Real Project Cards */}
+        {/* Additional Real Project Cards (portfolio publié depuis Supabase, fallback local) */}
+        {dbItems.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6">
+            {dbItems.map((it) => (
+              <div key={it.id} className="bg-white rounded-2xl p-4 border border-[#8fa07e]/20 shadow-xs space-y-2">
+                <div className="relative aspect-[4/3] rounded-xl overflow-hidden">
+                  <Image
+                    src={it.url}
+                    alt={it.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 300px"
+                    unoptimized
+                    className="object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <h4 className="font-bold text-sm text-[#2d4d36] pt-1">{it.title}</h4>
+                <p className="text-xs text-slate-500">{it.commune || "Pino Espaces Verts"}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6">
           <div className="bg-white rounded-2xl p-4 border border-[#8fa07e]/20 shadow-xs space-y-2">
             <div className="relative aspect-[4/3] rounded-xl overflow-hidden">
@@ -221,6 +274,7 @@ export function GalerieSection() {
             <p className="text-xs text-slate-500">Éclaircie pour apporter de la lumière au gazon.</p>
           </div>
         </div>
+        )}
       </div>
     </section>
   );

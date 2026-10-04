@@ -39,8 +39,9 @@ begin
   -- Dossiers (client_id NOT NULL) : supprimés.
   delete from public.dossiers where client_id = uid;
 
-  -- Coupon : supprimé.
+  -- Coupon : supprimé + promotion de bienvenue désactivée.
   delete from public.cupones where cliente_id = uid;
+  update public.promotions set active = false where owner_user_id = uid;
 
   -- Trace légale de la demande d'effacement.
   insert into public.dsar_requests (user_id, request_type, status, completed_at)

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Percent, ArrowRight } from "lucide-react";
+import FiscalCalculator from "@/components/FiscalCalculator";
 
 export const metadata: Metadata = {
   title: "Crédit d'Impôt 50% & Avance Immédiate (SAP) | Pino Espaces Verts",
@@ -35,6 +36,8 @@ export default function AidesFiscalesPage() {
           </div>
 
           <div className="space-y-6 text-sm text-slate-700 leading-relaxed">
+            <FiscalCalculator />
+
             <section className="space-y-3">
               <h2 className="font-bold text-base text-slate-900">Qu&apos;est-ce que l&apos;Avance Immédiate ?</h2>
               <p className="text-xs sm:text-sm text-slate-600">

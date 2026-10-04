@@ -68,6 +68,9 @@ export function Navbar() {
           <a href="#faq" className="hover:text-[#1e5138] transition-colors py-1">
             FAQ
           </a>
+          <Link href="/pro" className="hover:text-[#1e5138] transition-colors py-1">
+            Espace Pro
+          </Link>
 
           <div className="flex items-center gap-3 pl-3 border-l border-[#8fa07e]/20">
             <a
