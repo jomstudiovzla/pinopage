@@ -14,6 +14,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 import CouponCard from "./CouponCard";
+import RgpdSection from "./RgpdSection";
 import { signedUrl } from "@/lib/storage";
 
 const eur = (n: number) =>
@@ -271,6 +272,9 @@ export default async function EspacePage() {
             </a>
           </div>
         </section>
+
+        {/* RGPD : export + droit à l'effacement */}
+        <RgpdSection />
       </div>
     </main>
   );

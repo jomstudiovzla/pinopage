@@ -16,6 +16,7 @@ import { signOut } from "../espace/actions";
 import LeadStatusSelect from "./LeadStatusSelect";
 import InvoiceStatusControl from "./InvoiceStatusControl";
 import DocumentUpload from "./DocumentUpload";
+import PortfolioManager, { type PortfolioItem } from "./PortfolioManager";
 
 export const metadata = {
   title: "Administration | Pino Espaces Verts",
@@ -129,6 +130,19 @@ export default async function AdminPage() {
     .order("created_at", { ascending: false })
     .limit(200);
   const clients = (clientsData as { id: string; full_name: string | null; email: string | null }[]) ?? [];
+
+  // Portfolio (bucket público) : items + URL publique.
+  const { data: portfolioData } = await supabase
+    .from("portfolio_items")
+    .select("id, title, commune, kind, published, image_path")
+    .order("created_at", { ascending: false })
+    .limit(60);
+  const portfolioItems: PortfolioItem[] = (
+    (portfolioData as Omit<PortfolioItem, "url">[]) ?? []
+  ).map((it) => ({
+    ...it,
+    url: supabase.storage.from("portfolio").getPublicUrl(it.image_path).data.publicUrl,
+  }));
 
   const kpis = [
     { label: "Devis / Leads", value: String(leadsCount), icon: FileText, color: "text-brand-vivid" },
@@ -296,6 +310,14 @@ export default async function AdminPage() {
               </table>
             </div>
           )}
+        </section>
+
+        {/* Gestion du Portfolio (bucket public portfolio) */}
+        <section className="rounded-3xl border-2 border-brand-accent/15 bg-white/90 p-6 shadow-sm">
+          <h2 className="mb-4 font-serif text-xl font-bold text-brand-green">
+            Gestion du Portfolio
+          </h2>
+          <PortfolioManager items={portfolioItems} />
         </section>
       </div>
     </main>
