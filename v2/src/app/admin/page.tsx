@@ -15,7 +15,7 @@ import { signedUrl } from "@/lib/storage";
 import { signOut } from "../espace/actions";
 import LeadStatusSelect from "./LeadStatusSelect";
 import InvoiceStatusControl from "./InvoiceStatusControl";
-import InvoiceUpload from "./InvoiceUpload";
+import DocumentUpload from "./DocumentUpload";
 
 export const metadata = {
   title: "Administration | Pino Espaces Verts",
@@ -240,12 +240,12 @@ export default async function AdminPage() {
             Factures &amp; Dossiers SAP
           </h2>
 
-          {/* Téléversement sécurisé d'une facture (bucket privé invoices, RLS admin) */}
+          {/* Téléversement sécurisé (buckets privés invoices/dossiers, RLS admin) */}
           <div className="mb-6 rounded-2xl border border-brand-accent/20 bg-brand-light/40 p-4">
             <p className="mb-3 text-xs font-bold uppercase tracking-wide text-brand-charcoal/60">
-              Téléverser une facture
+              Téléverser un document
             </p>
-            <InvoiceUpload clients={clients} />
+            <DocumentUpload clients={clients} />
           </div>
 
           {invoices.length === 0 ? (
