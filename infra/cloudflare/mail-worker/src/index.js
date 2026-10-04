@@ -119,7 +119,8 @@ const EVENT_LABELS = {
   client_message: "message reçu",
   admin_reply: "réponse d'Andrés Pino",
   admin_alert: "alerte CRM",
-  transactional: "message d'Andrés Pino"
+  transactional: "message d'Andrés Pino",
+  coupon: "code de réduction -20 %"
 };
 
 function socialLinksHtml(env) {
@@ -191,6 +192,25 @@ function clientEmailBody(event, first, data, env) {
       ${custom || `<p>Nous confirmons votre <strong>${esc(label)}</strong> sur le site de Pino Espaces Verts.</p>`}
       ${recap}
       <p>Andrés Pino vous recontactera rapidement. Si vous n'êtes pas à l'origine de cette action, ignorez ce message ou écrivez-nous à ${esc((env.REPLY_TO_EMAIL || env.ADMIN_EMAIL || "").split(",")[0])}.</p>
+      <p style="margin:18px 0 0;font-weight:700;color:#047857">Andrés Pino</p>
+      <p style="margin:2px 0 0;color:#64748b;font-size:13px">Pino Espaces Verts · Vaucluse (84)</p>
+    </div>`;
+}
+
+// Correo al CLIENTE con su código de cupón -20 % (envío único, titular verificado).
+function couponBody(first, data, env) {
+  const salut = first ? `Bonjour ${esc(first)},` : "Bonjour,";
+  const code = esc(clip(data.code || "", 40));
+  return `
+    <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a;line-height:1.6;font-size:14px">
+      <p style="font-size:18px;font-weight:700;color:#047857">🌲 Pino Espaces Verts</p>
+      <p>${salut}</p>
+      <p>Merci d'avoir vérifié votre compte ! Voici votre <strong>code de bienvenue -20 %</strong> :</p>
+      <div style="margin:16px 0;padding:16px 20px;background:#ecfdf5;border:2px solid #10b981;border-radius:12px;text-align:center">
+        <span style="font-family:monospace;font-size:26px;font-weight:800;letter-spacing:3px;color:#065f46">${code}</span>
+      </div>
+      <p>Utilisez-le lors de votre demande de devis dans votre Espace Client : la remise de -20 % sera appliquée automatiquement. Code unique, valable une seule fois.</p>
+      ${socialLinksHtml(env)}
       <p style="margin:18px 0 0;font-weight:700;color:#047857">Andrés Pino</p>
       <p style="margin:2px 0 0;color:#64748b;font-size:13px">Pino Espaces Verts · Vaucluse (84)</p>
     </div>`;
@@ -382,6 +402,19 @@ export default {
           replyTo: clientEmail || env.REPLY_TO_EMAIL
         });
         results.admin = sent.ok;
+        if (sent.id) results.ids.push(sent.id);
+      } else if (event === "coupon") {
+        // Code promo -20 % au CLIENT lui-même. Anti-abus : doit être le titulaire
+        // authentifié et vérifié (sinon on pourrait spammer des codes à des tiers).
+        if (!ident.verified || !clientEmail || clientEmail !== (ident.email || "").toLowerCase()) {
+          return new Response(JSON.stringify({ error: "forbidden_not_owner" }), { status: 403, headers: { "content-type": "application/json", ...cors } });
+        }
+        const sent = await sendEmail(env, {
+          to: [{ email: clientEmail, name: data.name || first || "Client" }],
+          subject: first ? `Bonjour ${first}, voici votre code -20 %` : "Votre code -20 % — Pino Espaces Verts",
+          html: couponBody(first, data, env)
+        });
+        results.client = sent.ok;
         if (sent.id) results.ids.push(sent.id);
       } else if (event === "client_message") {
         // Aviso a Andrés (+ copia JOM) de que un cliente ha escrito.

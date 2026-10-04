@@ -7555,6 +7555,16 @@ Envoyé depuis le site officiel ${window.pinoSiteUrl()}`;
               userProfile.promoStatus = couponRow.estado || couponRow.status;
               localStorage.setItem('pino_current_user', JSON.stringify(userProfile));
               if (typeof refreshCouponSection === 'function') refreshCouponSection();
+              // Envoi UNIQUE du code promo -20 % par e-mail au client vérifié (Resend via Worker).
+              // Dédupliqué par uid : jamais deux fois, même à chaque reconnexion.
+              try {
+                const emailedKey = 'pino_coupon_emailed_' + uid;
+                if (!localStorage.getItem(emailedKey) && window.PinoMail && typeof window.PinoMail.notify === 'function'
+                    && (couponRow.estado || couponRow.status || 'valid') === 'valid') {
+                  window.PinoMail.notify('coupon', { email: normEmail, name: displayName, code: userProfile.promoCode });
+                  localStorage.setItem(emailedKey, '1');
+                }
+              } catch (e) {}
             }
           }).catch((err) => console.warn('[pino] fetchUserCoupon background:', err));
         }
