@@ -1,7 +1,7 @@
 -- ============================================================
 -- APPLY_ALL_SUPABASE.sql — Pino v2 : TODO en 1 solo Run
--- Generado 2026-10-04. Pegar completo en Supabase → SQL Editor → Run.
--- Orden: 1) esquema maestro  2) función de borrado RGPD.
+-- Generado 2026-10-04 (fix: create policy sin IF NOT EXISTS). Idempotente.
+-- Pegar completo en Supabase → SQL Editor → Run.
 -- ============================================================
 
 -- ===== 1/2 : FULL_MIGRATION_MASTER.sql =====
@@ -839,7 +839,8 @@ create index if not exists jobs_service_idx      on public.jobs (service_type);
 alter table public.jobs enable row level security;
 
 -- Admin: acceso total
-create policy if not exists "admin_all_jobs"
+drop policy if exists "admin_all_jobs" on public.jobs;
+create policy "admin_all_jobs"
   on public.jobs
   for all
   to authenticated
@@ -851,7 +852,8 @@ create policy if not exists "admin_all_jobs"
   );
 
 -- Cliente: solo puede ver sus propios trabajos
-create policy if not exists "client_own_jobs"
+drop policy if exists "client_own_jobs" on public.jobs;
+create policy "client_own_jobs"
   on public.jobs
   for select
   to authenticated

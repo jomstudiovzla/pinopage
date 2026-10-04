@@ -832,7 +832,8 @@ create index if not exists jobs_service_idx      on public.jobs (service_type);
 alter table public.jobs enable row level security;
 
 -- Admin: acceso total
-create policy if not exists "admin_all_jobs"
+drop policy if exists "admin_all_jobs" on public.jobs;
+create policy "admin_all_jobs"
   on public.jobs
   for all
   to authenticated
@@ -844,7 +845,8 @@ create policy if not exists "admin_all_jobs"
   );
 
 -- Cliente: solo puede ver sus propios trabajos
-create policy if not exists "client_own_jobs"
+drop policy if exists "client_own_jobs" on public.jobs;
+create policy "client_own_jobs"
   on public.jobs
   for select
   to authenticated
